@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 image = "0.23"
 structopt = "0.3"
+svgbobdoc = "0.2"
