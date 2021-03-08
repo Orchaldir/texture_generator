@@ -50,4 +50,20 @@ impl Point {
     pub fn add_size(&self, size: &Size) -> Point {
         Point::new(self.x + size.width(), self.y + size.height())
     }
+
+    /// Calculates the euclidean distance to another point.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    /// let a = Point::new(1, 2);
+    /// let b = Point::new(4, 6);
+    ///
+    /// assert_eq!(a.calculate_distance(&a), 0.0);
+    /// assert_eq!(a.calculate_distance(&b), 5.0);
+    /// assert_eq!(b.calculate_distance(&a), 5.0);
+    /// ```
+    pub fn calculate_distance(&self, point: &Point) -> f32 {
+        ((self.x as f32 - point.x as f32).powf(2.0) + (self.y as f32 - point.y as f32).powf(2.0))
+            .sqrt()
+    }
 }
