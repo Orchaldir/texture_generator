@@ -2,6 +2,8 @@ use crate::math::color::Color;
 use crate::math::point::Point;
 use crate::math::size::Size;
 
+pub mod rendering;
+
 pub trait RuntimeData {
     /// Set the [``Color`] at the point.
     fn set(&mut self, point: &Point, color: &Color);
