@@ -1,4 +1,7 @@
 use structopt::StructOpt;
+use texture_generator::generation::{RuntimeData, RuntimeDataImpl};
+use texture_generator::math::color::PINK;
+use texture_generator::math::size::Size;
 
 #[derive(StructOpt)]
 struct Cli {
@@ -19,8 +22,15 @@ fn main() {
         args.size, args.output
     );
 
-    let pink = image::Rgb([255u8, 0, 128]);
-    let image = image::ImageBuffer::from_pixel(args.size, args.size, pink);
+    let size = Size::new(args.size, args.size);
+    let data = RuntimeDataImpl::new(size, PINK);
 
-    image.save(&args.output).unwrap();
+    image::save_buffer(
+        &args.output,
+        data.get_colors(),
+        size.width(),
+        size.height(),
+        image::ColorType::Rgb8,
+    )
+    .unwrap()
 }

@@ -1,6 +1,8 @@
 use crate::math::point::Point;
 use crate::math::size::Size;
 
+pub type AABB = AxisAlignedBoundingBox;
+
 #[svgbobdoc::transform]
 /// Defines an axis aligned bounding box.
 ///

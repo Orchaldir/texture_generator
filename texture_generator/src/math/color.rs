@@ -1,7 +1,7 @@
 /// Represents a color with the RGB color model.
 ///
 /// See [Wikipedia](https://en.wikipedia.org/wiki/RGB_color_model).
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Color {
     r: u8,
     g: u8,
