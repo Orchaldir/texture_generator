@@ -34,7 +34,7 @@ impl Size {
         Size { width, height }
     }
 
-    /// Returns the number of cells covered by this size
+    /// Returns the number of cells covered by this size.
     ///
     /// ```
     ///# use texture_generator::math::size::Size;
@@ -45,7 +45,7 @@ impl Size {
         (self.width * self.height) as usize
     }
 
-    /// Returns the size along the x-axis
+    /// Returns the size along the x-axis.
     ///
     /// ```
     ///# use texture_generator::math::size::Size;
@@ -56,7 +56,7 @@ impl Size {
         self.width
     }
 
-    /// Returns the size along the y-axis
+    /// Returns the size along the y-axis.
     ///
     /// ```
     ///# use texture_generator::math::size::Size;
@@ -67,7 +67,7 @@ impl Size {
         self.height
     }
 
-    /// Is the point (x,y) inside?
+    /// Is the [`Point`] inside?
     ///
     /// ```
     ///# use texture_generator::math::point::Point;
@@ -83,7 +83,7 @@ impl Size {
         point.x < self.width && point.y < self.height
     }
 
-    /// Converts an index to the x-coordinate of the equivalent [`Point`]
+    /// Converts an index to the x-coordinate of the equivalent [`Point`].
     ///
     /// ```
     ///# use texture_generator::math::size::Size;
@@ -94,7 +94,7 @@ impl Size {
         index as u32 % self.width
     }
 
-    /// Converts an index to the y-coordinate of the equivalent [`Point`]
+    /// Converts an index to the y-coordinate of the equivalent [`Point`].
     ///
     /// ```
     ///# use texture_generator::math::size::Size;
@@ -105,7 +105,7 @@ impl Size {
         index as u32 / self.width
     }
 
-    /// Converts an index to the equivalent [`Point`]
+    /// Converts an index to the equivalent [`Point`].
     ///
     /// ```
     ///# use texture_generator::math::point::Point;

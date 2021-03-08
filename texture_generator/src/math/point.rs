@@ -1,3 +1,5 @@
+use crate::math::size::Size;
+
 #[svgbobdoc::transform]
 /// Defines a point in 2 dimensions.
 ///
@@ -23,7 +25,7 @@ pub struct Point {
 }
 
 impl Point {
-    /// Returns a new point
+    /// Returns a new point.
     ///
     /// ```
     ///# use texture_generator::math::point::Point;
@@ -33,5 +35,19 @@ impl Point {
     /// ```
     pub const fn new(x: u32, y: u32) -> Point {
         Point { x, y }
+    }
+
+    /// Creates a new point by adding a [`Size`] to it.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    ///# use texture_generator::math::size::Size;
+    /// let point = Point::new(1, 2);
+    /// let size = Size::new(30, 50);
+    ///
+    /// assert_eq!(point.add_size(&size), Point::new(31, 52));
+    /// ```
+    pub fn add_size(&self, size: &Size) -> Point {
+        Point::new(self.x + size.width(), self.y + size.height())
     }
 }

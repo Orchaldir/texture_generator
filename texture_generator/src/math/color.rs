@@ -9,12 +9,12 @@ pub struct Color {
 }
 
 impl Color {
-    /// Returns a new color
+    /// Returns a new color.
     pub const fn from_rgb(r: u8, g: u8, b: u8) -> Color {
         Color { r, g, b }
     }
 
-    /// Returns a new gray color
+    /// Returns a new gray color.
     pub const fn gray(value: u8) -> Color {
         Color {
             r: value,
@@ -23,7 +23,7 @@ impl Color {
         }
     }
 
-    /// Returns the red component
+    /// Returns the red component.
     ///
     /// ```
     /// use texture_generator::math::color::Color;
@@ -43,7 +43,7 @@ impl Color {
         self.g
     }
 
-    /// Returns the blue component
+    /// Returns the blue component.
     ///
     /// ```
     ///# use texture_generator::math::color::Color;
