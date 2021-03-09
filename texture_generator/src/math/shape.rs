@@ -3,11 +3,19 @@ use crate::math::point::Point;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Shape {
     Circle(u32),
+    Rectangle { half_x: i32, half_y: i32 },
 }
 
 impl Shape {
     pub fn new_circle(radius: u32) -> Shape {
         Shape::Circle(radius)
+    }
+
+    pub fn new_rectangle(width: u32, height: u32) -> Shape {
+        Shape::Rectangle {
+            half_x: (width / 2) as i32,
+            half_y: (height / 2) as i32,
+        }
     }
 
     /// Calculates the euclidean distance to a [`Point`].
@@ -27,6 +35,10 @@ impl Shape {
     pub fn distance_to_border(&self, center: &Point, point: &Point) -> f32 {
         match self {
             Shape::Circle(radius) => center.calculate_distance(point) - *radius as f32,
+            Shape::Rectangle { half_x, half_y } => {
+                let diff = *point - *center;
+                (diff.x.abs() - *half_x).max(diff.y.abs() - *half_y) as f32
+            }
         }
     }
 
@@ -47,6 +59,62 @@ impl Shape {
     pub fn is_inside(&self, center: &Point, point: &Point) -> bool {
         match self {
             Shape::Circle(radius) => center.calculate_distance(point) <= *radius as f32,
+            Shape::Rectangle { half_x, half_y } => {
+                let diff = *point - *center;
+                diff.x >= -*half_x && diff.x < *half_x && diff.y >= -*half_y && diff.y < *half_y
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::math::size::Size;
+
+    const CENTER: Point = Point::new(2, 3);
+
+    #[test]
+    fn test_distance_to_border_rectangle() {
+        let size = Size::new(5, 7);
+        let rectangle = Shape::new_rectangle(2, 4);
+
+        #[rustfmt::skip]
+        let results = vec![
+            1.0, 1.0,  1.0, 1.0, 1.0,
+            1.0, 0.0,  0.0, 0.0, 1.0,
+            1.0, 0.0, -1.0, 0.0, 1.0,
+            1.0, 0.0, -1.0, 0.0, 1.0,
+            1.0, 0.0, -1.0, 0.0, 1.0,
+            1.0, 0.0,  0.0, 0.0, 1.0,
+            1.0, 1.0,  1.0, 1.0, 1.0
+        ];
+
+        for (index, result) in results.iter().enumerate() {
+            assert_eq!(
+                rectangle.distance_to_border(&CENTER, &size.to_point(index)),
+                *result
+            );
+        }
+    }
+
+    #[test]
+    fn test_is_inside_rectangle() {
+        let size = Size::new(4, 6);
+        let rectangle = Shape::new_rectangle(2, 4);
+
+        #[rustfmt::skip]
+        let results = vec![
+            false, false, false, false,
+            false,  true,  true, false,
+            false,  true,  true, false,
+            false,  true,  true, false,
+            false,  true,  true, false,
+            false, false, false, false
+        ];
+
+        for (index, result) in results.iter().enumerate() {
+            assert_eq!(rectangle.is_inside(&CENTER, &size.to_point(index)), *result);
         }
     }
 }
