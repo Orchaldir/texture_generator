@@ -1,5 +1,5 @@
 use crate::math::size::Size;
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 #[svgbobdoc::transform]
 /// Defines a point in 2 dimensions.
@@ -21,8 +21,8 @@ use std::ops::Add;
 /// ```
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub struct Point {
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
 }
 
 impl Point {
@@ -34,7 +34,7 @@ impl Point {
     /// assert_eq!(point.x, 2);
     /// assert_eq!(point.y, 3);
     /// ```
-    pub const fn new(x: u32, y: u32) -> Point {
+    pub const fn new(x: i32, y: i32) -> Point {
         Point { x, y }
     }
 
@@ -69,6 +69,25 @@ impl Add<Size> for Point {
     type Output = Point;
 
     fn add(self, size: Size) -> Point {
-        Point::new(self.x + size.width(), self.y + size.height())
+        Point::new(self.x + size.width() as i32, self.y + size.height() as i32)
+    }
+}
+
+/// Subtract a [`Point`] from another [`Point`].
+///
+/// ```
+///# use texture_generator::math::point::Point;
+///# use texture_generator::math::size::Size;
+/// let a = Point::new(1, 2);
+/// let b = Point::new(30, 50);
+///
+/// assert_eq!(a - b, Point::new(-29, -48));
+/// assert_eq!(b - a, Point::new(29, 48));
+/// ```
+impl Sub<Point> for Point {
+    type Output = Point;
+
+    fn sub(self, other: Point) -> Point {
+        Point::new(self.x - other.x, self.y - other.y)
     }
 }

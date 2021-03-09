@@ -89,12 +89,14 @@ impl Size {
     /// let size = Size::new(2, 3);
     /// let inside = Point::new(1, 2);
     /// let outside = Point::new(4, 5);
+    /// let negative = Point::new(-1, 1);
     ///
     /// assert!(size.is_inside(&inside));
     /// assert!(!size.is_inside(&outside));
+    /// assert!(!size.is_inside(&negative));
     /// ```
     pub fn is_inside(&self, point: &Point) -> bool {
-        point.x < self.width && point.y < self.height
+        point.x >= 0 && point.y >= 0 && point.x < self.width as i32 && point.y < self.height as i32
     }
 
     /// Converts an index to the x-coordinate of the equivalent [`Point`].
@@ -104,8 +106,8 @@ impl Size {
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.to_x(5), 1);
     /// ```
-    pub fn to_x(&self, index: usize) -> u32 {
-        index as u32 % self.width
+    pub fn to_x(&self, index: usize) -> i32 {
+        index as i32 % self.width as i32
     }
 
     /// Converts an index to the y-coordinate of the equivalent [`Point`].
@@ -115,8 +117,8 @@ impl Size {
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.to_y(5), 2);
     /// ```
-    pub fn to_y(&self, index: usize) -> u32 {
-        index as u32 / self.width
+    pub fn to_y(&self, index: usize) -> i32 {
+        index as i32 / self.width as i32
     }
 
     /// Converts an index to the equivalent [`Point`].
@@ -139,9 +141,11 @@ impl Size {
     /// let size = Size::new(2, 3);
     /// let inside = Point::new(1, 2);
     /// let outside = Point::new(4, 5);
+    /// let negative = Point::new(1, -1);
     ///
     /// assert_eq!(size.to_index(&inside), Some(5));
     /// assert_eq!(size.to_index(&outside), None);
+    /// assert_eq!(size.to_index(&negative), None);
     /// ```
     pub fn to_index(&self, point: &Point) -> Option<usize> {
         if self.is_inside(point) {
@@ -160,6 +164,6 @@ impl Size {
     /// assert_eq!(size.to_index_risky(&Point::new(1, 2)), 5);
     /// ```
     pub fn to_index_risky(&self, point: &Point) -> usize {
-        (point.y * self.width + point.x) as usize
+        (point.y * self.width as i32 + point.x) as usize
     }
 }
