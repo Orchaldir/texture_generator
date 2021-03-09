@@ -2,8 +2,7 @@ use structopt::StructOpt;
 use texture_generator::generation::rendering::RenderComponent;
 use texture_generator::generation::{RuntimeData, RuntimeDataImpl};
 use texture_generator::math::aabb::AABB;
-use texture_generator::math::color::{BLUE, PINK};
-use texture_generator::math::point::Point;
+use texture_generator::math::color::{BLUE, WHITE};
 use texture_generator::math::shape::Shape;
 use texture_generator::math::size::Size;
 
@@ -27,11 +26,10 @@ fn main() {
     );
 
     let size = Size::new(args.size, args.size);
-    let aabb = AABB::new(Point::new(0, 0), size);
-    let mut data = RuntimeDataImpl::new(size, PINK);
+    let aabb = AABB::with_size(size);
+    let mut data = RuntimeDataImpl::new(size, WHITE);
 
-    let center = Point::new(args.size / 2, args.size / 2);
-    let circle = Shape::new_circle(center, args.size / 3);
+    let circle = Shape::new_circle(aabb.center(), args.size / 3);
     let renderer = RenderComponent::new_shape(circle, BLUE);
 
     renderer.render(&mut data, &aabb);

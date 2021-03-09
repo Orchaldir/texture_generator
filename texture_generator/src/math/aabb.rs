@@ -43,12 +43,47 @@ impl AxisAlignedBoundingBox {
     /// assert_eq!(aabb.size(), size);
     /// ```
     pub fn new(start: Point, size: Size) -> Self {
-        let end = start.add_size(&size);
+        let end = start + size;
+        AxisAlignedBoundingBox { start, end, size }
+    }
+
+    /// Returns a new axis aligned bounding box.
+    ///
+    /// ```
+    ///# use texture_generator::math::aabb::AxisAlignedBoundingBox;
+    ///# use texture_generator::math::point::Point;
+    ///# use texture_generator::math::size::Size;
+    /// let size = Size::new(30, 50);
+    /// let aabb = AxisAlignedBoundingBox::with_size(size);
+    ///
+    /// assert_eq!(aabb.start(), Point::new(0, 0));
+    /// assert_eq!(aabb.end(), Point::new(30, 50));
+    /// assert_eq!(aabb.size(), size);
+    /// ```
+    pub fn with_size(size: Size) -> Self {
+        let start = Point::new(0, 0);
+        let end = start + size;
         AxisAlignedBoundingBox { start, end, size }
     }
 
     pub fn start(&self) -> Point {
         self.start
+    }
+
+    /// Returns the center of the axis aligned bounding box.
+    ///
+    /// ```
+    ///# use texture_generator::math::aabb::AxisAlignedBoundingBox;
+    ///# use texture_generator::math::point::Point;
+    ///# use texture_generator::math::size::Size;
+    /// let start = Point::new(2, 3);
+    /// let size = Size::new(30, 50);
+    /// let aabb = AxisAlignedBoundingBox::new(start, size);
+    ///
+    /// assert_eq!(aabb.center(), Point::new(17, 28));
+    /// ```
+    pub fn center(&self) -> Point {
+        self.start + self.size.divide(2)
     }
 
     pub fn end(&self) -> Point {

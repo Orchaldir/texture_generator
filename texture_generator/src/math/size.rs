@@ -34,6 +34,20 @@ impl Size {
         Size { width, height }
     }
 
+    /// Returns a new size divided by a value.
+    ///
+    /// ```
+    ///# use texture_generator::math::size::Size;
+    /// let size = Size::new(10, 30);
+    /// assert_eq!(size.divide(2), Size::new(5, 15));
+    /// ```
+    pub fn divide(&self, value: u32) -> Size {
+        Size {
+            width: self.width / value,
+            height: self.height / value,
+        }
+    }
+
     /// Returns the number of cells covered by this size.
     ///
     /// ```

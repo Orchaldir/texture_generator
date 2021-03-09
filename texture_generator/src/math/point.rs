@@ -1,4 +1,5 @@
 use crate::math::size::Size;
+use std::ops::Add;
 
 #[svgbobdoc::transform]
 /// Defines a point in 2 dimensions.
@@ -37,20 +38,6 @@ impl Point {
         Point { x, y }
     }
 
-    /// Creates a new point by adding a [`Size`] to it.
-    ///
-    /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
-    /// let point = Point::new(1, 2);
-    /// let size = Size::new(30, 50);
-    ///
-    /// assert_eq!(point.add_size(&size), Point::new(31, 52));
-    /// ```
-    pub fn add_size(&self, size: &Size) -> Point {
-        Point::new(self.x + size.width(), self.y + size.height())
-    }
-
     /// Calculates the euclidean distance to another point.
     ///
     /// ```
@@ -65,5 +52,23 @@ impl Point {
     pub fn calculate_distance(&self, point: &Point) -> f32 {
         ((self.x as f32 - point.x as f32).powf(2.0) + (self.y as f32 - point.y as f32).powf(2.0))
             .sqrt()
+    }
+}
+
+/// Add a [`Size`] to a [`Point`].
+///
+/// ```
+///# use texture_generator::math::point::Point;
+///# use texture_generator::math::size::Size;
+/// let point = Point::new(1, 2);
+/// let size = Size::new(30, 50);
+///
+/// assert_eq!(point + size, Point::new(31, 52));
+/// ```
+impl Add<Size> for Point {
+    type Output = Point;
+
+    fn add(self, size: Size) -> Point {
+        Point::new(self.x + size.width(), self.y + size.height())
     }
 }
