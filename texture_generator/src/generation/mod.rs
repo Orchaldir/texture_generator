@@ -5,11 +5,11 @@ use crate::math::size::Size;
 pub mod rendering;
 
 pub trait RuntimeData {
-    /// Set the [``Color`] at the point.
+    /// Set the [`Color`] at the [`Point`].
     fn set(&mut self, point: &Point, color: &Color);
 
-    /// Get all color values.
-    fn get_colors(&self) -> &[u8];
+    /// Get all the r, g & b values.
+    fn get_color_data(&self) -> &[u8];
 }
 
 pub struct RuntimeDataImpl {
@@ -39,7 +39,36 @@ impl RuntimeData for RuntimeDataImpl {
         self.colors[index + 2] = color.b();
     }
 
-    fn get_colors(&self) -> &[u8] {
+    fn get_color_data(&self) -> &[u8] {
         &self.colors
+    }
+}
+
+pub struct TestData {
+    size: Size,
+    colors: Vec<Color>,
+}
+
+impl TestData {
+    pub fn new(size: Size, default: Color) -> TestData {
+        let n = size.get_number_of_cells();
+        let colors = vec![default].into_iter().cycle().take(n).collect();
+
+        TestData { size, colors }
+    }
+
+    pub fn get_colors(&self) -> &[Color] {
+        &self.colors
+    }
+}
+
+impl RuntimeData for TestData {
+    fn set(&mut self, point: &Point, color: &Color) {
+        let index = self.size.to_index_risky(point);
+        self.colors[index] = *color;
+    }
+
+    fn get_color_data(&self) -> &[u8] {
+        unimplemented!()
     }
 }

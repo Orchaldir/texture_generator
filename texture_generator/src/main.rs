@@ -36,7 +36,7 @@ fn main() {
 
     image::save_buffer(
         &args.output,
-        data.get_colors(),
+        data.get_color_data(),
         size.width(),
         size.height(),
         image::ColorType::Rgb8,
