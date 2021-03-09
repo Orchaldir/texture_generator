@@ -17,12 +17,13 @@ impl RenderComponent {
         match self {
             RenderComponent::Shape { shape, color } => {
                 let mut point = aabb.start();
+                let center = aabb.center();
 
                 while point.y < aabb.end().y {
                     point.x = aabb.start().x;
 
                     while point.x < aabb.end().x {
-                        if shape.is_inside(&point) {
+                        if shape.is_inside(&center, &point) {
                             data.set(&point, color);
                         }
 

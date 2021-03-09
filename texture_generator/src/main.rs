@@ -29,7 +29,7 @@ fn main() {
     let aabb = AABB::with_size(size);
     let mut data = RuntimeDataImpl::new(size, WHITE);
 
-    let circle = Shape::new_circle(aabb.center(), args.size / 3);
+    let circle = Shape::new_circle(args.size / 3);
     let renderer = RenderComponent::new_shape(circle, BLUE);
 
     renderer.render(&mut data, &aabb);
