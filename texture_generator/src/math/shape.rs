@@ -2,12 +2,12 @@ use crate::math::point::Point;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Shape {
-    Circle { radius: u32 },
+    Circle(u32),
 }
 
 impl Shape {
     pub fn new_circle(radius: u32) -> Shape {
-        Shape::Circle { radius }
+        Shape::Circle(radius)
     }
 
     /// Calculates the euclidean distance to a [`Point`].
@@ -26,7 +26,7 @@ impl Shape {
     /// ```
     pub fn distance_to_border(&self, center: &Point, point: &Point) -> f32 {
         match self {
-            Shape::Circle { radius } => center.calculate_distance(point) - *radius as f32,
+            Shape::Circle(radius) => center.calculate_distance(point) - *radius as f32,
         }
     }
 
@@ -46,7 +46,7 @@ impl Shape {
     /// ```
     pub fn is_inside(&self, center: &Point, point: &Point) -> bool {
         match self {
-            Shape::Circle { radius } => center.calculate_distance(point) <= *radius as f32,
+            Shape::Circle(radius) => center.calculate_distance(point) <= *radius as f32,
         }
     }
 }
