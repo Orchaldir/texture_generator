@@ -1,4 +1,10 @@
 use structopt::StructOpt;
+use texture_generator::generation::rendering::RenderComponent;
+use texture_generator::generation::{RuntimeData, RuntimeDataImpl};
+use texture_generator::math::aabb::AABB;
+use texture_generator::math::color::{BLUE, WHITE};
+use texture_generator::math::shape::Shape;
+use texture_generator::math::size::Size;
 
 #[derive(StructOpt)]
 struct Cli {
@@ -19,8 +25,21 @@ fn main() {
         args.size, args.output
     );
 
-    let pink = image::Rgb([255u8, 0, 128]);
-    let image = image::ImageBuffer::from_pixel(args.size, args.size, pink);
+    let size = Size::new(args.size, args.size);
+    let aabb = AABB::with_size(size);
+    let mut data = RuntimeDataImpl::new(size, WHITE);
 
-    image.save(&args.output).unwrap();
+    let circle = Shape::new_circle(args.size / 3);
+    let renderer = RenderComponent::new_shape(circle, BLUE);
+
+    renderer.render(&mut data, &aabb);
+
+    image::save_buffer(
+        &args.output,
+        data.get_color_data(),
+        size.width(),
+        size.height(),
+        image::ColorType::Rgb8,
+    )
+    .unwrap()
 }

@@ -1,0 +1,93 @@
+use crate::math::size::Size;
+use std::ops::{Add, Sub};
+
+#[svgbobdoc::transform]
+/// Defines a point in 2 dimensions.
+///
+/// # Diagram
+///
+/// ```svgbob
+///      0  1
+///   +--*--*----> x-axis
+///   |
+/// 0 *
+///   |
+/// 1 *
+///   |
+/// 2 *     * (1,2)
+///   |
+///   v
+/// y-axis
+/// ```
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub struct Point {
+    pub x: i32,
+    pub y: i32,
+}
+
+impl Point {
+    /// Returns a new point.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    /// let point = Point::new(2, 3);
+    /// assert_eq!(point.x, 2);
+    /// assert_eq!(point.y, 3);
+    /// ```
+    pub const fn new(x: i32, y: i32) -> Point {
+        Point { x, y }
+    }
+
+    /// Calculates the euclidean distance to another point.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    /// let a = Point::new(1, 2);
+    /// let b = Point::new(4, 6);
+    ///
+    /// assert_eq!(a.calculate_distance(&a), 0.0);
+    /// assert_eq!(a.calculate_distance(&b), 5.0);
+    /// assert_eq!(b.calculate_distance(&a), 5.0);
+    /// ```
+    pub fn calculate_distance(&self, point: &Point) -> f32 {
+        ((self.x as f32 - point.x as f32).powf(2.0) + (self.y as f32 - point.y as f32).powf(2.0))
+            .sqrt()
+    }
+}
+
+/// Add a [`Size`] to a [`Point`].
+///
+/// ```
+///# use texture_generator::math::point::Point;
+///# use texture_generator::math::size::Size;
+/// let point = Point::new(1, 2);
+/// let size = Size::new(30, 50);
+///
+/// assert_eq!(point + size, Point::new(31, 52));
+/// ```
+impl Add<Size> for Point {
+    type Output = Point;
+
+    fn add(self, size: Size) -> Point {
+        Point::new(self.x + size.width() as i32, self.y + size.height() as i32)
+    }
+}
+
+/// Subtract a [`Point`] from another [`Point`].
+///
+/// ```
+///# use texture_generator::math::point::Point;
+///# use texture_generator::math::size::Size;
+/// let a = Point::new(1, 2);
+/// let b = Point::new(30, 50);
+///
+/// assert_eq!(a - b, Point::new(-29, -48));
+/// assert_eq!(b - a, Point::new(29, 48));
+/// ```
+impl Sub<Point> for Point {
+    type Output = Point;
+
+    fn sub(self, other: Point) -> Point {
+        Point::new(self.x - other.x, self.y - other.y)
+    }
+}
