@@ -1,4 +1,6 @@
 use structopt::StructOpt;
+use texture_generator::generation::component::GenerationComponent;
+use texture_generator::generation::layout::LayoutComponent;
 use texture_generator::generation::rendering::RenderComponent;
 use texture_generator::generation::{RuntimeData, RuntimeDataImpl};
 use texture_generator::math::aabb::AABB;
@@ -26,13 +28,16 @@ fn main() {
     );
 
     let size = Size::new(args.size, args.size);
+    let layout_size = args.size / 8;
     let aabb = AABB::with_size(size);
     let mut data = RuntimeDataImpl::new(size, WHITE);
 
-    let circle = Shape::new_circle(args.size / 3);
+    let circle = Shape::new_circle(layout_size / 3);
     let renderer = RenderComponent::new_shape(circle, BLUE);
+    let component = GenerationComponent::Rendering(renderer);
+    let layout = LayoutComponent::new_square(layout_size, component);
 
-    renderer.render(&mut data, &aabb);
+    layout.render(&mut data, &aabb);
 
     image::save_buffer(
         &args.output,

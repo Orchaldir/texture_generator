@@ -91,3 +91,21 @@ impl Sub<Point> for Point {
         Point::new(self.x - other.x, self.y - other.y)
     }
 }
+
+/// Subtract a [`Size`] from a [`Point`].
+///
+/// ```
+///# use texture_generator::math::point::Point;
+///# use texture_generator::math::size::Size;
+/// let point = Point::new(1, 2);
+/// let size = Size::new(30, 50);
+///
+/// assert_eq!(point - size, Point::new(-29, -48));
+/// ```
+impl Sub<Size> for Point {
+    type Output = Point;
+
+    fn sub(self, size: Size) -> Point {
+        Point::new(self.x - size.width() as i32, self.y - size.height() as i32)
+    }
+}

@@ -2,6 +2,8 @@ use crate::math::color::Color;
 use crate::math::point::Point;
 use crate::math::size::Size;
 
+pub mod component;
+pub mod layout;
 pub mod rendering;
 
 pub trait RuntimeData {
