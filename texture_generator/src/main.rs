@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 use structopt::StructOpt;
 use texture_generator::generation::component::GenerationComponent;
 use texture_generator::generation::layout::LayoutComponent;
@@ -7,6 +10,7 @@ use texture_generator::math::aabb::AABB;
 use texture_generator::math::color::{BLUE, WHITE};
 use texture_generator::math::shape::Shape;
 use texture_generator::math::size::Size;
+use texture_generator::utils::logging::init_logging;
 
 #[derive(StructOpt)]
 struct Cli {
@@ -20,12 +24,11 @@ struct Cli {
 }
 
 fn main() {
+    init_logging();
+
     let args = Cli::from_args();
 
-    println!(
-        "Save image of size {0}*{0} to {1:?}",
-        args.size, args.output
-    );
+    info!("size={} output={:?}", args.size, args.output);
 
     let size = Size::new(args.size, args.size);
     let layout_size = args.size / 8;
@@ -37,7 +40,11 @@ fn main() {
     let component = GenerationComponent::Rendering(renderer);
     let layout = LayoutComponent::new_square(layout_size, component);
 
+    info!("Start rendering");
+
     layout.render(&mut data, &aabb);
+
+    info!("Start saving");
 
     image::save_buffer(
         &args.output,
@@ -46,5 +53,7 @@ fn main() {
         size.height(),
         image::ColorType::Rgb8,
     )
-    .unwrap()
+    .unwrap();
+
+    info!("Finished");
 }
