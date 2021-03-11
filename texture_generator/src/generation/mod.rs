@@ -22,11 +22,13 @@ pub struct RuntimeDataImpl {
 impl RuntimeDataImpl {
     pub fn new(size: Size, default: Color) -> RuntimeDataImpl {
         let n = size.get_number_of_cells();
-        let colors = vec![default.r(), default.g(), default.b()]
-            .into_iter()
-            .cycle()
-            .take(n * 3)
-            .collect();
+        let mut colors = Vec::with_capacity(n * 3);
+
+        for _ in 0..n {
+            colors.push(default.r());
+            colors.push(default.g());
+            colors.push(default.b());
+        }
 
         RuntimeDataImpl { size, colors }
     }
