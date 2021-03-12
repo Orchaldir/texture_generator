@@ -1,6 +1,6 @@
+use crate::generation::data::RuntimeData;
 use crate::generation::layout::LayoutComponent;
 use crate::generation::rendering::RenderComponent;
-use crate::generation::RuntimeData;
 use crate::math::aabb::AABB;
 
 #[derive(Debug, Eq, PartialEq)]

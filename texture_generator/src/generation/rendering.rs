@@ -1,4 +1,4 @@
-use crate::generation::RuntimeData;
+use crate::generation::data::RuntimeData;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::shape::Shape;
@@ -42,7 +42,7 @@ impl RenderComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::TestData;
+    use crate::generation::data::TestData;
     use crate::math::color::{RED, WHITE};
     use crate::math::point::Point;
     use crate::math::size::Size;

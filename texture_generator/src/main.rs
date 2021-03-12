@@ -3,9 +3,9 @@ extern crate log;
 
 use structopt::StructOpt;
 use texture_generator::generation::component::GenerationComponent;
+use texture_generator::generation::data::{RuntimeData, RuntimeDataImpl};
 use texture_generator::generation::layout::LayoutComponent;
 use texture_generator::generation::rendering::RenderComponent;
-use texture_generator::generation::{RuntimeData, RuntimeDataImpl};
 use texture_generator::math::aabb::AABB;
 use texture_generator::math::color::{BLUE, WHITE};
 use texture_generator::math::shape::Shape;

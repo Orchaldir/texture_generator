@@ -1,5 +1,5 @@
 use crate::generation::component::GenerationComponent;
-use crate::generation::RuntimeData;
+use crate::generation::data::RuntimeData;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
 
@@ -65,8 +65,8 @@ impl LayoutComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generation::data::TestData;
     use crate::generation::rendering::RenderComponent;
-    use crate::generation::TestData;
     use crate::math::color::{RED, WHITE};
     use crate::math::shape::Shape;
     use crate::math::size::Size;
