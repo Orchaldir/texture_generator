@@ -4,17 +4,17 @@ use crate::generation::rendering::RenderingComponent;
 use crate::math::aabb::AABB;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum GenerationComponent {
+pub enum Component {
     Layout(LayoutComponent),
     Rendering(RenderingComponent),
 }
 
-impl GenerationComponent {
+impl Component {
     /// Generates the texture inside the [`AABB`].
     pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
-            GenerationComponent::Layout(component) => component.generate(data, aabb),
-            GenerationComponent::Rendering(component) => component.render(data, aabb),
+            Component::Layout(component) => component.generate(data, aabb),
+            Component::Rendering(component) => component.render(data, aabb),
         }
     }
 }

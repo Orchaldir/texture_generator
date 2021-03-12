@@ -1,5 +1,5 @@
 use crate::definition::generation::component::ComponentError;
-use crate::generation::component::GenerationComponent;
+use crate::generation::component::Component;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
@@ -37,20 +37,20 @@ pub enum LayoutComponent {
     /// ```
     Square {
         size: u32,
-        component: Box<GenerationComponent>,
+        component: Box<Component>,
     },
 }
 
 impl LayoutComponent {
     pub fn new_square(
         size: u32,
-        component: GenerationComponent,
+        component: Component,
     ) -> Result<LayoutComponent, LayoutError> {
         LayoutComponent::new_square_box(size, Box::new(component))
     }
     pub fn new_square_box(
         size: u32,
-        component: Box<GenerationComponent>,
+        component: Box<Component>,
     ) -> Result<LayoutComponent, LayoutError> {
         if size < 1 {
             return Err(LayoutError::SizeTooSmall(size));
@@ -104,7 +104,7 @@ mod tests {
 
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
         let renderer = RenderingComponent::new_shape(rectangle, RED);
-        let component = GenerationComponent::Rendering(renderer);
+        let component = Component::Rendering(renderer);
         let layout = LayoutComponent::new_square(4, component).unwrap();
 
         layout.generate(&mut data, &aabb);

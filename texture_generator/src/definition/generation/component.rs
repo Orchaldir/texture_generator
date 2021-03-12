@@ -1,6 +1,6 @@
 use crate::definition::generation::layout::LayoutDefinition;
 use crate::definition::generation::rendering::RenderingDefinition;
-use crate::generation::component::GenerationComponent;
+use crate::generation::component::Component;
 use crate::generation::layout::LayoutError;
 use crate::generation::rendering::RenderingError;
 use std::convert::{TryFrom, TryInto};
@@ -29,26 +29,26 @@ pub enum ComponentDefinition {
     Rendering(RenderingDefinition),
 }
 
-impl TryFrom<ComponentDefinition> for GenerationComponent {
+impl TryFrom<ComponentDefinition> for Component {
     type Error = ComponentError;
 
     fn try_from(definition: ComponentDefinition) -> Result<Self, Self::Error> {
         match definition {
             ComponentDefinition::Layout(definition) => {
-                Ok(GenerationComponent::Layout(definition.try_into()?))
+                Ok(Component::Layout(definition.try_into()?))
             }
             ComponentDefinition::Rendering(definition) => {
-                Ok(GenerationComponent::Rendering(definition.try_into()?))
+                Ok(Component::Rendering(definition.try_into()?))
             }
         }
     }
 }
 
-impl From<&GenerationComponent> for ComponentDefinition {
-    fn from(component: &GenerationComponent) -> Self {
+impl From<&Component> for ComponentDefinition {
+    fn from(component: &Component) -> Self {
         match component {
-            GenerationComponent::Layout(layout) => ComponentDefinition::Layout(layout.into()),
-            GenerationComponent::Rendering(render) => ComponentDefinition::Rendering(render.into()),
+            Component::Layout(layout) => ComponentDefinition::Layout(layout.into()),
+            Component::Rendering(render) => ComponentDefinition::Rendering(render.into()),
         }
     }
 }
@@ -82,7 +82,7 @@ mod tests {
     }
 
     fn assert_convert(definition: ComponentDefinition) {
-        let shape: GenerationComponent = definition.clone().try_into().unwrap();
+        let shape: Component = definition.clone().try_into().unwrap();
         let result: ComponentDefinition = (&shape).into();
 
         assert_eq!(result, definition)
