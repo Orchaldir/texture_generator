@@ -38,7 +38,7 @@ fn main() {
     let circle = Shape::new_circle(layout_size / 3).unwrap();
     let renderer = RenderComponent::new_shape(circle, BLUE);
     let component = GenerationComponent::Rendering(renderer);
-    let layout = LayoutComponent::new_square(layout_size, component);
+    let layout = LayoutComponent::new_square(layout_size, component).unwrap();
 
     info!("Start rendering");
 
