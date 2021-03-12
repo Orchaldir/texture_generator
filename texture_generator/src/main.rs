@@ -5,7 +5,7 @@ use structopt::StructOpt;
 use texture_generator::generation::component::GenerationComponent;
 use texture_generator::generation::data::{Data, RuntimeData};
 use texture_generator::generation::layout::LayoutComponent;
-use texture_generator::generation::rendering::RenderComponent;
+use texture_generator::generation::rendering::RenderingComponent;
 use texture_generator::math::aabb::AABB;
 use texture_generator::math::color::{BLUE, WHITE};
 use texture_generator::math::shape::Shape;
@@ -36,7 +36,7 @@ fn main() {
     let mut data = RuntimeData::new(size, WHITE);
 
     let circle = Shape::new_circle(layout_size / 3).unwrap();
-    let renderer = RenderComponent::new_shape(circle, BLUE);
+    let renderer = RenderingComponent::new_shape(circle, BLUE);
     let component = GenerationComponent::Rendering(renderer);
     let layout = LayoutComponent::new_square(layout_size, component).unwrap();
 

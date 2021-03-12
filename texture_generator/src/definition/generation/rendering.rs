@@ -1,34 +1,34 @@
 use crate::definition::math::shape::ShapeDefinition;
-use crate::generation::rendering::{RenderComponent, RenderError};
+use crate::generation::rendering::{RenderingComponent, RenderingError};
 use crate::math::color::Color;
 use crate::math::shape::Shape;
 use std::convert::{TryFrom, TryInto};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum RenderDefinition {
+pub enum RenderingDefinition {
     Shape {
         shape: ShapeDefinition,
         color: Color,
     },
 }
 
-impl TryFrom<RenderDefinition> for RenderComponent {
-    type Error = RenderError;
+impl TryFrom<RenderingDefinition> for RenderingComponent {
+    type Error = RenderingError;
 
-    fn try_from(definition: RenderDefinition) -> Result<Self, Self::Error> {
+    fn try_from(definition: RenderingDefinition) -> Result<Self, Self::Error> {
         match definition {
-            RenderDefinition::Shape { shape, color } => {
+            RenderingDefinition::Shape { shape, color } => {
                 let shape: Shape = shape.try_into()?;
-                Ok(RenderComponent::Shape { shape, color })
+                Ok(RenderingComponent::Shape { shape, color })
             }
         }
     }
 }
 
-impl From<&RenderComponent> for RenderDefinition {
-    fn from(shape: &RenderComponent) -> Self {
-        match shape {
-            RenderComponent::Shape { shape, color } => RenderDefinition::Shape {
+impl From<&RenderingComponent> for RenderingDefinition {
+    fn from(component: &RenderingComponent) -> Self {
+        match component {
+            RenderingComponent::Shape { shape, color } => RenderingDefinition::Shape {
                 shape: shape.into(),
                 color: *color,
             },
@@ -39,7 +39,7 @@ impl From<&RenderComponent> for RenderDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::rendering::RenderError;
+    use crate::generation::rendering::RenderingError;
     use crate::math::color::RED;
     use crate::math::shape::ShapeError;
     use std::convert::TryInto;
@@ -47,25 +47,25 @@ mod tests {
     #[test]
     fn test_convert_shape() {
         let shape = ShapeDefinition::Circle(42);
-        assert_convert(RenderDefinition::Shape { shape, color: RED });
+        assert_convert(RenderingDefinition::Shape { shape, color: RED });
     }
 
     #[test]
     fn test_convert_invalid_shape() {
         let shape = ShapeDefinition::Circle(0);
-        let definition = RenderDefinition::Shape { shape, color: RED };
+        let definition = RenderingDefinition::Shape { shape, color: RED };
         let shape_error = ShapeError::RadiusTooSmall(0);
-        is_error(definition, RenderError::ShapeError(shape_error))
+        is_error(definition, RenderingError::ShapeError(shape_error))
     }
 
-    fn assert_convert(definition: RenderDefinition) {
-        let shape: RenderComponent = definition.clone().try_into().unwrap();
-        let result: RenderDefinition = (&shape).into();
+    fn assert_convert(definition: RenderingDefinition) {
+        let shape: RenderingComponent = definition.clone().try_into().unwrap();
+        let result: RenderingDefinition = (&shape).into();
 
         assert_eq!(result, definition)
     }
 
-    fn is_error(data: impl TryInto<RenderComponent, Error = RenderError>, error: RenderError) {
+    fn is_error(data: impl TryInto<RenderingComponent, Error =RenderingError>, error: RenderingError) {
         assert_eq!(data.try_into(), Err(error));
     }
 }

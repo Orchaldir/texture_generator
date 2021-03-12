@@ -90,7 +90,7 @@ impl LayoutComponent {
 mod tests {
     use super::*;
     use crate::generation::data::TestData;
-    use crate::generation::rendering::RenderComponent;
+    use crate::generation::rendering::RenderingComponent;
     use crate::math::color::{RED, WHITE};
     use crate::math::shape::Shape;
     use crate::math::size::Size;
@@ -103,7 +103,7 @@ mod tests {
         let mut data = TestData::new(size, WHITE);
 
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
-        let renderer = RenderComponent::new_shape(rectangle, RED);
+        let renderer = RenderingComponent::new_shape(rectangle, RED);
         let component = GenerationComponent::Rendering(renderer);
         let layout = LayoutComponent::new_square(4, component).unwrap();
 

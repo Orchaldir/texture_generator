@@ -4,32 +4,32 @@ use crate::math::color::Color;
 use crate::math::shape::{Shape, ShapeError};
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum RenderError {
+pub enum RenderingError {
     ShapeError(ShapeError),
 }
 
-impl From<ShapeError> for RenderError {
+impl From<ShapeError> for RenderingError {
     fn from(error: ShapeError) -> Self {
-        RenderError::ShapeError(error)
+        RenderingError::ShapeError(error)
     }
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Renders the texture.
-pub enum RenderComponent {
+pub enum RenderingComponent {
     /// Renders a [`Shape`].
     Shape { shape: Shape, color: Color },
 }
 
-impl RenderComponent {
-    pub fn new_shape(shape: Shape, color: Color) -> RenderComponent {
-        RenderComponent::Shape { shape, color }
+impl RenderingComponent {
+    pub fn new_shape(shape: Shape, color: Color) -> RenderingComponent {
+        RenderingComponent::Shape { shape, color }
     }
 
     /// Renders the texture in the area defined by the [`AABB`].
     pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
-            RenderComponent::Shape { shape, color } => {
+            RenderingComponent::Shape { shape, color } => {
                 let mut point = aabb.start();
                 let center = aabb.center();
 
@@ -68,7 +68,7 @@ mod tests {
         let aabb = AABB::new(start, size);
 
         let mut data = TestData::new(data_size, WHITE);
-        let renderer = RenderComponent::new_shape(rectangle, RED);
+        let renderer = RenderingComponent::new_shape(rectangle, RED);
 
         renderer.render(&mut data, &aabb);
 

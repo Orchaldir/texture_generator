@@ -1,12 +1,12 @@
 use crate::generation::data::Data;
 use crate::generation::layout::LayoutComponent;
-use crate::generation::rendering::RenderComponent;
+use crate::generation::rendering::RenderingComponent;
 use crate::math::aabb::AABB;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum GenerationComponent {
     Layout(LayoutComponent),
-    Rendering(RenderComponent),
+    Rendering(RenderingComponent),
 }
 
 impl GenerationComponent {

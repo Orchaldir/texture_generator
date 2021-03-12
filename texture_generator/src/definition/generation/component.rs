@@ -1,14 +1,14 @@
 use crate::definition::generation::layout::LayoutDefinition;
-use crate::definition::generation::rendering::RenderDefinition;
+use crate::definition::generation::rendering::RenderingDefinition;
 use crate::generation::component::GenerationComponent;
 use crate::generation::layout::LayoutError;
-use crate::generation::rendering::RenderError;
+use crate::generation::rendering::RenderingError;
 use std::convert::{TryFrom, TryInto};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum ComponentError {
     LayoutError(LayoutError),
-    RenderError(RenderError),
+    RenderingError(RenderingError),
 }
 
 impl From<LayoutError> for ComponentError {
@@ -17,16 +17,16 @@ impl From<LayoutError> for ComponentError {
     }
 }
 
-impl From<RenderError> for ComponentError {
-    fn from(error: RenderError) -> Self {
-        ComponentError::RenderError(error)
+impl From<RenderingError> for ComponentError {
+    fn from(error: RenderingError) -> Self {
+        ComponentError::RenderingError(error)
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ComponentDefinition {
     Layout(LayoutDefinition),
-    Rendering(RenderDefinition),
+    Rendering(RenderingDefinition),
 }
 
 impl TryFrom<ComponentDefinition> for GenerationComponent {
@@ -61,7 +61,7 @@ mod tests {
     use std::convert::TryInto;
 
     const SHAPE: ShapeDefinition = ShapeDefinition::Circle(42);
-    const RENDERING: RenderDefinition = RenderDefinition::Shape {
+    const RENDERING: RenderingDefinition = RenderingDefinition::Shape {
         shape: SHAPE,
         color: RED,
     };

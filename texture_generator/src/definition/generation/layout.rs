@@ -39,7 +39,7 @@ impl From<&LayoutComponent> for LayoutDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::definition::generation::rendering::RenderDefinition;
+    use crate::definition::generation::rendering::RenderingDefinition;
     use crate::definition::math::shape::ShapeDefinition;
     use crate::math::color::RED;
     use std::convert::TryInto;
@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn test_convert_square() {
         let shape = ShapeDefinition::Circle(42);
-        let rendering = RenderDefinition::Shape { shape, color: RED };
+        let rendering = RenderingDefinition::Shape { shape, color: RED };
         let component = Box::new(ComponentDefinition::Rendering(rendering));
         assert_convert(LayoutDefinition::Square {
             size: 10,
