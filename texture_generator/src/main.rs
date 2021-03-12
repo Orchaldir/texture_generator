@@ -42,7 +42,7 @@ fn main() {
 
     info!("Start rendering");
 
-    layout.render(&mut data, &aabb);
+    layout.generate(&mut data, &aabb);
 
     info!("Start saving");
 

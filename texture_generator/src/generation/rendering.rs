@@ -4,8 +4,9 @@ use crate::math::color::Color;
 use crate::math::shape::Shape;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+/// Renders the texture.
 pub enum RenderComponent {
-    /// Renders a [`Shape`] at the center of the [`AABB`].
+    /// Renders a [`Shape`].
     Shape { shape: Shape, color: Color },
 }
 
@@ -14,7 +15,7 @@ impl RenderComponent {
         RenderComponent::Shape { shape, color }
     }
 
-    /// Renders the component in the area defined by the [`AABB`].
+    /// Renders the texture in the area defined by the [`AABB`].
     pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
             RenderComponent::Shape { shape, color } => {

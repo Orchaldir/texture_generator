@@ -11,9 +11,9 @@ pub enum GenerationComponent {
 
 impl GenerationComponent {
     /// Generates the texture inside the [`AABB`].
-    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
+    pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
-            GenerationComponent::Layout(component) => component.render(data, aabb),
+            GenerationComponent::Layout(component) => component.generate(data, aabb),
             GenerationComponent::Rendering(component) => component.render(data, aabb),
         }
     }

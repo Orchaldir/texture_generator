@@ -4,6 +4,7 @@ use crate::math::aabb::AABB;
 use crate::math::size::Size;
 
 #[derive(Debug, Eq, PartialEq)]
+/// Generates a layout,
 pub enum LayoutComponent {
     /// A grid of squares that have the same size.
     ///
@@ -36,7 +37,7 @@ impl LayoutComponent {
     }
 
     /// Generates the layout in the area defined by the [`AABB`].
-    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
+    pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
             LayoutComponent::Square { size, component } => {
                 let mut point = aabb.start();
@@ -50,7 +51,7 @@ impl LayoutComponent {
                     while point.x <= end.x {
                         let square_aabb = AABB::new(point, square_size);
 
-                        component.render(data, &square_aabb);
+                        component.generate(data, &square_aabb);
 
                         point.x += step;
                     }
@@ -83,7 +84,7 @@ mod tests {
         let component = GenerationComponent::Rendering(renderer);
         let layout = LayoutComponent::new_square(4, component);
 
-        layout.render(&mut data, &aabb);
+        layout.generate(&mut data, &aabb);
 
         #[rustfmt::skip]
         let expected_colors = vec![
