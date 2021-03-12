@@ -1,7 +1,18 @@
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
-use crate::math::shape::Shape;
+use crate::math::shape::{Shape, ShapeError};
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum RenderError {
+    ShapeError(ShapeError),
+}
+
+impl From<ShapeError> for RenderError {
+    fn from(error: ShapeError) -> Self {
+        RenderError::ShapeError(error)
+    }
+}
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Renders the texture.
