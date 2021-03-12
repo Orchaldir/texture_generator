@@ -35,7 +35,8 @@ impl Shape {
         })
     }
 
-    /// Calculates the euclidean distance to a [`Point`].
+    /// Calculates the euclidean distance from the shape's border to a [`Point`].
+    /// A positive distance means the point is outside.
     ///
     /// ```
     ///# use texture_generator::math::point::Point;
