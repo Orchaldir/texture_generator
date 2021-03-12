@@ -53,7 +53,7 @@ mod tests {
         let size = Size::new(4, 6);
         let data_size = Size::new(5, 8);
         let start = Point::new(1, 2);
-        let rectangle = Shape::new_rectangle(2, 4);
+        let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let aabb = AABB::new(start, size);
 
         let mut data = TestData::new(data_size, WHITE);

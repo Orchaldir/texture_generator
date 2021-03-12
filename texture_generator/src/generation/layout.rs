@@ -79,7 +79,7 @@ mod tests {
 
         let mut data = TestData::new(size, WHITE);
 
-        let rectangle = Shape::new_rectangle(2, 2);
+        let rectangle = Shape::new_rectangle(2, 2).unwrap();
         let renderer = RenderComponent::new_shape(rectangle, RED);
         let component = GenerationComponent::Rendering(renderer);
         let layout = LayoutComponent::new_square(4, component);
