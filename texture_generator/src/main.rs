@@ -3,7 +3,7 @@ extern crate log;
 
 use structopt::StructOpt;
 use texture_generator::generation::component::GenerationComponent;
-use texture_generator::generation::data::{RuntimeData, RuntimeDataImpl};
+use texture_generator::generation::data::{Data, RuntimeData};
 use texture_generator::generation::layout::LayoutComponent;
 use texture_generator::generation::rendering::RenderComponent;
 use texture_generator::math::aabb::AABB;
@@ -33,7 +33,7 @@ fn main() {
     let size = Size::new(args.size, args.size);
     let layout_size = args.size / 8;
     let aabb = AABB::with_size(size);
-    let mut data = RuntimeDataImpl::new(size, WHITE);
+    let mut data = RuntimeData::new(size, WHITE);
 
     let circle = Shape::new_circle(layout_size / 3);
     let renderer = RenderComponent::new_shape(circle, BLUE);

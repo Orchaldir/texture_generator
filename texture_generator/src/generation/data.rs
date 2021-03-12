@@ -2,7 +2,8 @@ use crate::math::color::Color;
 use crate::math::point::Point;
 use crate::math::size::Size;
 
-pub trait RuntimeData {
+/// A trait used to store the data during the generation of the texture.
+pub trait Data {
     /// Set the [`Color`] at the [`Point`].
     fn set(&mut self, point: &Point, color: &Color);
 
@@ -10,13 +11,14 @@ pub trait RuntimeData {
     fn get_color_data(&self) -> &[u8];
 }
 
-pub struct RuntimeDataImpl {
+/// An implementation of [`Data`] for the actual usage.
+pub struct RuntimeData {
     size: Size,
     colors: Vec<u8>,
 }
 
-impl RuntimeDataImpl {
-    pub fn new(size: Size, default: Color) -> RuntimeDataImpl {
+impl RuntimeData {
+    pub fn new(size: Size, default: Color) -> RuntimeData {
         let n = size.get_number_of_cells();
         let mut colors = Vec::with_capacity(n * 3);
 
@@ -26,11 +28,11 @@ impl RuntimeDataImpl {
             colors.push(default.b());
         }
 
-        RuntimeDataImpl { size, colors }
+        RuntimeData { size, colors }
     }
 }
 
-impl RuntimeData for RuntimeDataImpl {
+impl Data for RuntimeData {
     fn set(&mut self, point: &Point, color: &Color) {
         let index = self.size.to_index_risky(point) * 3;
 
@@ -44,6 +46,7 @@ impl RuntimeData for RuntimeDataImpl {
     }
 }
 
+/// An implementation of [`Data`] for testing.
 pub struct TestData {
     size: Size,
     colors: Vec<Color>,
@@ -62,7 +65,7 @@ impl TestData {
     }
 }
 
-impl RuntimeData for TestData {
+impl Data for TestData {
     fn set(&mut self, point: &Point, color: &Color) {
         let index = self.size.to_index_risky(point);
         self.colors[index] = *color;

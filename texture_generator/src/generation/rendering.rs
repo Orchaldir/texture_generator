@@ -1,4 +1,4 @@
-use crate::generation::data::RuntimeData;
+use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::shape::Shape;
@@ -15,7 +15,7 @@ impl RenderComponent {
     }
 
     /// Renders the component in the area defined by the [`AABB`].
-    pub fn render(&self, data: &mut dyn RuntimeData, aabb: &AABB) {
+    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
             RenderComponent::Shape { shape, color } => {
                 let mut point = aabb.start();

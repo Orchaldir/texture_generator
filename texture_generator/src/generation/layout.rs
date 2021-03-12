@@ -1,5 +1,5 @@
 use crate::generation::component::GenerationComponent;
-use crate::generation::data::RuntimeData;
+use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
 
@@ -36,7 +36,7 @@ impl LayoutComponent {
     }
 
     /// Generates the layout in the area defined by the [`AABB`].
-    pub fn render(&self, data: &mut dyn RuntimeData, aabb: &AABB) {
+    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
             LayoutComponent::Square { size, component } => {
                 let mut point = aabb.start();
