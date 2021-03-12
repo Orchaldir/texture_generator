@@ -3,7 +3,7 @@ use crate::generation::layout::LayoutComponent;
 use crate::generation::rendering::RenderComponent;
 use crate::math::aabb::AABB;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum GenerationComponent {
     Layout(LayoutComponent),
     Rendering(RenderComponent),

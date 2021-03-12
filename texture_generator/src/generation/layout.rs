@@ -3,7 +3,7 @@ use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 /// Generates a layout,
 pub enum LayoutComponent {
     /// A grid of squares that have the same size.
