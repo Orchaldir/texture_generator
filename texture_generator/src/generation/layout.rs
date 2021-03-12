@@ -6,13 +6,13 @@ use crate::math::size::Size;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum LayoutError {
-    ComponentError(ComponentError),
+    ComponentError(Box<ComponentError>),
     SizeTooSmall(u32),
 }
 
 impl From<ComponentError> for LayoutError {
     fn from(error: ComponentError) -> Self {
-        LayoutError::ComponentError(error)
+        LayoutError::ComponentError(Box::new(error))
     }
 }
 

@@ -1,11 +1,20 @@
+use crate::definition::generation::layout::LayoutDefinition;
 use crate::definition::generation::rendering::RenderDefinition;
 use crate::generation::component::GenerationComponent;
+use crate::generation::layout::LayoutError;
 use crate::generation::rendering::RenderError;
 use std::convert::{TryFrom, TryInto};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum ComponentError {
+    LayoutError(LayoutError),
     RenderError(RenderError),
+}
+
+impl From<LayoutError> for ComponentError {
+    fn from(error: LayoutError) -> Self {
+        ComponentError::LayoutError(error)
+    }
 }
 
 impl From<RenderError> for ComponentError {
@@ -16,6 +25,7 @@ impl From<RenderError> for ComponentError {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ComponentDefinition {
+    Layout(LayoutDefinition),
     Rendering(RenderDefinition),
 }
 
@@ -24,6 +34,9 @@ impl TryFrom<ComponentDefinition> for GenerationComponent {
 
     fn try_from(definition: ComponentDefinition) -> Result<Self, Self::Error> {
         match definition {
+            ComponentDefinition::Layout(definition) => {
+                Ok(GenerationComponent::Layout(definition.try_into()?))
+            }
             ComponentDefinition::Rendering(definition) => {
                 Ok(GenerationComponent::Rendering(definition.try_into()?))
             }
@@ -34,7 +47,7 @@ impl TryFrom<ComponentDefinition> for GenerationComponent {
 impl From<&GenerationComponent> for ComponentDefinition {
     fn from(component: &GenerationComponent) -> Self {
         match component {
-            GenerationComponent::Layout(_) => unimplemented!(),
+            GenerationComponent::Layout(layout) => ComponentDefinition::Layout(layout.into()),
             GenerationComponent::Rendering(render) => ComponentDefinition::Rendering(render.into()),
         }
     }
@@ -47,11 +60,25 @@ mod tests {
     use crate::math::color::RED;
     use std::convert::TryInto;
 
+    const SHAPE: ShapeDefinition = ShapeDefinition::Circle(42);
+    const RENDERING: RenderDefinition = RenderDefinition::Shape {
+        shape: SHAPE,
+        color: RED,
+    };
+
+    #[test]
+    fn test_convert_layout() {
+        let layout = LayoutDefinition::Square {
+            size: 10,
+            component: Box::new(ComponentDefinition::Rendering(RENDERING)),
+        };
+
+        assert_convert(ComponentDefinition::Layout(layout));
+    }
+
     #[test]
     fn test_convert_rendering() {
-        let shape = ShapeDefinition::Circle(42);
-        let rendering = RenderDefinition::Shape { shape, color: RED };
-        assert_convert(ComponentDefinition::Rendering(rendering));
+        assert_convert(ComponentDefinition::Rendering(RENDERING));
     }
 
     fn assert_convert(definition: ComponentDefinition) {
