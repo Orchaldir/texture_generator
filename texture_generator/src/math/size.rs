@@ -1,4 +1,5 @@
 use crate::math::point::Point;
+use serde::{Deserialize, Serialize};
 
 #[svgbobdoc::transform]
 /// Defines the size of something (e.g. a texture) in 2 dimensions.
@@ -22,7 +23,7 @@ use crate::math::point::Point;
 ///
 /// A size with width 2 & height 3.
 /// The numbers are indices of each cell.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Size {
     width: u32,
     height: u32,

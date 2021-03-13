@@ -1,9 +1,11 @@
-use crate::generation::component::GenerationComponent;
-use crate::generation::RuntimeData;
+use crate::generation::component::Component;
+use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
+use crate::utils::error::GenerationError;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+/// Generates a layout,
 pub enum LayoutComponent {
     /// A grid of squares that have the same size.
     ///
@@ -22,23 +24,35 @@ pub enum LayoutComponent {
     /// y-axis
     /// ```
     Square {
+        name: String,
         size: u32,
-        component: Box<GenerationComponent>,
+        component: Component,
     },
 }
 
 impl LayoutComponent {
-    pub fn new_square(size: u32, component: GenerationComponent) -> LayoutComponent {
-        LayoutComponent::Square {
-            size,
-            component: Box::new(component),
+    pub fn new_square<S: Into<String>>(
+        name: S,
+        size: u32,
+        component: Component,
+    ) -> Result<LayoutComponent, GenerationError> {
+        if size < 1 {
+            return Err(GenerationError::value_too_small(name, "size", size));
         }
+
+        Ok(LayoutComponent::Square {
+            name: name.into(),
+            size,
+            component,
+        })
     }
 
     /// Generates the layout in the area defined by the [`AABB`].
-    pub fn render(&self, data: &mut dyn RuntimeData, aabb: &AABB) {
+    pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
-            LayoutComponent::Square { size, component } => {
+            LayoutComponent::Square {
+                size, component, ..
+            } => {
                 let mut point = aabb.start();
                 let square_size = Size::new(*size, *size);
                 let end = aabb.end() - square_size;
@@ -50,7 +64,7 @@ impl LayoutComponent {
                     while point.x <= end.x {
                         let square_aabb = AABB::new(point, square_size);
 
-                        component.render(data, &square_aabb);
+                        component.generate(data, &square_aabb);
 
                         point.x += step;
                     }
@@ -65,8 +79,8 @@ impl LayoutComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::rendering::RenderComponent;
-    use crate::generation::TestData;
+    use crate::generation::data::TestData;
+    use crate::generation::rendering::RenderingComponent;
     use crate::math::color::{RED, WHITE};
     use crate::math::shape::Shape;
     use crate::math::size::Size;
@@ -78,12 +92,12 @@ mod tests {
 
         let mut data = TestData::new(size, WHITE);
 
-        let rectangle = Shape::new_rectangle(2, 2);
-        let renderer = RenderComponent::new_shape(rectangle, RED);
-        let component = GenerationComponent::Rendering(renderer);
-        let layout = LayoutComponent::new_square(4, component);
+        let rectangle = Shape::new_rectangle(2, 2).unwrap();
+        let renderer = RenderingComponent::new_shape("tile", rectangle, RED);
+        let component = Component::Rendering(Box::new(renderer));
+        let layout = LayoutComponent::new_square("test", 4, component).unwrap();
 
-        layout.render(&mut data, &aabb);
+        layout.generate(&mut data, &aabb);
 
         #[rustfmt::skip]
         let expected_colors = vec![

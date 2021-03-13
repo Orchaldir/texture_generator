@@ -1,23 +1,32 @@
-use crate::generation::RuntimeData;
+use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::shape::Shape;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum RenderComponent {
-    /// Renders a [`Shape`] at the center of the [`AABB`].
-    Shape { shape: Shape, color: Color },
+#[derive(Clone, Debug, Eq, PartialEq)]
+/// Renders the texture.
+pub enum RenderingComponent {
+    /// Renders a [`Shape`].
+    Shape {
+        name: String,
+        shape: Shape,
+        color: Color,
+    },
 }
 
-impl RenderComponent {
-    pub fn new_shape(shape: Shape, color: Color) -> RenderComponent {
-        RenderComponent::Shape { shape, color }
+impl RenderingComponent {
+    pub fn new_shape<S: Into<String>>(name: S, shape: Shape, color: Color) -> RenderingComponent {
+        RenderingComponent::Shape {
+            name: name.into(),
+            shape,
+            color,
+        }
     }
 
-    /// Renders the component in the area defined by the [`AABB`].
-    pub fn render(&self, data: &mut dyn RuntimeData, aabb: &AABB) {
+    /// Renders the texture in the area defined by the [`AABB`].
+    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
-            RenderComponent::Shape { shape, color } => {
+            RenderingComponent::Shape { shape, color, .. } => {
                 let mut point = aabb.start();
                 let center = aabb.center();
 
@@ -42,7 +51,7 @@ impl RenderComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::TestData;
+    use crate::generation::data::TestData;
     use crate::math::color::{RED, WHITE};
     use crate::math::point::Point;
     use crate::math::size::Size;
@@ -52,11 +61,11 @@ mod tests {
         let size = Size::new(4, 6);
         let data_size = Size::new(5, 8);
         let start = Point::new(1, 2);
-        let rectangle = Shape::new_rectangle(2, 4);
+        let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let aabb = AABB::new(start, size);
 
         let mut data = TestData::new(data_size, WHITE);
-        let renderer = RenderComponent::new_shape(rectangle, RED);
+        let renderer = RenderingComponent::new_shape("test", rectangle, RED);
 
         renderer.render(&mut data, &aabb);
 

@@ -1,78 +1,80 @@
+use crate::generation::component::Component;
+use crate::generation::data::RuntimeData;
+use crate::math::aabb::AABB;
 use crate::math::color::Color;
-use crate::math::point::Point;
 use crate::math::size::Size;
 
 pub mod component;
+pub mod data;
 pub mod layout;
 pub mod rendering;
 
-pub trait RuntimeData {
-    /// Set the [`Color`] at the [`Point`].
-    fn set(&mut self, point: &Point, color: &Color);
-
-    /// Get all the r, g & b values.
-    fn get_color_data(&self) -> &[u8];
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TextureGenerator {
+    pub name: String,
+    pub background: Color,
+    pub component: Component,
 }
 
-pub struct RuntimeDataImpl {
-    size: Size,
-    colors: Vec<u8>,
-}
-
-impl RuntimeDataImpl {
-    pub fn new(size: Size, default: Color) -> RuntimeDataImpl {
-        let n = size.get_number_of_cells();
-        let mut colors = Vec::with_capacity(n * 3);
-
-        for _ in 0..n {
-            colors.push(default.r());
-            colors.push(default.g());
-            colors.push(default.b());
+impl TextureGenerator {
+    pub fn new<S: Into<String>>(
+        name: S,
+        background: Color,
+        component: Component,
+    ) -> TextureGenerator {
+        TextureGenerator {
+            name: name.into(),
+            background,
+            component,
         }
+    }
 
-        RuntimeDataImpl { size, colors }
+    /// Generates the texture with a specific size.
+    pub fn generate(&self, width: u32, height: u32) -> RuntimeData {
+        let size = Size::new(width, height);
+        let aabb = AABB::with_size(size);
+        let mut data = RuntimeData::new(size, self.background);
+
+        self.component.generate(&mut data, &aabb);
+
+        data
     }
 }
 
-impl RuntimeData for RuntimeDataImpl {
-    fn set(&mut self, point: &Point, color: &Color) {
-        let index = self.size.to_index_risky(point) * 3;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::generation::data::Data;
+    use crate::generation::rendering::RenderingComponent;
+    use crate::math::color::{GREEN, RED};
+    use crate::math::shape::Shape;
 
-        self.colors[index] = color.r();
-        self.colors[index + 1] = color.g();
-        self.colors[index + 2] = color.b();
-    }
+    #[test]
+    fn test_generate() {
+        let rectangle = Shape::new_rectangle(2, 4).unwrap();
+        let rendering = RenderingComponent::new_shape("test", rectangle, RED);
+        let component = Component::Rendering(Box::new(rendering));
+        let generator = TextureGenerator::new("test", GREEN, component);
 
-    fn get_color_data(&self) -> &[u8] {
-        &self.colors
-    }
-}
+        let data = generator.generate(4, 6);
 
-pub struct TestData {
-    size: Size,
-    colors: Vec<Color>,
-}
+        #[rustfmt::skip]
+        let result = vec![
+            GREEN, GREEN, GREEN, GREEN,
+            GREEN,   RED,   RED, GREEN,
+            GREEN,   RED,   RED, GREEN,
+            GREEN,   RED,   RED, GREEN,
+            GREEN,   RED,   RED, GREEN,
+            GREEN, GREEN, GREEN, GREEN
+        ];
 
-impl TestData {
-    pub fn new(size: Size, default: Color) -> TestData {
-        let n = size.get_number_of_cells();
-        let colors = vec![default].into_iter().cycle().take(n).collect();
+        let color_data = data.get_color_data();
 
-        TestData { size, colors }
-    }
-
-    pub fn get_colors(&self) -> &[Color] {
-        &self.colors
-    }
-}
-
-impl RuntimeData for TestData {
-    fn set(&mut self, point: &Point, color: &Color) {
-        let index = self.size.to_index_risky(point);
-        self.colors[index] = *color;
-    }
-
-    fn get_color_data(&self) -> &[u8] {
-        unimplemented!()
+        for (index, color) in result.iter().enumerate() {
+            let data_index = index * 3;
+            assert_eq!(color_data[data_index], color.r());
+            assert_eq!(color_data[data_index + 1], color.g());
+            assert_eq!(color_data[data_index + 2], color.b());
+        }
     }
 }

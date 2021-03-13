@@ -1,4 +1,5 @@
 use crate::math::size::Size;
+use serde::{Deserialize, Serialize};
 use std::ops::{Add, Sub};
 
 #[svgbobdoc::transform]
@@ -19,7 +20,7 @@ use std::ops::{Add, Sub};
 ///   v
 /// y-axis
 /// ```
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Point {
     pub x: i32,
     pub y: i32,

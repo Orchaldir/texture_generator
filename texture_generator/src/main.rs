@@ -1,59 +1,61 @@
 #[macro_use]
 extern crate log;
 
+use anyhow::Result;
+use std::convert::TryInto;
+use std::path::PathBuf;
 use structopt::StructOpt;
-use texture_generator::generation::component::GenerationComponent;
-use texture_generator::generation::layout::LayoutComponent;
-use texture_generator::generation::rendering::RenderComponent;
-use texture_generator::generation::{RuntimeData, RuntimeDataImpl};
-use texture_generator::math::aabb::AABB;
-use texture_generator::math::color::{BLUE, WHITE};
-use texture_generator::math::shape::Shape;
-use texture_generator::math::size::Size;
+use texture_generator::definition::generation::TextureDefinition;
+use texture_generator::generation::data::Data;
+use texture_generator::generation::TextureGenerator;
 use texture_generator::utils::logging::init_logging;
 
 #[derive(StructOpt)]
 struct Cli {
+    /// The path of the texture definition.
+    #[structopt(parse(from_os_str))]
+    input: PathBuf,
+
     /// The path of the output image.
     #[structopt(parse(from_os_str))]
-    output: std::path::PathBuf,
+    output: PathBuf,
 
     /// The size of the output image.
     #[structopt(default_value = "1024")]
     size: u32,
 }
 
-fn main() {
+fn main() -> Result<()> {
     init_logging();
 
     let args = Cli::from_args();
 
-    info!("size={} output={:?}", args.size, args.output);
+    info!(
+        "size={} input{:?} output={:?}",
+        args.size, args.input, args.output
+    );
 
-    let size = Size::new(args.size, args.size);
-    let layout_size = args.size / 8;
-    let aabb = AABB::with_size(size);
-    let mut data = RuntimeDataImpl::new(size, WHITE);
+    info!("Load definition");
 
-    let circle = Shape::new_circle(layout_size / 3);
-    let renderer = RenderComponent::new_shape(circle, BLUE);
-    let component = GenerationComponent::Rendering(renderer);
-    let layout = LayoutComponent::new_square(layout_size, component);
+    let definition = TextureDefinition::read(&args.input)?;
+    let generator: TextureGenerator = definition.try_into()?;
 
     info!("Start rendering");
 
-    layout.render(&mut data, &aabb);
+    let data = generator.generate(args.size, args.size);
 
     info!("Start saving");
 
     image::save_buffer(
         &args.output,
         data.get_color_data(),
-        size.width(),
-        size.height(),
+        data.get_size().width(),
+        data.get_size().height(),
         image::ColorType::Rgb8,
     )
     .unwrap();
 
     info!("Finished");
+
+    Ok(())
 }
