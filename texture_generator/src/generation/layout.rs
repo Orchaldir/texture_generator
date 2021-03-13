@@ -105,7 +105,7 @@ mod tests {
         let mut data = TestData::new(size, WHITE);
 
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
-        let renderer = RenderingComponent::new_shape(rectangle, RED);
+        let renderer = RenderingComponent::new_shape("tile", rectangle, RED);
         let component = Component::Rendering(Box::new(renderer));
         let layout = LayoutComponent::new_square("test", 4, component).unwrap();
 

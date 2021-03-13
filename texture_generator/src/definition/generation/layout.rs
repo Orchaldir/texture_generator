@@ -52,7 +52,11 @@ mod tests {
     #[test]
     fn test_convert_square() {
         let shape = ShapeDefinition::Circle(42);
-        let rendering = Box::new(RenderingDefinition::Shape { shape, color: RED });
+        let rendering = Box::new(RenderingDefinition::Shape {
+            name: "brick".to_string(),
+            shape,
+            color: RED,
+        });
         let component = ComponentDefinition::Rendering(rendering);
 
         assert_convert(LayoutDefinition::Square {

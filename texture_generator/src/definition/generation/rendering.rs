@@ -4,9 +4,10 @@ use crate::math::color::Color;
 use crate::math::shape::Shape;
 use std::convert::{TryFrom, TryInto};
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RenderingDefinition {
     Shape {
+        name: String,
         shape: ShapeDefinition,
         color: Color,
     },
@@ -17,9 +18,9 @@ impl TryFrom<RenderingDefinition> for RenderingComponent {
 
     fn try_from(definition: RenderingDefinition) -> Result<Self, Self::Error> {
         match definition {
-            RenderingDefinition::Shape { shape, color } => {
+            RenderingDefinition::Shape { name, shape, color } => {
                 let shape: Shape = shape.try_into()?;
-                Ok(RenderingComponent::Shape { shape, color })
+                Ok(RenderingComponent::Shape { name, shape, color })
             }
         }
     }
@@ -28,7 +29,8 @@ impl TryFrom<RenderingDefinition> for RenderingComponent {
 impl From<&RenderingComponent> for RenderingDefinition {
     fn from(component: &RenderingComponent) -> Self {
         match component {
-            RenderingComponent::Shape { shape, color } => RenderingDefinition::Shape {
+            RenderingComponent::Shape { name, shape, color } => RenderingDefinition::Shape {
+                name: name.clone(),
                 shape: shape.into(),
                 color: *color,
             },
@@ -47,13 +49,21 @@ mod tests {
     #[test]
     fn test_convert_shape() {
         let shape = ShapeDefinition::Circle(42);
-        assert_convert(RenderingDefinition::Shape { shape, color: RED });
+        assert_convert(RenderingDefinition::Shape {
+            name: "circle".to_string(),
+            shape,
+            color: RED,
+        });
     }
 
     #[test]
     fn test_convert_invalid_shape() {
         let shape = ShapeDefinition::Circle(0);
-        let definition = RenderingDefinition::Shape { shape, color: RED };
+        let definition = RenderingDefinition::Shape {
+            name: "brick".to_string(),
+            shape,
+            color: RED,
+        };
         let shape_error = ShapeError::RadiusTooSmall(0);
         is_error(definition, RenderingError::ShapeError(shape_error))
     }

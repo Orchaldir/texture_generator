@@ -14,22 +14,30 @@ impl From<ShapeError> for RenderingError {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 /// Renders the texture.
 pub enum RenderingComponent {
     /// Renders a [`Shape`].
-    Shape { shape: Shape, color: Color },
+    Shape {
+        name: String,
+        shape: Shape,
+        color: Color,
+    },
 }
 
 impl RenderingComponent {
-    pub fn new_shape(shape: Shape, color: Color) -> RenderingComponent {
-        RenderingComponent::Shape { shape, color }
+    pub fn new_shape<S: Into<String>>(name: S, shape: Shape, color: Color) -> RenderingComponent {
+        RenderingComponent::Shape {
+            name: name.into(),
+            shape,
+            color,
+        }
     }
 
     /// Renders the texture in the area defined by the [`AABB`].
     pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
-            RenderingComponent::Shape { shape, color } => {
+            RenderingComponent::Shape { shape, color, .. } => {
                 let mut point = aabb.start();
                 let center = aabb.center();
 
@@ -68,7 +76,7 @@ mod tests {
         let aabb = AABB::new(start, size);
 
         let mut data = TestData::new(data_size, WHITE);
-        let renderer = RenderingComponent::new_shape(rectangle, RED);
+        let renderer = RenderingComponent::new_shape("test", rectangle, RED);
 
         renderer.render(&mut data, &aabb);
 

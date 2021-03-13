@@ -67,17 +67,18 @@ mod tests {
     use std::convert::TryInto;
 
     const SHAPE: ShapeDefinition = ShapeDefinition::Circle(42);
-    const RENDERING: RenderingDefinition = RenderingDefinition::Shape {
-        shape: SHAPE,
-        color: RED,
-    };
 
     #[test]
     fn test_convert_layout() {
+        let rendering = RenderingDefinition::Shape {
+            name: "brick".to_string(),
+            shape: SHAPE,
+            color: RED,
+        };
         let layout = LayoutDefinition::Square {
             name: "test".to_string(),
             size: 10,
-            component: ComponentDefinition::Rendering(Box::new(RENDERING)),
+            component: ComponentDefinition::Rendering(Box::new(rendering)),
         };
 
         assert_convert(ComponentDefinition::Layout(Box::new(layout)));
@@ -85,7 +86,12 @@ mod tests {
 
     #[test]
     fn test_convert_rendering() {
-        assert_convert(ComponentDefinition::Rendering(Box::new(RENDERING)));
+        let rendering = RenderingDefinition::Shape {
+            name: "brick".to_string(),
+            shape: SHAPE,
+            color: RED,
+        };
+        assert_convert(ComponentDefinition::Rendering(Box::new(rendering)));
     }
 
     fn assert_convert(definition: ComponentDefinition) {
