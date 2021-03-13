@@ -1,9 +1,10 @@
 use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::layout::LayoutComponent;
 use crate::utils::error::GenerationError;
+use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum LayoutDefinition {
     Square {
         name: String,

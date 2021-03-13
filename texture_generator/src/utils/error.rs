@@ -1,12 +1,16 @@
 use thiserror::Error;
 
-#[derive(Error, Debug, Eq, PartialEq)]
+#[derive(Error, Debug)]
 pub enum GenerationError {
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
     #[error("Component '{component:?}' has an invalid shape")]
     InvalidShape {
         component: String,
         error: ShapeError,
     },
+    #[error(transparent)]
+    SerdeError(#[from] serde_yaml::Error),
     #[error("Value '{name:?}' of component '{component:?}' is too small ({value})")]
     ValueTooSmall {
         component: String,

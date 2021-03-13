@@ -1,0 +1,17 @@
+---
+name: test
+component:
+  type: Layout
+  Square:
+    name: layout
+    size: 128
+    component:
+      type: Rendering
+      Shape:
+        name: circle
+        shape:
+          Circle: 42
+        color:
+          r: 0
+          g: 0
+          b: 255

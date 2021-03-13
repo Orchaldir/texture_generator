@@ -1,8 +1,9 @@
 use crate::math::shape::Shape;
 use crate::utils::error::ShapeError;
+use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ShapeDefinition {
     Circle(u32),
     Rectangle { width: u32, height: u32 },

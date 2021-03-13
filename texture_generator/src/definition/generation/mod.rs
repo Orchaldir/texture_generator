@@ -1,13 +1,17 @@
 use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::TextureGenerator;
 use crate::utils::error::GenerationError;
+use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
+use std::fs;
+use std::fs::File;
+use std::io::Write;
 
 pub mod component;
 pub mod layout;
 pub mod rendering;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
     name: String,
     component: ComponentDefinition,
@@ -19,6 +23,22 @@ impl TextureDefinition {
             name: name.into(),
             component,
         }
+    }
+
+    pub fn read(path: &str) -> Result<TextureDefinition, GenerationError> {
+        let string = fs::read_to_string(path)?;
+        let data: TextureDefinition = serde_yaml::from_str(&string)?;
+        Ok(data)
+    }
+
+    pub fn write(&self, path: &str) -> Result<(), GenerationError> {
+        let mut file = File::create(path)?;
+
+        let s = serde_yaml::to_string(self)?;
+
+        file.write_all(s.as_bytes())?;
+
+        Ok(())
     }
 }
 

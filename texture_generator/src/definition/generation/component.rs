@@ -2,9 +2,11 @@ use crate::definition::generation::layout::LayoutDefinition;
 use crate::definition::generation::rendering::RenderingDefinition;
 use crate::generation::component::Component;
 use crate::utils::error::GenerationError;
+use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub enum ComponentDefinition {
     Layout(Box<LayoutDefinition>),
     Rendering(Box<RenderingDefinition>),

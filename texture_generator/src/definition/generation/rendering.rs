@@ -2,9 +2,10 @@ use crate::definition::math::shape::ShapeDefinition;
 use crate::generation::rendering::RenderingComponent;
 use crate::math::color::Color;
 use crate::utils::error::GenerationError;
+use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum RenderingDefinition {
     Shape {
         name: String,
@@ -42,7 +43,6 @@ impl From<&RenderingComponent> for RenderingDefinition {
 mod tests {
     use super::*;
     use crate::math::color::RED;
-    use crate::utils::error::ShapeError;
     use std::convert::TryInto;
 
     #[test]
@@ -63,9 +63,7 @@ mod tests {
             shape,
             color: RED,
         };
-        let shape_error = ShapeError::RadiusTooSmall(0);
-        let error = GenerationError::invalid_shape("brick", shape_error);
-        is_error(definition, error)
+        is_error(definition)
     }
 
     fn assert_convert(definition: RenderingDefinition) {
@@ -75,10 +73,7 @@ mod tests {
         assert_eq!(result, definition)
     }
 
-    fn is_error(
-        data: impl TryInto<RenderingComponent, Error = GenerationError>,
-        error: GenerationError,
-    ) {
-        assert_eq!(data.try_into(), Err(error));
+    fn is_error(data: impl TryInto<RenderingComponent, Error = GenerationError>) {
+        assert!(data.try_into().is_err());
     }
 }
