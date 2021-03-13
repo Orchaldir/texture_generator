@@ -4,6 +4,9 @@ use crate::math::size::Size;
 
 /// A trait used to store the data during the generation of the texture.
 pub trait Data {
+    /// Get the [`Size`] of the textures.
+    fn get_size(&self) -> &Size;
+
     /// Set the [`Color`] at the [`Point`].
     fn set(&mut self, point: &Point, color: &Color);
 
@@ -33,6 +36,10 @@ impl RuntimeData {
 }
 
 impl Data for RuntimeData {
+    fn get_size(&self) -> &Size {
+        &self.size
+    }
+
     fn set(&mut self, point: &Point, color: &Color) {
         let index = self.size.to_index_risky(point) * 3;
 
@@ -66,6 +73,10 @@ impl TestData {
 }
 
 impl Data for TestData {
+    fn get_size(&self) -> &Size {
+        &self.size
+    }
+
     fn set(&mut self, point: &Point, color: &Color) {
         let index = self.size.to_index_risky(point);
         self.colors[index] = *color;

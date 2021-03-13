@@ -1,5 +1,9 @@
 ---
 name: test
+background:
+  r: 0
+  g: 255
+  b: 0
 component:
   type: Layout
   Square:

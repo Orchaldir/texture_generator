@@ -6,11 +6,8 @@ use std::convert::TryInto;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use texture_generator::definition::generation::TextureDefinition;
-use texture_generator::generation::data::{Data, RuntimeData};
+use texture_generator::generation::data::Data;
 use texture_generator::generation::TextureGenerator;
-use texture_generator::math::aabb::AABB;
-use texture_generator::math::color::WHITE;
-use texture_generator::math::size::Size;
 use texture_generator::utils::logging::init_logging;
 
 #[derive(StructOpt)]
@@ -38,10 +35,6 @@ fn main() -> Result<()> {
         args.size, args.input, args.output
     );
 
-    let size = Size::new(args.size, args.size);
-    let aabb = AABB::with_size(size);
-    let mut data = RuntimeData::new(size, WHITE);
-
     info!("Load definition");
 
     let definition = TextureDefinition::read(&args.input)?;
@@ -49,15 +42,15 @@ fn main() -> Result<()> {
 
     info!("Start rendering");
 
-    generator.component.generate(&mut data, &aabb);
+    let data = generator.generate(args.size, args.size);
 
     info!("Start saving");
 
     image::save_buffer(
         &args.output,
         data.get_color_data(),
-        size.width(),
-        size.height(),
+        data.get_size().width(),
+        data.get_size().height(),
         image::ColorType::Rgb8,
     )
     .unwrap();
