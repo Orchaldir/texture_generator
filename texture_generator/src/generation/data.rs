@@ -4,13 +4,13 @@ use crate::math::size::Size;
 
 /// A trait used to store the data during the generation of the texture.
 pub trait Data {
-    /// Get the [`Size`] of the textures.
+    /// Gets the [`Size`] of the textures.
     fn get_size(&self) -> &Size;
 
-    /// Set the [`Color`] at the [`Point`].
+    /// Sets the [`Color`] at the [`Point`].
     fn set(&mut self, point: &Point, color: &Color);
 
-    /// Get all the r, g & b values.
+    /// Gets all the r, g & b values.
     fn get_color_data(&self) -> &[u8];
 }
 

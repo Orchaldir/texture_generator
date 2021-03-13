@@ -4,6 +4,7 @@ use crate::generation::rendering::RenderingComponent;
 use crate::math::aabb::AABB;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+/// A wrapper for different types of components.
 pub enum Component {
     Layout(Box<LayoutComponent>),
     Rendering(Box<RenderingComponent>),

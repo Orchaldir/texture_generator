@@ -29,6 +29,7 @@ impl TextureGenerator {
         }
     }
 
+    /// Generates the texture with a specific size.
     pub fn generate(&self, width: u32, height: u32) -> RuntimeData {
         let size = Size::new(width, height);
         let aabb = AABB::with_size(size);
