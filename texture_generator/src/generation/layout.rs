@@ -35,22 +35,36 @@ pub enum LayoutComponent {
     ///   v
     /// y-axis
     /// ```
-    Square { size: u32, component: Component },
+    Square {
+        name: String,
+        size: u32,
+        component: Component,
+    },
 }
 
 impl LayoutComponent {
-    pub fn new_square(size: u32, component: Component) -> Result<LayoutComponent, LayoutError> {
+    pub fn new_square<S: Into<String>>(
+        name: S,
+        size: u32,
+        component: Component,
+    ) -> Result<LayoutComponent, LayoutError> {
         if size < 1 {
             return Err(LayoutError::SizeTooSmall(size));
         }
 
-        Ok(LayoutComponent::Square { size, component })
+        Ok(LayoutComponent::Square {
+            name: name.into(),
+            size,
+            component,
+        })
     }
 
     /// Generates the layout in the area defined by the [`AABB`].
     pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
-            LayoutComponent::Square { size, component } => {
+            LayoutComponent::Square {
+                size, component, ..
+            } => {
                 let mut point = aabb.start();
                 let square_size = Size::new(*size, *size);
                 let end = aabb.end() - square_size;
@@ -93,7 +107,7 @@ mod tests {
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
         let renderer = RenderingComponent::new_shape(rectangle, RED);
         let component = Component::Rendering(Box::new(renderer));
-        let layout = LayoutComponent::new_square(4, component).unwrap();
+        let layout = LayoutComponent::new_square("test", 4, component).unwrap();
 
         layout.generate(&mut data, &aabb);
 

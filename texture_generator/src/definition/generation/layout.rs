@@ -5,6 +5,7 @@ use std::convert::{TryFrom, TryInto};
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LayoutDefinition {
     Square {
+        name: String,
         size: u32,
         component: ComponentDefinition,
     },
@@ -15,9 +16,11 @@ impl TryFrom<LayoutDefinition> for LayoutComponent {
 
     fn try_from(definition: LayoutDefinition) -> Result<Self, Self::Error> {
         match definition {
-            LayoutDefinition::Square { size, component } => {
-                LayoutComponent::new_square(size, component.try_into()?)
-            }
+            LayoutDefinition::Square {
+                name,
+                size,
+                component,
+            } => LayoutComponent::new_square(name, size, component.try_into()?),
         }
     }
 }
@@ -25,7 +28,12 @@ impl TryFrom<LayoutDefinition> for LayoutComponent {
 impl From<&LayoutComponent> for LayoutDefinition {
     fn from(layout: &LayoutComponent) -> Self {
         match layout {
-            LayoutComponent::Square { size, component } => LayoutDefinition::Square {
+            LayoutComponent::Square {
+                name,
+                size,
+                component,
+            } => LayoutDefinition::Square {
+                name: name.clone(),
                 size: *size,
                 component: component.into(),
             },
@@ -46,7 +54,9 @@ mod tests {
         let shape = ShapeDefinition::Circle(42);
         let rendering = Box::new(RenderingDefinition::Shape { shape, color: RED });
         let component = ComponentDefinition::Rendering(rendering);
+
         assert_convert(LayoutDefinition::Square {
+            name: "test".to_string(),
             size: 10,
             component,
         });

@@ -75,6 +75,7 @@ mod tests {
     #[test]
     fn test_convert_layout() {
         let layout = LayoutDefinition::Square {
+            name: "test".to_string(),
             size: 10,
             component: ComponentDefinition::Rendering(Box::new(RENDERING)),
         };
