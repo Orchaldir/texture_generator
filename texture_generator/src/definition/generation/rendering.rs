@@ -1,7 +1,7 @@
 use crate::definition::math::shape::ShapeDefinition;
-use crate::generation::rendering::{RenderingComponent, RenderingError};
+use crate::generation::rendering::RenderingComponent;
 use crate::math::color::Color;
-use crate::math::shape::Shape;
+use crate::utils::error::GenerationError;
 use std::convert::{TryFrom, TryInto};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -14,14 +14,14 @@ pub enum RenderingDefinition {
 }
 
 impl TryFrom<RenderingDefinition> for RenderingComponent {
-    type Error = RenderingError;
+    type Error = GenerationError;
 
     fn try_from(definition: RenderingDefinition) -> Result<Self, Self::Error> {
         match definition {
-            RenderingDefinition::Shape { name, shape, color } => {
-                let shape: Shape = shape.try_into()?;
-                Ok(RenderingComponent::Shape { name, shape, color })
-            }
+            RenderingDefinition::Shape { name, shape, color } => match shape.try_into() {
+                Ok(shape) => Ok(RenderingComponent::Shape { name, shape, color }),
+                Err(error) => Err(GenerationError::invalid_shape(name, error)),
+            },
         }
     }
 }
@@ -41,9 +41,8 @@ impl From<&RenderingComponent> for RenderingDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::rendering::RenderingError;
     use crate::math::color::RED;
-    use crate::math::shape::ShapeError;
+    use crate::utils::error::ShapeError;
     use std::convert::TryInto;
 
     #[test]
@@ -65,7 +64,8 @@ mod tests {
             color: RED,
         };
         let shape_error = ShapeError::RadiusTooSmall(0);
-        is_error(definition, RenderingError::ShapeError(shape_error))
+        let error = GenerationError::invalid_shape("brick", shape_error);
+        is_error(definition, error)
     }
 
     fn assert_convert(definition: RenderingDefinition) {
@@ -76,8 +76,8 @@ mod tests {
     }
 
     fn is_error(
-        data: impl TryInto<RenderingComponent, Error = RenderingError>,
-        error: RenderingError,
+        data: impl TryInto<RenderingComponent, Error = GenerationError>,
+        error: GenerationError,
     ) {
         assert_eq!(data.try_into(), Err(error));
     }

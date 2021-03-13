@@ -1,11 +1,5 @@
 use crate::math::point::Point;
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum ShapeError {
-    RadiusTooSmall(u32),
-    WidthTooSmall(u32),
-    HeightTooSmall(u32),
-}
+use crate::utils::error::ShapeError;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Shape {

@@ -1,27 +1,8 @@
 use crate::definition::generation::layout::LayoutDefinition;
 use crate::definition::generation::rendering::RenderingDefinition;
 use crate::generation::component::Component;
-use crate::generation::layout::LayoutError;
-use crate::generation::rendering::RenderingError;
+use crate::utils::error::GenerationError;
 use std::convert::{TryFrom, TryInto};
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum ComponentError {
-    LayoutError(Box<LayoutError>),
-    RenderingError(Box<RenderingError>),
-}
-
-impl From<LayoutError> for ComponentError {
-    fn from(error: LayoutError) -> Self {
-        ComponentError::LayoutError(Box::new(error))
-    }
-}
-
-impl From<RenderingError> for ComponentError {
-    fn from(error: RenderingError) -> Self {
-        ComponentError::RenderingError(Box::new(error))
-    }
-}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ComponentDefinition {
@@ -30,7 +11,7 @@ pub enum ComponentDefinition {
 }
 
 impl TryFrom<ComponentDefinition> for Component {
-    type Error = ComponentError;
+    type Error = GenerationError;
 
     fn try_from(definition: ComponentDefinition) -> Result<Self, Self::Error> {
         match definition {

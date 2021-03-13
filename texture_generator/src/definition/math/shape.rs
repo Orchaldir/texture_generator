@@ -1,4 +1,5 @@
-use crate::math::shape::{Shape, ShapeError};
+use crate::math::shape::Shape;
+use crate::utils::error::ShapeError;
 use std::convert::TryFrom;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

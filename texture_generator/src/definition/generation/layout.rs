@@ -1,5 +1,6 @@
 use crate::definition::generation::component::ComponentDefinition;
-use crate::generation::layout::{LayoutComponent, LayoutError};
+use crate::generation::layout::LayoutComponent;
+use crate::utils::error::GenerationError;
 use std::convert::{TryFrom, TryInto};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -12,7 +13,7 @@ pub enum LayoutDefinition {
 }
 
 impl TryFrom<LayoutDefinition> for LayoutComponent {
-    type Error = LayoutError;
+    type Error = GenerationError;
 
     fn try_from(definition: LayoutDefinition) -> Result<Self, Self::Error> {
         match definition {
@@ -20,7 +21,10 @@ impl TryFrom<LayoutDefinition> for LayoutComponent {
                 name,
                 size,
                 component,
-            } => LayoutComponent::new_square(name, size, component.try_into()?),
+            } => match component.try_into() {
+                Ok(component) => LayoutComponent::new_square(name, size, component),
+                Err(error) => Err(error),
+            },
         }
     }
 }

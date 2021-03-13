@@ -1,20 +1,8 @@
-use crate::definition::generation::component::ComponentError;
 use crate::generation::component::Component;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum LayoutError {
-    ComponentError(ComponentError),
-    SizeTooSmall(u32),
-}
-
-impl From<ComponentError> for LayoutError {
-    fn from(error: ComponentError) -> Self {
-        LayoutError::ComponentError(error)
-    }
-}
+use crate::utils::error::GenerationError;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 /// Generates a layout,
@@ -47,9 +35,9 @@ impl LayoutComponent {
         name: S,
         size: u32,
         component: Component,
-    ) -> Result<LayoutComponent, LayoutError> {
+    ) -> Result<LayoutComponent, GenerationError> {
         if size < 1 {
-            return Err(LayoutError::SizeTooSmall(size));
+            return Err(GenerationError::value_too_small(name, "size", size));
         }
 
         Ok(LayoutComponent::Square {
