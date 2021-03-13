@@ -6,7 +6,7 @@ use std::convert::{TryFrom, TryInto};
 pub enum LayoutDefinition {
     Square {
         size: u32,
-        component: Box<ComponentDefinition>,
+        component: ComponentDefinition,
     },
 }
 
@@ -16,7 +16,7 @@ impl TryFrom<LayoutDefinition> for LayoutComponent {
     fn try_from(definition: LayoutDefinition) -> Result<Self, Self::Error> {
         match definition {
             LayoutDefinition::Square { size, component } => {
-                LayoutComponent::new_square(size, (*component).try_into()?)
+                LayoutComponent::new_square(size, component.try_into()?)
             }
         }
     }
@@ -25,13 +25,10 @@ impl TryFrom<LayoutDefinition> for LayoutComponent {
 impl From<&LayoutComponent> for LayoutDefinition {
     fn from(layout: &LayoutComponent) -> Self {
         match layout {
-            LayoutComponent::Square { size, component } => {
-                let definition: ComponentDefinition = (&(**component)).into();
-                LayoutDefinition::Square {
-                    size: *size,
-                    component: Box::new(definition),
-                }
-            }
+            LayoutComponent::Square { size, component } => LayoutDefinition::Square {
+                size: *size,
+                component: component.into(),
+            },
         }
     }
 }
@@ -47,8 +44,8 @@ mod tests {
     #[test]
     fn test_convert_square() {
         let shape = ShapeDefinition::Circle(42);
-        let rendering = RenderingDefinition::Shape { shape, color: RED };
-        let component = Box::new(ComponentDefinition::Rendering(rendering));
+        let rendering = Box::new(RenderingDefinition::Shape { shape, color: RED });
+        let component = ComponentDefinition::Rendering(rendering);
         assert_convert(LayoutDefinition::Square {
             size: 10,
             component,

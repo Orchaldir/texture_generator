@@ -65,7 +65,10 @@ mod tests {
         assert_eq!(result, definition)
     }
 
-    fn is_error(data: impl TryInto<RenderingComponent, Error =RenderingError>, error: RenderingError) {
+    fn is_error(
+        data: impl TryInto<RenderingComponent, Error = RenderingError>,
+        error: RenderingError,
+    ) {
         assert_eq!(data.try_into(), Err(error));
     }
 }

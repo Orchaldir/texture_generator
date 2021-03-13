@@ -6,13 +6,13 @@ use crate::math::size::Size;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum LayoutError {
-    ComponentError(Box<ComponentError>),
+    ComponentError(ComponentError),
     SizeTooSmall(u32),
 }
 
 impl From<ComponentError> for LayoutError {
     fn from(error: ComponentError) -> Self {
-        LayoutError::ComponentError(Box::new(error))
+        LayoutError::ComponentError(error)
     }
 }
 
@@ -35,23 +35,11 @@ pub enum LayoutComponent {
     ///   v
     /// y-axis
     /// ```
-    Square {
-        size: u32,
-        component: Box<Component>,
-    },
+    Square { size: u32, component: Component },
 }
 
 impl LayoutComponent {
-    pub fn new_square(
-        size: u32,
-        component: Component,
-    ) -> Result<LayoutComponent, LayoutError> {
-        LayoutComponent::new_square_box(size, Box::new(component))
-    }
-    pub fn new_square_box(
-        size: u32,
-        component: Box<Component>,
-    ) -> Result<LayoutComponent, LayoutError> {
+    pub fn new_square(size: u32, component: Component) -> Result<LayoutComponent, LayoutError> {
         if size < 1 {
             return Err(LayoutError::SizeTooSmall(size));
         }
@@ -104,7 +92,7 @@ mod tests {
 
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
         let renderer = RenderingComponent::new_shape(rectangle, RED);
-        let component = Component::Rendering(renderer);
+        let component = Component::Rendering(Box::new(renderer));
         let layout = LayoutComponent::new_square(4, component).unwrap();
 
         layout.generate(&mut data, &aabb);

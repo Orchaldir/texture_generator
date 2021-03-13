@@ -7,26 +7,26 @@ use std::convert::{TryFrom, TryInto};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum ComponentError {
-    LayoutError(LayoutError),
-    RenderingError(RenderingError),
+    LayoutError(Box<LayoutError>),
+    RenderingError(Box<RenderingError>),
 }
 
 impl From<LayoutError> for ComponentError {
     fn from(error: LayoutError) -> Self {
-        ComponentError::LayoutError(error)
+        ComponentError::LayoutError(Box::new(error))
     }
 }
 
 impl From<RenderingError> for ComponentError {
     fn from(error: RenderingError) -> Self {
-        ComponentError::RenderingError(error)
+        ComponentError::RenderingError(Box::new(error))
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ComponentDefinition {
-    Layout(LayoutDefinition),
-    Rendering(RenderingDefinition),
+    Layout(Box<LayoutDefinition>),
+    Rendering(Box<RenderingDefinition>),
 }
 
 impl TryFrom<ComponentDefinition> for Component {
@@ -35,10 +35,10 @@ impl TryFrom<ComponentDefinition> for Component {
     fn try_from(definition: ComponentDefinition) -> Result<Self, Self::Error> {
         match definition {
             ComponentDefinition::Layout(definition) => {
-                Ok(Component::Layout(definition.try_into()?))
+                Ok(Component::Layout(Box::new((*definition).try_into()?)))
             }
             ComponentDefinition::Rendering(definition) => {
-                Ok(Component::Rendering(definition.try_into()?))
+                Ok(Component::Rendering(Box::new((*definition).try_into()?)))
             }
         }
     }
@@ -47,8 +47,14 @@ impl TryFrom<ComponentDefinition> for Component {
 impl From<&Component> for ComponentDefinition {
     fn from(component: &Component) -> Self {
         match component {
-            Component::Layout(layout) => ComponentDefinition::Layout(layout.into()),
-            Component::Rendering(render) => ComponentDefinition::Rendering(render.into()),
+            Component::Layout(component) => {
+                let definition: LayoutDefinition = (&(**component)).into();
+                ComponentDefinition::Layout(Box::new(definition))
+            }
+            Component::Rendering(component) => {
+                let definition: RenderingDefinition = (&(**component)).into();
+                ComponentDefinition::Rendering(Box::new(definition))
+            }
         }
     }
 }
@@ -70,15 +76,15 @@ mod tests {
     fn test_convert_layout() {
         let layout = LayoutDefinition::Square {
             size: 10,
-            component: Box::new(ComponentDefinition::Rendering(RENDERING)),
+            component: ComponentDefinition::Rendering(Box::new(RENDERING)),
         };
 
-        assert_convert(ComponentDefinition::Layout(layout));
+        assert_convert(ComponentDefinition::Layout(Box::new(layout)));
     }
 
     #[test]
     fn test_convert_rendering() {
-        assert_convert(ComponentDefinition::Rendering(RENDERING));
+        assert_convert(ComponentDefinition::Rendering(Box::new(RENDERING)));
     }
 
     fn assert_convert(definition: ComponentDefinition) {

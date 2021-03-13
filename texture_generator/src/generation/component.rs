@@ -5,8 +5,8 @@ use crate::math::aabb::AABB;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Component {
-    Layout(LayoutComponent),
-    Rendering(RenderingComponent),
+    Layout(Box<LayoutComponent>),
+    Rendering(Box<RenderingComponent>),
 }
 
 impl Component {

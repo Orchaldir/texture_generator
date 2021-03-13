@@ -36,8 +36,8 @@ fn main() {
     let mut data = RuntimeData::new(size, WHITE);
 
     let circle = Shape::new_circle(layout_size / 3).unwrap();
-    let renderer = RenderingComponent::new_shape(circle, BLUE);
-    let component = Component::Rendering(renderer);
+    let rendering = RenderingComponent::new_shape(circle, BLUE);
+    let component = Component::Rendering(Box::new(rendering));
     let layout = LayoutComponent::new_square(layout_size, component).unwrap();
 
     info!("Start rendering");
