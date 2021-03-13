@@ -3,6 +3,7 @@ extern crate log;
 
 use anyhow::Result;
 use std::convert::TryInto;
+use std::path::PathBuf;
 use structopt::StructOpt;
 use texture_generator::definition::generation::TextureDefinition;
 use texture_generator::generation::data::{Data, RuntimeData};
@@ -14,9 +15,13 @@ use texture_generator::utils::logging::init_logging;
 
 #[derive(StructOpt)]
 struct Cli {
+    /// The path of the texture definition.
+    #[structopt(parse(from_os_str))]
+    input: PathBuf,
+
     /// The path of the output image.
     #[structopt(parse(from_os_str))]
-    output: std::path::PathBuf,
+    output: PathBuf,
 
     /// The size of the output image.
     #[structopt(default_value = "1024")]
@@ -28,7 +33,10 @@ fn main() -> Result<()> {
 
     let args = Cli::from_args();
 
-    info!("size={} output={:?}", args.size, args.output);
+    info!(
+        "size={} input{:?} output={:?}",
+        args.size, args.input, args.output
+    );
 
     let size = Size::new(args.size, args.size);
     let aabb = AABB::with_size(size);
@@ -36,7 +44,7 @@ fn main() -> Result<()> {
 
     info!("Load definition");
 
-    let definition = TextureDefinition::read("resources/textures/test.yaml")?;
+    let definition = TextureDefinition::read(&args.input)?;
     let generator: TextureGenerator = definition.try_into()?;
 
     info!("Start rendering");

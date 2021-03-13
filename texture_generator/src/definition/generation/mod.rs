@@ -7,6 +7,7 @@ use std::convert::{TryFrom, TryInto};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+use std::path::PathBuf;
 
 pub mod component;
 pub mod layout;
@@ -26,10 +27,10 @@ impl TextureDefinition {
         }
     }
 
-    pub fn read(path: &str) -> Result<TextureDefinition> {
-        let string = fs::read_to_string(path).context(format!("Unable to read '{}'", path))?;
+    pub fn read(path: &PathBuf) -> Result<TextureDefinition> {
+        let string = fs::read_to_string(path).context(format!("Unable to read {:?}", path))?;
         let data: TextureDefinition =
-            serde_yaml::from_str(&string).context(format!("Unable to parse '{}'", path))?;
+            serde_yaml::from_str(&string).context(format!("Unable to parse {:?}", path))?;
         Ok(data)
     }
 
