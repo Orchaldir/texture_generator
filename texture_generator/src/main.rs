@@ -11,6 +11,7 @@ use texture_generator::generation::TextureGenerator;
 use texture_generator::utils::logging::init_logging;
 
 #[derive(StructOpt)]
+/// The arguments of the application.
 struct Cli {
     /// The path of the texture definition.
     #[structopt(parse(from_os_str))]

@@ -1,6 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+/// An error type for [`TextureGenerator`] and its components.
 pub enum GenerationError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
@@ -41,6 +42,7 @@ impl GenerationError {
 }
 
 #[derive(Error, Debug, Eq, PartialEq)]
+/// An error type for [`Shape`].
 pub enum ShapeError {
     #[error("Radius {0} is too small")]
     RadiusTooSmall(u32),

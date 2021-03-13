@@ -2,6 +2,7 @@ use crate::math::point::Point;
 use crate::utils::error::ShapeError;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+/// Different shapes that are centered around (0,0).
 pub enum Shape {
     Circle(u32),
     Rectangle { half_x: i32, half_y: i32 },
