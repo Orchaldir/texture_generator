@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate log;
 
+use anyhow::Result;
 use std::convert::TryInto;
 use structopt::StructOpt;
 use texture_generator::definition::generation::TextureDefinition;
@@ -22,7 +23,7 @@ struct Cli {
     size: u32,
 }
 
-fn main() {
+fn main() -> Result<()> {
     init_logging();
 
     let args = Cli::from_args();
@@ -35,8 +36,8 @@ fn main() {
 
     info!("Load definition");
 
-    let definition = TextureDefinition::read("resources/textures/test.yaml").unwrap();
-    let generator: TextureGenerator = definition.try_into().unwrap();
+    let definition = TextureDefinition::read("resources/textures/test.yaml")?;
+    let generator: TextureGenerator = definition.try_into()?;
 
     info!("Start rendering");
 
@@ -54,4 +55,6 @@ fn main() {
     .unwrap();
 
     info!("Finished");
+
+    Ok(())
 }

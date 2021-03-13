@@ -4,14 +4,14 @@ use thiserror::Error;
 pub enum GenerationError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
-    #[error("Component '{component:?}' has an invalid shape")]
+    #[error("Component {component:?} has an invalid shape")]
     InvalidShape {
         component: String,
-        error: ShapeError,
+        source: ShapeError,
     },
     #[error(transparent)]
     SerdeError(#[from] serde_yaml::Error),
-    #[error("Value '{name:?}' of component '{component:?}' is too small ({value})")]
+    #[error("Value {name:?} of component {component:?} is too small ({value})")]
     ValueTooSmall {
         component: String,
         name: String,
@@ -20,10 +20,10 @@ pub enum GenerationError {
 }
 
 impl GenerationError {
-    pub fn invalid_shape<S: Into<String>>(component: S, error: ShapeError) -> GenerationError {
+    pub fn invalid_shape<S: Into<String>>(component: S, source: ShapeError) -> GenerationError {
         GenerationError::InvalidShape {
             component: component.into(),
-            error,
+            source,
         }
     }
 

@@ -1,6 +1,7 @@
 use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::TextureGenerator;
 use crate::utils::error::GenerationError;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 use std::fs;
@@ -25,9 +26,10 @@ impl TextureDefinition {
         }
     }
 
-    pub fn read(path: &str) -> Result<TextureDefinition, GenerationError> {
-        let string = fs::read_to_string(path)?;
-        let data: TextureDefinition = serde_yaml::from_str(&string)?;
+    pub fn read(path: &str) -> Result<TextureDefinition> {
+        let string = fs::read_to_string(path).context(format!("Unable to read '{}'", path))?;
+        let data: TextureDefinition =
+            serde_yaml::from_str(&string).context(format!("Unable to parse '{}'", path))?;
         Ok(data)
     }
 
