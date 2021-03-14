@@ -5,6 +5,8 @@ use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 
+pub mod depth;
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum RenderingDefinition {
     Shape {
