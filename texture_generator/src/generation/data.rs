@@ -7,17 +7,21 @@ pub trait Data {
     /// Gets the [`Size`] of the textures.
     fn get_size(&self) -> &Size;
 
-    /// Sets the [`Color`] at the [`Point`].
-    fn set(&mut self, point: &Point, color: &Color);
+    /// Sets the [`Color`] & depth at the [`Point`].
+    fn set(&mut self, point: &Point, color: &Color, depth: u8);
 
     /// Gets all the r, g & b values.
     fn get_color_data(&self) -> &[u8];
+
+    /// Gets all the depth values.
+    fn get_depth_data(&self) -> &[u8];
 }
 
 /// An implementation of [`Data`] for the actual usage.
 pub struct RuntimeData {
     size: Size,
     colors: Vec<u8>,
+    depth: Vec<u8>,
 }
 
 impl RuntimeData {
@@ -31,7 +35,13 @@ impl RuntimeData {
             colors.push(default.b());
         }
 
-        RuntimeData { size, colors }
+        let depth = vec![0; n];
+
+        RuntimeData {
+            size,
+            colors,
+            depth,
+        }
     }
 }
 
@@ -40,8 +50,12 @@ impl Data for RuntimeData {
         &self.size
     }
 
-    fn set(&mut self, point: &Point, color: &Color) {
-        let index = self.size.to_index_risky(point) * 3;
+    fn set(&mut self, point: &Point, color: &Color, depth: u8) {
+        let index = self.size.to_index_risky(point);
+
+        self.depth[index] = depth;
+
+        let index = index * 3;
 
         self.colors[index] = color.r();
         self.colors[index + 1] = color.g();
@@ -51,20 +65,30 @@ impl Data for RuntimeData {
     fn get_color_data(&self) -> &[u8] {
         &self.colors
     }
+
+    fn get_depth_data(&self) -> &[u8] {
+        &self.depth
+    }
 }
 
 /// An implementation of [`Data`] for testing.
 pub struct TestData {
     size: Size,
     colors: Vec<Color>,
+    depth: Vec<u8>,
 }
 
 impl TestData {
     pub fn new(size: Size, default: Color) -> TestData {
         let n = size.get_number_of_cells();
-        let colors = vec![default].into_iter().cycle().take(n).collect();
+        let colors = vec![default; n];
+        let depth = vec![0; n];
 
-        TestData { size, colors }
+        TestData {
+            size,
+            colors,
+            depth,
+        }
     }
 
     pub fn get_colors(&self) -> &[Color] {
@@ -77,12 +101,17 @@ impl Data for TestData {
         &self.size
     }
 
-    fn set(&mut self, point: &Point, color: &Color) {
+    fn set(&mut self, point: &Point, color: &Color, depth: u8) {
         let index = self.size.to_index_risky(point);
         self.colors[index] = *color;
+        self.depth[index] = depth;
     }
 
     fn get_color_data(&self) -> &[u8] {
         unimplemented!()
+    }
+
+    fn get_depth_data(&self) -> &[u8] {
+        &self.depth
     }
 }

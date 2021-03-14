@@ -35,7 +35,7 @@ impl RenderingComponent {
 
                     while point.x < aabb.end().x {
                         if shape.is_inside(&center, &point) {
-                            data.set(&point, color);
+                            data.set(&point, color, 255);
                         }
 
                         point.x += 1;
@@ -70,7 +70,7 @@ mod tests {
         renderer.render(&mut data, &aabb);
 
         #[rustfmt::skip]
-        let result = vec![
+        let colors = vec![
             WHITE, WHITE, WHITE, WHITE, WHITE,
             WHITE, WHITE, WHITE, WHITE, WHITE,
             WHITE, WHITE, WHITE, WHITE, WHITE,
@@ -81,6 +81,20 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE
         ];
 
-        assert_eq!(data.get_colors(), &result);
+        assert_eq!(data.get_colors(), &colors);
+
+        #[rustfmt::skip]
+        let depth = vec![
+            0, 0,   0,   0, 0,
+            0, 0,   0,   0, 0,
+            0, 0,   0,   0, 0,
+            0, 0, 255, 255, 0,
+            0, 0, 255, 255, 0,
+            0, 0, 255, 255, 0,
+            0, 0, 255, 255, 0,
+            0, 0,   0,   0, 0
+        ];
+
+        assert_eq!(data.get_depth_data(), &depth);
     }
 }
