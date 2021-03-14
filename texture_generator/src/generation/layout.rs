@@ -4,7 +4,7 @@ use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use crate::utils::error::GenerationError;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 /// Generates a layout,
 pub enum LayoutComponent {
     /// A grid of squares that have the same size.

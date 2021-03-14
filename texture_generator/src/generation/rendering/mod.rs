@@ -6,7 +6,7 @@ use crate::math::shape::Shape;
 
 pub mod depth;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 /// Renders the texture.
 pub enum RenderingComponent {
     /// Renders a [`Shape`].

@@ -51,8 +51,7 @@ impl Point {
     /// assert_eq!(b.calculate_distance(&a), 5.0);
     /// ```
     pub fn calculate_distance(&self, point: &Point) -> f32 {
-        ((self.x as f32 - point.x as f32).powf(2.0) + (self.y as f32 - point.y as f32).powf(2.0))
-            .sqrt()
+        (self.x as f32 - point.x as f32).hypot(self.y as f32 - point.y as f32)
     }
 }
 

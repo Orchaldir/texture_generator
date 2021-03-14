@@ -9,7 +9,7 @@ pub mod data;
 pub mod layout;
 pub mod rendering;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TextureGenerator {
     pub name: String,
     pub background: Color,
