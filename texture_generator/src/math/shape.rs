@@ -30,6 +30,32 @@ impl Shape {
         })
     }
 
+    /// Calculates the euclidean distance from the shape's center to a [`Point`].
+    /// Values larger than 1 are outside.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    ///# use texture_generator::math::shape::Shape;
+    /// let center = Point::new(10, 20);
+    /// let border = Point::new(7, 20);
+    /// let outside = Point::new(10, 26);
+    /// let circle = Shape::new_circle(3).unwrap();
+    ///
+    /// assert_eq!(circle.distance(&center, &center), 0.0);
+    /// assert_eq!(circle.distance(&center, &outside), 2.0);
+    /// assert_eq!(circle.distance(&center, &border), 1.0);
+    /// ```
+    pub fn distance(&self, center: &Point, point: &Point) -> f32 {
+        match self {
+            Shape::Circle(radius) => center.calculate_distance(point) / *radius as f32,
+            Shape::Rectangle { half_x, half_y } => {
+                let diff = *point - *center;
+                let max_half = *half_x.min(half_y) as f32;
+                ((diff.x.abs() - *half_x).max(diff.y.abs() - *half_y) as f32 + max_half) / max_half
+            }
+        }
+    }
+
     /// Calculates the euclidean distance from the shape's border to a [`Point`].
     /// A positive distance means the point is outside.
     ///
@@ -86,6 +112,27 @@ mod tests {
     use crate::math::size::Size;
 
     const CENTER: Point = Point::new(2, 3);
+
+    #[test]
+    fn test_distance() {
+        let size = Size::new(5, 7);
+        let rectangle = Shape::new_rectangle(2, 4).unwrap();
+
+        #[rustfmt::skip]
+        let results = vec![
+            2.0, 2.0,  2.0, 2.0, 2.0,
+            2.0, 1.0,  1.0, 1.0, 2.0,
+            2.0, 1.0,  0.0, 1.0, 2.0,
+            2.0, 1.0,  0.0, 1.0, 2.0,
+            2.0, 1.0,  0.0, 1.0, 2.0,
+            2.0, 1.0,  1.0, 1.0, 2.0,
+            2.0, 2.0,  2.0, 2.0, 2.0
+        ];
+
+        for (index, result) in results.iter().enumerate() {
+            assert_eq!(rectangle.distance(&CENTER, &size.to_point(index)), *result);
+        }
+    }
 
     #[test]
     fn test_distance_to_border_rectangle() {

@@ -78,6 +78,7 @@ impl From<&TextureGenerator> for TextureDefinition {
 mod tests {
     use super::*;
     use crate::definition::generation::component::ComponentDefinition;
+    use crate::definition::generation::rendering::depth::DepthDefinition;
     use crate::definition::generation::rendering::RenderingDefinition;
     use crate::definition::math::shape::ShapeDefinition;
     use crate::math::color::{BLUE, RED};
@@ -87,10 +88,12 @@ mod tests {
 
     #[test]
     fn test_convert_layout() {
+        let depth = DepthDefinition::Uniform(111);
         let rendering = RenderingDefinition::Shape {
             name: "brick".to_string(),
             shape: SHAPE,
             color: RED,
+            depth,
         };
         let component = ComponentDefinition::Rendering(Box::new(rendering));
 
