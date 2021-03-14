@@ -1,3 +1,4 @@
+use crate::definition::generation::rendering::depth::DepthDefinition;
 use crate::definition::math::shape::ShapeDefinition;
 use crate::generation::rendering::RenderingComponent;
 use crate::math::color::Color;
@@ -13,6 +14,7 @@ pub enum RenderingDefinition {
         name: String,
         shape: ShapeDefinition,
         color: Color,
+        depth: DepthDefinition,
     },
 }
 
@@ -21,8 +23,21 @@ impl TryFrom<RenderingDefinition> for RenderingComponent {
 
     fn try_from(definition: RenderingDefinition) -> Result<Self, Self::Error> {
         match definition {
-            RenderingDefinition::Shape { name, shape, color } => match shape.try_into() {
-                Ok(shape) => Ok(RenderingComponent::Shape { name, shape, color }),
+            RenderingDefinition::Shape {
+                name,
+                shape,
+                color,
+                depth,
+            } => match shape.try_into() {
+                Ok(shape) => match depth.try_into() {
+                    Ok(depth) => Ok(RenderingComponent::Shape {
+                        name,
+                        shape,
+                        color,
+                        depth_calculator: depth,
+                    }),
+                    Err(error) => Err(error),
+                },
                 Err(error) => Err(GenerationError::invalid_shape(name, error)),
             },
         }
@@ -32,10 +47,16 @@ impl TryFrom<RenderingDefinition> for RenderingComponent {
 impl From<&RenderingComponent> for RenderingDefinition {
     fn from(component: &RenderingComponent) -> Self {
         match component {
-            RenderingComponent::Shape { name, shape, color } => RenderingDefinition::Shape {
+            RenderingComponent::Shape {
+                name,
+                shape,
+                color,
+                depth_calculator: depth,
+            } => RenderingDefinition::Shape {
                 name: name.clone(),
                 shape: shape.into(),
                 color: *color,
+                depth: depth.into(),
             },
         }
     }
@@ -50,20 +71,24 @@ mod tests {
     #[test]
     fn test_convert_shape() {
         let shape = ShapeDefinition::Circle(42);
+        let depth = DepthDefinition::Uniform(111);
         assert_convert(RenderingDefinition::Shape {
             name: "circle".to_string(),
             shape,
             color: RED,
+            depth,
         });
     }
 
     #[test]
     fn test_convert_invalid_shape() {
         let shape = ShapeDefinition::Circle(0);
+        let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
             name: "brick".to_string(),
             shape,
             color: RED,
+            depth,
         };
         is_error(definition)
     }

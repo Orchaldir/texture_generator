@@ -49,6 +49,7 @@ impl From<&LayoutComponent> for LayoutDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::definition::generation::rendering::depth::DepthDefinition;
     use crate::definition::generation::rendering::RenderingDefinition;
     use crate::definition::math::shape::ShapeDefinition;
     use crate::math::color::RED;
@@ -56,11 +57,13 @@ mod tests {
 
     #[test]
     fn test_convert_square() {
+        let depth = DepthDefinition::Uniform(42);
         let shape = ShapeDefinition::Circle(42);
         let rendering = Box::new(RenderingDefinition::Shape {
             name: "brick".to_string(),
             shape,
             color: RED,
+            depth,
         });
         let component = ComponentDefinition::Rendering(rendering);
 

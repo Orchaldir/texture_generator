@@ -45,6 +45,7 @@ impl From<&Component> for ComponentDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::definition::generation::rendering::depth::DepthDefinition;
     use crate::definition::math::shape::ShapeDefinition;
     use crate::math::color::RED;
     use std::convert::TryInto;
@@ -53,10 +54,12 @@ mod tests {
 
     #[test]
     fn test_convert_layout() {
+        let depth = DepthDefinition::Uniform(42);
         let rendering = RenderingDefinition::Shape {
             name: "brick".to_string(),
             shape: SHAPE,
             color: RED,
+            depth,
         };
         let layout = LayoutDefinition::Square {
             name: "test".to_string(),
@@ -69,10 +72,12 @@ mod tests {
 
     #[test]
     fn test_convert_rendering() {
+        let depth = DepthDefinition::Uniform(77);
         let rendering = RenderingDefinition::Shape {
             name: "brick".to_string(),
             shape: SHAPE,
             color: RED,
+            depth,
         };
         assert_convert(ComponentDefinition::Rendering(Box::new(rendering)));
     }
