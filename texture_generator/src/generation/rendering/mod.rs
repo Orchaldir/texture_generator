@@ -3,6 +3,8 @@ use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::shape::Shape;
 
+pub mod depth;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 /// Renders the texture.
 pub enum RenderingComponent {
