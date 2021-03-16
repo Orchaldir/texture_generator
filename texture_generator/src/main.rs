@@ -6,7 +6,7 @@ use std::convert::TryInto;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use texture_generator::definition::generation::TextureDefinition;
-use texture_generator::generation::data::Data;
+use texture_generator::generation::data::{convert, Data};
 use texture_generator::generation::TextureGenerator;
 use texture_generator::utils::logging::init_logging;
 
@@ -48,9 +48,11 @@ fn main() -> Result<()> {
 
     info!("Save color to {:?}", color_path);
 
+    let color_data = convert(&data.get_color_data());
+
     image::save_buffer(
         &color_path,
-        data.get_color_data(),
+        &color_data,
         data.get_size().width(),
         data.get_size().height(),
         image::ColorType::Rgb8,

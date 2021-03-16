@@ -79,7 +79,7 @@ impl LayoutComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::data::TestData;
+    use crate::generation::data::RuntimeData;
     use crate::generation::rendering::RenderingComponent;
     use crate::math::color::{RED, WHITE};
     use crate::math::shape::Shape;
@@ -90,7 +90,7 @@ mod tests {
         let size = Size::new(8, 12);
         let aabb = AABB::with_size(size);
 
-        let mut data = TestData::new(size, WHITE);
+        let mut data = RuntimeData::new(size, WHITE);
 
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
         let renderer = RenderingComponent::new_shape("tile", rectangle, RED);
@@ -117,6 +117,6 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_colors(), &expected_colors);
+        assert_eq!(data.get_color_data(), &expected_colors);
     }
 }

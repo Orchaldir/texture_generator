@@ -68,13 +68,6 @@ mod tests {
             GREEN, GREEN, GREEN, GREEN
         ];
 
-        let color_data = data.get_color_data();
-
-        for (index, color) in result.iter().enumerate() {
-            let data_index = index * 3;
-            assert_eq!(color_data[data_index], color.r());
-            assert_eq!(color_data[data_index + 1], color.g());
-            assert_eq!(color_data[data_index + 2], color.b());
-        }
+        assert_eq!(data.get_color_data(), &result);
     }
 }
