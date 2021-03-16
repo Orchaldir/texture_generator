@@ -93,7 +93,6 @@ impl Vector3 {
 ///
 /// ```
 ///# use texture_generator::math::vector3::Vector3;
-///# use texture_generator::math::size::Size;
 /// let a = Vector3::new(1.1, 2.2, 3.0);
 /// let b = Vector3::new(30.0, 50.2, -3.0);
 /// let result = Vector3::new(31.1, 52.4, 0.0);
@@ -113,7 +112,6 @@ impl Add<Vector3> for Vector3 {
 ///
 /// ```
 ///# use texture_generator::math::vector3::Vector3;
-///# use texture_generator::math::size::Size;
 /// let a = Vector3::new(1.1, 2.2, 3.0);
 /// let b = Vector3::new(30.0, 50.2, -3.0);
 ///
@@ -132,7 +130,6 @@ impl Sub<Vector3> for Vector3 {
 ///
 /// ```
 ///# use texture_generator::math::vector3::Vector3;
-///# use texture_generator::math::size::Size;
 /// let vector = Vector3::new(1.1, 2.2, 3.0);
 ///
 /// assert_eq!(vector * 0.5, Vector3::new(0.55, 1.1, 1.5));
