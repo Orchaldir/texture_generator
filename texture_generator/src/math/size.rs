@@ -167,4 +167,16 @@ impl Size {
     pub fn to_index_risky(&self, point: &Point) -> usize {
         (point.y * self.width as i32 + point.x) as usize
     }
+
+    /// Converts a [`Point`] to the equivalent index, but returns a wrong result if it is outside.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    ///# use texture_generator::math::size::Size;
+    /// let size = Size::new(2, 3);
+    /// assert_eq!(size.convert_x_y(1, 2), 5);
+    /// ```
+    pub fn convert_x_y(&self, x: u32, y: u32) -> usize {
+        (y * self.width + x) as usize
+    }
 }

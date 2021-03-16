@@ -10,8 +10,11 @@ pub trait Data {
     /// Sets the [`Color`] & depth at the [`Point`].
     fn set(&mut self, point: &Point, color: &Color, depth: u8);
 
-    /// Gets all the r, g & b values.
+    /// Gets all the colors.
     fn get_color_data(&self) -> &[Color];
+
+    /// Gets all the colors mutable.
+    fn get_color_data_mut(&mut self) -> &mut [Color];
 
     /// Gets all the depth values.
     fn get_depth_data(&self) -> &[u8];
@@ -52,6 +55,10 @@ impl Data for RuntimeData {
 
     fn get_color_data(&self) -> &[Color] {
         &self.colors
+    }
+
+    fn get_color_data_mut(&mut self) -> &mut [Color] {
+        &mut self.colors
     }
 
     fn get_depth_data(&self) -> &[u8] {
