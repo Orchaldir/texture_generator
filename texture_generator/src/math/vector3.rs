@@ -57,6 +57,19 @@ impl Vector3 {
         self.z /= length;
     }
 
+    /// Returns the normalied vector.
+    ///
+    /// ```
+    ///# use texture_generator::math::vector3::Vector3;
+    /// let mut vector = Vector3::new(3.0, -4.0, 0.0);
+    ///
+    /// assert_eq!(vector.get_normalized(), Vector3::new(0.6, -0.8, 0.0));
+    /// ```
+    pub fn get_normalized(mut self) -> Vector3 {
+        self.normalize();
+        self
+    }
+
     /// Calculates the euclidean distance to another vector.
     ///
     /// ```

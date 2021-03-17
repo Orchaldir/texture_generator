@@ -25,8 +25,7 @@ impl Lighting {
         let ambient = 0.1;
 
         let view_direction = Vector3::new(0.0, 0.0, 1.0);
-        let mut half_direction = view_direction + self.light_direction;
-        half_direction.normalize();
+        let half_direction = (view_direction + self.light_direction).get_normalized();
 
         for y in 0..size.height() {
             for x in 0..size.width() {
@@ -80,7 +79,5 @@ pub fn calculate_normal(
 ) -> Vector3 {
     let diff_x = depth_right as f32 - depth_left as f32;
     let diff_y = depth_up as f32 - depth_down as f32;
-    let mut normal = Vector3::new(diff_x, diff_y, normal_z);
-    normal.normalize();
-    normal
+    Vector3::new(diff_x, diff_y, normal_z).get_normalized()
 }
