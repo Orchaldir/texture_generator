@@ -3,6 +3,7 @@ use crate::generation::data::RuntimeData;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::size::Size;
+use crate::process::PostProcess;
 
 pub mod component;
 pub mod data;
@@ -14,6 +15,7 @@ pub struct TextureGenerator {
     pub name: String,
     pub background: Color,
     pub component: Component,
+    pub post_processes: Vec<PostProcess>,
 }
 
 impl TextureGenerator {
@@ -21,11 +23,13 @@ impl TextureGenerator {
         name: S,
         background: Color,
         component: Component,
+        post_processes: Vec<PostProcess>,
     ) -> TextureGenerator {
         TextureGenerator {
             name: name.into(),
             background,
             component,
+            post_processes,
         }
     }
 
@@ -36,6 +40,12 @@ impl TextureGenerator {
         let mut data = RuntimeData::new(size, self.background);
 
         self.component.generate(&mut data, &aabb);
+
+        for post_process in self.post_processes.iter() {
+            post_process.process(&mut data);
+        }
+
+        //let lighting = Lighting::new(Vector3::new(1.0, 0.0, 0.0), 10, 32);
 
         data
     }
@@ -54,7 +64,7 @@ mod tests {
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let rendering = RenderingComponent::new_shape("test", rectangle, RED);
         let component = Component::Rendering(Box::new(rendering));
-        let generator = TextureGenerator::new("test", GREEN, component);
+        let generator = TextureGenerator::new("test", GREEN, component, Vec::new());
 
         let data = generator.generate(4, 6);
 

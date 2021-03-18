@@ -1,7 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul, Sub};
 
 #[svgbobdoc::transform]
-#[derive(Copy, Clone, Debug, Default, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 /// Defines a point or a direction in 3 dimensions.
 pub struct Vector3 {
     pub x: f32,

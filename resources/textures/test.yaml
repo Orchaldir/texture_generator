@@ -23,3 +23,11 @@ component:
           type: Linear
           center: 255
           border: 50
+post_processes:
+  - Lighting:
+      light_direction:
+        x: 1.0
+        y: 0.0
+        z: 0.0
+      normal_z: 10
+      shininess: 32

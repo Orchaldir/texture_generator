@@ -1,4 +1,5 @@
 use crate::definition::generation::component::ComponentDefinition;
+use crate::definition::process::PostProcessDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::utils::error::GenerationError;
@@ -14,11 +15,12 @@ pub mod component;
 pub mod layout;
 pub mod rendering;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
     name: String,
     background: Color,
     component: ComponentDefinition,
+    post_processes: Vec<PostProcessDefinition>,
 }
 
 impl TextureDefinition {
@@ -26,11 +28,13 @@ impl TextureDefinition {
         name: S,
         background: Color,
         component: ComponentDefinition,
+        post_processes: Vec<PostProcessDefinition>,
     ) -> TextureDefinition {
         TextureDefinition {
             name: name.into(),
             background,
             component,
+            post_processes,
         }
     }
 
@@ -60,6 +64,11 @@ impl TryFrom<TextureDefinition> for TextureGenerator {
             definition.name,
             definition.background,
             definition.component.try_into()?,
+            definition
+                .post_processes
+                .into_iter()
+                .map(|process| process.into())
+                .collect(),
         ))
     }
 }
@@ -70,6 +79,11 @@ impl From<&TextureGenerator> for TextureDefinition {
             generator.name.clone(),
             generator.background,
             (&generator.component).into(),
+            generator
+                .post_processes
+                .iter()
+                .map(|process| process.into())
+                .collect(),
         )
     }
 }
@@ -97,7 +111,7 @@ mod tests {
         };
         let component = ComponentDefinition::Rendering(Box::new(rendering));
 
-        assert_convert(TextureDefinition::new("test", BLUE, component));
+        assert_convert(TextureDefinition::new("test", BLUE, component, Vec::new()));
     }
 
     fn assert_convert(definition: TextureDefinition) {

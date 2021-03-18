@@ -4,18 +4,18 @@ use crate::math::vector3::Vector3;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Lighting {
-    light_direction: Vector3,
-    normal_z: f32,
-    shininess: i32,
+    pub light_direction: Vector3,
+    pub normal_z: f32,
+    pub shininess: i32,
 }
 
 impl Lighting {
-    pub fn new(mut light_direction: Vector3, normal_z: f32, shininess: i32) -> Lighting {
+    pub fn new(mut light_direction: Vector3, normal_z: u32, shininess: u32) -> Lighting {
         light_direction.normalize();
         Lighting {
             light_direction,
-            normal_z,
-            shininess,
+            normal_z: normal_z as f32,
+            shininess: shininess as i32,
         }
     }
 
