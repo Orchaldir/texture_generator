@@ -8,12 +8,13 @@ use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::definition::generation::component::ComponentDefinition;
-use crate::definition::process::PostProcessDefinition;
+use crate::definition::generation::process::PostProcessDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::utils::error::GenerationError;
 
 pub mod component;
+pub mod process;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {

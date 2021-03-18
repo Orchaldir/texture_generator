@@ -1,5 +1,5 @@
 use crate::generation::data::Data;
-use crate::process::lighting::Lighting;
+use crate::generation::process::lighting::Lighting;
 
 pub mod lighting;
 

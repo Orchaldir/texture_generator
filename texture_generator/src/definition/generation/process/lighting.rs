@@ -1,5 +1,5 @@
+use crate::generation::process::lighting::Lighting;
 use crate::math::vector3::Vector3;
-use crate::process::lighting::Lighting;
 use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]

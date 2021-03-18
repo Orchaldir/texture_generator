@@ -1,12 +1,13 @@
 use crate::generation::component::Component;
 use crate::generation::data::RuntimeData;
+use crate::generation::process::PostProcess;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::size::Size;
-use crate::process::PostProcess;
 
 pub mod component;
 pub mod data;
+pub mod process;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TextureGenerator {
@@ -42,8 +43,6 @@ impl TextureGenerator {
         for post_process in self.post_processes.iter() {
             post_process.process(&mut data);
         }
-
-        //let lighting = Lighting::new(Vector3::new(1.0, 0.0, 0.0), 10, 32);
 
         data
     }

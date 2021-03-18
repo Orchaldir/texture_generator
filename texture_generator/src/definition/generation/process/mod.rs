@@ -1,5 +1,5 @@
-use crate::definition::process::lighting::LightingDefinition;
-use crate::process::PostProcess;
+use crate::definition::generation::process::lighting::LightingDefinition;
+use crate::generation::process::PostProcess;
 use serde::{Deserialize, Serialize};
 
 pub mod lighting;
