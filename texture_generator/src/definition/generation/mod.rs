@@ -1,19 +1,19 @@
-use crate::definition::generation::component::ComponentDefinition;
-use crate::definition::process::PostProcessDefinition;
-use crate::generation::TextureGenerator;
-use crate::math::color::Color;
-use crate::utils::error::GenerationError;
-use anyhow::{Context, Result};
-use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
+use anyhow::{Context, Result};
+use serde::{Deserialize, Serialize};
+
+use crate::definition::generation::component::ComponentDefinition;
+use crate::definition::process::PostProcessDefinition;
+use crate::generation::TextureGenerator;
+use crate::math::color::Color;
+use crate::utils::error::GenerationError;
+
 pub mod component;
-pub mod layout;
-pub mod rendering;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
@@ -90,13 +90,15 @@ impl From<&TextureGenerator> for TextureDefinition {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::convert::TryInto;
+
+    use crate::definition::generation::component::rendering::depth::DepthDefinition;
+    use crate::definition::generation::component::rendering::RenderingDefinition;
     use crate::definition::generation::component::ComponentDefinition;
-    use crate::definition::generation::rendering::depth::DepthDefinition;
-    use crate::definition::generation::rendering::RenderingDefinition;
     use crate::definition::math::shape::ShapeDefinition;
     use crate::math::color::{BLUE, RED};
-    use std::convert::TryInto;
+
+    use super::*;
 
     const SHAPE: ShapeDefinition = ShapeDefinition::Circle(42);
 

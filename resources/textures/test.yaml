@@ -28,6 +28,6 @@ post_processes:
       light_direction:
         x: 1.0
         y: 0.0
-        z: 0.0
+        z: 1.0
       normal_z: 10
       shininess: 32

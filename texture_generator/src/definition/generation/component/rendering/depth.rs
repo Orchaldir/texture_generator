@@ -1,4 +1,4 @@
-use crate::generation::rendering::depth::DepthCalculator;
+use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;

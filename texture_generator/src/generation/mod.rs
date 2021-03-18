@@ -7,8 +7,6 @@ use crate::process::PostProcess;
 
 pub mod component;
 pub mod data;
-pub mod layout;
-pub mod rendering;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TextureGenerator {
@@ -53,11 +51,12 @@ impl TextureGenerator {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::Data;
-    use crate::generation::rendering::RenderingComponent;
     use crate::math::color::{GREEN, RED};
     use crate::math::shape::Shape;
+
+    use super::*;
 
     #[test]
     fn test_generate() {

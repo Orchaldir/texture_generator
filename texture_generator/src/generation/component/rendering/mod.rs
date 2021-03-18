@@ -1,5 +1,5 @@
+use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::data::Data;
-use crate::generation::rendering::depth::DepthCalculator;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::shape::Shape;

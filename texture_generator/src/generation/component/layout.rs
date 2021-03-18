@@ -79,8 +79,8 @@ impl LayoutComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::RuntimeData;
-    use crate::generation::rendering::RenderingComponent;
     use crate::math::color::{RED, WHITE};
     use crate::math::shape::Shape;
     use crate::math::size::Size;
