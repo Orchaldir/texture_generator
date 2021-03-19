@@ -1,17 +1,15 @@
-use std::convert::{TryFrom, TryInto};
-use std::fs;
-use std::fs::File;
-use std::io::Write;
-use std::path::PathBuf;
-
-use anyhow::{Context, Result};
-use serde::{Deserialize, Serialize};
-
 use crate::definition::generation::component::ComponentDefinition;
 use crate::definition::generation::process::PostProcessDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::utils::error::GenerationError;
+use anyhow::{Context, Result};
+use serde::{Deserialize, Serialize};
+use std::convert::{TryFrom, TryInto};
+use std::fs;
+use std::fs::File;
+use std::io::Write;
+use std::path::PathBuf;
 
 pub mod component;
 pub mod process;
@@ -91,36 +89,34 @@ impl From<&TextureGenerator> for TextureDefinition {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use crate::generation::component::rendering::depth::DepthCalculator;
+    use crate::generation::component::rendering::RenderingComponent;
+    use crate::generation::component::Component;
+    use crate::generation::process::lighting::Lighting;
+    use crate::generation::process::PostProcess;
+    use crate::math::color::{BLUE, RED};
+    use crate::math::shape::Shape;
+    use crate::math::vector3::Vector3;
     use std::convert::TryInto;
 
-    use crate::definition::generation::component::rendering::depth::DepthDefinition;
-    use crate::definition::generation::component::rendering::RenderingDefinition;
-    use crate::definition::generation::component::ComponentDefinition;
-    use crate::definition::math::shape::ShapeDefinition;
-    use crate::math::color::{BLUE, RED};
-
-    use super::*;
-
-    const SHAPE: ShapeDefinition = ShapeDefinition::Circle(42);
+    const SHAPE: Shape = Shape::Circle(42);
 
     #[test]
     fn test_convert_layout() {
-        let depth = DepthDefinition::Uniform(111);
-        let rendering = RenderingDefinition::Shape {
-            name: "brick".to_string(),
-            shape: SHAPE,
-            color: RED,
-            depth,
-        };
-        let component = ComponentDefinition::Rendering(Box::new(rendering));
+        let depth = DepthCalculator::Uniform(111);
+        let rendering = RenderingComponent::new_shape_with_depth("brick", SHAPE, RED, depth);
+        let component = Component::Rendering(Box::new(rendering));
+        let lighting = Lighting::new(Vector3::new(1.0, 0.0, 0.0), 20, 32);
+        let processes = vec![PostProcess::Lighting(lighting)];
 
-        assert_convert(TextureDefinition::new("test", BLUE, component, Vec::new()));
+        assert_convert(TextureGenerator::new("test", BLUE, component, processes));
     }
 
-    fn assert_convert(definition: TextureDefinition) {
-        let generator: TextureGenerator = definition.clone().try_into().unwrap();
-        let result: TextureDefinition = (&generator).into();
+    fn assert_convert(generator: TextureGenerator) {
+        let definition: TextureDefinition = (&generator).into();
+        let result: TextureGenerator = definition.clone().try_into().unwrap();
 
-        assert_eq!(result, definition)
+        assert_eq!(result, generator)
     }
 }

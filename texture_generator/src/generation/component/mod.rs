@@ -1,5 +1,4 @@
 use crate::generation::component::layout::LayoutComponent;
-
 use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;

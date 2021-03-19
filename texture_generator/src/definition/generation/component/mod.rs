@@ -1,12 +1,9 @@
-use std::convert::{TryFrom, TryInto};
-
-use serde::{Deserialize, Serialize};
-
-use layout::LayoutDefinition;
-
 use crate::definition::generation::component::rendering::RenderingDefinition;
 use crate::generation::component::Component;
 use crate::utils::error::GenerationError;
+use layout::LayoutDefinition;
+use serde::{Deserialize, Serialize};
+use std::convert::{TryFrom, TryInto};
 
 pub mod layout;
 pub mod rendering;
@@ -50,13 +47,11 @@ impl From<&Component> for ComponentDefinition {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryInto;
-
+    use super::*;
     use crate::definition::generation::component::rendering::depth::DepthDefinition;
     use crate::definition::math::shape::ShapeDefinition;
     use crate::math::color::RED;
-
-    use super::*;
+    use std::convert::TryInto;
 
     const SHAPE: ShapeDefinition = ShapeDefinition::Circle(42);
 
