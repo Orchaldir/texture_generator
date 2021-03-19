@@ -65,6 +65,7 @@ impl TryFrom<TextureDefinition> for TextureGenerator {
     fn try_from(definition: TextureDefinition) -> Result<Self, Self::Error> {
         Ok(TextureGenerator::new(
             definition.name,
+            definition.size,
             definition.background,
             definition.component.try_into()?,
             definition
@@ -80,7 +81,7 @@ impl From<&TextureGenerator> for TextureDefinition {
     fn from(generator: &TextureGenerator) -> Self {
         TextureDefinition::new(
             generator.name.clone(),
-            Size::new(1, 1),
+            generator.size,
             generator.background,
             (&generator.component).into(),
             generator
@@ -115,7 +116,13 @@ mod tests {
         let lighting = Lighting::new(Vector3::new(1.0, 0.0, 0.0), 20, 32);
         let processes = vec![PostProcess::Lighting(lighting)];
 
-        assert_convert(TextureGenerator::new("test", BLUE, component, processes));
+        assert_convert(TextureGenerator::new(
+            "test",
+            Size::new(1, 1),
+            BLUE,
+            component,
+            processes,
+        ));
     }
 
     fn assert_convert(generator: TextureGenerator) {

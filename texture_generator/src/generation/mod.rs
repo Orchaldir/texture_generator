@@ -12,6 +12,7 @@ pub mod process;
 #[derive(Clone, Debug, PartialEq)]
 pub struct TextureGenerator {
     pub name: String,
+    pub size: Size,
     pub background: Color,
     pub component: Component,
     pub post_processes: Vec<PostProcess>,
@@ -20,12 +21,14 @@ pub struct TextureGenerator {
 impl TextureGenerator {
     pub fn new<S: Into<String>>(
         name: S,
+        size: Size,
         background: Color,
         component: Component,
         post_processes: Vec<PostProcess>,
     ) -> TextureGenerator {
         TextureGenerator {
             name: name.into(),
+            size,
             background,
             component,
             post_processes,
@@ -62,7 +65,8 @@ mod tests {
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let rendering = RenderingComponent::new_shape("test", rectangle, RED);
         let component = Component::Rendering(Box::new(rendering));
-        let generator = TextureGenerator::new("test", GREEN, component, Vec::new());
+        let generator =
+            TextureGenerator::new("test", Size::new(1, 1), GREEN, component, Vec::new());
 
         let data = generator.generate(4, 6);
 
