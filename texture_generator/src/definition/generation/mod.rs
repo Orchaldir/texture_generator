@@ -2,6 +2,7 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::definition::generation::process::PostProcessDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
+use crate::math::size::Size;
 use crate::utils::error::GenerationError;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
@@ -17,6 +18,7 @@ pub mod process;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
     name: String,
+    size: Size,
     background: Color,
     component: ComponentDefinition,
     post_processes: Vec<PostProcessDefinition>,
@@ -25,12 +27,14 @@ pub struct TextureDefinition {
 impl TextureDefinition {
     pub fn new<S: Into<String>>(
         name: S,
+        size: Size,
         background: Color,
         component: ComponentDefinition,
         post_processes: Vec<PostProcessDefinition>,
     ) -> TextureDefinition {
         TextureDefinition {
             name: name.into(),
+            size,
             background,
             component,
             post_processes,
@@ -76,6 +80,7 @@ impl From<&TextureGenerator> for TextureDefinition {
     fn from(generator: &TextureGenerator) -> Self {
         TextureDefinition::new(
             generator.name.clone(),
+            Size::new(1, 1),
             generator.background,
             (&generator.component).into(),
             generator
