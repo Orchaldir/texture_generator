@@ -1,5 +1,8 @@
 ---
 name: test
+size:
+  width: 1024
+  height: 1024
 background:
   r: 0
   g: 255
@@ -8,7 +11,7 @@ component:
   type: Layout
   Square:
     name: layout
-    size: 128
+    side: 128
     component:
       type: Rendering
       Shape:

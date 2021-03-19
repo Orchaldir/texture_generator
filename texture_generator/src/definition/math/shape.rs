@@ -1,7 +1,7 @@
+use crate::definition::convert;
 use crate::math::shape::Shape;
 use crate::utils::error::ShapeError;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ShapeDefinition {
@@ -9,25 +9,13 @@ pub enum ShapeDefinition {
     Rectangle { width: u32, height: u32 },
 }
 
-impl TryFrom<ShapeDefinition> for Shape {
-    type Error = ShapeError;
-
-    fn try_from(definition: ShapeDefinition) -> Result<Self, Self::Error> {
-        match definition {
-            ShapeDefinition::Circle(radius) => Shape::new_circle(radius),
-            ShapeDefinition::Rectangle { width, height } => Shape::new_rectangle(width, height),
-        }
-    }
-}
-
-impl From<&Shape> for ShapeDefinition {
-    fn from(shape: &Shape) -> Self {
-        match shape {
-            Shape::Circle(radius) => ShapeDefinition::Circle(*radius),
-            Shape::Rectangle { half_x, half_y } => ShapeDefinition::Rectangle {
-                width: *half_x as u32 * 2,
-                height: *half_y as u32 * 2,
-            },
+impl ShapeDefinition {
+    pub fn convert(&self, factor: f32) -> Result<Shape, ShapeError> {
+        match self {
+            ShapeDefinition::Circle(radius) => Shape::new_circle(convert(*radius, factor)),
+            ShapeDefinition::Rectangle { width, height } => {
+                Shape::new_rectangle(convert(*width, factor), convert(*height, factor))
+            }
         }
     }
 }
@@ -35,25 +23,23 @@ impl From<&Shape> for ShapeDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::convert::TryInto;
 
     #[test]
     fn test_convert_circle() {
-        assert_convert(ShapeDefinition::Circle(11));
+        let definition = ShapeDefinition::Circle(20);
+        let shape = Shape::Circle(10);
+
+        assert_eq!(shape, definition.convert(0.5).unwrap())
     }
 
     #[test]
     fn test_convert_rectangle() {
-        assert_convert(ShapeDefinition::Rectangle {
+        let definition = ShapeDefinition::Rectangle {
             width: 10,
             height: 20,
-        });
-    }
+        };
+        let shape = Shape::new_rectangle(15, 30).unwrap();
 
-    fn assert_convert(definition: ShapeDefinition) {
-        let shape: Shape = definition.clone().try_into().unwrap();
-        let result: ShapeDefinition = (&shape).into();
-
-        assert_eq!(result, definition)
+        assert_eq!(shape, definition.convert(1.5).unwrap())
     }
 }

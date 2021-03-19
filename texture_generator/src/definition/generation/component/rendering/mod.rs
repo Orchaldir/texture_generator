@@ -4,7 +4,7 @@ use crate::generation::component::rendering::RenderingComponent;
 use crate::math::color::Color;
 use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto;
 
 pub mod depth;
 
@@ -18,24 +18,19 @@ pub enum RenderingDefinition {
     },
 }
 
-impl TryFrom<RenderingDefinition> for RenderingComponent {
-    type Error = GenerationError;
-
-    fn try_from(definition: RenderingDefinition) -> Result<Self, Self::Error> {
-        match definition {
+impl RenderingDefinition {
+    pub fn convert(&self, factor: f32) -> Result<RenderingComponent, GenerationError> {
+        match self {
             RenderingDefinition::Shape {
                 name,
                 shape,
                 color,
                 depth,
-            } => match shape.try_into() {
-                Ok(shape) => match depth.try_into() {
-                    Ok(depth) => Ok(RenderingComponent::Shape {
-                        name,
-                        shape,
-                        color,
-                        depth_calculator: depth,
-                    }),
+            } => match shape.convert(factor) {
+                Ok(shape) => match depth.clone().try_into() {
+                    Ok(depth) => Ok(RenderingComponent::new_shape_with_depth(
+                        name, shape, *color, depth,
+                    )),
                     Err(error) => Err(error),
                 },
                 Err(error) => Err(GenerationError::invalid_shape(name, error)),
@@ -44,40 +39,31 @@ impl TryFrom<RenderingDefinition> for RenderingComponent {
     }
 }
 
-impl From<&RenderingComponent> for RenderingDefinition {
-    fn from(component: &RenderingComponent) -> Self {
-        match component {
-            RenderingComponent::Shape {
-                name,
-                shape,
-                color,
-                depth_calculator: depth,
-            } => RenderingDefinition::Shape {
-                name: name.clone(),
-                shape: shape.into(),
-                color: *color,
-                depth: depth.into(),
-            },
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generation::component::rendering::depth::DepthCalculator;
     use crate::math::color::RED;
-    use std::convert::TryInto;
+    use crate::math::shape::Shape;
 
     #[test]
     fn test_convert_shape() {
         let shape = ShapeDefinition::Circle(42);
         let depth = DepthDefinition::Uniform(111);
-        assert_convert(RenderingDefinition::Shape {
+        let definition = RenderingDefinition::Shape {
             name: "circle".to_string(),
             shape,
             color: RED,
             depth,
-        });
+        };
+        let component = RenderingComponent::new_shape_with_depth(
+            "circle",
+            Shape::Circle(126),
+            RED,
+            DepthCalculator::Uniform(111),
+        );
+
+        assert_eq!(component, definition.convert(3.0).unwrap())
     }
 
     #[test]
@@ -90,17 +76,7 @@ mod tests {
             color: RED,
             depth,
         };
-        is_error(definition)
-    }
 
-    fn assert_convert(definition: RenderingDefinition) {
-        let shape: RenderingComponent = definition.clone().try_into().unwrap();
-        let result: RenderingDefinition = (&shape).into();
-
-        assert_eq!(result, definition)
-    }
-
-    fn is_error(data: impl TryInto<RenderingComponent, Error = GenerationError>) {
-        assert!(data.try_into().is_err());
+        assert!(definition.convert(2.0).is_err());
     }
 }

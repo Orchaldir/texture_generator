@@ -25,7 +25,7 @@ pub enum LayoutComponent {
     /// ```
     Square {
         name: String,
-        size: u32,
+        side: u32,
         component: Component,
     },
 }
@@ -33,16 +33,16 @@ pub enum LayoutComponent {
 impl LayoutComponent {
     pub fn new_square<S: Into<String>>(
         name: S,
-        size: u32,
+        side: u32,
         component: Component,
     ) -> Result<LayoutComponent, GenerationError> {
-        if size < 1 {
-            return Err(GenerationError::value_too_small(name, "size", size));
+        if side < 1 {
+            return Err(GenerationError::value_too_small(name, "side", side));
         }
 
         Ok(LayoutComponent::Square {
             name: name.into(),
-            size,
+            side,
             component,
         })
     }
@@ -51,12 +51,12 @@ impl LayoutComponent {
     pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
             LayoutComponent::Square {
-                size, component, ..
+                side, component, ..
             } => {
                 let mut point = aabb.start();
-                let square_size = Size::new(*size, *size);
+                let square_size = Size::new(*side, *side);
                 let end = aabb.end() - square_size;
-                let step = *size as i32;
+                let step = *side as i32;
 
                 while point.y <= end.y {
                     point.x = aabb.start().x;

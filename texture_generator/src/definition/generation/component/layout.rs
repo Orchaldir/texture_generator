@@ -1,46 +1,30 @@
+use crate::definition::convert;
 use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::component::layout::LayoutComponent;
 use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
-use std::convert::{TryFrom, TryInto};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum LayoutDefinition {
     Square {
         name: String,
-        size: u32,
+        side: u32,
         component: ComponentDefinition,
     },
 }
 
-impl TryFrom<LayoutDefinition> for LayoutComponent {
-    type Error = GenerationError;
-
-    fn try_from(definition: LayoutDefinition) -> Result<Self, Self::Error> {
-        match definition {
+impl LayoutDefinition {
+    pub fn convert(&self, factor: f32) -> Result<LayoutComponent, GenerationError> {
+        match self {
             LayoutDefinition::Square {
                 name,
-                size,
+                side,
                 component,
-            } => match component.try_into() {
-                Ok(component) => LayoutComponent::new_square(name, size, component),
+            } => match component.convert(factor) {
+                Ok(component) => {
+                    LayoutComponent::new_square(name, convert(*side, factor), component)
+                }
                 Err(error) => Err(error),
-            },
-        }
-    }
-}
-
-impl From<&LayoutComponent> for LayoutDefinition {
-    fn from(layout: &LayoutComponent) -> Self {
-        match layout {
-            LayoutComponent::Square {
-                name,
-                size,
-                component,
-            } => LayoutDefinition::Square {
-                name: name.clone(),
-                size: *size,
-                component: component.into(),
             },
         }
     }
@@ -49,35 +33,17 @@ impl From<&LayoutComponent> for LayoutDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::definition::generation::component::rendering::depth::DepthDefinition;
-    use crate::definition::generation::component::rendering::RenderingDefinition;
-    use crate::definition::math::shape::ShapeDefinition;
-    use crate::math::color::RED;
-    use std::convert::TryInto;
+    use crate::generation::component::Component;
 
     #[test]
     fn test_convert_square() {
-        let depth = DepthDefinition::Uniform(42);
-        let shape = ShapeDefinition::Circle(42);
-        let rendering = Box::new(RenderingDefinition::Shape {
-            name: "brick".to_string(),
-            shape,
-            color: RED,
-            depth,
-        });
-        let component = ComponentDefinition::Rendering(rendering);
-
-        assert_convert(LayoutDefinition::Square {
+        let definition = LayoutDefinition::Square {
             name: "test".to_string(),
-            size: 10,
-            component,
-        });
-    }
+            side: 10,
+            component: ComponentDefinition::Mock(66),
+        };
+        let component = LayoutComponent::new_square("test", 25, Component::Mock(66)).unwrap();
 
-    fn assert_convert(definition: LayoutDefinition) {
-        let shape: LayoutComponent = definition.clone().try_into().unwrap();
-        let result: LayoutDefinition = (&shape).into();
-
-        assert_eq!(result, definition)
+        assert_eq!(component, definition.convert(2.5).unwrap())
     }
 }

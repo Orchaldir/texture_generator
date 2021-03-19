@@ -2,10 +2,10 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::definition::generation::process::PostProcessDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
+use crate::math::size::Size;
 use crate::utils::error::GenerationError;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
-use std::convert::{TryFrom, TryInto};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
@@ -17,6 +17,7 @@ pub mod process;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
     name: String,
+    size: Size,
     background: Color,
     component: ComponentDefinition,
     post_processes: Vec<PostProcessDefinition>,
@@ -25,12 +26,14 @@ pub struct TextureDefinition {
 impl TextureDefinition {
     pub fn new<S: Into<String>>(
         name: S,
+        size: Size,
         background: Color,
         component: ComponentDefinition,
         post_processes: Vec<PostProcessDefinition>,
     ) -> TextureDefinition {
         TextureDefinition {
             name: name.into(),
+            size,
             background,
             component,
             post_processes,
@@ -53,70 +56,52 @@ impl TextureDefinition {
 
         Ok(())
     }
-}
 
-impl TryFrom<TextureDefinition> for TextureGenerator {
-    type Error = GenerationError;
+    pub fn convert(&self, size: u32) -> Result<TextureGenerator, GenerationError> {
+        let max = self.size.width().max(self.size.height());
+        let factor = size as f32 / max as f32;
+        let component = self.component.convert(factor)?;
+        let post_processes = self
+            .post_processes
+            .clone()
+            .into_iter()
+            .map(|process| process.into())
+            .collect();
 
-    fn try_from(definition: TextureDefinition) -> Result<Self, Self::Error> {
         Ok(TextureGenerator::new(
-            definition.name,
-            definition.background,
-            definition.component.try_into()?,
-            definition
-                .post_processes
-                .into_iter()
-                .map(|process| process.into())
-                .collect(),
+            self.name.clone(),
+            self.size * factor,
+            self.background,
+            component,
+            post_processes,
         ))
-    }
-}
-
-impl From<&TextureGenerator> for TextureDefinition {
-    fn from(generator: &TextureGenerator) -> Self {
-        TextureDefinition::new(
-            generator.name.clone(),
-            generator.background,
-            (&generator.component).into(),
-            generator
-                .post_processes
-                .iter()
-                .map(|process| process.into())
-                .collect(),
-        )
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::component::rendering::depth::DepthCalculator;
-    use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::component::Component;
-    use crate::generation::process::lighting::Lighting;
     use crate::generation::process::PostProcess;
-    use crate::math::color::{BLUE, RED};
-    use crate::math::shape::Shape;
-    use crate::math::vector3::Vector3;
-    use std::convert::TryInto;
-
-    const SHAPE: Shape = Shape::Circle(42);
+    use crate::math::color::BLUE;
 
     #[test]
     fn test_convert_layout() {
-        let depth = DepthCalculator::Uniform(111);
-        let rendering = RenderingComponent::new_shape_with_depth("brick", SHAPE, RED, depth);
-        let component = Component::Rendering(Box::new(rendering));
-        let lighting = Lighting::new(Vector3::new(1.0, 0.0, 0.0), 20, 32);
-        let processes = vec![PostProcess::Lighting(lighting)];
+        let definition = TextureDefinition::new(
+            "test",
+            Size::new(100, 50),
+            BLUE,
+            ComponentDefinition::Mock(42),
+            vec![PostProcessDefinition::Mock(13)],
+        );
+        let generator = TextureGenerator::new(
+            "test",
+            Size::new(200, 100),
+            BLUE,
+            Component::Mock(42),
+            vec![PostProcess::Mock(13)],
+        );
 
-        assert_convert(TextureGenerator::new("test", BLUE, component, processes));
-    }
-
-    fn assert_convert(generator: TextureGenerator) {
-        let definition: TextureDefinition = (&generator).into();
-        let result: TextureGenerator = definition.clone().try_into().unwrap();
-
-        assert_eq!(result, generator)
+        assert_eq!(generator, definition.convert(200).unwrap());
     }
 }
