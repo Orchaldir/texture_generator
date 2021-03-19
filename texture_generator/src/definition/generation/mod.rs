@@ -97,17 +97,14 @@ impl From<&TextureGenerator> for TextureDefinition {
 mod tests {
     use super::*;
     use crate::generation::component::Component;
-    use crate::generation::process::lighting::Lighting;
     use crate::generation::process::PostProcess;
     use crate::math::color::BLUE;
-    use crate::math::vector3::Vector3;
     use std::convert::TryInto;
 
     #[test]
     fn test_convert_layout() {
         let component = Component::Mock(42);
-        let lighting = Lighting::new(Vector3::new(1.0, 0.0, 0.0), 20, 32);
-        let processes = vec![PostProcess::Lighting(lighting)];
+        let processes = vec![PostProcess::Mock(13)];
 
         assert_convert(TextureGenerator::new(
             "test",
