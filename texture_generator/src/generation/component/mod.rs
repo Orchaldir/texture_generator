@@ -10,6 +10,7 @@ pub mod rendering;
 /// A wrapper for different types of components.
 pub enum Component {
     Layout(Box<LayoutComponent>),
+    Mock(u8),
     Rendering(Box<RenderingComponent>),
 }
 
@@ -18,6 +19,7 @@ impl Component {
     pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
             Component::Layout(component) => component.generate(data, aabb),
+            Component::Mock(id) => info!("Generate mock {}", *id),
             Component::Rendering(component) => component.render(data, aabb),
         }
     }

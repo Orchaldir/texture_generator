@@ -12,6 +12,7 @@ pub mod rendering;
 #[serde(tag = "type")]
 pub enum ComponentDefinition {
     Layout(Box<LayoutDefinition>),
+    Mock(u8),
     Rendering(Box<RenderingDefinition>),
 }
 
@@ -23,6 +24,7 @@ impl TryFrom<ComponentDefinition> for Component {
             ComponentDefinition::Layout(definition) => {
                 Ok(Component::Layout(Box::new((*definition).try_into()?)))
             }
+            ComponentDefinition::Mock(id) => Ok(Component::Mock(id)),
             ComponentDefinition::Rendering(definition) => {
                 Ok(Component::Rendering(Box::new((*definition).try_into()?)))
             }
@@ -37,6 +39,7 @@ impl From<&Component> for ComponentDefinition {
                 let definition: LayoutDefinition = (&(**component)).into();
                 ComponentDefinition::Layout(Box::new(definition))
             }
+            Component::Mock(id) => ComponentDefinition::Mock(*id),
             Component::Rendering(component) => {
                 let definition: RenderingDefinition = (&(**component)).into();
                 ComponentDefinition::Rendering(Box::new(definition))
@@ -57,17 +60,10 @@ mod tests {
 
     #[test]
     fn test_convert_layout() {
-        let depth = DepthDefinition::Uniform(42);
-        let rendering = RenderingDefinition::Shape {
-            name: "brick".to_string(),
-            shape: SHAPE,
-            color: RED,
-            depth,
-        };
         let layout = LayoutDefinition::Square {
             name: "test".to_string(),
             size: 10,
-            component: ComponentDefinition::Rendering(Box::new(rendering)),
+            component: ComponentDefinition::Mock(99),
         };
 
         assert_convert(ComponentDefinition::Layout(Box::new(layout)));

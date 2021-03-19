@@ -96,23 +96,16 @@ impl From<&TextureGenerator> for TextureDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::component::rendering::depth::DepthCalculator;
-    use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::component::Component;
     use crate::generation::process::lighting::Lighting;
     use crate::generation::process::PostProcess;
-    use crate::math::color::{BLUE, RED};
-    use crate::math::shape::Shape;
+    use crate::math::color::BLUE;
     use crate::math::vector3::Vector3;
     use std::convert::TryInto;
 
-    const SHAPE: Shape = Shape::Circle(42);
-
     #[test]
     fn test_convert_layout() {
-        let depth = DepthCalculator::Uniform(111);
-        let rendering = RenderingComponent::new_shape_with_depth("brick", SHAPE, RED, depth);
-        let component = Component::Rendering(Box::new(rendering));
+        let component = Component::Mock(42);
         let lighting = Lighting::new(Vector3::new(1.0, 0.0, 0.0), 20, 32);
         let processes = vec![PostProcess::Lighting(lighting)];
 
