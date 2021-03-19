@@ -1,4 +1,5 @@
 use crate::definition::generation::component::ComponentDefinition;
+use crate::definition::generation::process::PostProcessDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::utils::error::GenerationError;
@@ -11,14 +12,14 @@ use std::io::Write;
 use std::path::PathBuf;
 
 pub mod component;
-pub mod layout;
-pub mod rendering;
+pub mod process;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
     name: String,
     background: Color,
     component: ComponentDefinition,
+    post_processes: Vec<PostProcessDefinition>,
 }
 
 impl TextureDefinition {
@@ -26,11 +27,13 @@ impl TextureDefinition {
         name: S,
         background: Color,
         component: ComponentDefinition,
+        post_processes: Vec<PostProcessDefinition>,
     ) -> TextureDefinition {
         TextureDefinition {
             name: name.into(),
             background,
             component,
+            post_processes,
         }
     }
 
@@ -60,6 +63,11 @@ impl TryFrom<TextureDefinition> for TextureGenerator {
             definition.name,
             definition.background,
             definition.component.try_into()?,
+            definition
+                .post_processes
+                .into_iter()
+                .map(|process| process.into())
+                .collect(),
         ))
     }
 }
@@ -70,6 +78,11 @@ impl From<&TextureGenerator> for TextureDefinition {
             generator.name.clone(),
             generator.background,
             (&generator.component).into(),
+            generator
+                .post_processes
+                .iter()
+                .map(|process| process.into())
+                .collect(),
         )
     }
 }
@@ -77,33 +90,33 @@ impl From<&TextureGenerator> for TextureDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::definition::generation::component::ComponentDefinition;
-    use crate::definition::generation::rendering::depth::DepthDefinition;
-    use crate::definition::generation::rendering::RenderingDefinition;
-    use crate::definition::math::shape::ShapeDefinition;
+    use crate::generation::component::rendering::depth::DepthCalculator;
+    use crate::generation::component::rendering::RenderingComponent;
+    use crate::generation::component::Component;
+    use crate::generation::process::lighting::Lighting;
+    use crate::generation::process::PostProcess;
     use crate::math::color::{BLUE, RED};
+    use crate::math::shape::Shape;
+    use crate::math::vector3::Vector3;
     use std::convert::TryInto;
 
-    const SHAPE: ShapeDefinition = ShapeDefinition::Circle(42);
+    const SHAPE: Shape = Shape::Circle(42);
 
     #[test]
     fn test_convert_layout() {
-        let depth = DepthDefinition::Uniform(111);
-        let rendering = RenderingDefinition::Shape {
-            name: "brick".to_string(),
-            shape: SHAPE,
-            color: RED,
-            depth,
-        };
-        let component = ComponentDefinition::Rendering(Box::new(rendering));
+        let depth = DepthCalculator::Uniform(111);
+        let rendering = RenderingComponent::new_shape_with_depth("brick", SHAPE, RED, depth);
+        let component = Component::Rendering(Box::new(rendering));
+        let lighting = Lighting::new(Vector3::new(1.0, 0.0, 0.0), 20, 32);
+        let processes = vec![PostProcess::Lighting(lighting)];
 
-        assert_convert(TextureDefinition::new("test", BLUE, component));
+        assert_convert(TextureGenerator::new("test", BLUE, component, processes));
     }
 
-    fn assert_convert(definition: TextureDefinition) {
-        let generator: TextureGenerator = definition.clone().try_into().unwrap();
-        let result: TextureDefinition = (&generator).into();
+    fn assert_convert(generator: TextureGenerator) {
+        let definition: TextureDefinition = (&generator).into();
+        let result: TextureGenerator = definition.clone().try_into().unwrap();
 
-        assert_eq!(result, definition)
+        assert_eq!(result, generator)
     }
 }

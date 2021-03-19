@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::ops::{Add, Mul};
 
 /// Represents a color with the RGB color model.
 ///
@@ -59,6 +60,51 @@ impl Color {
 impl Default for Color {
     fn default() -> Self {
         PINK
+    }
+}
+
+/// Adds a [`Color`] to another [`Color`].
+///
+/// ```
+///# use texture_generator::math::color::Color;
+/// let a = Color::from_rgb(10, 100, 255);
+/// let b = Color::from_rgb(5, 80, 100);
+/// let result = Color::from_rgb(15, 180, 255);
+///
+/// assert_eq!(a + b, result);
+/// assert_eq!(b + a, result);
+/// ```
+impl Add<Color> for Color {
+    type Output = Color;
+
+    fn add(self, other: Color) -> Color {
+        Color::from_rgb(
+            self.r.saturating_add(other.r),
+            self.g.saturating_add(other.g),
+            self.b.saturating_add(other.b),
+        )
+    }
+}
+
+/// Multiplies a [`Color`] with a float.
+///
+/// ```
+///# use texture_generator::math::color::Color;
+/// let vector = Color::from_rgb(0, 100, 255);
+///
+/// assert_eq!(vector * -1.0, Color::from_rgb(0, 0, 0));
+/// assert_eq!(vector * 0.5, Color::from_rgb(0, 50, 127));
+/// assert_eq!(vector * 2.0, Color::from_rgb(0, 200, 255));
+/// ```
+impl Mul<f32> for Color {
+    type Output = Self;
+
+    fn mul(self, value: f32) -> Color {
+        Color::from_rgb(
+            (self.r as f32 * value) as u8,
+            (self.g as f32 * value) as u8,
+            (self.b as f32 * value) as u8,
+        )
     }
 }
 

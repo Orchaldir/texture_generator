@@ -1,9 +1,12 @@
+use crate::generation::component::layout::LayoutComponent;
+use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::data::Data;
-use crate::generation::layout::LayoutComponent;
-use crate::generation::rendering::RenderingComponent;
 use crate::math::aabb::AABB;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+pub mod layout;
+pub mod rendering;
+
+#[derive(Clone, Debug, PartialEq)]
 /// A wrapper for different types of components.
 pub enum Component {
     Layout(Box<LayoutComponent>),

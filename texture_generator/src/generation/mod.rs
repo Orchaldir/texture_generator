@@ -1,19 +1,20 @@
 use crate::generation::component::Component;
 use crate::generation::data::RuntimeData;
+use crate::generation::process::PostProcess;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::size::Size;
 
 pub mod component;
 pub mod data;
-pub mod layout;
-pub mod rendering;
+pub mod process;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TextureGenerator {
     pub name: String,
     pub background: Color,
     pub component: Component,
+    pub post_processes: Vec<PostProcess>,
 }
 
 impl TextureGenerator {
@@ -21,11 +22,13 @@ impl TextureGenerator {
         name: S,
         background: Color,
         component: Component,
+        post_processes: Vec<PostProcess>,
     ) -> TextureGenerator {
         TextureGenerator {
             name: name.into(),
             background,
             component,
+            post_processes,
         }
     }
 
@@ -37,24 +40,29 @@ impl TextureGenerator {
 
         self.component.generate(&mut data, &aabb);
 
+        for post_process in self.post_processes.iter() {
+            post_process.process(&mut data);
+        }
+
         data
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::Data;
-    use crate::generation::rendering::RenderingComponent;
     use crate::math::color::{GREEN, RED};
     use crate::math::shape::Shape;
+
+    use super::*;
 
     #[test]
     fn test_generate() {
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let rendering = RenderingComponent::new_shape("test", rectangle, RED);
         let component = Component::Rendering(Box::new(rendering));
-        let generator = TextureGenerator::new("test", GREEN, component);
+        let generator = TextureGenerator::new("test", GREEN, component, Vec::new());
 
         let data = generator.generate(4, 6);
 
@@ -68,13 +76,6 @@ mod tests {
             GREEN, GREEN, GREEN, GREEN
         ];
 
-        let color_data = data.get_color_data();
-
-        for (index, color) in result.iter().enumerate() {
-            let data_index = index * 3;
-            assert_eq!(color_data[data_index], color.r());
-            assert_eq!(color_data[data_index + 1], color.g());
-            assert_eq!(color_data[data_index + 2], color.b());
-        }
+        assert_eq!(data.get_color_data(), &result);
     }
 }

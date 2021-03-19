@@ -1,9 +1,12 @@
-use crate::definition::generation::layout::LayoutDefinition;
-use crate::definition::generation::rendering::RenderingDefinition;
+use crate::definition::generation::component::rendering::RenderingDefinition;
 use crate::generation::component::Component;
 use crate::utils::error::GenerationError;
+use layout::LayoutDefinition;
 use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
+
+pub mod layout;
+pub mod rendering;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -45,7 +48,7 @@ impl From<&Component> for ComponentDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::definition::generation::rendering::depth::DepthDefinition;
+    use crate::definition::generation::component::rendering::depth::DepthDefinition;
     use crate::definition::math::shape::ShapeDefinition;
     use crate::math::color::RED;
     use std::convert::TryInto;

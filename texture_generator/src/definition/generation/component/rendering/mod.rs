@@ -1,6 +1,6 @@
-use crate::definition::generation::rendering::depth::DepthDefinition;
+use crate::definition::generation::component::rendering::depth::DepthDefinition;
 use crate::definition::math::shape::ShapeDefinition;
-use crate::generation::rendering::RenderingComponent;
+use crate::generation::component::rendering::RenderingComponent;
 use crate::math::color::Color;
 use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};

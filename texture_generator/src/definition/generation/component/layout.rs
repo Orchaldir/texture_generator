@@ -1,5 +1,5 @@
 use crate::definition::generation::component::ComponentDefinition;
-use crate::generation::layout::LayoutComponent;
+use crate::generation::component::layout::LayoutComponent;
 use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
@@ -49,8 +49,8 @@ impl From<&LayoutComponent> for LayoutDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::definition::generation::rendering::depth::DepthDefinition;
-    use crate::definition::generation::rendering::RenderingDefinition;
+    use crate::definition::generation::component::rendering::depth::DepthDefinition;
+    use crate::definition::generation::component::rendering::RenderingDefinition;
     use crate::definition::math::shape::ShapeDefinition;
     use crate::math::color::RED;
     use std::convert::TryInto;

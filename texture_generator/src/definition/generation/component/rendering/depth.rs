@@ -1,4 +1,4 @@
-use crate::generation::rendering::depth::DepthCalculator;
+use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
@@ -28,9 +28,9 @@ impl From<&DepthCalculator> for DepthDefinition {
         match component {
             DepthCalculator::Uniform(depth) => DepthDefinition::Uniform(*depth),
             DepthCalculator::Linear { center, diff } => {
-                let border = (*diff + *center as i16) as u8;
+                let border = (*diff + *center) as u8;
                 DepthDefinition::Linear {
-                    center: *center,
+                    center: *center as u8,
                     border,
                 }
             }
