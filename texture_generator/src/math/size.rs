@@ -1,5 +1,6 @@
 use crate::math::point::Point;
 use serde::{Deserialize, Serialize};
+use std::ops::Mul;
 
 #[svgbobdoc::transform]
 /// Defines the size of something (e.g. a texture) in 2 dimensions.
@@ -178,5 +179,24 @@ impl Size {
     /// ```
     pub fn convert_x_y(&self, x: u32, y: u32) -> usize {
         (y * self.width + x) as usize
+    }
+}
+
+/// Multiplies a [`Size`] with a float.
+///
+/// ```
+///# use texture_generator::math::size::Size;
+/// let vector = Size::new(10, 30);
+///
+/// assert_eq!(vector * 1.5, Size::new(15, 45));
+/// ```
+impl Mul<f32> for Size {
+    type Output = Self;
+
+    fn mul(self, value: f32) -> Size {
+        Size::new(
+            (self.width as f32 * value) as u32,
+            (self.height as f32 * value) as u32,
+        )
     }
 }

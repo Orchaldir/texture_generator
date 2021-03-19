@@ -6,7 +6,6 @@ use crate::math::size::Size;
 use crate::utils::error::GenerationError;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
-use std::convert::{TryFrom, TryInto};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
@@ -57,39 +56,25 @@ impl TextureDefinition {
 
         Ok(())
     }
-}
 
-impl TryFrom<TextureDefinition> for TextureGenerator {
-    type Error = GenerationError;
+    pub fn convert(&self, size: u32) -> Result<TextureGenerator, GenerationError> {
+        let max = self.size.width().max(self.size.height());
+        let factor = size as f32 / max as f32;
+        let component = self.component.convert(factor)?;
+        let post_processes = self
+            .post_processes
+            .clone()
+            .into_iter()
+            .map(|process| process.into())
+            .collect();
 
-    fn try_from(definition: TextureDefinition) -> Result<Self, Self::Error> {
         Ok(TextureGenerator::new(
-            definition.name,
-            definition.size,
-            definition.background,
-            definition.component.try_into()?,
-            definition
-                .post_processes
-                .into_iter()
-                .map(|process| process.into())
-                .collect(),
+            self.name.clone(),
+            self.size * factor,
+            self.background,
+            component,
+            post_processes,
         ))
-    }
-}
-
-impl From<&TextureGenerator> for TextureDefinition {
-    fn from(generator: &TextureGenerator) -> Self {
-        TextureDefinition::new(
-            generator.name.clone(),
-            generator.size,
-            generator.background,
-            (&generator.component).into(),
-            generator
-                .post_processes
-                .iter()
-                .map(|process| process.into())
-                .collect(),
-        )
     }
 }
 
@@ -99,26 +84,24 @@ mod tests {
     use crate::generation::component::Component;
     use crate::generation::process::PostProcess;
     use crate::math::color::BLUE;
-    use std::convert::TryInto;
 
     #[test]
     fn test_convert_layout() {
-        let component = Component::Mock(42);
-        let processes = vec![PostProcess::Mock(13)];
-
-        assert_convert(TextureGenerator::new(
+        let definition = TextureDefinition::new(
             "test",
-            Size::new(1, 1),
+            Size::new(100, 50),
             BLUE,
-            component,
-            processes,
-        ));
-    }
+            ComponentDefinition::Mock(42),
+            vec![PostProcessDefinition::Mock(13)],
+        );
+        let generator = TextureGenerator::new(
+            "test",
+            Size::new(200, 100),
+            BLUE,
+            Component::Mock(42),
+            vec![PostProcess::Mock(13)],
+        );
 
-    fn assert_convert(generator: TextureGenerator) {
-        let definition: TextureDefinition = (&generator).into();
-        let result: TextureGenerator = definition.clone().try_into().unwrap();
-
-        assert_eq!(result, generator)
+        assert_eq!(generator, definition.convert(200).unwrap());
     }
 }

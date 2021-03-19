@@ -11,7 +11,7 @@ component:
   type: Layout
   Square:
     name: layout
-    size: 128
+    side: 128
     component:
       type: Rendering
       Shape:

@@ -36,10 +36,9 @@ impl TextureGenerator {
     }
 
     /// Generates the texture with a specific size.
-    pub fn generate(&self, width: u32, height: u32) -> RuntimeData {
-        let size = Size::new(width, height);
-        let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, self.background);
+    pub fn generate(&self) -> RuntimeData {
+        let aabb = AABB::with_size(self.size);
+        let mut data = RuntimeData::new(self.size, self.background);
 
         self.component.generate(&mut data, &aabb);
 
@@ -66,9 +65,9 @@ mod tests {
         let rendering = RenderingComponent::new_shape("test", rectangle, RED);
         let component = Component::Rendering(Box::new(rendering));
         let generator =
-            TextureGenerator::new("test", Size::new(1, 1), GREEN, component, Vec::new());
+            TextureGenerator::new("test", Size::new(4, 6), GREEN, component, Vec::new());
 
-        let data = generator.generate(4, 6);
+        let data = generator.generate();
 
         #[rustfmt::skip]
         let result = vec![

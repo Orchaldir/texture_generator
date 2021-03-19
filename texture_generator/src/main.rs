@@ -2,7 +2,6 @@
 extern crate log;
 
 use anyhow::Result;
-use std::convert::TryInto;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use texture_generator::definition::generation::TextureDefinition;
@@ -38,13 +37,13 @@ fn main() -> Result<()> {
     info!("Load definition");
 
     let definition = TextureDefinition::read(&args.input)?;
-    let generator: TextureGenerator = definition.try_into()?;
+    let generator: TextureGenerator = definition.convert(args.size)?;
     let color_path = format!("{}-color.png", args.output);
     let depth_path = format!("{}-depth.png", args.output);
 
     info!("Rendering");
 
-    let data = generator.generate(args.size, args.size);
+    let data = generator.generate();
 
     info!("Save color to {:?}", color_path);
 
