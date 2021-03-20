@@ -23,9 +23,9 @@ component:
           g: 0
           b: 255
         depth:
-          type: Linear
-          center: 255
-          border: 50
+          Linear:
+            center: 255
+            border: 50
 post_processes:
   - Lighting:
       light_direction:
