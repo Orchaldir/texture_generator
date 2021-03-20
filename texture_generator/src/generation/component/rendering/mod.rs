@@ -2,6 +2,7 @@ use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
+use crate::math::point::Point;
 use crate::math::shape::Shape;
 
 pub mod depth;
@@ -51,13 +52,15 @@ impl RenderingComponent {
                 depth_calculator,
                 ..
             } => {
-                let mut point = aabb.start();
+                let start = aabb.start().max(&Point::default());
+                let end = aabb.end().limit_to(data.get_size());
+                let mut point = start;
                 let center = aabb.center();
 
-                while point.y < aabb.end().y {
-                    point.x = aabb.start().x;
+                while point.y < end.y {
+                    point.x = start.x;
 
-                    while point.x < aabb.end().x {
+                    while point.x < end.x {
                         if shape.is_inside(&center, &point) {
                             let distance = shape.distance(&center, &point);
                             let depth = depth_calculator.calculate(distance);
@@ -119,6 +122,40 @@ mod tests {
             0, 0, 255, 255, 0,
             0, 0, 255, 255, 0,
             0, 0,   0,   0, 0
+        ];
+
+        assert_eq!(data.get_depth_data(), &depth);
+    }
+
+    #[test]
+    fn test_render_shape_partly_outside() {
+        let size = Size::new(4, 2);
+        let data_size = Size::new(4, 4);
+        let start = Point::new(-2, -1);
+        let rectangle = Shape::new_rectangle(4, 2).unwrap();
+        let aabb = AABB::new(start, size);
+
+        let mut data = RuntimeData::new(data_size, WHITE);
+        let renderer = RenderingComponent::new_shape("test", rectangle, RED);
+
+        renderer.render(&mut data, &aabb);
+
+        #[rustfmt::skip]
+            let colors = vec![
+              RED,   RED, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE,
+        ];
+
+        assert_eq!(data.get_color_data(), &colors);
+
+        #[rustfmt::skip]
+            let depth = vec![
+            255, 255, 0, 0,
+              0,   0, 0, 0,
+              0,   0, 0, 0,
+              0,   0, 0, 0,
         ];
 
         assert_eq!(data.get_depth_data(), &depth);

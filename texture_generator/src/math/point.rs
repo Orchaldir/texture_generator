@@ -53,6 +53,58 @@ impl Point {
     pub fn calculate_distance(&self, point: &Point) -> f32 {
         (self.x as f32 - point.x as f32).hypot(self.y as f32 - point.y as f32)
     }
+
+    /// Returns a new point with the max coordinates of both points.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    /// let a = Point::new(1, 6);
+    /// let b = Point::new(4, 2);
+    /// let max = Point::new(4, 6);
+    ///
+    /// assert_eq!(a.max(&a), a);
+    /// assert_eq!(a.max(&b), max);
+    /// assert_eq!(b.max(&a), max);
+    /// assert_eq!(b.max(&b), b);
+    /// ```
+    pub fn max(&self, point: &Point) -> Self {
+        Point::new(self.x.max(point.x), self.y.max(point.y))
+    }
+
+    /// Returns a new point with the min coordinates of both points.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    /// let a = Point::new(1, 6);
+    /// let b = Point::new(4, 2);
+    /// let min = Point::new(1, 2);
+    ///
+    /// assert_eq!(a.min(&a), a);
+    /// assert_eq!(a.min(&b), min);
+    /// assert_eq!(b.min(&a), min);
+    /// assert_eq!(b.min(&b), b);
+    /// ```
+    pub fn min(&self, point: &Point) -> Self {
+        Point::new(self.x.min(point.x), self.y.min(point.y))
+    }
+
+    /// Returns a new point with the min coordinates of the point & size.
+    ///
+    /// ```
+    ///# use texture_generator::math::point::Point;
+    ///# use texture_generator::math::size::Size;
+    /// let point = Point::new(1, 6);
+    /// let size = Size::new(4, 2);
+    /// let min = Point::new(1, 2);
+    ///
+    /// assert_eq!(point.limit_to(&size), Point::new(1, 2));
+    /// ```
+    pub fn limit_to(&self, size: &Size) -> Self {
+        Point::new(
+            self.x.min(size.width() as i32),
+            self.y.min(size.height() as i32),
+        )
+    }
 }
 
 /// Add a [`Size`] to a [`Point`].
