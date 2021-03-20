@@ -12,6 +12,12 @@ pub enum GenerationError {
     },
     #[error(transparent)]
     SerdeError(#[from] serde_yaml::Error),
+    #[error("Value {name:?} of component {component:?} is too big ({value})")]
+    ValueTooBig {
+        component: String,
+        name: String,
+        value: u32,
+    },
     #[error("Value {name:?} of component {component:?} is too small ({value})")]
     ValueTooSmall {
         component: String,
@@ -25,6 +31,18 @@ impl GenerationError {
         GenerationError::InvalidShape {
             component: component.into(),
             source,
+        }
+    }
+
+    pub fn value_too_big<S: Into<String>, T: Into<String>>(
+        component: S,
+        name: T,
+        value: u32,
+    ) -> GenerationError {
+        GenerationError::ValueTooBig {
+            component: component.into(),
+            name: name.into(),
+            value,
         }
     }
 
