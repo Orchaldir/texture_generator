@@ -20,6 +20,7 @@ pub struct TextureDefinition {
     size: Size,
     background: Color,
     component: ComponentDefinition,
+    #[serde(default)]
     post_processes: Vec<PostProcessDefinition>,
 }
 

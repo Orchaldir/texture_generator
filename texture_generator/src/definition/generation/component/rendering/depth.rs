@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type")]
 pub enum DepthDefinition {
     Uniform(u8),
     Linear { center: u8, border: u8 },

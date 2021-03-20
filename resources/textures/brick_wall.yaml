@@ -1,0 +1,31 @@
+---
+name: brick_wall
+size:
+  width: 1024
+  height: 1024
+background:
+  r: 255
+  g: 255
+  b: 255
+component:
+  type: Layout
+  BrickWall:
+    name: layout
+    brick:
+      width: 128
+      height: 64
+    offset: 64
+    component:
+      type: Rendering
+      Shape:
+        name: circle
+        shape:
+          Rectangle:
+            width: 120
+            height: 60
+        color:
+          r: 255
+          g: 0
+          b: 0
+        depth:
+          Uniform: 255
