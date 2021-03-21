@@ -13,7 +13,7 @@ pub enum RenderingDefinition {
     Shape {
         name: String,
         shape: ShapeDefinition,
-        color: Color,
+        color: String,
         depth: DepthDefinition,
     },
 }
@@ -28,9 +28,13 @@ impl RenderingDefinition {
                 depth,
             } => match shape.convert(factor) {
                 Ok(shape) => match depth.clone().try_into() {
-                    Ok(depth) => Ok(RenderingComponent::new_shape_with_depth(
-                        name, shape, *color, depth,
-                    )),
+                    Ok(depth) => {
+                        let color = Color::convert(color)
+                            .ok_or_else(|| GenerationError::invalid_colo(name, color))?;
+                        Ok(RenderingComponent::new_shape_with_depth(
+                            name, shape, color, depth,
+                        ))
+                    }
                     Err(error) => Err(error),
                 },
                 Err(error) => Err(GenerationError::invalid_shape(name, error)),
@@ -43,7 +47,7 @@ impl RenderingDefinition {
 mod tests {
     use super::*;
     use crate::generation::component::rendering::depth::DepthCalculator;
-    use crate::math::color::RED;
+    use crate::math::color::ORANGE;
     use crate::math::shape::Shape;
 
     #[test]
@@ -53,13 +57,13 @@ mod tests {
         let definition = RenderingDefinition::Shape {
             name: "circle".to_string(),
             shape,
-            color: RED,
+            color: "#FFA500".to_string(),
             depth,
         };
         let component = RenderingComponent::new_shape_with_depth(
             "circle",
             Shape::Circle(126),
-            RED,
+            ORANGE,
             DepthCalculator::Uniform(111),
         );
 
@@ -73,7 +77,7 @@ mod tests {
         let definition = RenderingDefinition::Shape {
             name: "brick".to_string(),
             shape,
-            color: RED,
+            color: "#FFA500".to_string(),
             depth,
         };
 

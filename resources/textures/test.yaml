@@ -3,10 +3,7 @@ name: test
 size:
   width: 1024
   height: 1024
-background:
-  r: 0
-  g: 255
-  b: 0
+background: "#00FF00"
 component:
   type: Layout
   Square:
@@ -18,10 +15,7 @@ component:
         name: circle
         shape:
           Circle: 42
-        color:
-          r: 0
-          g: 0
-          b: 255
+        color: "#0000FF"
         depth:
           Linear:
             center: 255

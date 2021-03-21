@@ -3,10 +3,7 @@ name: brick_wall
 size:
   width: 1024
   height: 1024
-background:
-  r: 255
-  g: 255
-  b: 255
+background: "#FFFFFF"
 component:
   type: Layout
   BrickWall:
@@ -23,9 +20,6 @@ component:
           Rectangle:
             width: 120
             height: 60
-        color:
-          r: 255
-          g: 0
-          b: 0
+        color: "#FF0000"
         depth:
           Uniform: 255
