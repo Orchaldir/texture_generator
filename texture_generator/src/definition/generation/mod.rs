@@ -69,7 +69,7 @@ impl TextureDefinition {
             .map(|process| process.into())
             .collect();
         let color = Color::convert(&self.background)
-            .ok_or_else(|| GenerationError::invalid_colo("background", &self.background))?;
+            .ok_or_else(|| GenerationError::invalid_color("background", &self.background))?;
 
         Ok(TextureGenerator::new(
             self.name.clone(),

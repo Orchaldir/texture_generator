@@ -6,6 +6,7 @@ use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
 
+pub mod color;
 pub mod depth;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -30,7 +31,7 @@ impl RenderingDefinition {
                 Ok(shape) => match depth.clone().try_into() {
                     Ok(depth) => {
                         let color = Color::convert(color)
-                            .ok_or_else(|| GenerationError::invalid_colo(name, color))?;
+                            .ok_or_else(|| GenerationError::invalid_color(name, color))?;
                         Ok(RenderingComponent::new_shape_with_depth(
                             name, shape, color, depth,
                         ))

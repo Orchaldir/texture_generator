@@ -5,6 +5,7 @@ use crate::math::color::Color;
 use crate::math::point::Point;
 use crate::math::shape::Shape;
 
+pub mod color;
 pub mod depth;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -21,12 +22,7 @@ pub enum RenderingComponent {
 
 impl RenderingComponent {
     pub fn new_shape<S: Into<String>>(name: S, shape: Shape, color: Color) -> RenderingComponent {
-        RenderingComponent::Shape {
-            name: name.into(),
-            shape,
-            color,
-            depth_calculator: DepthCalculator::Uniform(255),
-        }
+        RenderingComponent::new_shape_with_depth(name, shape, color, DepthCalculator::Uniform(255))
     }
 
     pub fn new_shape_with_depth<S: Into<String>>(

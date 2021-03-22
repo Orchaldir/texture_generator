@@ -29,7 +29,7 @@ pub enum GenerationError {
 }
 
 impl GenerationError {
-    pub fn invalid_colo<S: Into<String>>(name: S, value: S) -> GenerationError {
+    pub fn invalid_color<S: Into<String>>(name: S, value: S) -> GenerationError {
         GenerationError::InvalidColor {
             name: name.into(),
             value: value.into(),
