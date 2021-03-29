@@ -1,7 +1,7 @@
+use crate::definition::generation::component::rendering::color::ColorSelectorDefinition;
 use crate::definition::generation::component::rendering::depth::DepthDefinition;
 use crate::definition::math::shape::ShapeDefinition;
 use crate::generation::component::rendering::RenderingComponent;
-use crate::math::color::Color;
 use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
@@ -14,7 +14,7 @@ pub enum RenderingDefinition {
     Shape {
         name: String,
         shape: ShapeDefinition,
-        color: String,
+        color: ColorSelectorDefinition,
         depth: DepthDefinition,
     },
 }
@@ -30,8 +30,7 @@ impl RenderingDefinition {
             } => match shape.convert(factor) {
                 Ok(shape) => match depth.clone().try_into() {
                     Ok(depth) => {
-                        let color = Color::convert(color)
-                            .ok_or_else(|| GenerationError::invalid_color(name, color))?;
+                        let color = color.convert(name)?;
                         Ok(RenderingComponent::new_shape_with_depth(
                             name, shape, color, depth,
                         ))
@@ -47,6 +46,7 @@ impl RenderingDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generation::component::rendering::color::ColorSelector;
     use crate::generation::component::rendering::depth::DepthCalculator;
     use crate::math::color::ORANGE;
     use crate::math::shape::Shape;
@@ -54,17 +54,18 @@ mod tests {
     #[test]
     fn test_convert_shape() {
         let shape = ShapeDefinition::Circle(42);
+        let color = ColorSelectorDefinition::ConstantColor("#FFA500".to_string());
         let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
             name: "circle".to_string(),
             shape,
-            color: "#FFA500".to_string(),
+            color,
             depth,
         };
         let component = RenderingComponent::new_shape_with_depth(
             "circle",
             Shape::Circle(126),
-            ORANGE,
+            ColorSelector::ConstantColor(ORANGE),
             DepthCalculator::Uniform(111),
         );
 
@@ -74,11 +75,12 @@ mod tests {
     #[test]
     fn test_convert_invalid_shape() {
         let shape = ShapeDefinition::Circle(0);
+        let color = ColorSelectorDefinition::ConstantColor("#FFA500".to_string());
         let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
             name: "brick".to_string(),
             shape,
-            color: "#FFA500".to_string(),
+            color,
             depth,
         };
 

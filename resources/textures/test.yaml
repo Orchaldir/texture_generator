@@ -15,7 +15,8 @@ component:
         name: circle
         shape:
           Circle: 42
-        color: "#0000FF"
+        color:
+          ConstantColor: "#0000FF"
         depth:
           Linear:
             center: 255

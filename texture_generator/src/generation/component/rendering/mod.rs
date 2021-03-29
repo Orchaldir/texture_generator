@@ -1,3 +1,4 @@
+use crate::generation::component::rendering::color::ColorSelector;
 use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
@@ -15,26 +16,31 @@ pub enum RenderingComponent {
     Shape {
         name: String,
         shape: Shape,
-        color: Color,
+        color_selector: ColorSelector,
         depth_calculator: DepthCalculator,
     },
 }
 
 impl RenderingComponent {
     pub fn new_shape<S: Into<String>>(name: S, shape: Shape, color: Color) -> RenderingComponent {
-        RenderingComponent::new_shape_with_depth(name, shape, color, DepthCalculator::Uniform(255))
+        RenderingComponent::new_shape_with_depth(
+            name,
+            shape,
+            ColorSelector::ConstantColor(color),
+            DepthCalculator::Uniform(255),
+        )
     }
 
     pub fn new_shape_with_depth<S: Into<String>>(
         name: S,
         shape: Shape,
-        color: Color,
+        color_selector: ColorSelector,
         depth_calculator: DepthCalculator,
     ) -> RenderingComponent {
         RenderingComponent::Shape {
             name: name.into(),
             shape,
-            color,
+            color_selector,
             depth_calculator,
         }
     }
@@ -44,7 +50,7 @@ impl RenderingComponent {
         match self {
             RenderingComponent::Shape {
                 shape,
-                color,
+                color_selector,
                 depth_calculator,
                 ..
             } => {
@@ -52,6 +58,7 @@ impl RenderingComponent {
                 let end = aabb.end().limit_to(data.get_size());
                 let mut point = start;
                 let center = aabb.center();
+                let color = color_selector.select();
 
                 while point.y < end.y {
                     point.x = start.x;
@@ -60,7 +67,7 @@ impl RenderingComponent {
                         if shape.is_inside(&center, &point) {
                             let distance = shape.distance(&center, &point);
                             let depth = depth_calculator.calculate(distance);
-                            data.set(&point, color, depth);
+                            data.set(&point, &color, depth);
                         }
 
                         point.x += 1;

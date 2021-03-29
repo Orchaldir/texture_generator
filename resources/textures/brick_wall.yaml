@@ -20,6 +20,11 @@ component:
           Rectangle:
             width: 120
             height: 60
-        color: "#FF0000"
+        color:
+          Sequence:
+            - "#4E0707"
+            - "#A91B0D"
+            - "#E3242B"
+            - "#990F02"
         depth:
           Uniform: 255
