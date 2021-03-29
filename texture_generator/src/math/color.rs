@@ -17,6 +17,24 @@ impl Color {
         Color { r, g, b }
     }
 
+    /// Converts a string to a color, if possible:
+    ///
+    /// ```
+    /// use texture_generator::math::color::{Color, ORANGE};
+    /// assert_eq!(Color::convert("#FFA500"), Some(ORANGE));
+    /// ```
+    pub fn convert(hex_code: &str) -> Option<Color> {
+        if !hex_code.starts_with('#') || hex_code.len() < 7 {
+            return None;
+        }
+
+        let r: u8 = u8::from_str_radix(&hex_code[1..3], 16).ok()?;
+        let g: u8 = u8::from_str_radix(&hex_code[3..5], 16).ok()?;
+        let b: u8 = u8::from_str_radix(&hex_code[5..7], 16).ok()?;
+
+        Some(Color::from_rgb(r, g, b))
+    }
+
     /// Returns a new gray color.
     pub const fn gray(value: u8) -> Color {
         Color {
@@ -118,3 +136,32 @@ pub const RED: Color = Color::from_rgb(255, 0, 0);
 pub const PINK: Color = Color::from_rgb(255, 0, 128);
 pub const WHITE: Color = Color::from_rgb(255, 255, 255);
 pub const YELLOW: Color = Color::from_rgb(255, 255, 0);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_empty_string() {
+        assert_eq!(Color::convert(""), None);
+    }
+
+    #[test]
+    fn test_from_string_invalid_start() {
+        assert_eq!(Color::convert("FFA500"), None);
+    }
+
+    #[test]
+    fn test_from_string_part() {
+        assert_eq!(Color::convert("#"), None);
+        assert_eq!(Color::convert("#FF"), None);
+        assert_eq!(Color::convert("#FFA5"), None);
+        assert_eq!(Color::convert("#FFA50"), None);
+    }
+
+    #[test]
+    fn test_from_string_ignore_case() {
+        assert_eq!(Color::convert("#FFA500"), Some(ORANGE));
+        assert_eq!(Color::convert("#ffa500"), Some(ORANGE));
+    }
+}

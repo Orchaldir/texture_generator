@@ -18,7 +18,7 @@ pub mod process;
 pub struct TextureDefinition {
     name: String,
     size: Size,
-    background: Color,
+    background: String,
     component: ComponentDefinition,
     #[serde(default)]
     post_processes: Vec<PostProcessDefinition>,
@@ -28,7 +28,7 @@ impl TextureDefinition {
     pub fn new<S: Into<String>>(
         name: S,
         size: Size,
-        background: Color,
+        background: String,
         component: ComponentDefinition,
         post_processes: Vec<PostProcessDefinition>,
     ) -> TextureDefinition {
@@ -68,11 +68,13 @@ impl TextureDefinition {
             .into_iter()
             .map(|process| process.into())
             .collect();
+        let color = Color::convert(&self.background)
+            .ok_or_else(|| GenerationError::invalid_color("background", &self.background))?;
 
         Ok(TextureGenerator::new(
             self.name.clone(),
             self.size * factor,
-            self.background,
+            color,
             component,
             post_processes,
         ))
@@ -91,7 +93,7 @@ mod tests {
         let definition = TextureDefinition::new(
             "test",
             Size::new(100, 50),
-            BLUE,
+            "#0000FF".to_string(),
             ComponentDefinition::Mock(42),
             vec![PostProcessDefinition::Mock(13)],
         );

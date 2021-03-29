@@ -3,10 +3,7 @@ name: brick_wall
 size:
   width: 1024
   height: 1024
-background:
-  r: 255
-  g: 255
-  b: 255
+background: "#FFFFFF"
 component:
   type: Layout
   BrickWall:
@@ -24,8 +21,10 @@ component:
             width: 120
             height: 60
         color:
-          r: 255
-          g: 0
-          b: 0
+          Sequence:
+            - "#4E0707"
+            - "#A91B0D"
+            - "#E3242B"
+            - "#990F02"
         depth:
           Uniform: 255

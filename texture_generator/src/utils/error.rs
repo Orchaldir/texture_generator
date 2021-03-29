@@ -5,6 +5,8 @@ use thiserror::Error;
 pub enum GenerationError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
+    #[error("Color {name:?} has an invalid value {value:?}")]
+    InvalidColor { name: String, value: String },
     #[error("Component {component:?} has an invalid shape")]
     InvalidShape {
         component: String,
@@ -27,6 +29,13 @@ pub enum GenerationError {
 }
 
 impl GenerationError {
+    pub fn invalid_color<S: Into<String>>(name: S, value: S) -> GenerationError {
+        GenerationError::InvalidColor {
+            name: name.into(),
+            value: value.into(),
+        }
+    }
+
     pub fn invalid_shape<S: Into<String>>(component: S, source: ShapeError) -> GenerationError {
         GenerationError::InvalidShape {
             component: component.into(),
