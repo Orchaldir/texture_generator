@@ -1,21 +1,27 @@
 use crate::math::color::Color;
-use rand::Rng;
+use std::cell::RefCell;
+use std::ops::AddAssign;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ColorSelector {
     /// Everything has the same color.
     ConstantColor(Color),
-    /// Randomly select from a list of colors with equal probability.
-    UniformDistribution(Vec<Color>),
+    /// A sequence of colors that repeats.
+    Sequence(Vec<Color>, RefCell<usize>),
 }
 
 impl ColorSelector {
-    pub fn select(&self, random: &mut dyn rand::RngCore) -> Color {
+    pub fn new_sequence(colors: Vec<Color>) -> ColorSelector {
+        ColorSelector::Sequence(colors, RefCell::new(0))
+    }
+
+    pub fn select(&self) -> Color {
         match self {
             ColorSelector::ConstantColor(color) => *color,
-            ColorSelector::UniformDistribution(colors) => {
-                let index = random.gen::<usize>() % colors.len();
-                colors[index]
+            ColorSelector::Sequence(colors, index) => {
+                let current_index = *index.borrow() % colors.len();
+                index.borrow_mut().add_assign(1);
+                colors[current_index]
             }
         }
     }
@@ -25,25 +31,25 @@ impl ColorSelector {
 mod tests {
     use super::*;
     use crate::math::color::{BLUE, GREEN, RED};
-    use rand::rngs::mock::StepRng;
-    use rand::RngCore;
 
     #[test]
     fn test_constant() {
-        let mut random = StepRng::new(0, 1);
         let selector = ColorSelector::ConstantColor(RED);
 
-        assert_eq!(selector.select(&mut random), RED);
-        assert_eq!(random.next_u32(), 0);
+        assert_eq!(selector.select(), RED);
+        assert_eq!(selector.select(), RED);
+        assert_eq!(selector.select(), RED);
     }
 
     #[test]
     fn test_uniform() {
-        let mut random = StepRng::new(0, 1);
-        let selector = ColorSelector::UniformDistribution(vec![RED, GREEN, BLUE]);
+        let selector = ColorSelector::new_sequence(vec![RED, GREEN, BLUE]);
 
-        assert_eq!(selector.select(&mut random), RED);
-        assert_eq!(selector.select(&mut random), GREEN);
-        assert_eq!(selector.select(&mut random), BLUE);
+        assert_eq!(selector.select(), RED);
+        assert_eq!(selector.select(), GREEN);
+        assert_eq!(selector.select(), BLUE);
+        assert_eq!(selector.select(), RED);
+        assert_eq!(selector.select(), GREEN);
+        assert_eq!(selector.select(), BLUE);
     }
 }

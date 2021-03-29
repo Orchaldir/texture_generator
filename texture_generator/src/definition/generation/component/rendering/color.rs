@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ColorSelectorDefinition {
     ConstantColor(String),
-    UniformDistribution(Vec<String>),
+    Sequence(Vec<String>),
 }
 
 impl ColorSelectorDefinition {
@@ -17,7 +17,7 @@ impl ColorSelectorDefinition {
                     .ok_or_else(|| GenerationError::invalid_color(name, &color))?;
                 Ok(ColorSelector::ConstantColor(color))
             }
-            ColorSelectorDefinition::UniformDistribution(colors) => {
+            ColorSelectorDefinition::Sequence(colors) => {
                 let mut converted_colors = Vec::with_capacity(colors.len());
 
                 for color in colors {
@@ -26,7 +26,7 @@ impl ColorSelectorDefinition {
                     converted_colors.push(color);
                 }
 
-                Ok(ColorSelector::UniformDistribution(converted_colors))
+                Ok(ColorSelector::new_sequence(converted_colors))
             }
         }
     }
@@ -47,11 +47,9 @@ mod tests {
 
     #[test]
     fn test_convert_uniform() {
-        let definition = ColorSelectorDefinition::UniformDistribution(vec![
-            "#FFA500".to_string(),
-            "#FF0080".to_string(),
-        ]);
-        let selector = ColorSelector::UniformDistribution(vec![ORANGE, PINK]);
+        let definition =
+            ColorSelectorDefinition::Sequence(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
+        let selector = ColorSelector::new_sequence(vec![ORANGE, PINK]);
 
         assert_eq!(selector, definition.convert("test").unwrap())
     }
