@@ -198,12 +198,6 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
-        println!(
-            "data={}, expected={}",
-            data.get_color_data().len(),
-            &expected_colors.len()
-        );
-
         assert_eq!(data.get_color_data(), &expected_colors);
     }
 

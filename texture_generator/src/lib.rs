@@ -1,6 +1,3 @@
-#[cfg(test)]
-#[macro_use]
-extern crate approx;
 #[macro_use]
 extern crate log;
 

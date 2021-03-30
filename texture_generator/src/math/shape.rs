@@ -101,6 +101,7 @@ impl Shape {
 mod tests {
     use super::*;
     use crate::math::size::Size;
+    use assert_approx_eq::assert_approx_eq;
 
     const CENTER: Point = Point::new(2, 3);
 
@@ -132,24 +133,22 @@ mod tests {
 
         for x in 0..(radius * 2) {
             let result = x as f32 / 10.0;
-            println!("x={} result={}", x, result);
-            relative_eq!(
+            assert_approx_eq!(
                 rectangle.distance(&CENTER, &Point::new(CENTER.x - x as i32, CENTER.y)),
                 result
             );
-            relative_eq!(
+            assert_approx_eq!(
                 rectangle.distance(&CENTER, &Point::new(CENTER.x + x as i32, CENTER.y)),
                 result
             );
         }
 
         for y in 0..16 {
-            println!("y={}", y);
-            relative_eq!(
+            assert_approx_eq!(
                 rectangle.distance(&CENTER, &Point::new(CENTER.x, CENTER.y - y as i32)),
                 0.0
             );
-            relative_eq!(
+            assert_approx_eq!(
                 rectangle.distance(&CENTER, &Point::new(CENTER.x, CENTER.y + y as i32)),
                 0.0
             );
@@ -157,12 +156,11 @@ mod tests {
 
         for y in 16..36 {
             let result = (y - 15) as f32 / 10.0;
-            println!("y={} result={}", y, result);
-            relative_eq!(
+            assert_approx_eq!(
                 rectangle.distance(&CENTER, &Point::new(CENTER.x, CENTER.y - y as i32)),
                 result
             );
-            relative_eq!(
+            assert_approx_eq!(
                 rectangle.distance(&CENTER, &Point::new(CENTER.x, CENTER.y + y as i32)),
                 result
             );
