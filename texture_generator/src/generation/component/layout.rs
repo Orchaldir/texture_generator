@@ -169,7 +169,7 @@ mod tests {
 
     #[test]
     fn test_brick_wall() {
-        let size = Size::new(8, 12);
+        let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
 
         let mut data = RuntimeData::new(size, WHITE);
@@ -178,34 +178,43 @@ mod tests {
         let renderer = RenderingComponent::new_shape("tile", rectangle, RED);
         let component = Component::Rendering(Box::new(renderer));
         let layout =
-            LayoutComponent::new_brick_wall("test", Size::new(4, 4), 2, component).unwrap();
+            LayoutComponent::new_brick_wall("test", Size::new(5, 5), 2, component).unwrap();
 
         layout.generate(&mut data, &aabb);
 
         #[rustfmt::skip]
-            let expected_colors = vec![
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
+        let expected_colors = vec![
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
 
-            WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE,
-              RED, WHITE,   WHITE,   RED,   RED, WHITE,   WHITE,   RED,
-              RED, WHITE,   WHITE,   RED,   RED, WHITE,   WHITE,   RED,
-            WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE,
+            WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE,
+              RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,
+              RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,
+              RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,
+            WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE,
 
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
+
+        println!(
+            "data={}, expected={}",
+            data.get_color_data().len(),
+            &expected_colors.len()
+        );
 
         assert_eq!(data.get_color_data(), &expected_colors);
     }
 
     #[test]
     fn test_square_layout() {
-        let size = Size::new(8, 12);
+        let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
 
         let mut data = RuntimeData::new(size, WHITE);
@@ -213,26 +222,29 @@ mod tests {
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
         let renderer = RenderingComponent::new_shape("tile", rectangle, RED);
         let component = Component::Rendering(Box::new(renderer));
-        let layout = LayoutComponent::new_square("test", 4, component).unwrap();
+        let layout = LayoutComponent::new_square("test", 5, component).unwrap();
 
         layout.generate(&mut data, &aabb);
 
         #[rustfmt::skip]
         let expected_colors = vec![
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
 
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
 
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE,   RED,   RED, WHITE,   WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
         assert_eq!(data.get_color_data(), &expected_colors);

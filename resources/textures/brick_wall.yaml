@@ -17,9 +17,10 @@ component:
       Shape:
         name: circle
         shape:
-          Rectangle:
+          RoundedRectangle:
             width: 120
-            height: 60
+            height: 56
+            radius: 10
         color:
           Sequence:
             - "#4E0707"

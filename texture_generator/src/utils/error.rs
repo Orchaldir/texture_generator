@@ -71,6 +71,8 @@ impl GenerationError {
 #[derive(Error, Debug, Eq, PartialEq)]
 /// An error type for [`Shape`].
 pub enum ShapeError {
+    #[error("Radius {0} is too big")]
+    RadiusTooBig(u32),
     #[error("Radius {0} is too small")]
     RadiusTooSmall(u32),
     #[error("Width {0} is too small")]
