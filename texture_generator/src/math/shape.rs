@@ -9,6 +9,7 @@ pub enum Shape {
         half_x: i32,
         half_y: i32,
     },
+    /// A rectangle with rounded corners.
     RoundedRectangle {
         half_x: i32,
         half_y: i32,

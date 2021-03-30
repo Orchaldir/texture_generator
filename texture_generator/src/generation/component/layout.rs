@@ -4,6 +4,7 @@ use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use crate::utils::error::GenerationError;
 
+#[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
 /// Generates a layout,
 pub enum LayoutComponent {
@@ -12,16 +13,13 @@ pub enum LayoutComponent {
     /// # Diagram
     ///
     /// ```svgbob
-    ///   +-----*-----*-----*-----*----> x-axis
+    ///   +-----*-----*-----*-----*
     ///   |     |     |     |     |
     ///   *--*--*--*--*--*--*--*--*--*
-    ///   |  |     |     |     |     |
+    ///      |     |     |     |     |
     ///   *--*--*--*--*--*--*--*--*--*
     ///   |     |     |     |     |
     ///   *--*--*--*--*--*--*--*--*
-    ///   |
-    ///   v
-    /// y-axis
     /// ```
     BrickWall {
         name: String,
@@ -34,16 +32,13 @@ pub enum LayoutComponent {
     /// # Diagram
     ///
     /// ```svgbob
-    ///   +--*--*--*----> x-axis
+    ///   +--*--*--*
     ///   |  |  |  |
     ///   *--*--*--*
     ///   |  |  |  |
     ///   *--*--*--*
     ///   |  |  |  |
     ///   *--*--*--*
-    ///   |
-    ///   v
-    /// y-axis
     /// ```
     Square {
         name: String,
