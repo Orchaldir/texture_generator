@@ -3,7 +3,7 @@ name: brick_wall
 size:
   width: 1024
   height: 1024
-background: "#FFFFFF"
+background: "#AAAAAA"
 component:
   type: Layout
   BrickWall:
@@ -17,9 +17,10 @@ component:
       Shape:
         name: circle
         shape:
-          Rectangle:
+          RoundedRectangle:
             width: 120
-            height: 60
+            height: 56
+            radius: 20
         color:
           Sequence:
             - "#4E0707"
@@ -27,4 +28,14 @@ component:
             - "#E3242B"
             - "#990F02"
         depth:
-          Uniform: 255
+          Linear:
+            center: 255
+            border: 100
+post_processes:
+  - Lighting:
+      light_direction:
+        x: 1.0
+        y: 0.0
+        z: 2.0
+      normal_z: 10
+      shininess: 32

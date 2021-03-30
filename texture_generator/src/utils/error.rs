@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-/// An error type for [`TextureGenerator`] and its components.
+/// An error type for [`TextureGenerator`](crate::generation::TextureGenerator) and its components.
 pub enum GenerationError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
@@ -69,8 +69,10 @@ impl GenerationError {
 }
 
 #[derive(Error, Debug, Eq, PartialEq)]
-/// An error type for [`Shape`].
+/// An error type for [`Shape`](crate::math:.shape::TextureGenerator).
 pub enum ShapeError {
+    #[error("Radius {0} is too big")]
+    RadiusTooBig(u32),
     #[error("Radius {0} is too small")]
     RadiusTooSmall(u32),
     #[error("Width {0} is too small")]

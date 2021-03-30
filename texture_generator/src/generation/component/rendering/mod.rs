@@ -64,8 +64,9 @@ impl RenderingComponent {
                     point.x = start.x;
 
                     while point.x < end.x {
-                        if shape.is_inside(&center, &point) {
-                            let distance = shape.distance(&center, &point);
+                        let distance = shape.distance(&center, &point);
+
+                        if distance <= 1.0 {
                             let depth = depth_calculator.calculate(distance);
                             data.set(&point, &color, depth);
                         }
@@ -91,7 +92,7 @@ mod tests {
     #[test]
     fn test_render_shape() {
         let size = Size::new(4, 6);
-        let data_size = Size::new(5, 8);
+        let data_size = Size::new(6, 9);
         let start = Point::new(1, 2);
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let aabb = AABB::new(start, size);
@@ -103,28 +104,30 @@ mod tests {
 
         #[rustfmt::skip]
         let colors = vec![
-            WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE, WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE
+            WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
         assert_eq!(data.get_color_data(), &colors);
 
         #[rustfmt::skip]
         let depth = vec![
-            0, 0,   0,   0, 0,
-            0, 0,   0,   0, 0,
-            0, 0,   0,   0, 0,
-            0, 0, 255, 255, 0,
-            0, 0, 255, 255, 0,
-            0, 0, 255, 255, 0,
-            0, 0, 255, 255, 0,
-            0, 0,   0,   0, 0
+            0, 0,   0,   0,   0, 0,
+            0, 0,   0,   0,   0, 0,
+            0, 0,   0,   0,   0, 0,
+            0, 0, 255, 255, 255, 0,
+            0, 0, 255, 255, 255, 0,
+            0, 0, 255, 255, 255, 0,
+            0, 0, 255, 255, 255, 0,
+            0, 0, 255, 255, 255, 0,
+            0, 0,   0,   0,   0, 0,
         ];
 
         assert_eq!(data.get_depth_data(), &depth);

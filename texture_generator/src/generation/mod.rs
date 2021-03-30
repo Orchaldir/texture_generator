@@ -65,18 +65,19 @@ mod tests {
         let rendering = RenderingComponent::new_shape("test", rectangle, RED);
         let component = Component::Rendering(Box::new(rendering));
         let generator =
-            TextureGenerator::new("test", Size::new(4, 6), GREEN, component, Vec::new());
+            TextureGenerator::new("test", Size::new(5, 7), GREEN, component, Vec::new());
 
         let data = generator.generate();
 
         #[rustfmt::skip]
         let result = vec![
-            GREEN, GREEN, GREEN, GREEN,
-            GREEN,   RED,   RED, GREEN,
-            GREEN,   RED,   RED, GREEN,
-            GREEN,   RED,   RED, GREEN,
-            GREEN,   RED,   RED, GREEN,
-            GREEN, GREEN, GREEN, GREEN
+            GREEN, GREEN, GREEN, GREEN, GREEN,
+            GREEN,   RED,   RED,   RED, GREEN,
+            GREEN,   RED,   RED,   RED, GREEN,
+            GREEN,   RED,   RED,   RED, GREEN,
+            GREEN,   RED,   RED,   RED, GREEN,
+            GREEN,   RED,   RED,   RED, GREEN,
+            GREEN, GREEN, GREEN, GREEN, GREEN
         ];
 
         assert_eq!(data.get_color_data(), &result);
