@@ -78,7 +78,8 @@ impl Shape {
             Shape::Circle(radius) => center.calculate_distance(point) / *radius as f32,
             Shape::Rectangle { half_x, half_y } => {
                 let max_half = *half_x.min(half_y) as f32;
-                let distance = Shape::calculate_rectangle_distance(center, point, half_x, half_y);
+                let diff = *point - *center;
+                let distance = (diff.x.abs() - *half_x).max(diff.y.abs() - *half_y) as f32;
                 (distance + max_half) / max_half
             }
             Shape::RoundedRectangle {
@@ -90,78 +91,6 @@ impl Shape {
                 let squared_x = (diff.x.abs() - *half_x).max(0).pow(2);
                 let squared_y = (diff.y.abs() - *half_y).max(0).pow(2);
                 ((squared_x + squared_y) as f32).sqrt() - *radius as f32
-            }
-        }
-    }
-
-    /// Calculates the euclidean distance from the shape's border to a [`Point`].
-    /// A positive distance means the point is outside.
-    ///
-    /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::shape::Shape;
-    /// let center = Point::new(10, 20);
-    /// let border = Point::new(7, 20);
-    /// let outside = Point::new(13, 24);
-    /// let circle = Shape::new_circle(3).unwrap();
-    ///
-    /// assert_eq!(circle.distance_to_border(&center, &center), -3.0);
-    /// assert_eq!(circle.distance_to_border(&center, &outside), 2.0);
-    /// assert_eq!(circle.distance_to_border(&center, &border), 0.0);
-    /// ```
-    pub fn distance_to_border(&self, center: &Point, point: &Point) -> f32 {
-        match self {
-            Shape::Circle(radius) => center.calculate_distance(point) - *radius as f32,
-            Shape::Rectangle { half_x, half_y } => {
-                Shape::calculate_rectangle_distance(center, point, half_x, half_y)
-            }
-            Shape::RoundedRectangle { .. } => 0.0,
-        }
-    }
-
-    fn calculate_rectangle_distance(
-        center: &Point,
-        point: &Point,
-        half_x: &i32,
-        half_y: &i32,
-    ) -> f32 {
-        let diff = *point - *center;
-        (diff.x.abs() - *half_x).max(diff.y.abs() - *half_y) as f32
-    }
-
-    /// Is the [`Point`] inside?
-    ///
-    /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::shape::Shape;
-    /// let center = Point::new(10, 20);
-    /// let border = Point::new(7, 20);
-    /// let outside = Point::new(13, 24);
-    /// let circle = Shape::new_circle(3).unwrap();
-    ///
-    /// assert!(circle.is_inside(&center, &center));
-    /// assert!(!circle.is_inside(&center, &outside));
-    /// assert!(circle.is_inside(&center, &border));
-    /// ```
-    pub fn is_inside(&self, center: &Point, point: &Point) -> bool {
-        match self {
-            Shape::Circle(radius) => center.calculate_distance(point) <= *radius as f32,
-            Shape::Rectangle { half_x, half_y } => {
-                let diff = *point - *center;
-                diff.x >= -*half_x && diff.x < *half_x && diff.y >= -*half_y && diff.y < *half_y
-            }
-            Shape::RoundedRectangle {
-                half_x,
-                half_y,
-                radius,
-            } => {
-                let diff = *point - *center;
-                let threshold_x = *half_x + *radius;
-                let threshold_y = *half_y + *radius;
-                diff.x >= -threshold_x
-                    && diff.x < threshold_x
-                    && diff.y >= -threshold_y
-                    && diff.y < threshold_y
             }
         }
     }
@@ -215,50 +144,6 @@ mod tests {
 
         for (index, result) in results.iter().enumerate() {
             relative_eq!(rectangle.distance(&CENTER, &size.to_point(index)), *result);
-        }
-    }
-
-    #[test]
-    fn test_distance_to_border_rectangle() {
-        let size = Size::new(5, 7);
-        let rectangle = Shape::new_rectangle(2, 4).unwrap();
-
-        #[rustfmt::skip]
-        let results = vec![
-            1.0, 1.0,  1.0, 1.0, 1.0,
-            1.0, 0.0,  0.0, 0.0, 1.0,
-            1.0, 0.0, -1.0, 0.0, 1.0,
-            1.0, 0.0, -1.0, 0.0, 1.0,
-            1.0, 0.0, -1.0, 0.0, 1.0,
-            1.0, 0.0,  0.0, 0.0, 1.0,
-            1.0, 1.0,  1.0, 1.0, 1.0
-        ];
-
-        for (index, result) in results.iter().enumerate() {
-            assert_eq!(
-                rectangle.distance_to_border(&CENTER, &size.to_point(index)),
-                *result
-            );
-        }
-    }
-
-    #[test]
-    fn test_is_inside_rectangle() {
-        let size = Size::new(4, 6);
-        let rectangle = Shape::new_rectangle(2, 4).unwrap();
-
-        #[rustfmt::skip]
-        let results = vec![
-            false, false, false, false,
-            false,  true,  true, false,
-            false,  true,  true, false,
-            false,  true,  true, false,
-            false,  true,  true, false,
-            false, false, false, false
-        ];
-
-        for (index, result) in results.iter().enumerate() {
-            assert_eq!(rectangle.is_inside(&CENTER, &size.to_point(index)), *result);
         }
     }
 }
