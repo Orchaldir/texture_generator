@@ -1,7 +1,7 @@
 use crate::math::point::Point;
 use crate::utils::error::ShapeError;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 /// Different shapes that are centered around (0,0).
 pub enum Shape {
     Circle(u32),
@@ -13,7 +13,7 @@ pub enum Shape {
     RoundedRectangle {
         half_x: i32,
         half_y: i32,
-        radius: i32,
+        radius: f32,
     },
 }
 
@@ -50,11 +50,11 @@ impl Shape {
             return Err(ShapeError::RadiusTooBig(radius));
         }
 
-        let radius = radius as i32;
+        let radius = radius as f32;
 
         Ok(Shape::RoundedRectangle {
-            half_x: (width / 2) as i32 - radius,
-            half_y: (height / 2) as i32 - radius,
+            half_x: (width / 2) as i32 - radius as i32,
+            half_y: (height / 2) as i32 - radius as i32,
             radius,
         })
     }
@@ -89,9 +89,9 @@ impl Shape {
                 radius,
             } => {
                 let diff = *point - *center;
-                let squared_x = (diff.x.abs() - *half_x).max(0).pow(2);
-                let squared_y = (diff.y.abs() - *half_y).max(0).pow(2);
-                ((squared_x + squared_y) as f32).sqrt() - *radius as f32
+                let x = (diff.x.abs() - *half_x).max(0) as f32;
+                let y = (diff.y.abs() - *half_y).max(0) as f32;
+                x.hypot(y) / *radius
             }
         }
     }
@@ -127,24 +127,45 @@ mod tests {
 
     #[test]
     fn test_distance_rounded() {
-        let size = Size::new(5, 7);
-        let rectangle = Shape::new_rounded(2, 4, 1).unwrap();
+        let radius = 10;
+        let rectangle = Shape::new_rounded(20, 50, radius).unwrap();
 
-        let c2 = 2.6457512;
+        for x in 0..(radius * 2) {
+            let result = x as f32 / 10.0;
+            println!("x={} result={}", x, result);
+            relative_eq!(
+                rectangle.distance(&CENTER, &Point::new(CENTER.x - x as i32, CENTER.y)),
+                result
+            );
+            relative_eq!(
+                rectangle.distance(&CENTER, &Point::new(CENTER.x + x as i32, CENTER.y)),
+                result
+            );
+        }
 
-        #[rustfmt::skip]
-        let results = vec![
-             c2, 2.0,  2.0, 2.0,  c2,
-            2.0, 1.0,  1.0, 1.0, 2.0,
-            2.0, 1.0,  0.0, 1.0, 2.0,
-            2.0, 1.0,  0.0, 1.0, 2.0,
-            2.0, 1.0,  0.0, 1.0, 2.0,
-            2.0, 1.0,  1.0, 1.0, 2.0,
-             c2, 2.0,  2.0, 2.0,  c2
-        ];
+        for y in 0..16 {
+            println!("y={}", y);
+            relative_eq!(
+                rectangle.distance(&CENTER, &Point::new(CENTER.x, CENTER.y - y as i32)),
+                0.0
+            );
+            relative_eq!(
+                rectangle.distance(&CENTER, &Point::new(CENTER.x, CENTER.y + y as i32)),
+                0.0
+            );
+        }
 
-        for (index, result) in results.iter().enumerate() {
-            relative_eq!(rectangle.distance(&CENTER, &size.to_point(index)), *result);
+        for y in 16..36 {
+            let result = (y - 15) as f32 / 10.0;
+            println!("y={} result={}", y, result);
+            relative_eq!(
+                rectangle.distance(&CENTER, &Point::new(CENTER.x, CENTER.y - y as i32)),
+                result
+            );
+            relative_eq!(
+                rectangle.distance(&CENTER, &Point::new(CENTER.x, CENTER.y + y as i32)),
+                result
+            );
         }
     }
 }
