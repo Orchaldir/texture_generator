@@ -10,16 +10,17 @@ use texture_generator::generation::TextureGenerator;
 use texture_generator::utils::logging::init_logging;
 
 #[derive(StructOpt)]
+#[structopt(name = "texture_generator")]
 /// The arguments of the application.
 struct Cli {
     /// The path of the texture definition.
     #[structopt(parse(from_os_str))]
     input: PathBuf,
 
-    /// The path of the output image.
+    /// The path of the output images.
     output: String,
 
-    /// The size of the output image.
+    /// The size of the output images.
     #[structopt(default_value = "1024")]
     size: u32,
 }
