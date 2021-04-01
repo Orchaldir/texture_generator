@@ -17,7 +17,3 @@ serde_yaml = "0.8"
 structopt = "0.3"
 svgbobdoc = "0.2"
 texture_generation = { path = "../texture_generation" }
-thiserror = "1.0"
-
-[dev-dependencies]
-assert_approx_eq = "1.1"
