@@ -1,5 +1,5 @@
 [workspace]
 
 members = [
-    "texture_generator",
+    "texture_generation",
 ]
