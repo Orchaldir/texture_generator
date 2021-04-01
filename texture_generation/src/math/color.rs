@@ -20,7 +20,7 @@ impl Color {
     /// Converts a string to a color, if possible:
     ///
     /// ```
-    /// use texture_generator::math::color::{Color, ORANGE};
+    /// use texture_generation::math::color::{Color, ORANGE};
     /// assert_eq!(Color::convert("#FFA500"), Some(ORANGE));
     /// ```
     pub fn convert(hex_code: &str) -> Option<Color> {
@@ -47,7 +47,7 @@ impl Color {
     /// Returns the red component.
     ///
     /// ```
-    /// use texture_generator::math::color::Color;
+    /// use texture_generation::math::color::Color;
     /// assert_eq!(Color::from_rgb(0, 1, 2).r(), 0);
     /// ```
     pub fn r(&self) -> u8 {
@@ -57,7 +57,7 @@ impl Color {
     /// Returns the green component
     ///
     /// ```
-    ///# use texture_generator::math::color::Color;
+    ///# use texture_generation::math::color::Color;
     /// assert_eq!(Color::from_rgb(0, 1, 2).g(), 1);
     /// ```
     pub fn g(&self) -> u8 {
@@ -67,7 +67,7 @@ impl Color {
     /// Returns the blue component.
     ///
     /// ```
-    ///# use texture_generator::math::color::Color;
+    ///# use texture_generation::math::color::Color;
     /// assert_eq!(Color::from_rgb(0, 1, 2).b(), 2);
     /// ```
     pub fn b(&self) -> u8 {
@@ -84,7 +84,7 @@ impl Default for Color {
 /// Adds a [`Color`] to another [`Color`].
 ///
 /// ```
-///# use texture_generator::math::color::Color;
+///# use texture_generation::math::color::Color;
 /// let a = Color::from_rgb(10, 100, 255);
 /// let b = Color::from_rgb(5, 80, 100);
 /// let result = Color::from_rgb(15, 180, 255);
@@ -107,7 +107,7 @@ impl Add<Color> for Color {
 /// Multiplies a [`Color`] with a float.
 ///
 /// ```
-///# use texture_generator::math::color::Color;
+///# use texture_generation::math::color::Color;
 /// let vector = Color::from_rgb(0, 100, 255);
 ///
 /// assert_eq!(vector * -1.0, Color::from_rgb(0, 0, 0));

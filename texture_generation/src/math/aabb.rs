@@ -31,9 +31,9 @@ impl AxisAlignedBoundingBox {
     /// Returns a new axis aligned bounding box.
     ///
     /// ```
-    ///# use texture_generator::math::aabb::AxisAlignedBoundingBox;
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::aabb::AxisAlignedBoundingBox;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let start = Point::new(2, 3);
     /// let size = Size::new(30, 50);
     /// let aabb = AxisAlignedBoundingBox::new(start, size);
@@ -50,9 +50,9 @@ impl AxisAlignedBoundingBox {
     /// Returns a new axis aligned bounding box.
     ///
     /// ```
-    ///# use texture_generator::math::aabb::AxisAlignedBoundingBox;
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::aabb::AxisAlignedBoundingBox;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(30, 50);
     /// let aabb = AxisAlignedBoundingBox::with_size(size);
     ///
@@ -73,9 +73,9 @@ impl AxisAlignedBoundingBox {
     /// Returns the center of the axis aligned bounding box.
     ///
     /// ```
-    ///# use texture_generator::math::aabb::AxisAlignedBoundingBox;
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::aabb::AxisAlignedBoundingBox;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let start = Point::new(2, 3);
     /// let size = Size::new(30, 50);
     /// let aabb = AxisAlignedBoundingBox::new(start, size);
@@ -97,9 +97,9 @@ impl AxisAlignedBoundingBox {
     /// Is the [`Point`] inside?
     ///
     /// ```
-    ///# use texture_generator::math::aabb::AxisAlignedBoundingBox;
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::aabb::AxisAlignedBoundingBox;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let start = Point::new(10, 20);
     /// let size = Size::new(30, 40);
     /// let aabb = AxisAlignedBoundingBox::new(start, size);

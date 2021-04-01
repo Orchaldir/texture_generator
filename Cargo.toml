@@ -2,4 +2,5 @@
 
 members = [
     "texture_generation",
+    "texture_generation_app",
 ]
