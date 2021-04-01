@@ -1,13 +1,9 @@
-use crate::generation::component::Component;
-use crate::generation::data::RuntimeData;
-use crate::generation::process::PostProcess;
-use crate::math::aabb::AABB;
-use crate::math::color::Color;
-use crate::math::size::Size;
-
-pub mod component;
-pub mod data;
-pub mod process;
+use texture_generation::generation::component::Component;
+use texture_generation::generation::data::RuntimeData;
+use texture_generation::generation::process::PostProcess;
+use texture_generation::math::aabb::AABB;
+use texture_generation::math::color::Color;
+use texture_generation::math::size::Size;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TextureGenerator {
@@ -52,10 +48,10 @@ impl TextureGenerator {
 
 #[cfg(test)]
 mod tests {
-    use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::Data;
-    use crate::math::color::{GREEN, RED};
-    use crate::math::shape::Shape;
+    use texture_generation::generation::component::rendering::RenderingComponent;
+    use texture_generation::generation::data::Data;
+    use texture_generation::math::color::{GREEN, RED};
+    use texture_generation::math::shape::Shape;
 
     use super::*;
 

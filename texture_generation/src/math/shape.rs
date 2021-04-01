@@ -63,8 +63,8 @@ impl Shape {
     /// Values larger than 1 are outside.
     ///
     /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::shape::Shape;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::shape::Shape;
     /// let center = Point::new(10, 20);
     /// let border = Point::new(7, 20);
     /// let outside = Point::new(10, 26);

@@ -1,18 +1,15 @@
-use crate::definition::generation::component::ComponentDefinition;
-use crate::definition::generation::process::PostProcessDefinition;
 use crate::generation::TextureGenerator;
-use crate::math::color::Color;
-use crate::math::size::Size;
-use crate::utils::error::GenerationError;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
-
-pub mod component;
-pub mod process;
+use texture_generation::definition::generation::component::ComponentDefinition;
+use texture_generation::definition::generation::process::PostProcessDefinition;
+use texture_generation::math::color::Color;
+use texture_generation::math::size::Size;
+use texture_generation::utils::error::GenerationError;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
@@ -84,9 +81,9 @@ impl TextureDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::component::Component;
-    use crate::generation::process::PostProcess;
-    use crate::math::color::BLUE;
+    use texture_generation::generation::component::Component;
+    use texture_generation::generation::process::PostProcess;
+    use texture_generation::math::color::BLUE;
 
     #[test]
     fn test_convert_layout() {

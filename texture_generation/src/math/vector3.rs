@@ -14,7 +14,7 @@ impl Vector3 {
     /// Returns a new vector.
     ///
     /// ```
-    ///# use texture_generator::math::vector3::Vector3;
+    ///# use texture_generation::math::vector3::Vector3;
     /// let point = Vector3::new(2.0, 3.0, 4.0);
     /// assert_eq!(point.x, 2.0);
     /// assert_eq!(point.y, 3.0);
@@ -27,7 +27,7 @@ impl Vector3 {
     /// Calculates the length of the vector.
     ///
     /// ```
-    ///# use texture_generator::math::vector3::Vector3;
+    ///# use texture_generation::math::vector3::Vector3;
     /// let a = Vector3::new(3.0, -4.0, 0.0);
     /// let b = Vector3::new(4.0, 0.0, -3.0);
     /// let c = Vector3::new(0.0, 0.0, 0.0);
@@ -43,7 +43,7 @@ impl Vector3 {
     /// Normalizes the vector so that its length is 1.
     ///
     /// ```
-    ///# use texture_generator::math::vector3::Vector3;
+    ///# use texture_generation::math::vector3::Vector3;
     /// let mut vector = Vector3::new(3.0, -4.0, 0.0);
     /// vector.normalize();
     ///
@@ -61,7 +61,7 @@ impl Vector3 {
     /// Returns the normalied vector.
     ///
     /// ```
-    ///# use texture_generator::math::vector3::Vector3;
+    ///# use texture_generation::math::vector3::Vector3;
     /// let mut vector = Vector3::new(3.0, -4.0, 0.0);
     ///
     /// assert_eq!(vector.get_normalized(), Vector3::new(0.6, -0.8, 0.0));
@@ -74,7 +74,7 @@ impl Vector3 {
     /// Calculates the euclidean distance to another vector.
     ///
     /// ```
-    ///# use texture_generator::math::vector3::Vector3;
+    ///# use texture_generation::math::vector3::Vector3;
     /// let a = Vector3::new(1.0, 2.0, -3.0);
     /// let b = Vector3::new(4.0, 6.0, -3.0);
     /// let c = Vector3::new(8.0, 6.0, 0.0);
@@ -92,7 +92,7 @@ impl Vector3 {
     /// Calculates the dot product.
     ///
     /// ```
-    ///# use texture_generator::math::vector3::Vector3;
+    ///# use texture_generation::math::vector3::Vector3;
     /// let a = Vector3::new(1.0, 2.0, -3.0);
     /// let b = Vector3::new(4.0, 6.0, -1.0);
     ///
@@ -106,7 +106,7 @@ impl Vector3 {
 /// Adds a [`Vector3`] to another [`Vector3`].
 ///
 /// ```
-///# use texture_generator::math::vector3::Vector3;
+///# use texture_generation::math::vector3::Vector3;
 /// let a = Vector3::new(1.1, 2.2, 3.0);
 /// let b = Vector3::new(30.0, 50.2, -3.0);
 /// let result = Vector3::new(31.1, 52.4, 0.0);
@@ -125,7 +125,7 @@ impl Add<Vector3> for Vector3 {
 /// Subtracts a [`Vector3`] from another [`Vector3`].
 ///
 /// ```
-///# use texture_generator::math::vector3::Vector3;
+///# use texture_generation::math::vector3::Vector3;
 /// let a = Vector3::new(1.1, 2.2, 3.0);
 /// let b = Vector3::new(30.0, 50.2, -3.0);
 ///
@@ -143,7 +143,7 @@ impl Sub<Vector3> for Vector3 {
 /// Multiplies a [`Vector3`] with a float.
 ///
 /// ```
-///# use texture_generator::math::vector3::Vector3;
+///# use texture_generation::math::vector3::Vector3;
 /// let vector = Vector3::new(1.1, 2.2, 3.0);
 ///
 /// assert_eq!(vector * 0.5, Vector3::new(0.55, 1.1, 1.5));

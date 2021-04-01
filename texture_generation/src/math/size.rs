@@ -39,7 +39,7 @@ impl Size {
     /// Returns a new size divided by a value.
     ///
     /// ```
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(10, 30);
     /// assert_eq!(size.divide(2), Size::new(5, 15));
     /// ```
@@ -53,7 +53,7 @@ impl Size {
     /// Returns the number of cells covered by this size.
     ///
     /// ```
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.get_number_of_cells(), 6);
     /// ```
@@ -64,7 +64,7 @@ impl Size {
     /// Returns the size along the x-axis.
     ///
     /// ```
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.width(), 2);
     /// ```
@@ -75,7 +75,7 @@ impl Size {
     /// Returns the size along the y-axis.
     ///
     /// ```
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.height(), 3);
     /// ```
@@ -86,8 +86,8 @@ impl Size {
     /// Is the [`Point`] inside?
     ///
     /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// let inside = Point::new(1, 2);
     /// let outside = Point::new(4, 5);
@@ -104,7 +104,7 @@ impl Size {
     /// Converts an index to the x-coordinate of the equivalent [`Point`].
     ///
     /// ```
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.to_x(5), 1);
     /// ```
@@ -115,7 +115,7 @@ impl Size {
     /// Converts an index to the y-coordinate of the equivalent [`Point`].
     ///
     /// ```
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.to_y(5), 2);
     /// ```
@@ -126,8 +126,8 @@ impl Size {
     /// Converts an index to the equivalent [`Point`].
     ///
     /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.to_point(5), Point::new(1,2));
     /// ```
@@ -138,8 +138,8 @@ impl Size {
     /// Converts a [`Point`] to the equivalent index, if it is inside.
     ///
     /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// let inside = Point::new(1, 2);
     /// let outside = Point::new(4, 5);
@@ -160,8 +160,8 @@ impl Size {
     /// Converts a [`Point`] to the equivalent index, but returns a wrong result if it is outside.
     ///
     /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.to_index_risky(&Point::new(1, 2)), 5);
     /// ```
@@ -172,8 +172,8 @@ impl Size {
     /// Converts a [`Point`] to the equivalent index, but returns a wrong result if it is outside.
     ///
     /// ```
-    ///# use texture_generator::math::point::Point;
-    ///# use texture_generator::math::size::Size;
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
     /// assert_eq!(size.convert_x_y(1, 2), 5);
     /// ```
@@ -185,7 +185,7 @@ impl Size {
 /// Multiplies a [`Size`] with a float.
 ///
 /// ```
-///# use texture_generator::math::size::Size;
+///# use texture_generation::math::size::Size;
 /// let vector = Size::new(10, 30);
 ///
 /// assert_eq!(vector * 1.5, Size::new(15, 45));
