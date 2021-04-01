@@ -2,5 +2,5 @@
 
 members = [
     "texture_generation",
-    "texture_generation_app",
+    "texture_generation_cli",
 ]
