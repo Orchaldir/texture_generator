@@ -1,7 +1,7 @@
 use crate::rendering::texture::TextureManager;
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use texture_generation::generation::data::{Data, RuntimeData};
+use texture_generation::generation::data::RuntimeData;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::PINK;
@@ -12,14 +12,21 @@ pub mod texture;
 
 pub struct Renderer {
     tile_size: u32,
+    wall_depth: u8,
     textures: TextureManager,
     post_processes: Vec<PostProcess>,
 }
 
 impl Renderer {
-    pub fn new(tile_size: u32, textures: TextureManager, post_processes: Vec<PostProcess>) -> Self {
+    pub fn new(
+        tile_size: u32,
+        wall_depth: u8,
+        textures: TextureManager,
+        post_processes: Vec<PostProcess>,
+    ) -> Self {
         Renderer {
             tile_size,
+            wall_depth,
             textures,
             post_processes,
         }
@@ -42,8 +49,10 @@ impl Renderer {
 
                 match tile {
                     Tile::Empty => {}
-                    Tile::Floor(id) => self.render_texture(index, id, &mut data, &aabb),
-                    Tile::Full(id) => self.render_texture(index, id, &mut data, &aabb),
+                    Tile::Floor(id) => self.render_texture(index, id, 0, &mut data, &aabb),
+                    Tile::Full(id) => {
+                        self.render_texture(index, id, self.wall_depth, &mut data, &aabb)
+                    }
                 }
 
                 start.x = tile_size.width() as i32;
@@ -59,8 +68,16 @@ impl Renderer {
         data
     }
 
-    fn render_texture(&self, index: usize, texture_id: usize, data: &mut dyn Data, aabb: &AABB) {
+    fn render_texture(
+        &self,
+        index: usize,
+        texture_id: usize,
+        depth: u8,
+        data: &mut RuntimeData,
+        aabb: &AABB,
+    ) {
         if let Some(texture) = self.textures.get(texture_id) {
+            data.set_base_depth(depth);
             texture.render(data, aabb);
         } else {
             warn!(
@@ -82,11 +99,11 @@ mod tests {
     use texture_generation::math::color::{Color, BLUE, RED};
 
     #[test]
-    fn test_generate() {
+    fn test_render() {
         let texture0 = create_texture("texture0", RED, 99);
         let texture1 = create_texture("texture0", BLUE, 42);
         let textures = TextureManager::new(vec![texture0, texture1]);
-        let renderer = Renderer::new(2, textures, Vec::default());
+        let renderer = Renderer::new(2, 100, textures, Vec::default());
         let tiles = vec![Tile::Empty, Tile::Floor(0), Tile::Full(1), Tile::Empty];
         let tilemap = Tilemap2d::new(Size::square(2), tiles).unwrap();
 
@@ -104,10 +121,10 @@ mod tests {
 
         #[rustfmt::skip]
         let depth = vec![
-             0,  0, 99, 99,
-             0,  0, 99, 99,
-            42, 42,  0,  0,
-            42, 42,  0,  0,
+              0,   0, 99, 99,
+              0,   0, 99, 99,
+            142, 142,  0,  0,
+            142, 142,  0,  0,
         ];
 
         assert_eq!(data.get_depth_data(), &depth);

@@ -41,7 +41,7 @@ impl RenderingComponent {
             name,
             shape,
             ColorSelector::ConstantColor(color),
-            DepthCalculator::Uniform(255),
+            DepthCalculator::Uniform(200),
         )
     }
 
@@ -66,12 +66,13 @@ impl RenderingComponent {
                 let start = aabb.start().max(&Point::default());
                 let end = aabb.end().limit_to(data.get_size());
                 let mut point = start;
+                let depth = data.get_base_depth() + *depth;
 
                 while point.y < end.y {
                     point.x = start.x;
 
                     while point.x < end.x {
-                        data.set(&point, color, *depth);
+                        data.set(&point, color, depth);
 
                         point.x += 1;
                     }
@@ -98,7 +99,8 @@ impl RenderingComponent {
                         let distance = shape.distance(&center, &point);
 
                         if distance <= 1.0 {
-                            let depth = depth_calculator.calculate(distance);
+                            let depth =
+                                data.get_base_depth() + depth_calculator.calculate(distance);
                             data.set(&point, &color, depth);
                         }
 
@@ -127,7 +129,7 @@ mod tests {
         let start = Point::new(1, 2);
         let aabb = AABB::new(start, size);
 
-        let mut data = RuntimeData::new(data_size, WHITE);
+        let mut data = RuntimeData::with_base_depth(data_size, WHITE, 3);
         let renderer = RenderingComponent::new_fill_area("test", RED, 42);
 
         renderer.render(&mut data, &aabb);
@@ -149,10 +151,10 @@ mod tests {
         let depth = vec![
             0,  0,  0,  0, 0,
             0,  0,  0,  0, 0,
-            0, 42, 42, 42, 0,
-            0, 42, 42, 42, 0,
-            0, 42, 42, 42, 0,
-            0, 42, 42, 42, 0,
+            0, 45, 45, 45, 0,
+            0, 45, 45, 45, 0,
+            0, 45, 45, 45, 0,
+            0, 45, 45, 45, 0,
             0,  0,  0,  0, 0,
         ];
 
@@ -167,7 +169,7 @@ mod tests {
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let aabb = AABB::new(start, size);
 
-        let mut data = RuntimeData::new(data_size, WHITE);
+        let mut data = RuntimeData::with_base_depth(data_size, WHITE, 10);
         let renderer = RenderingComponent::new_shape("test", rectangle, RED);
 
         renderer.render(&mut data, &aabb);
@@ -192,11 +194,11 @@ mod tests {
             0, 0,   0,   0,   0, 0,
             0, 0,   0,   0,   0, 0,
             0, 0,   0,   0,   0, 0,
-            0, 0, 255, 255, 255, 0,
-            0, 0, 255, 255, 255, 0,
-            0, 0, 255, 255, 255, 0,
-            0, 0, 255, 255, 255, 0,
-            0, 0, 255, 255, 255, 0,
+            0, 0, 210, 210, 210, 0,
+            0, 0, 210, 210, 210, 0,
+            0, 0, 210, 210, 210, 0,
+            0, 0, 210, 210, 210, 0,
+            0, 0, 210, 210, 210, 0,
             0, 0,   0,   0,   0, 0,
         ];
 
@@ -228,7 +230,7 @@ mod tests {
 
         #[rustfmt::skip]
             let depth = vec![
-            255, 255, 0, 0,
+            200, 200, 0, 0,
               0,   0, 0, 0,
               0,   0, 0, 0,
               0,   0, 0, 0,

@@ -18,6 +18,9 @@ pub trait Data {
 
     /// Gets all the depth values.
     fn get_depth_data(&self) -> &[u8];
+
+    /// Gets the base depth for the current tile of the tilemap.
+    fn get_base_depth(&self) -> u8;
 }
 
 /// An implementation of [`Data`] for the actual usage.
@@ -25,10 +28,15 @@ pub struct RuntimeData {
     size: Size,
     colors: Vec<Color>,
     depth: Vec<u8>,
+    base_depth: u8,
 }
 
 impl RuntimeData {
     pub fn new(size: Size, default: Color) -> RuntimeData {
+        RuntimeData::with_base_depth(size, default, 0)
+    }
+
+    pub fn with_base_depth(size: Size, default: Color, base_depth: u8) -> RuntimeData {
         let n = size.get_number_of_cells();
         let colors = vec![default; n];
         let depth = vec![0; n];
@@ -37,7 +45,12 @@ impl RuntimeData {
             size,
             colors,
             depth,
+            base_depth,
         }
+    }
+
+    pub fn set_base_depth(&mut self, depth: u8) {
+        self.base_depth = depth;
     }
 }
 
@@ -63,6 +76,10 @@ impl Data for RuntimeData {
 
     fn get_depth_data(&self) -> &[u8] {
         &self.depth
+    }
+
+    fn get_base_depth(&self) -> u8 {
+        self.base_depth
     }
 }
 
