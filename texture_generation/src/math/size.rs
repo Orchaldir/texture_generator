@@ -36,6 +36,11 @@ impl Size {
         Size { width, height }
     }
 
+    /// Returns a size with equal width & height.
+    pub const fn square(size: u32) -> Size {
+        Size::new(size, size)
+    }
+
     /// Returns a new size divided by a value.
     ///
     /// ```
@@ -198,5 +203,22 @@ impl Mul<f32> for Size {
             (self.width as f32 * value) as u32,
             (self.height as f32 * value) as u32,
         )
+    }
+}
+
+/// Multiplies a [`Size`] with another.
+///
+/// ```
+///# use texture_generation::math::size::Size;
+/// let a = Size::new(10, 30);
+/// let b = Size::new(2, 5);
+///
+/// assert_eq!(a * b, Size::new(20, 150));
+/// ```
+impl Mul<Size> for Size {
+    type Output = Self;
+
+    fn mul(self, other: Size) -> Size {
+        Size::new(self.width * other.width, self.height * other.height)
     }
 }
