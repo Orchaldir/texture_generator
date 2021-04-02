@@ -2,6 +2,7 @@ use crate::definition::generation::component::rendering::color::ColorSelectorDef
 use crate::definition::generation::component::rendering::depth::DepthDefinition;
 use crate::definition::math::shape::ShapeDefinition;
 use crate::generation::component::rendering::RenderingComponent;
+use crate::math::color::Color;
 use crate::utils::error::GenerationError;
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
@@ -11,6 +12,11 @@ pub mod depth;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum RenderingDefinition {
+    FillArea {
+        name: String,
+        color: String,
+        depth: u8,
+    },
     Shape {
         name: String,
         shape: ShapeDefinition,
@@ -22,6 +28,11 @@ pub enum RenderingDefinition {
 impl RenderingDefinition {
     pub fn convert(&self, factor: f32) -> Result<RenderingComponent, GenerationError> {
         match self {
+            RenderingDefinition::FillArea { name, color, depth } => {
+                let color = Color::convert(&color)
+                    .ok_or_else(|| GenerationError::invalid_color(name, &color))?;
+                Ok(RenderingComponent::new_fill_area(name, color, *depth))
+            }
             RenderingDefinition::Shape {
                 name,
                 shape,
@@ -50,6 +61,18 @@ mod tests {
     use crate::generation::component::rendering::depth::DepthCalculator;
     use crate::math::color::ORANGE;
     use crate::math::shape::Shape;
+
+    #[test]
+    fn test_convert_fill_area() {
+        let definition = RenderingDefinition::FillArea {
+            name: "fill".to_string(),
+            color: "#FFA500".to_string(),
+            depth: 111,
+        };
+        let component = RenderingComponent::new_fill_area("fill", ORANGE, 111);
+
+        assert_eq!(component, definition.convert(3.0).unwrap())
+    }
 
     #[test]
     fn test_convert_shape() {

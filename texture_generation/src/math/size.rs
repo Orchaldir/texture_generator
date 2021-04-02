@@ -205,3 +205,20 @@ impl Mul<f32> for Size {
         )
     }
 }
+
+/// Multiplies a [`Size`] with another.
+///
+/// ```
+///# use texture_generation::math::size::Size;
+/// let a = Size::new(10, 30);
+/// let b = Size::new(2, 5);
+///
+/// assert_eq!(a * b, Size::new(20, 150));
+/// ```
+impl Mul<Size> for Size {
+    type Output = Self;
+
+    fn mul(self, other: Size) -> Size {
+        Size::new(self.width * other.width, self.height * other.height)
+    }
+}

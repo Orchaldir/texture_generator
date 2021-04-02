@@ -12,6 +12,12 @@ pub mod depth;
 #[derive(Clone, Debug, PartialEq)]
 /// Renders the texture.
 pub enum RenderingComponent {
+    /// Fills the area with a color.
+    FillArea {
+        name: String,
+        color: Color,
+        depth: u8,
+    },
     /// Renders a [`Shape`].
     Shape {
         name: String,
@@ -22,6 +28,14 @@ pub enum RenderingComponent {
 }
 
 impl RenderingComponent {
+    pub fn new_fill_area<S: Into<String>>(name: S, color: Color, depth: u8) -> RenderingComponent {
+        RenderingComponent::FillArea {
+            name: name.into(),
+            color,
+            depth,
+        }
+    }
+
     pub fn new_shape<S: Into<String>>(name: S, shape: Shape, color: Color) -> RenderingComponent {
         RenderingComponent::new_shape_with_depth(
             name,
@@ -48,6 +62,23 @@ impl RenderingComponent {
     /// Renders the texture in the area defined by the [`AABB`].
     pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
+            RenderingComponent::FillArea { color, depth, .. } => {
+                let start = aabb.start().max(&Point::default());
+                let end = aabb.end().limit_to(data.get_size());
+                let mut point = start;
+
+                while point.y < end.y {
+                    point.x = start.x;
+
+                    while point.x < end.x {
+                        data.set(&point, color, *depth);
+
+                        point.x += 1;
+                    }
+
+                    point.y += 1;
+                }
+            }
             RenderingComponent::Shape {
                 shape,
                 color_selector,
@@ -88,6 +119,45 @@ mod tests {
     use crate::math::color::{RED, WHITE};
     use crate::math::point::Point;
     use crate::math::size::Size;
+
+    #[test]
+    fn test_render_fill_area() {
+        let size = Size::new(3, 4);
+        let data_size = Size::new(5, 7);
+        let start = Point::new(1, 2);
+        let aabb = AABB::new(start, size);
+
+        let mut data = RuntimeData::new(data_size, WHITE);
+        let renderer = RenderingComponent::new_fill_area("test", RED, 42);
+
+        renderer.render(&mut data, &aabb);
+
+        #[rustfmt::skip]
+        let colors = vec![
+            WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,
+        ];
+
+        assert_eq!(data.get_color_data(), &colors);
+
+        #[rustfmt::skip]
+        let depth = vec![
+            0,  0,  0,  0, 0,
+            0,  0,  0,  0, 0,
+            0, 42, 42, 42, 0,
+            0, 42, 42, 42, 0,
+            0, 42, 42, 42, 0,
+            0, 42, 42, 42, 0,
+            0,  0,  0,  0, 0,
+        ];
+
+        assert_eq!(data.get_depth_data(), &depth);
+    }
 
     #[test]
     fn test_render_shape() {
