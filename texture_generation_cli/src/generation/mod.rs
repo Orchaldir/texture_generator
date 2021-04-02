@@ -7,11 +7,11 @@ use texture_generation::math::size::Size;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TextureGenerator {
-    pub name: String,
-    pub size: Size,
-    pub background: Color,
-    pub component: Component,
-    pub post_processes: Vec<PostProcess>,
+    name: String,
+    size: Size,
+    background: Color,
+    component: Component,
+    post_processes: Vec<PostProcess>,
 }
 
 impl TextureGenerator {
