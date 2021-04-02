@@ -3,15 +3,15 @@ use texture_generation::generation::component::Component;
 pub struct Surface {
     name: String,
     height: u32,
-    component: Component,
+    texture: Component,
 }
 
 impl Surface {
-    pub fn new<S: Into<String>>(name: S, height: u32, component: Component) -> Surface {
+    pub fn new<S: Into<String>>(name: S, height: u32, texture: Component) -> Surface {
         Surface {
             name: name.into(),
             height,
-            component,
+            texture,
         }
     }
 }
