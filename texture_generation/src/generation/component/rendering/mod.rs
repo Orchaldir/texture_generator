@@ -136,7 +136,7 @@ mod tests {
     #[test]
     fn test_render_shape_partly_outside() {
         let size = Size::new(4, 2);
-        let data_size = Size::new(4, 4);
+        let data_size = Size::square(4);
         let start = Point::new(-2, -1);
         let rectangle = Shape::new_rectangle(4, 2).unwrap();
         let aabb = AABB::new(start, size);

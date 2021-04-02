@@ -131,7 +131,7 @@ impl LayoutComponent {
                 side, component, ..
             } => {
                 let mut point = aabb.start();
-                let square_size = Size::new(*side, *side);
+                let square_size = Size::square(*side);
                 let end = aabb.end() - square_size;
                 let step = *side as i32;
 
@@ -173,7 +173,7 @@ mod tests {
         let renderer = RenderingComponent::new_shape("tile", rectangle, RED);
         let component = Component::Rendering(Box::new(renderer));
         let layout =
-            LayoutComponent::new_brick_wall("test", Size::new(5, 5), 2, component).unwrap();
+            LayoutComponent::new_brick_wall("test", Size::square(5), 2, component).unwrap();
 
         layout.generate(&mut data, &aabb);
 

@@ -36,6 +36,11 @@ impl Size {
         Size { width, height }
     }
 
+    /// Returns a size with equal width & height.
+    pub const fn square(size: u32) -> Size {
+        Size::new(size, size)
+    }
+
     /// Returns a new size divided by a value.
     ///
     /// ```
