@@ -1,5 +1,5 @@
-use texture_generation::math::size::Size;
 use crate::tilemap::tile::Tile;
+use texture_generation::math::size::Size;
 
 pub struct Tilemap2d {
     size: Size,
