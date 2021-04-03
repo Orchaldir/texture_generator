@@ -38,5 +38,5 @@ fn main() {
     let mut window = GliumWindow::default_size("Tilemap Editor");
     let app = Rc::new(RefCell::new(TilemapEditor::default()));
 
-    window.run(app.clone());
+    window.run(app);
 }

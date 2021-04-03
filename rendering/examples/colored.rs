@@ -30,5 +30,5 @@ fn main() {
     let mut window = GliumWindow::default_size("Example with colored Polygons");
     let app = Rc::new(RefCell::new(ColoredExample::default()));
 
-    window.run(app.clone());
+    window.run(app);
 }

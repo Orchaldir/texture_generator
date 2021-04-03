@@ -6,7 +6,6 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use texture_generation::definition::generation::component::ComponentDefinition;
-use texture_generation::definition::generation::process::PostProcessDefinition;
 use texture_generation::math::color::Color;
 use texture_generation::math::size::Size;
 use texture_generation::utils::error::GenerationError;
@@ -17,8 +16,6 @@ pub struct TextureDefinition {
     size: Size,
     background: String,
     component: ComponentDefinition,
-    #[serde(default)]
-    post_processes: Vec<PostProcessDefinition>,
 }
 
 impl TextureDefinition {
@@ -27,14 +24,12 @@ impl TextureDefinition {
         size: Size,
         background: String,
         component: ComponentDefinition,
-        post_processes: Vec<PostProcessDefinition>,
     ) -> TextureDefinition {
         TextureDefinition {
             name: name.into(),
             size,
             background,
             component,
-            post_processes,
         }
     }
 
@@ -59,12 +54,6 @@ impl TextureDefinition {
         let max = self.size.width().max(self.size.height());
         let factor = size as f32 / max as f32;
         let component = self.component.convert(factor)?;
-        let post_processes = self
-            .post_processes
-            .clone()
-            .into_iter()
-            .map(|process| process.into())
-            .collect();
         let color = Color::convert(&self.background)
             .ok_or_else(|| GenerationError::invalid_color("background", &self.background))?;
 
@@ -73,7 +62,6 @@ impl TextureDefinition {
             self.size * factor,
             color,
             component,
-            post_processes,
         ))
     }
 }
@@ -92,15 +80,9 @@ mod tests {
             Size::new(100, 50),
             "#0000FF".to_string(),
             ComponentDefinition::Mock(42),
-            vec![PostProcessDefinition::Mock(13)],
         );
-        let generator = TextureGenerator::new(
-            "test",
-            Size::new(200, 100),
-            BLUE,
-            Component::Mock(42),
-            vec![PostProcess::Mock(13)],
-        );
+        let generator =
+            TextureGenerator::new("test", Size::new(200, 100), BLUE, Component::Mock(42));
 
         assert_eq!(generator, definition.convert(200).unwrap());
     }

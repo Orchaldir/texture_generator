@@ -1,6 +1,5 @@
 use texture_generation::generation::component::Component;
 use texture_generation::generation::data::RuntimeData;
-use texture_generation::generation::process::PostProcess;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::Color;
 use texture_generation::math::size::Size;
@@ -11,7 +10,6 @@ pub struct TextureGenerator {
     size: Size,
     background: Color,
     component: Component,
-    post_processes: Vec<PostProcess>,
 }
 
 impl TextureGenerator {
@@ -20,14 +18,12 @@ impl TextureGenerator {
         size: Size,
         background: Color,
         component: Component,
-        post_processes: Vec<PostProcess>,
     ) -> TextureGenerator {
         TextureGenerator {
             name: name.into(),
             size,
             background,
             component,
-            post_processes,
         }
     }
 
@@ -37,10 +33,6 @@ impl TextureGenerator {
         let mut data = RuntimeData::new(self.size, self.background);
 
         self.component.generate(&mut data, &aabb);
-
-        for post_process in self.post_processes.iter() {
-            post_process.process(&mut data);
-        }
 
         data
     }
@@ -60,8 +52,7 @@ mod tests {
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let rendering = RenderingComponent::new_shape("test", rectangle, RED);
         let component = Component::Rendering(Box::new(rendering));
-        let generator =
-            TextureGenerator::new("test", Size::new(5, 7), GREEN, component, Vec::new());
+        let generator = TextureGenerator::new("test", Size::new(5, 7), GREEN, component);
 
         let data = generator.generate();
 

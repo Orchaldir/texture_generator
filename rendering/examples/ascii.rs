@@ -55,5 +55,5 @@ fn main() {
     let mut window = GliumWindow::default_size("Example with ascii");
     let app = Rc::new(RefCell::new(AsciiExample::default()));
 
-    window.run(app.clone());
+    window.run(app);
 }

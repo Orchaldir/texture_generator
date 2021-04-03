@@ -32,5 +32,5 @@ fn main() {
     let mut window = GliumWindow::default_size("Example with a texture");
     let app = Rc::new(RefCell::new(TextureExample::default()));
 
-    window.run(app.clone());
+    window.run(app);
 }

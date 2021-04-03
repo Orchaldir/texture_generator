@@ -1,3 +1,4 @@
+use crate::generation::process::PostProcess;
 use crate::math::color::Color;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -51,6 +52,13 @@ impl RuntimeData {
 
     pub fn set_base_depth(&mut self, depth: u8) {
         self.base_depth = depth;
+    }
+
+    /// Applies the post processes.
+    pub fn apply(&mut self, post_processes: &[PostProcess]) {
+        for post_process in post_processes.iter() {
+            post_process.process(self);
+        }
     }
 }
 
