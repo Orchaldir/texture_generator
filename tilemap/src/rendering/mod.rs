@@ -12,7 +12,7 @@ pub mod texture;
 
 pub struct Renderer {
     tile_size: u32,
-    wall_depth: u8,
+    wall_height: u8,
     textures: TextureManager,
     post_processes: Vec<PostProcess>,
 }
@@ -26,7 +26,7 @@ impl Renderer {
     ) -> Self {
         Renderer {
             tile_size,
-            wall_depth,
+            wall_height: wall_depth,
             textures,
             post_processes,
         }
@@ -51,7 +51,7 @@ impl Renderer {
                     Tile::Empty => {}
                     Tile::Floor(id) => self.render_texture(index, id, 0, &mut data, &aabb),
                     Tile::Full(id) => {
-                        self.render_texture(index, id, self.wall_depth, &mut data, &aabb)
+                        self.render_texture(index, id, self.wall_height, &mut data, &aabb)
                     }
                 }
 
@@ -72,12 +72,12 @@ impl Renderer {
         &self,
         index: usize,
         texture_id: usize,
-        depth: u8,
+        height: u8,
         data: &mut RuntimeData,
         aabb: &AABB,
     ) {
         if let Some(texture) = self.textures.get(texture_id) {
-            data.set_base_depth(depth);
+            data.set_base_depth(height);
             texture.render(data, aabb);
         } else {
             warn!(
