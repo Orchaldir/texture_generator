@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "rendering",
     "texture_generation",
     "texture_generation_cli",
     "tilemap",
