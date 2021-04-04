@@ -2,7 +2,7 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::definition::{convert, convert_size};
 use crate::generation::component::layout::LayoutComponent;
 use crate::math::size::Size;
-use crate::utils::error::GenerationError;
+use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -21,32 +21,32 @@ pub enum LayoutDefinition {
 }
 
 impl LayoutDefinition {
-    pub fn convert(&self, factor: f32) -> Result<LayoutComponent, GenerationError> {
+    pub fn convert(&self, factor: f32) -> Result<LayoutComponent, DefinitionError> {
         match self {
             LayoutDefinition::BrickWall {
                 name,
                 brick,
                 offset,
                 component,
-            } => match component.convert(factor) {
-                Ok(component) => LayoutComponent::new_brick_wall(
+            } => {
+                let component = component.convert(factor)?;
+                let layout = LayoutComponent::new_brick_wall(
                     name,
                     convert_size(brick, factor),
                     convert(*offset, factor),
                     component,
-                ),
-                Err(error) => Err(error),
-            },
+                )?;
+                Ok(layout)
+            }
             LayoutDefinition::Square {
                 name,
                 side,
                 component,
-            } => match component.convert(factor) {
-                Ok(component) => {
-                    LayoutComponent::new_square(name, convert(*side, factor), component)
-                }
-                Err(error) => Err(error),
-            },
+            } => {
+                let component = component.convert(factor)?;
+                let layout = LayoutComponent::new_square(name, convert(*side, factor), component)?;
+                Ok(layout)
+            }
         }
     }
 }

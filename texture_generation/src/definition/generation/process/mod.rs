@@ -1,6 +1,6 @@
 use crate::definition::generation::process::lighting::LightingDefinition;
 use crate::generation::process::PostProcess;
-use crate::utils::error::GenerationError;
+use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
@@ -14,7 +14,7 @@ pub enum PostProcessDefinition {
 }
 
 impl PostProcessDefinition {
-    pub fn read(path: &PathBuf) -> Result<Vec<PostProcessDefinition>, GenerationError> {
+    pub fn read(path: &PathBuf) -> Result<Vec<PostProcessDefinition>, DefinitionError> {
         let string = fs::read_to_string(path)?;
         let data: Vec<PostProcessDefinition> = serde_yaml::from_str(&string)?;
         Ok(data)

@@ -1,8 +1,8 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-/// An error type for [`TextureGenerator`](crate::generation::TextureGenerator) and its components.
-pub enum GenerationError {
+/// The different errors for reading & converting definitions.
+pub enum DefinitionError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
     #[error("Color {name:?} has an invalid value {value:?}")]
@@ -14,6 +14,13 @@ pub enum GenerationError {
     },
     #[error(transparent)]
     SerdeError(#[from] serde_yaml::Error),
+    #[error(transparent)]
+    ValueError(#[from] ValueError),
+}
+
+#[derive(Error, Debug)]
+/// The different errors for creating new objects.
+pub enum ValueError {
     #[error("Value {name:?} of component {component:?} is too big ({value})")]
     ValueTooBig {
         component: String,
@@ -28,27 +35,29 @@ pub enum GenerationError {
     },
 }
 
-impl GenerationError {
-    pub fn invalid_color<S: Into<String>>(name: S, value: S) -> GenerationError {
-        GenerationError::InvalidColor {
+impl DefinitionError {
+    pub fn invalid_color<S: Into<String>>(name: S, value: S) -> DefinitionError {
+        DefinitionError::InvalidColor {
             name: name.into(),
             value: value.into(),
         }
     }
 
-    pub fn invalid_shape<S: Into<String>>(component: S, source: ShapeError) -> GenerationError {
-        GenerationError::InvalidShape {
+    pub fn invalid_shape<S: Into<String>>(component: S, source: ShapeError) -> DefinitionError {
+        DefinitionError::InvalidShape {
             component: component.into(),
             source,
         }
     }
+}
 
+impl ValueError {
     pub fn value_too_big<S: Into<String>, T: Into<String>>(
         component: S,
         name: T,
         value: u32,
-    ) -> GenerationError {
-        GenerationError::ValueTooBig {
+    ) -> ValueError {
+        ValueError::ValueTooBig {
             component: component.into(),
             name: name.into(),
             value,
@@ -59,8 +68,8 @@ impl GenerationError {
         component: S,
         name: T,
         value: u32,
-    ) -> GenerationError {
-        GenerationError::ValueTooSmall {
+    ) -> ValueError {
+        ValueError::ValueTooSmall {
             component: component.into(),
             name: name.into(),
             value,

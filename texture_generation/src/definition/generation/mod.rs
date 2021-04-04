@@ -2,7 +2,7 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::math::size::Size;
-use crate::utils::error::GenerationError;
+use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
@@ -35,13 +35,13 @@ impl TextureDefinition {
         }
     }
 
-    pub fn read(path: &PathBuf) -> Result<TextureDefinition, GenerationError> {
+    pub fn read(path: &PathBuf) -> Result<TextureDefinition, DefinitionError> {
         let string = fs::read_to_string(path)?;
         let data: TextureDefinition = serde_yaml::from_str(&string)?;
         Ok(data)
     }
 
-    pub fn write(&self, path: &str) -> Result<(), GenerationError> {
+    pub fn write(&self, path: &str) -> Result<(), DefinitionError> {
         let mut file = File::create(path)?;
 
         let s = serde_yaml::to_string(self)?;
@@ -51,12 +51,12 @@ impl TextureDefinition {
         Ok(())
     }
 
-    pub fn convert(&self, size: u32) -> Result<TextureGenerator, GenerationError> {
+    pub fn convert(&self, size: u32) -> Result<TextureGenerator, DefinitionError> {
         let max = self.size.width().max(self.size.height());
         let factor = size as f32 / max as f32;
         let component = self.component.convert(factor)?;
         let color = Color::convert(&self.background)
-            .ok_or_else(|| GenerationError::invalid_color("background", &self.background))?;
+            .ok_or_else(|| DefinitionError::invalid_color("background", &self.background))?;
 
         Ok(TextureGenerator::new(
             self.name.clone(),

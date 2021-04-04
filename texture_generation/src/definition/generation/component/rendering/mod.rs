@@ -3,7 +3,7 @@ use crate::definition::generation::component::rendering::depth::DepthDefinition;
 use crate::definition::math::shape::ShapeDefinition;
 use crate::generation::component::rendering::RenderingComponent;
 use crate::math::color::Color;
-use crate::utils::error::GenerationError;
+use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
 
@@ -26,11 +26,11 @@ pub enum RenderingDefinition {
 }
 
 impl RenderingDefinition {
-    pub fn convert(&self, factor: f32) -> Result<RenderingComponent, GenerationError> {
+    pub fn convert(&self, factor: f32) -> Result<RenderingComponent, DefinitionError> {
         match self {
             RenderingDefinition::FillArea { name, color, depth } => {
                 let color = Color::convert(&color)
-                    .ok_or_else(|| GenerationError::invalid_color(name, &color))?;
+                    .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
                 Ok(RenderingComponent::new_fill_area(name, color, *depth))
             }
             RenderingDefinition::Shape {
@@ -48,7 +48,7 @@ impl RenderingDefinition {
                     }
                     Err(error) => Err(error),
                 },
-                Err(error) => Err(GenerationError::invalid_shape(name, error)),
+                Err(error) => Err(DefinitionError::invalid_shape(name, error)),
             },
         }
     }

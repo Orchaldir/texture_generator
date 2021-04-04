@@ -9,7 +9,7 @@ use texture_generation::definition::generation::TextureDefinition;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
-use texture_generation::utils::error::GenerationError;
+use texture_generation::utils::error::DefinitionError;
 use texture_generation::utils::logging::init_logging;
 
 #[derive(StructOpt)]
@@ -32,7 +32,7 @@ struct Cli {
     size: u32,
 }
 
-fn load_post_processing(path: &PathBuf) -> Result<Vec<PostProcess>, GenerationError> {
+fn load_post_processing(path: &PathBuf) -> Result<Vec<PostProcess>, DefinitionError> {
     if path.exists() {
         let definition = PostProcessDefinition::read(path)?;
         let post_processes = definition.into_iter().map(|d| d.into()).collect();
