@@ -20,16 +20,16 @@ impl AmbientOcclusion {
         info!("Post Processing: Ambient Occlusion");
 
         let size = *data.get_size();
-        let mut index = 0;
+        let max_x = size.width().saturating_sub(self.radius);
+        let max_y = size.height().saturating_sub(self.radius);
 
-        for y in 0..size.height() {
-            let start_y = y.saturating_sub(self.radius);
-            let end_y = (y + self.radius).min(size.height());
+        for y in self.radius..max_y {
+            info!("Line {}/{}", y + 1, size.height());
 
-            info!("Line {}/{}: {}-{}", y + 1, size.height(), start_y, end_y);
+            let mut index = size.convert_x_y(self.radius, y);
 
-            for x in 0..size.width() {
-                let average = self.calculate_average_depth(data, x, y, start_y, end_y);
+            for x in self.radius..max_x {
+                let average = self.calculate_average_depth(data, x, y);
                 let current = data.get_depth_data()[index];
                 let diff = (current as f32 - average as f32).min(0.0);
                 let factor = diff.max(self.max_diff) / self.max_diff;
@@ -44,32 +44,29 @@ impl AmbientOcclusion {
         }
     }
 
-    fn calculate_average_depth(
-        &self,
-        data: &dyn Data,
-        x: u32,
-        y: u32,
-        start_y: u32,
-        end_y: u32,
-    ) -> u8 {
+    fn calculate_average_depth(&self, data: &dyn Data, x: u32, y: u32) -> u8 {
         let mut sum = 0u32;
         let mut pixels = 0u32;
         let depth_data = data.get_depth_data();
         let size = data.get_size();
 
-        let start_x = x.saturating_sub(self.radius);
-        let end_x = (x + self.radius).min(size.width());
+        let start_x = x - self.radius;
+        let start_y = y - self.radius;
+        let end_y = y + self.radius - 1;
+        let side = self.radius * 2;
 
-        for i in start_x..end_x {
-            let index = size.convert_x_y(i, y);
-            sum += depth_data[index] as u32;
-            pixels += 1;
-        }
+        for i in 0..side {
+            let index_x = size.convert_x_y(start_x + i, y);
+            let index_y = size.convert_x_y(x, start_y + i);
+            let index_d0 = size.convert_x_y(start_x + i, start_y + i);
+            let index_d1 = size.convert_x_y(start_x + i, end_y - i);
 
-        for i in start_y..end_y {
-            let index = size.convert_x_y(x, i);
-            sum += depth_data[index] as u32;
-            pixels += 1;
+            sum += depth_data[index_x] as u32;
+            sum += depth_data[index_y] as u32;
+            sum += depth_data[index_d0] as u32;
+            sum += depth_data[index_d1] as u32;
+
+            pixels += 4;
         }
 
         (sum / pixels) as u8
