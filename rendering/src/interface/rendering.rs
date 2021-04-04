@@ -37,6 +37,13 @@ pub trait Renderer {
 
     /// Gets a renderer for text.
     fn get_ascii_renderer(&mut self, id: TextureId) -> &mut dyn AsciiRenderer;
+
+    /// Creates a rgb texture from data and returns a `TextureId` as a handle.
+    ///
+    /// # Panics
+    ///
+    /// Panics if it can not create a texture from the image.
+    fn create_rgb(&mut self, data: &[u8], size: Size2d) -> TextureId;
 }
 
 /// A trait that focuses on rendering colored polygons.

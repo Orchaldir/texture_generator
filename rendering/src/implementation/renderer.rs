@@ -1,6 +1,7 @@
 use crate::implementation::builder::color::ColorBuilder;
 use crate::implementation::builder::texture::TextureBuilder;
 use crate::implementation::shader::load_program;
+use crate::implementation::texture::create_rgb;
 use crate::interface::rendering::{AsciiRenderer, ColorRenderer, Renderer, TextureRenderer};
 use crate::interface::{Color3f, Point2f, Size2d, TextureId};
 use cgmath::ortho;
@@ -150,6 +151,18 @@ impl Renderer for GliumRenderer {
 
     fn get_ascii_renderer(&mut self, id: TextureId) -> &mut dyn AsciiRenderer {
         &mut self.texture_data[id].builder
+    }
+
+    fn create_rgb(&mut self, data: &[u8], size: (u32, u32)) -> usize {
+        let texture = create_rgb(&self.display, data, size).unwrap();
+        let id = self.texture_data.len();
+
+        self.texture_data.push(TextureData {
+            texture,
+            builder: TextureBuilder::new(16),
+        });
+
+        id
     }
 }
 

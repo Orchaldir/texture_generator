@@ -23,6 +23,6 @@ pub fn create_rgb<F: Facade>(
     data: &[u8],
     size: Size2d,
 ) -> Result<glium::texture::Texture2d, glium::texture::TextureCreationError> {
-    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(data, size);
+    let image = glium::texture::RawImage2d::from_raw_rgb_reversed(data, size);
     glium::texture::Texture2d::new(display, image)
 }
