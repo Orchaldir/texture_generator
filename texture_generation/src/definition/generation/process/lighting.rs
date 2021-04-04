@@ -19,29 +19,20 @@ impl From<LightingDefinition> for Lighting {
     }
 }
 
-impl From<&Lighting> for LightingDefinition {
-    fn from(lighting: &Lighting) -> Self {
-        LightingDefinition {
-            light_direction: lighting.light_direction,
-            normal_z: lighting.normal_z as u32,
-            shininess: lighting.shininess as u32,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_convert() {
-        assert_convert(Lighting::new(Vector3::new(1.0, 0.0, 0.0), 10, 32));
-    }
+        let light_direction = Vector3::new(1.0, 0.0, 0.0);
+        let definition = LightingDefinition {
+            light_direction,
+            normal_z: 10,
+            shininess: 32,
+        };
+        let result = Lighting::new(light_direction, 10, 32);
 
-    fn assert_convert(lighting: Lighting) {
-        let definition: LightingDefinition = (&lighting).into();
-        let result: Lighting = definition.clone().into();
-
-        assert_eq!(result, lighting)
+        assert_eq!(result, definition.into())
     }
 }

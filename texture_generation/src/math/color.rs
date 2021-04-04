@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::ops::{Add, Mul};
+use std::ops::{Add, Mul, MulAssign};
 
 /// Represents a color with the RGB color model.
 ///
@@ -104,7 +104,7 @@ impl Add<Color> for Color {
     }
 }
 
-/// Multiplies a [`Color`] with a float.
+/// Multiplies a [`Color`] with a float and returns a new color.
 ///
 /// ```
 ///# use texture_generation::math::color::Color;
@@ -123,6 +123,24 @@ impl Mul<f32> for Color {
             (self.g as f32 * value) as u8,
             (self.b as f32 * value) as u8,
         )
+    }
+}
+
+/// Multiplies a [`Color`] with a float.
+///
+/// ```
+///# use texture_generation::math::color::Color;
+/// let mut vector = Color::from_rgb(0, 100, 255);
+///
+/// vector *= 0.5;
+///
+/// assert_eq!(vector, Color::from_rgb(0, 50, 127));
+/// ```
+impl MulAssign<f32> for Color {
+    fn mul_assign(&mut self, factor: f32) {
+        self.r = (self.r as f32 * factor) as u8;
+        self.g = (self.g as f32 * factor) as u8;
+        self.b = (self.b as f32 * factor) as u8;
     }
 }
 

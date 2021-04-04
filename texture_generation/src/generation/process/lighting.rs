@@ -4,9 +4,9 @@ use crate::math::vector3::Vector3;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Lighting {
-    pub light_direction: Vector3,
-    pub normal_z: f32,
-    pub shininess: i32,
+    light_direction: Vector3,
+    normal_z: f32,
+    shininess: i32,
 }
 
 impl Lighting {
@@ -20,6 +20,8 @@ impl Lighting {
     }
 
     pub fn process(&self, data: &mut dyn Data) {
+        info!("Post Processing: Lighting");
+
         let size = *data.get_size();
         let mut index = 0;
         let ambient = 0.1;
@@ -40,8 +42,7 @@ impl Lighting {
                 let diffuse = self.light_direction.dot(&normal).max(0.0);
                 let specular = half_direction.dot(&normal).max(0.0).powi(self.shininess);
 
-                let color = data.get_color_data()[index];
-                data.get_color_data_mut()[index] = color * (ambient + diffuse + specular);
+                data.get_color_data_mut()[index] *= ambient + diffuse + specular;
 
                 index += 1;
             }

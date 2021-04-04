@@ -29,5 +29,5 @@ component:
             - "#990F02"
         depth:
           Linear:
-            center: 255
-            border: 100
+            center: 25
+            border: 10
