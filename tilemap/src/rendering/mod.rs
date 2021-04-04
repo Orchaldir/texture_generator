@@ -42,7 +42,7 @@ impl Renderer {
         for y in 0..tiles.height() {
             start.x = 0;
 
-            for x in 0..tiles.height() {
+            for x in 0..tiles.width() {
                 let index = tiles.convert_x_y(x, y);
                 let tile = tilemap.get_tile(index);
                 let aabb = AABB::new(start, tile_size);
@@ -55,10 +55,10 @@ impl Renderer {
                     }
                 }
 
-                start.x = tile_size.width() as i32;
+                start.x += tile_size.width() as i32;
             }
 
-            start.y = tile_size.height() as i32;
+            start.y += tile_size.height() as i32;
         }
 
         for post_process in self.post_processes.iter() {
@@ -104,8 +104,8 @@ mod tests {
         let texture1 = create_texture("texture0", BLUE, 42);
         let textures = TextureManager::new(vec![texture0, texture1]);
         let renderer = Renderer::new(2, 100, textures, Vec::default());
-        let tiles = vec![Tile::Empty, Tile::Floor(0), Tile::Full(1), Tile::Empty];
-        let tilemap = Tilemap2d::new(Size::square(2), tiles).unwrap();
+        let tiles = vec![Tile::Empty, Tile::Floor(0), Tile::Full(1), Tile::Empty, Tile::Empty, Tile::Floor(1)];
+        let tilemap = Tilemap2d::new(Size::new(2, 3), tiles).unwrap();
 
         let data = renderer.render(&tilemap);
 
@@ -115,6 +115,8 @@ mod tests {
             PINK, PINK,  RED,  RED,
             BLUE, BLUE, PINK, PINK,
             BLUE, BLUE, PINK, PINK,
+            PINK, PINK, BLUE, BLUE,
+            PINK, PINK, BLUE, BLUE,
         ];
 
         assert_eq!(data.get_color_data(), &result);
@@ -125,6 +127,8 @@ mod tests {
               0,   0, 99, 99,
             142, 142,  0,  0,
             142, 142,  0,  0,
+              0,   0, 42, 42,
+              0,   0, 42, 42,
         ];
 
         assert_eq!(data.get_depth_data(), &depth);
