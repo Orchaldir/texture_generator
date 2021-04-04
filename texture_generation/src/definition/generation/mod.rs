@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::{DirEntry, File};
 use std::io::{Error, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub mod component;
 pub mod process;
@@ -35,7 +35,7 @@ impl TextureDefinition {
         }
     }
 
-    pub fn read(path: &PathBuf) -> Result<TextureDefinition, DefinitionError> {
+    pub fn read(path: &Path) -> Result<TextureDefinition, DefinitionError> {
         let string = fs::read_to_string(path)?;
         let data: TextureDefinition = serde_yaml::from_str(&string)?;
         Ok(data)

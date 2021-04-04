@@ -2,7 +2,7 @@
 extern crate log;
 
 use anyhow::Result;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use structopt::StructOpt;
 use texture_generation::definition::generation::process::PostProcessDefinition;
 use texture_generation::definition::generation::TextureDefinition;
@@ -31,7 +31,7 @@ struct Cli {
     size: u32,
 }
 
-fn load_post_processing(path: &PathBuf) -> Result<Vec<PostProcess>, DefinitionError> {
+fn load_post_processing(path: &Path) -> Result<Vec<PostProcess>, DefinitionError> {
     if path.exists() {
         let definition = PostProcessDefinition::read(path)?;
         let post_processes = definition.into_iter().map(|d| d.into()).collect();
