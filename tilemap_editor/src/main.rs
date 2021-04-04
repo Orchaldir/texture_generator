@@ -6,7 +6,7 @@ extern crate tilemap;
 
 use rendering::implementation::window::GliumWindow;
 use rendering::interface::app::App;
-use rendering::interface::input::KeyCode;
+use rendering::interface::input::{get_number, KeyCode, MouseButton};
 use rendering::interface::rendering::{Initialization, Renderer};
 use rendering::interface::window::Window;
 use rendering::interface::{TextureId, BLACK, WHITE};
@@ -50,30 +50,35 @@ struct Cli {
 
 pub struct TilemapEditor {
     font_id: TextureId,
-    preview_id: Option<TextureId>,
+    preview_id: TextureId,
     renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
+    has_changed: bool,
+    current_texture: usize,
 }
 
 impl TilemapEditor {
     pub fn new(renderer: tilemap::rendering::Renderer, tilemap: Tilemap2d) -> TilemapEditor {
         TilemapEditor {
             font_id: 0,
-            preview_id: None,
+            preview_id: 0,
             renderer,
             tilemap,
+            has_changed: true,
+            current_texture: 0,
         }
     }
 
     fn render_preview(&mut self, renderer: &mut dyn Renderer) {
-        if self.preview_id.is_none() {
+        if self.has_changed {
             info!("Render preview");
 
             let data = self.renderer.render(&self.tilemap);
             let rbg = convert(data.get_color_data());
             let size = data.get_size();
 
-            self.preview_id = Some(renderer.create_rgb(&rbg, (size.width(), size.height())));
+            self.preview_id = renderer.create_rgb(&rbg, (size.width(), size.height()));
+            self.has_changed = false;
 
             info!("Finished rendering preview");
         }
@@ -90,18 +95,12 @@ impl App for TilemapEditor {
 
         renderer.start(BLACK);
 
-        if let Some(id) = self.preview_id {
-            let window_size = renderer.get_size();
-            let rectangle_size = (window_size.0 as f32, window_size.1 as f32);
+        let window_size = renderer.get_size();
+        let rectangle_size = (window_size.0 as f32, window_size.1 as f32);
 
-            renderer.get_texture_renderer(id).render_rectangle(
-                (0.0, 0.0),
-                rectangle_size,
-                (0.0, 0.0),
-                (1.0, 1.0),
-                WHITE,
-            );
-        }
+        renderer
+            .get_texture_renderer(self.preview_id)
+            .render_rectangle((0.0, 0.0), rectangle_size, (0.0, 0.0), (1.0, 1.0), WHITE);
 
         renderer.finish();
     }
@@ -109,7 +108,29 @@ impl App for TilemapEditor {
     fn on_key_released(&mut self, key: KeyCode) {
         if key == KeyCode::Space {
             info!("Save tilemap")
+        } else if let Some(number) = get_number(key) {
+            self.current_texture = number;
         }
+    }
+
+    fn on_button_released(&mut self, button: MouseButton, point: (u32, u32)) {
+        let tile_x = point.0 / self.renderer.get_tile_size();
+        let tile_y = point.1 / self.renderer.get_tile_size();
+        let index = self.tilemap.get_size().convert_x_y(tile_x, tile_y);
+
+        let tile = match button {
+            MouseButton::Left => Tile::Floor(self.current_texture),
+            MouseButton::Middle => Tile::Empty,
+            MouseButton::Right => Tile::Full(self.current_texture),
+        };
+
+        info!(
+            "Set tile {} (x={} y={}) to {:?}",
+            index, tile_x, tile_y, tile
+        );
+
+        self.tilemap.set_tile(index, tile);
+        self.has_changed = true;
     }
 }
 
@@ -157,7 +178,8 @@ fn main() {
         Vec::default(),
     );
 
-    let mut window = GliumWindow::default_size("Tilemap Editor");
+    let window_size = (args.width * args.tile_size, args.height * args.tile_size);
+    let mut window = GliumWindow::new("Tilemap Editor", window_size);
     let editor = TilemapEditor::new(renderer, tilemap2d);
     let app = Rc::new(RefCell::new(editor));
 

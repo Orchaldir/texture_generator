@@ -32,6 +32,10 @@ impl Renderer {
         }
     }
 
+    pub fn get_tile_size(&self) -> u32 {
+        self.tile_size
+    }
+
     pub fn render(&self, tilemap: &Tilemap2d) -> RuntimeData {
         let tiles = tilemap.get_size();
         let tile_size = Size::square(self.tile_size);
