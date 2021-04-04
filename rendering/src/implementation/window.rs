@@ -3,7 +3,6 @@ use crate::implementation::input::{convert_key_code, convert_mouse_button};
 use crate::interface::app::App;
 use crate::interface::window::Window;
 use crate::interface::Size2d;
-use core::cmp;
 use glium::glutin::dpi::PhysicalPosition;
 use glium::glutin::event::{ElementState, KeyboardInput, MouseButton};
 use glium::{glutin, Display};
@@ -141,7 +140,6 @@ fn calculate_mouse_point(size: Size2d, position: PhysicalPosition<f64>) -> Optio
         return None;
     }
 
-    let y = cmp::max(size.1 - y, 1) - 1;
     Some((x, y))
 }
 
