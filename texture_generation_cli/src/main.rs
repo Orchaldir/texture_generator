@@ -1,19 +1,16 @@
 #[macro_use]
 extern crate log;
 
-use crate::definition::TextureDefinition;
-use crate::generation::TextureGenerator;
 use anyhow::Result;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use texture_generation::definition::generation::process::PostProcessDefinition;
+use texture_generation::definition::generation::TextureDefinition;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::PostProcess;
+use texture_generation::generation::TextureGenerator;
 use texture_generation::utils::error::GenerationError;
 use texture_generation::utils::logging::init_logging;
-
-pub mod definition;
-pub mod generation;
 
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]
