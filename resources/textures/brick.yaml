@@ -7,7 +7,7 @@ background: "#AAAAAA"
 component:
   type: Layout
   BrickWall:
-    name: layout
+    name: brick layout
     brick:
       width: 128
       height: 64
@@ -15,7 +15,7 @@ component:
     component:
       type: Rendering
       Shape:
-        name: circle
+        name: red brick
         shape:
           RoundedRectangle:
             width: 120
@@ -31,11 +31,3 @@ component:
           Linear:
             center: 255
             border: 100
-post_processes:
-  - Lighting:
-      light_direction:
-        x: 1.0
-        y: 0.0
-        z: 2.0
-      normal_z: 10
-      shininess: 32

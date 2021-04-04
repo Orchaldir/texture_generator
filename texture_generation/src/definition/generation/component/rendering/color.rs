@@ -1,6 +1,6 @@
 use crate::generation::component::rendering::color::ColorSelector;
 use crate::math::color::Color;
-use crate::utils::error::GenerationError;
+use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -10,11 +10,11 @@ pub enum ColorSelectorDefinition {
 }
 
 impl ColorSelectorDefinition {
-    pub fn convert(&self, name: &str) -> Result<ColorSelector, GenerationError> {
+    pub fn convert(&self, name: &str) -> Result<ColorSelector, DefinitionError> {
         match self {
             ColorSelectorDefinition::ConstantColor(color) => {
                 let color = Color::convert(&color)
-                    .ok_or_else(|| GenerationError::invalid_color(name, &color))?;
+                    .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
                 Ok(ColorSelector::ConstantColor(color))
             }
             ColorSelectorDefinition::Sequence(colors) => {
@@ -22,7 +22,7 @@ impl ColorSelectorDefinition {
 
                 for color in colors {
                     let color = Color::convert(&color)
-                        .ok_or_else(|| GenerationError::invalid_color(name, &color))?;
+                        .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
                     converted_colors.push(color);
                 }
 

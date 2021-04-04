@@ -1,6 +1,6 @@
 use crate::definition::generation::component::rendering::RenderingDefinition;
 use crate::generation::component::Component;
-use crate::utils::error::GenerationError;
+use crate::utils::error::DefinitionError;
 use layout::LayoutDefinition;
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ pub enum ComponentDefinition {
 }
 
 impl ComponentDefinition {
-    pub fn convert(&self, factor: f32) -> Result<Component, GenerationError> {
+    pub fn convert(&self, factor: f32) -> Result<Component, DefinitionError> {
         match self {
             ComponentDefinition::Layout(definition) => {
                 Ok(Component::Layout(Box::new(definition.convert(factor)?)))

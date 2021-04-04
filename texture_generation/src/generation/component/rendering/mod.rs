@@ -91,6 +91,7 @@ impl RenderingComponent {
                 let mut point = start;
                 let center = aabb.center();
                 let color = color_selector.select();
+                let base_depth = data.get_base_depth();
 
                 while point.y < end.y {
                     point.x = start.x;
@@ -100,7 +101,7 @@ impl RenderingComponent {
 
                         if distance <= 1.0 {
                             let depth =
-                                data.get_base_depth() + depth_calculator.calculate(distance);
+                                base_depth.saturating_add(depth_calculator.calculate(distance));
                             data.set(&point, &color, depth);
                         }
 

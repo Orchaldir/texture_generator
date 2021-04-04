@@ -1,3 +1,4 @@
+use crate::generation::process::PostProcess;
 use crate::math::color::Color;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -51,6 +52,43 @@ impl RuntimeData {
 
     pub fn set_base_depth(&mut self, depth: u8) {
         self.base_depth = depth;
+    }
+
+    /// Applies the post processes.
+    pub fn apply(&mut self, post_processes: &[PostProcess]) {
+        for post_process in post_processes.iter() {
+            post_process.process(self);
+        }
+    }
+
+    /// Save the color image.
+    pub fn save_color_image(&self, path: &str) {
+        info!("Save color to {:?}", path);
+
+        let color_data = convert(&self.colors);
+
+        image::save_buffer(
+            path,
+            &color_data,
+            self.size.width(),
+            self.size.height(),
+            image::ColorType::Rgb8,
+        )
+        .unwrap();
+    }
+
+    /// Save the depth image.
+    pub fn save_depth_image(&self, path: &str) {
+        info!("Save depth to {:?}", path);
+
+        image::save_buffer(
+            path,
+            &self.depth,
+            self.size.width(),
+            self.size.height(),
+            image::ColorType::L8,
+        )
+        .unwrap();
     }
 }
 

@@ -1,16 +1,15 @@
 #[macro_use]
 extern crate log;
 
-use crate::definition::TextureDefinition;
-use crate::generation::TextureGenerator;
 use anyhow::Result;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use texture_generation::generation::data::{convert, Data};
+use texture_generation::definition::generation::process::PostProcessDefinition;
+use texture_generation::definition::generation::TextureDefinition;
+use texture_generation::generation::process::PostProcess;
+use texture_generation::generation::TextureGenerator;
+use texture_generation::utils::error::DefinitionError;
 use texture_generation::utils::logging::init_logging;
-
-pub mod definition;
-pub mod generation;
 
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]
@@ -23,9 +22,23 @@ struct Cli {
     /// The path of the output images.
     output: String,
 
+    /// The path of the post processing definition.
+    #[structopt(default_value = "")]
+    post_processing: PathBuf,
+
     /// The size of the output images.
     #[structopt(default_value = "1024")]
     size: u32,
+}
+
+fn load_post_processing(path: &PathBuf) -> Result<Vec<PostProcess>, DefinitionError> {
+    if path.exists() {
+        let definition = PostProcessDefinition::read(path)?;
+        let post_processes = definition.into_iter().map(|d| d.into()).collect();
+        Ok(post_processes)
+    } else {
+        Ok(Vec::default())
+    }
 }
 
 fn main() -> Result<()> {
@@ -34,44 +47,31 @@ fn main() -> Result<()> {
     let args = Cli::from_args();
 
     info!(
-        "size={} input{:?} output={:?}",
-        args.size, args.input, args.output
+        "size={} input={:?} output={:?} post_processing={:?}",
+        args.size, args.input, args.output, args.post_processing
     );
 
-    info!("Load definition");
+    info!("Load texture definition");
 
     let definition = TextureDefinition::read(&args.input)?;
     let generator: TextureGenerator = definition.convert(args.size)?;
     let color_path = format!("{}-color.png", args.output);
     let depth_path = format!("{}-depth.png", args.output);
 
-    info!("Rendering");
+    info!("Load post processing definition");
 
-    let data = generator.generate();
+    let post_processes: Vec<PostProcess> = load_post_processing(&args.post_processing)?;
 
-    info!("Save color to {:?}", color_path);
+    info!("Texture generation");
 
-    let color_data = convert(&data.get_color_data());
+    let mut data = generator.generate();
 
-    image::save_buffer(
-        &color_path,
-        &color_data,
-        data.get_size().width(),
-        data.get_size().height(),
-        image::ColorType::Rgb8,
-    )
-    .unwrap();
+    info!("Post processing. N={}", post_processes.len());
 
-    info!("Save depth to {:?}", depth_path);
+    data.apply(&post_processes);
 
-    image::save_buffer(
-        &depth_path,
-        data.get_depth_data(),
-        data.get_size().width(),
-        data.get_size().height(),
-        image::ColorType::L8,
-    )
-    .unwrap();
+    data.save_color_image(&color_path);
+    data.save_depth_image(&depth_path);
 
     info!("Finished");
 

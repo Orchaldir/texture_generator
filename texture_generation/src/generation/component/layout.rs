@@ -2,7 +2,7 @@ use crate::generation::component::Component;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
-use crate::utils::error::GenerationError;
+use crate::utils::error::ValueError;
 
 #[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
@@ -53,25 +53,21 @@ impl LayoutComponent {
         brick: Size,
         offset: u32,
         component: Component,
-    ) -> Result<LayoutComponent, GenerationError> {
+    ) -> Result<LayoutComponent, ValueError> {
         if brick.width() < 1 {
-            return Err(GenerationError::value_too_small(
+            return Err(ValueError::value_too_small(
                 name,
                 "brick.width",
                 brick.width(),
             ));
         } else if brick.height() < 1 {
-            return Err(GenerationError::value_too_small(
+            return Err(ValueError::value_too_small(
                 name,
                 "brick.height",
                 brick.height(),
             ));
         } else if offset >= brick.width() {
-            return Err(GenerationError::value_too_big(
-                name,
-                "offset",
-                brick.height(),
-            ));
+            return Err(ValueError::value_too_big(name, "offset", brick.height()));
         }
 
         let offset = offset as i32 - brick.width() as i32;
@@ -88,9 +84,9 @@ impl LayoutComponent {
         name: S,
         side: u32,
         component: Component,
-    ) -> Result<LayoutComponent, GenerationError> {
+    ) -> Result<LayoutComponent, ValueError> {
         if side < 1 {
-            return Err(GenerationError::value_too_small(name, "side", side));
+            return Err(ValueError::value_too_small(name, "side", side));
         }
 
         Ok(LayoutComponent::Square {
