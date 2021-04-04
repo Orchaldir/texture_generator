@@ -20,13 +20,13 @@ pub struct Renderer {
 impl Renderer {
     pub fn new(
         tile_size: u32,
-        wall_depth: u8,
+        wall_height: u8,
         textures: TextureManager,
         post_processes: Vec<PostProcess>,
     ) -> Self {
         Renderer {
             tile_size,
-            wall_height: wall_depth,
+            wall_height,
             textures,
             post_processes,
         }
@@ -92,10 +92,10 @@ impl Renderer {
 mod tests {
 
     use super::*;
-    use crate::rendering::texture::Texture;
     use texture_generation::generation::component::rendering::RenderingComponent;
     use texture_generation::generation::component::Component;
     use texture_generation::generation::data::Data;
+    use texture_generation::generation::TextureGenerator;
     use texture_generation::math::color::{Color, BLUE, RED};
 
     #[test]
@@ -130,9 +130,9 @@ mod tests {
         assert_eq!(data.get_depth_data(), &depth);
     }
 
-    fn create_texture(name: &str, color: Color, depth: u8) -> Texture {
+    fn create_texture(name: &str, color: Color, depth: u8) -> TextureGenerator {
         let rendering = RenderingComponent::new_fill_area(name, color, depth);
         let component = Component::Rendering(Box::new(rendering));
-        Texture::new(name, component)
+        TextureGenerator::new(name, Size::default(), PINK, component)
     }
 }

@@ -3,7 +3,6 @@ use crate::implementation::input::{convert_key_code, convert_mouse_button};
 use crate::interface::app::App;
 use crate::interface::window::Window;
 use crate::interface::Size2d;
-use crate::logging::init_logging;
 use core::cmp;
 use glium::glutin::dpi::PhysicalPosition;
 use glium::glutin::event::{ElementState, KeyboardInput, MouseButton};
@@ -39,8 +38,6 @@ impl GliumWindow {
 
 impl Window for GliumWindow {
     fn run(&mut self, app: Rc<RefCell<dyn App>>) -> ! {
-        init_logging();
-
         let event_loop = glutin::event_loop::EventLoop::new();
         let display = self.create_display(&event_loop);
         let mut initialization = GliumInitialization::new(display);

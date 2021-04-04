@@ -5,7 +5,6 @@ extern crate log;
 
 pub mod implementation;
 pub mod interface;
-pub mod logging;
 
 use crate::implementation::vertex::ColoredVertex;
 use crate::implementation::vertex::TexturedVertex;

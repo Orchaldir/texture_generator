@@ -1,5 +1,5 @@
 use crate::generation::component::Component;
-use crate::generation::data::RuntimeData;
+use crate::generation::data::{Data, RuntimeData};
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::size::Size;
@@ -39,6 +39,11 @@ impl TextureGenerator {
         self.component.generate(&mut data, &aabb);
 
         data
+    }
+
+    /// Generates the texture to a specific part of [`Data`].
+    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
+        self.component.generate(data, aabb);
     }
 }
 

@@ -48,7 +48,7 @@ fn main() -> Result<()> {
     let args = Cli::from_args();
 
     info!(
-        "size={} input{:?} output={:?} post_processing={:?}",
+        "size={} input={:?} output={:?} post_processing={:?}",
         args.size, args.input, args.output, args.post_processing
     );
 
