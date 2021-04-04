@@ -60,6 +60,36 @@ impl RuntimeData {
             post_process.process(self);
         }
     }
+
+    /// Save the color image.
+    pub fn save_color_image(&self, path: &str) {
+        info!("Save color to {:?}", path);
+
+        let color_data = convert(&self.colors);
+
+        image::save_buffer(
+            path,
+            &color_data,
+            self.size.width(),
+            self.size.height(),
+            image::ColorType::Rgb8,
+        )
+        .unwrap();
+    }
+
+    /// Save the depth image.
+    pub fn save_depth_image(&self, path: &str) {
+        info!("Save depth to {:?}", path);
+
+        image::save_buffer(
+            path,
+            &self.depth,
+            self.size.width(),
+            self.size.height(),
+            image::ColorType::L8,
+        )
+        .unwrap();
+    }
 }
 
 impl Data for RuntimeData {

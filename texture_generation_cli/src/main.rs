@@ -6,7 +6,6 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 use texture_generation::definition::generation::process::PostProcessDefinition;
 use texture_generation::definition::generation::TextureDefinition;
-use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
 use texture_generation::utils::error::DefinitionError;
@@ -71,29 +70,8 @@ fn main() -> Result<()> {
 
     data.apply(&post_processes);
 
-    info!("Save color to {:?}", color_path);
-
-    let color_data = convert(&data.get_color_data());
-
-    image::save_buffer(
-        &color_path,
-        &color_data,
-        data.get_size().width(),
-        data.get_size().height(),
-        image::ColorType::Rgb8,
-    )
-    .unwrap();
-
-    info!("Save depth to {:?}", depth_path);
-
-    image::save_buffer(
-        &depth_path,
-        data.get_depth_data(),
-        data.get_size().width(),
-        data.get_size().height(),
-        image::ColorType::L8,
-    )
-    .unwrap();
+    data.save_color_image(&color_path);
+    data.save_depth_image(&depth_path);
 
     info!("Finished");
 

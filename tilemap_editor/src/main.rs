@@ -39,8 +39,12 @@ struct Cli {
     #[structopt(default_value = "10")]
     height: u32,
 
-    /// The size of a tile.
+    /// The size of a tile for the preview.
     #[structopt(default_value = "64")]
+    preview_size: u32,
+
+    /// The size of a tile.
+    #[structopt(default_value = "512")]
     tile_size: u32,
 
     /// The starting height for wall tiles.
@@ -52,17 +56,23 @@ pub struct TilemapEditor {
     font_id: TextureId,
     preview_id: TextureId,
     renderer: tilemap::rendering::Renderer,
+    preview_renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
     has_changed: bool,
     current_texture: usize,
 }
 
 impl TilemapEditor {
-    pub fn new(renderer: tilemap::rendering::Renderer, tilemap: Tilemap2d) -> TilemapEditor {
+    pub fn new(
+        renderer: tilemap::rendering::Renderer,
+        preview_renderer: tilemap::rendering::Renderer,
+        tilemap: Tilemap2d,
+    ) -> TilemapEditor {
         TilemapEditor {
             font_id: 0,
             preview_id: 0,
             renderer,
+            preview_renderer,
             tilemap,
             has_changed: true,
             current_texture: 0,
@@ -73,7 +83,7 @@ impl TilemapEditor {
         if self.has_changed {
             info!("Render preview");
 
-            let data = self.renderer.render(&self.tilemap);
+            let data = self.preview_renderer.render(&self.tilemap);
             let rbg = convert(data.get_color_data());
             let size = data.get_size();
 
@@ -107,15 +117,20 @@ impl App for TilemapEditor {
 
     fn on_key_released(&mut self, key: KeyCode) {
         if key == KeyCode::Space {
-            info!("Save tilemap")
+            info!("Save tilemap images");
+            let data = self.renderer.render(&self.tilemap);
+            data.save_color_image("tilemap-color.png");
+            data.save_depth_image("tilemap-depth.png");
+            info!("Finished saving tilemap images");
         } else if let Some(number) = get_number(key) {
             self.current_texture = number;
         }
     }
 
     fn on_button_released(&mut self, button: MouseButton, point: (u32, u32)) {
-        let tile_x = point.0 / self.renderer.get_tile_size();
-        let tile_y = point.1 / self.renderer.get_tile_size();
+        let tile_size = self.preview_renderer.get_tile_size();
+        let tile_x = point.0 / tile_size;
+        let tile_y = point.1 / tile_size;
         let index = self.tilemap.get_size().convert_x_y(tile_x, tile_y);
 
         let tile = match button {
@@ -146,6 +161,7 @@ fn main() {
     info!("Loaded {} texture definitions", definitions.len());
 
     let textures: Vec<TextureGenerator> = definitions
+        .clone()
         .into_iter()
         .filter_map(|d| d.convert(args.tile_size).ok())
         .collect();
@@ -153,6 +169,11 @@ fn main() {
     if textures.is_empty() {
         panic!("Not enough textures!");
     }
+
+    let preview_textures: Vec<TextureGenerator> = definitions
+        .into_iter()
+        .filter_map(|d| d.convert(args.preview_size).ok())
+        .collect();
 
     info!("Loaded {} textures", textures.len());
 
@@ -178,9 +199,22 @@ fn main() {
         Vec::default(),
     );
 
-    let window_size = (args.width * args.tile_size, args.height * args.tile_size);
+    info!("Init preview renderer: tile_size={}", args.preview_size);
+
+    let preview_texture_mgr = TextureManager::new(preview_textures);
+    let preview_renderer = tilemap::rendering::Renderer::new(
+        args.preview_size,
+        args.wall_height,
+        preview_texture_mgr,
+        Vec::default(),
+    );
+
+    let window_size = (
+        args.width * args.preview_size,
+        args.height * args.preview_size,
+    );
     let mut window = GliumWindow::new("Tilemap Editor", window_size);
-    let editor = TilemapEditor::new(renderer, tilemap2d);
+    let editor = TilemapEditor::new(renderer, preview_renderer, tilemap2d);
     let app = Rc::new(RefCell::new(editor));
 
     window.run(app);

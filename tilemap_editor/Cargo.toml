@@ -10,7 +10,6 @@ edition = "2018"
 anyhow = "1.0"
 chrono = "0.4"
 env_logger = "0.8"
-image = "0.23"
 log = "0.4"
 rendering = { path = "../rendering" }
 structopt = "0.3"
