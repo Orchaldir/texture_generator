@@ -4,7 +4,7 @@ use crate::tilemap::tilemap2d::Tilemap2d;
 use texture_generation::generation::data::RuntimeData;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::aabb::AABB;
-use texture_generation::math::color::PINK;
+use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 
@@ -37,7 +37,7 @@ impl Renderer {
         let tile_size = Size::square(self.tile_size);
         let size = tile_size * tiles;
         let mut start = Point::default();
-        let mut data = RuntimeData::new(size, PINK);
+        let mut data = RuntimeData::new(size, BLACK);
 
         for y in 0..tiles.height() {
             start.x = 0;
@@ -96,7 +96,7 @@ mod tests {
     use texture_generation::generation::component::Component;
     use texture_generation::generation::data::Data;
     use texture_generation::generation::TextureGenerator;
-    use texture_generation::math::color::{Color, BLUE, RED};
+    use texture_generation::math::color::{Color, BLACK, BLUE, PINK, RED};
 
     #[test]
     fn test_render() {
@@ -104,19 +104,26 @@ mod tests {
         let texture1 = create_texture("texture0", BLUE, 42);
         let textures = TextureManager::new(vec![texture0, texture1]);
         let renderer = Renderer::new(2, 100, textures, Vec::default());
-        let tiles = vec![Tile::Empty, Tile::Floor(0), Tile::Full(1), Tile::Empty, Tile::Empty, Tile::Floor(1)];
+        let tiles = vec![
+            Tile::Empty,
+            Tile::Floor(0),
+            Tile::Full(1),
+            Tile::Empty,
+            Tile::Empty,
+            Tile::Floor(1),
+        ];
         let tilemap = Tilemap2d::new(Size::new(2, 3), tiles).unwrap();
 
         let data = renderer.render(&tilemap);
 
         #[rustfmt::skip]
         let result = vec![
-            PINK, PINK,  RED,  RED,
-            PINK, PINK,  RED,  RED,
-            BLUE, BLUE, PINK, PINK,
-            BLUE, BLUE, PINK, PINK,
-            PINK, PINK, BLUE, BLUE,
-            PINK, PINK, BLUE, BLUE,
+            BLACK, BLACK,   RED,   RED,
+            BLACK, BLACK,   RED,   RED,
+             BLUE,  BLUE, BLACK, BLACK,
+             BLUE,  BLUE, BLACK, BLACK,
+            BLACK, BLACK,  BLUE,  BLUE,
+            BLACK, BLACK,  BLUE,  BLUE,
         ];
 
         assert_eq!(data.get_color_data(), &result);

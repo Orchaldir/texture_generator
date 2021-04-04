@@ -1,3 +1,4 @@
+use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::component::Component;
 use crate::generation::data::{Data, RuntimeData};
 use crate::math::aabb::AABB;
@@ -43,6 +44,9 @@ impl TextureGenerator {
 
     /// Generates the texture to a specific part of [`Data`].
     pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
+        let background = RenderingComponent::new_fill_area("background", self.background, 0);
+
+        background.render(data, aabb);
         self.component.generate(data, aabb);
     }
 }
