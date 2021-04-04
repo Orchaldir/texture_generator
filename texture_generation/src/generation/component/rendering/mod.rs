@@ -100,7 +100,8 @@ impl RenderingComponent {
                         let distance = shape.distance(&center, &point);
 
                         if distance <= 1.0 {
-                            let depth = base_depth.saturating_add(depth_calculator.calculate(distance));
+                            let depth =
+                                base_depth.saturating_add(depth_calculator.calculate(distance));
                             data.set(&point, &color, depth);
                         }
 
