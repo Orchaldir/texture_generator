@@ -29,12 +29,3 @@ impl From<PostProcessDefinition> for PostProcess {
         }
     }
 }
-
-impl From<&PostProcess> for PostProcessDefinition {
-    fn from(process: &PostProcess) -> Self {
-        match process {
-            PostProcess::Lighting(lighting) => PostProcessDefinition::Lighting(lighting.into()),
-            PostProcess::Mock(id) => PostProcessDefinition::Mock(*id),
-        }
-    }
-}

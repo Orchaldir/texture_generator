@@ -16,6 +16,8 @@ use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::definition::generation::TextureDefinition;
 use texture_generation::generation::data::{convert, Data};
+use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
+use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
@@ -117,7 +119,7 @@ impl App for TilemapEditor {
 
     fn on_key_released(&mut self, key: KeyCode) {
         if key == KeyCode::Space {
-            info!("Save tilemap images");
+            info!("Generate tilemap images");
             let data = self.renderer.render(&self.tilemap);
             data.save_color_image("tilemap-color.png");
             data.save_depth_image("tilemap-depth.png");
@@ -182,7 +184,7 @@ fn main() {
     let tiles = Size::new(args.width, args.height);
     let mut tilemap2d = Tilemap2d::default(tiles, Tile::Empty);
 
-    tilemap2d.set_tile(0, Tile::Floor(0));
+    tilemap2d.set_tile(0, Tile::Full(0));
     tilemap2d.set_tile(1, Tile::Floor(0));
     tilemap2d.set_tile(2, Tile::Floor(1));
 
@@ -192,11 +194,12 @@ fn main() {
     );
 
     let texture_mgr = TextureManager::new(textures);
+    let post_process = AmbientOcclusion::new(10, -200.0, -0.5);
     let renderer = tilemap::rendering::Renderer::new(
         args.tile_size,
         args.wall_height,
         texture_mgr,
-        Vec::default(),
+        vec![PostProcess::AmbientOcclusion(post_process)],
     );
 
     info!("Init preview renderer: tile_size={}", args.preview_size);
