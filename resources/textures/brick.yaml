@@ -7,7 +7,7 @@ background: "#AAAAAA"
 component:
   type: Layout
   BrickWall:
-    name: layout
+    name: brick layout
     brick:
       width: 128
       height: 64
@@ -15,7 +15,7 @@ component:
     component:
       type: Rendering
       Shape:
-        name: circle
+        name: red brick
         shape:
           RoundedRectangle:
             width: 120
