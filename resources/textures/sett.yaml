@@ -20,4 +20,4 @@ component:
         color:
           ConstantColor: "#808080"
         depth:
-          Uniform: 255
+          Uniform: 25

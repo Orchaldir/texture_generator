@@ -42,8 +42,7 @@ impl Lighting {
                 let diffuse = self.light_direction.dot(&normal).max(0.0);
                 let specular = half_direction.dot(&normal).max(0.0).powi(self.shininess);
 
-                let color = data.get_color_data()[index];
-                data.get_color_data_mut()[index] = color * (ambient + diffuse + specular);
+                data.get_color_data_mut()[index] *= ambient + diffuse + specular;
 
                 index += 1;
             }

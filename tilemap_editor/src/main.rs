@@ -194,7 +194,7 @@ fn main() {
     );
 
     let texture_mgr = TextureManager::new(textures);
-    let post_process = AmbientOcclusion::new(10, -200.0, -0.5);
+    let post_process = AmbientOcclusion::new(50, -200.0, -0.9);
     let renderer = tilemap::rendering::Renderer::new(
         args.tile_size,
         args.wall_height,
