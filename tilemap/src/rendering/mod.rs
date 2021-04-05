@@ -9,7 +9,9 @@ use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 
 pub mod texture;
+pub mod wall;
 
+/// Renders a [`Tilemap2d`] in a specific style.
 pub struct Renderer {
     tile_size: u32,
     wall_height: u8,
@@ -36,6 +38,7 @@ impl Renderer {
         self.tile_size
     }
 
+    /// Renders a [`Tilemap2d`].
     pub fn render(&self, tilemap: &Tilemap2d) -> RuntimeData {
         let tiles = tilemap.get_size();
         let tile_size = Size::square(self.tile_size);
@@ -94,7 +97,6 @@ impl Renderer {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
     use texture_generation::generation::component::Component;
@@ -103,7 +105,7 @@ mod tests {
     use texture_generation::math::color::{Color, BLACK, BLUE, PINK, RED};
 
     #[test]
-    fn test_render() {
+    fn test_render_tiles() {
         let texture0 = create_texture("texture0", RED, 99);
         let texture1 = create_texture("texture0", BLUE, 42);
         let textures = TextureManager::new(vec![texture0, texture1]);
