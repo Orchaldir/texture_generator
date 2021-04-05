@@ -60,9 +60,9 @@ impl Size {
     /// ```
     ///# use texture_generation::math::size::Size;
     /// let size = Size::new(2, 3);
-    /// assert_eq!(size.get_number_of_cells(), 6);
+    /// assert_eq!(size.len(), 6);
     /// ```
-    pub fn get_number_of_cells(&self) -> usize {
+    pub fn len(&self) -> usize {
         (self.width * self.height) as usize
     }
 

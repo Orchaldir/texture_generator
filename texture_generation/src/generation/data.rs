@@ -38,7 +38,7 @@ impl RuntimeData {
     }
 
     pub fn with_base_depth(size: Size, default: Color, base_depth: u8) -> RuntimeData {
-        let n = size.get_number_of_cells();
+        let n = size.len();
         let colors = vec![default; n];
         let depth = vec![0; n];
 
