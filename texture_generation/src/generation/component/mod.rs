@@ -16,11 +16,11 @@ pub enum Component {
 
 impl Component {
     /// Generates the texture inside the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
+    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
         match self {
-            Component::Layout(component) => component.generate(data, aabb),
+            Component::Layout(component) => component.generate(data, inner),
             Component::Mock(id) => info!("Generate mock {}", *id),
-            Component::Rendering(component) => component.render(data, aabb),
+            Component::Rendering(component) => component.render(data, outer, inner),
         }
     }
 }

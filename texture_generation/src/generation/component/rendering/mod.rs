@@ -3,7 +3,6 @@ use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
-use crate::math::point::Point;
 use crate::math::shape::Shape;
 
 pub mod color;
@@ -60,11 +59,11 @@ impl RenderingComponent {
     }
 
     /// Renders the texture in the area defined by the [`AABB`].
-    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
+    pub fn render(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
         match self {
             RenderingComponent::FillArea { color, depth, .. } => {
-                let start = aabb.start().max(&Point::default());
-                let end = aabb.end().limit_to(data.get_size());
+                let start = outer.start().max(&inner.start());
+                let end = outer.end().min(&inner.end());
                 let mut point = start;
                 let depth = data.get_base_depth() + *depth;
 
@@ -86,10 +85,10 @@ impl RenderingComponent {
                 depth_calculator,
                 ..
             } => {
-                let start = aabb.start().max(&Point::default());
-                let end = aabb.end().limit_to(data.get_size());
+                let start = outer.start().max(&inner.start());
+                let end = outer.end().min(&inner.end());
                 let mut point = start;
-                let center = aabb.center();
+                let center = inner.center();
                 let color = color_selector.select();
                 let base_depth = data.get_base_depth();
 
@@ -100,8 +99,8 @@ impl RenderingComponent {
                         let distance = shape.distance(&center, &point);
 
                         if distance <= 1.0 {
-                            let depth =
-                                base_depth.saturating_add(depth_calculator.calculate(distance));
+                            let depth = depth_calculator.calculate(distance);
+                            let depth = base_depth.saturating_add(depth);
                             data.set(&point, &color, depth);
                         }
 
@@ -128,12 +127,13 @@ mod tests {
         let size = Size::new(3, 4);
         let data_size = Size::new(5, 7);
         let start = Point::new(1, 2);
+        let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
         let mut data = RuntimeData::with_base_depth(data_size, WHITE, 3);
         let renderer = RenderingComponent::new_fill_area("test", RED, 42);
 
-        renderer.render(&mut data, &aabb);
+        renderer.render(&mut data, &outer, &aabb);
 
         #[rustfmt::skip]
         let colors = vec![
@@ -168,12 +168,13 @@ mod tests {
         let data_size = Size::new(6, 9);
         let start = Point::new(1, 2);
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
+        let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
         let mut data = RuntimeData::with_base_depth(data_size, WHITE, 10);
         let renderer = RenderingComponent::new_shape("test", rectangle, RED);
 
-        renderer.render(&mut data, &aabb);
+        renderer.render(&mut data, &outer, &aabb);
 
         #[rustfmt::skip]
         let colors = vec![
@@ -212,12 +213,13 @@ mod tests {
         let data_size = Size::square(4);
         let start = Point::new(-2, -1);
         let rectangle = Shape::new_rectangle(4, 2).unwrap();
+        let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
         let mut data = RuntimeData::new(data_size, WHITE);
         let renderer = RenderingComponent::new_shape("test", rectangle, RED);
 
-        renderer.render(&mut data, &aabb);
+        renderer.render(&mut data, &outer, &aabb);
 
         #[rustfmt::skip]
             let colors = vec![
