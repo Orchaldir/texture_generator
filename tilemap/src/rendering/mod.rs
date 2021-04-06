@@ -1,21 +1,21 @@
-use crate::rendering::texture::TextureManager;
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use texture_generation::generation::data::RuntimeData;
 use texture_generation::generation::process::PostProcess;
+use texture_generation::generation::TextureGenerator;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
+use texture_generation::utils::resource::ResourceManager;
 
-pub mod texture;
 pub mod wall;
 
 /// Renders a [`Tilemap2d`] in a specific style.
 pub struct Renderer {
     tile_size: u32,
     wall_height: u8,
-    textures: TextureManager,
+    textures: ResourceManager<TextureGenerator>,
     post_processes: Vec<PostProcess>,
 }
 
@@ -23,7 +23,7 @@ impl Renderer {
     pub fn new(
         tile_size: u32,
         wall_height: u8,
-        textures: TextureManager,
+        textures: ResourceManager<TextureGenerator>,
         post_processes: Vec<PostProcess>,
     ) -> Self {
         Renderer {

@@ -14,14 +14,12 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 use structopt::StructOpt;
-use texture_generation::definition::generation::TextureDefinition;
+use texture_generation::definition::generation::{into_manager, TextureDefinition};
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::generation::TextureGenerator;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
-use tilemap::rendering::texture::TextureManager;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 
@@ -162,22 +160,15 @@ fn main() {
 
     info!("Loaded {} texture definitions", definitions.len());
 
-    let textures: Vec<TextureGenerator> = definitions
-        .clone()
-        .into_iter()
-        .filter_map(|d| d.convert(args.tile_size).ok())
-        .collect();
+    let texture_mgr = into_manager(&definitions, args.tile_size);
 
-    if textures.is_empty() {
+    if texture_mgr.is_empty() {
         panic!("Not enough textures!");
     }
 
-    let preview_textures: Vec<TextureGenerator> = definitions
-        .into_iter()
-        .filter_map(|d| d.convert(args.preview_size).ok())
-        .collect();
+    let preview_texture_mgr = into_manager(&definitions, args.preview_size);
 
-    info!("Loaded {} textures", textures.len());
+    info!("Loaded {} textures", texture_mgr.len());
 
     info!("Init tilemap: width={} height={}", args.width, args.height);
 
@@ -193,7 +184,6 @@ fn main() {
         args.tile_size, args.wall_height
     );
 
-    let texture_mgr = TextureManager::new(textures);
     let post_process = AmbientOcclusion::new(50, -200.0, -1.0);
     let renderer = tilemap::rendering::Renderer::new(
         args.tile_size,
@@ -204,7 +194,6 @@ fn main() {
 
     info!("Init preview renderer: tile_size={}", args.preview_size);
 
-    let preview_texture_mgr = TextureManager::new(preview_textures);
     let preview_renderer = tilemap::rendering::Renderer::new(
         args.preview_size,
         args.wall_height,
