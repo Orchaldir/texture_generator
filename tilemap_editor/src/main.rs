@@ -19,11 +19,11 @@ use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::math::color::Color;
+use texture_generation::math::color::{Color, BLUE};
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceManager;
-use tilemap::rendering::wall::{WallGenerator, WallStyle};
+use tilemap::rendering::wall::{NodeGenerator, WallGenerator, WallStyle};
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::tile::{Side, Tile};
 use tilemap::tilemap::tilemap2d::Tilemap2d;
@@ -179,7 +179,9 @@ fn main() {
 
     let wall_component = RenderingComponent::new_fill_area("wall", Color::gray(100), 0);
     let wall_generator = WallGenerator::new_solid(10, wall_component);
-    let wall_style = WallStyle::new("stone", wall_generator);
+    let node_component = RenderingComponent::new_fill_area("node", BLUE, 20);
+    let node_generator = NodeGenerator::new(16, node_component);
+    let wall_style = WallStyle::new("stone", wall_generator, node_generator);
     let wall_styles = ResourceManager::new(vec![wall_style]);
 
     info!("Init tilemap: width={} height={}", args.width, args.height);
