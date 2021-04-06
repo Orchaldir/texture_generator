@@ -40,11 +40,19 @@ impl Renderer {
 
     /// Renders a [`Tilemap2d`].
     pub fn render(&self, tilemap: &Tilemap2d) -> RuntimeData {
-        let tiles = tilemap.get_size();
         let tile_size = Size::square(self.tile_size);
-        let size = tile_size * tiles;
-        let mut start = Point::default();
+        let size = tile_size * tilemap.get_size();
         let mut data = RuntimeData::new(size, BLACK);
+
+        self.render_tiles(tilemap, tile_size, &mut data);
+        self.post_process(&mut data);
+
+        data
+    }
+
+    fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, mut data: &mut RuntimeData) {
+        let tiles = tilemap.get_size();
+        let mut start = Point::default();
 
         for y in 0..tiles.height() {
             start.x = 0;
@@ -67,12 +75,12 @@ impl Renderer {
 
             start.y += tile_size.height() as i32;
         }
+    }
 
+    fn post_process(&self, data: &mut RuntimeData) {
         for post_process in self.post_processes.iter() {
-            post_process.process(&mut data);
+            post_process.process(data);
         }
-
-        data
     }
 
     fn render_texture(
