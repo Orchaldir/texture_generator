@@ -15,12 +15,17 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::definition::generation::{into_manager, TextureDefinition};
+use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
+use texture_generation::math::color::Color;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
-use tilemap::tilemap::tile::Tile;
+use texture_generation::utils::resource::ResourceManager;
+use tilemap::rendering::wall::{WallGenerator, WallStyle};
+use tilemap::tilemap::border::Border;
+use tilemap::tilemap::tile::{Side, Tile};
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 
 #[derive(StructOpt)]
@@ -168,7 +173,14 @@ fn main() {
 
     let preview_texture_mgr = into_manager(&definitions, args.preview_size);
 
-    info!("Loaded {} textures", texture_mgr.len());
+    info!("Converted {} textures", texture_mgr.len());
+
+    info!("Init wall styles");
+
+    let wall_component = RenderingComponent::new_fill_area("wall", Color::gray(100), 0);
+    let wall_generator = WallGenerator::new_solid(10, wall_component);
+    let wall_style = WallStyle::new("stone", wall_generator);
+    let wall_styles = ResourceManager::new(vec![wall_style]);
 
     info!("Init tilemap: width={} height={}", args.width, args.height);
 
@@ -178,6 +190,7 @@ fn main() {
     tilemap2d.set_tile(0, Tile::Full(0));
     tilemap2d.set_tile(1, Tile::Floor(0));
     tilemap2d.set_tile(2, Tile::Floor(1));
+    tilemap2d.set_border(1, Side::Bottom, Border::Wall(0));
 
     info!(
         "Init renderer: tile_size={} wall_height={} ",
@@ -189,6 +202,7 @@ fn main() {
         args.tile_size,
         args.wall_height,
         texture_mgr,
+        ResourceManager::new(Vec::default()),
         vec![PostProcess::AmbientOcclusion(post_process)],
     );
 
@@ -198,6 +212,7 @@ fn main() {
         args.preview_size,
         args.wall_height,
         preview_texture_mgr,
+        wall_styles,
         Vec::default(),
     );
 

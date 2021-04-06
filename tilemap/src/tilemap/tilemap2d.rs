@@ -88,9 +88,9 @@ impl Tilemap2d {
         }
 
         match side {
-            Side::Top => self.horizontal_borders[top(self.size, tile_index)],
+            Side::Top => self.horizontal_borders[tile_index],
             Side::Left => self.vertical_borders[tile_index],
-            Side::Bottom => self.horizontal_borders[tile_index],
+            Side::Bottom => self.horizontal_borders[bottom(self.size, tile_index)],
             Side::Right => self.vertical_borders[right(tile_index)],
         }
     }
@@ -101,23 +101,23 @@ impl Tilemap2d {
         }
 
         match side {
-            Side::Top => self.horizontal_borders[top(self.size, tile_index)] = border,
+            Side::Top => self.horizontal_borders[tile_index] = border,
             Side::Left => self.vertical_borders[tile_index] = border,
-            Side::Bottom => self.horizontal_borders[tile_index] = border,
+            Side::Bottom => self.horizontal_borders[bottom(self.size, tile_index)] = border,
             Side::Right => self.vertical_borders[right(tile_index)] = border,
         };
     }
 }
 
-fn get_horizontal_borders_size(size: Size) -> Size {
+pub fn get_horizontal_borders_size(size: Size) -> Size {
     Size::new(size.width(), size.height() + 1)
 }
 
-fn get_vertical_borders_size(size: Size) -> Size {
+pub fn get_vertical_borders_size(size: Size) -> Size {
     Size::new(size.width() + 1, size.height())
 }
 
-fn top(size: Size, tile_index: usize) -> usize {
+fn bottom(size: Size, tile_index: usize) -> usize {
     tile_index + size.width() as usize
 }
 

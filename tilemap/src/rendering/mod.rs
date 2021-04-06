@@ -1,6 +1,8 @@
+use crate::rendering::wall::WallStyle;
+use crate::tilemap::border::Border;
 use crate::tilemap::tile::Tile;
-use crate::tilemap::tilemap2d::Tilemap2d;
-use texture_generation::generation::data::RuntimeData;
+use crate::tilemap::tilemap2d::{get_horizontal_borders_size, Tilemap2d};
+use texture_generation::generation::data::{Data, RuntimeData};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
 use texture_generation::math::aabb::AABB;
@@ -16,6 +18,7 @@ pub struct Renderer {
     tile_size: u32,
     wall_height: u8,
     textures: ResourceManager<TextureGenerator>,
+    wall_styles: ResourceManager<WallStyle>,
     post_processes: Vec<PostProcess>,
 }
 
@@ -24,12 +27,14 @@ impl Renderer {
         tile_size: u32,
         wall_height: u8,
         textures: ResourceManager<TextureGenerator>,
+        wall_styles: ResourceManager<WallStyle>,
         post_processes: Vec<PostProcess>,
     ) -> Self {
         Renderer {
             tile_size,
             wall_height,
             textures,
+            wall_styles,
             post_processes,
         }
     }
@@ -45,35 +50,78 @@ impl Renderer {
         let mut data = RuntimeData::new(size, BLACK);
 
         self.render_tiles(tilemap, tile_size, &mut data);
+
+        data.set_base_depth(self.wall_height);
+        self.render_horizontal_borders(tilemap, self.tile_size, &mut data);
+
         self.post_process(&mut data);
 
         data
     }
 
-    fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, mut data: &mut RuntimeData) {
+    fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, data: &mut RuntimeData) {
         let tiles = tilemap.get_size();
         let mut start = Point::default();
+        let mut index = 0;
 
-        for y in 0..tiles.height() {
+        for _y in 0..tiles.height() {
             start.x = 0;
 
-            for x in 0..tiles.width() {
-                let index = tiles.convert_x_y(x, y);
+            for _x in 0..tiles.width() {
                 let tile = tilemap.get_tile(index);
                 let aabb = AABB::new(start, tile_size);
 
                 match tile {
                     Tile::Empty => {}
-                    Tile::Floor(id) => self.render_texture(index, id, 0, &mut data, &aabb),
-                    Tile::Full(id) => {
-                        self.render_texture(index, id, self.wall_height, &mut data, &aabb)
-                    }
+                    Tile::Floor(id) => self.render_texture(index, id, 0, data, &aabb),
+                    Tile::Full(id) => self.render_texture(index, id, self.wall_height, data, &aabb),
                 }
 
                 start.x += tile_size.width() as i32;
+                index += 1;
             }
 
             start.y += tile_size.height() as i32;
+        }
+    }
+
+    fn render_horizontal_borders(
+        &self,
+        tilemap: &Tilemap2d,
+        tile_size: u32,
+        data: &mut RuntimeData,
+    ) {
+        let size = get_horizontal_borders_size(tilemap.get_size());
+        let borders = tilemap.get_horizontal_borders();
+        let mut start = Point::default();
+        let aabb = AABB::new(start, *data.get_size());
+        let mut index = 0;
+
+        for _y in 0..size.height() {
+            start.x = 0;
+
+            for _x in 0..size.width() {
+                let border = borders[index];
+
+                match border {
+                    Border::Empty => {}
+                    Border::Wall(id) => {
+                        if let Some(wall_style) = self.wall_styles.get(id) {
+                            wall_style.render_horizontal(&aabb, start, tile_size, data);
+                        } else {
+                            warn!(
+                                "Cannot render unknown wall style '{}' for horizontal border '{}'!",
+                                id, index
+                            );
+                        }
+                    }
+                }
+
+                start.x += tile_size as i32;
+                index += 1;
+            }
+
+            start.y += tile_size as i32;
         }
     }
 
@@ -116,8 +164,9 @@ mod tests {
     fn test_render_tiles() {
         let texture0 = create_texture("texture0", RED, 99);
         let texture1 = create_texture("texture0", BLUE, 42);
-        let textures = TextureManager::new(vec![texture0, texture1]);
-        let renderer = Renderer::new(2, 100, textures, Vec::default());
+        let textures = ResourceManager::new(vec![texture0, texture1]);
+        let wall_styles = ResourceManager::new(Vec::default());
+        let renderer = Renderer::new(2, 100, textures, wall_styles, Vec::default());
         let tiles = vec![
             Tile::Empty,
             Tile::Floor(0),
