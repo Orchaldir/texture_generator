@@ -1,7 +1,7 @@
-use crate::rendering::wall::WallStyle;
+use crate::rendering::wall::{NodeGenerator, WallStyle};
 use crate::tilemap::border::Border;
-use crate::tilemap::tile::Tile;
-use crate::tilemap::tilemap2d::{get_horizontal_borders_size, Tilemap2d};
+use crate::tilemap::tile::{Side, Tile};
+use crate::tilemap::tilemap2d::{get_horizontal_borders_size, get_node_size, Tilemap2d};
 use texture_generation::generation::data::{Data, RuntimeData};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
@@ -84,19 +84,17 @@ impl Renderer {
 
     fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
         data.set_base_depth(self.wall_height);
-        self.render_horizontal_borders(tilemap, self.tile_size, &mut data);
+        let nodes = self.calculate_nodes(tilemap);
+        self.render_horizontal_borders(tilemap, &mut data);
+        self.render_nodes(tilemap, &nodes, &mut data);
     }
 
-    fn render_horizontal_borders(
-        &self,
-        tilemap: &Tilemap2d,
-        tile_size: u32,
-        data: &mut RuntimeData,
-    ) {
+    fn render_horizontal_borders(&self, tilemap: &Tilemap2d, data: &mut RuntimeData) {
         let size = get_horizontal_borders_size(tilemap.get_size());
         let borders = tilemap.get_horizontal_borders();
         let mut start = Point::default();
         let aabb = AABB::new(start, *data.get_size());
+        let step = self.tile_size as i32;
         let mut index = 0;
 
         for _y in 0..size.height() {
@@ -109,7 +107,7 @@ impl Renderer {
                     Border::Empty => {}
                     Border::Wall(id) => {
                         if let Some(wall_style) = self.wall_styles.get(id) {
-                            wall_style.render_horizontal(&aabb, start, tile_size, data);
+                            wall_style.render_horizontal(&aabb, start, self.tile_size, data);
                         } else {
                             warn!(
                                 "Cannot render unknown wall style '{}' for horizontal border '{}'!",
@@ -119,11 +117,64 @@ impl Renderer {
                     }
                 }
 
-                start.x += tile_size as i32;
+                start.x += step;
                 index += 1;
             }
 
-            start.y += tile_size as i32;
+            start.y += step;
+        }
+    }
+
+    fn calculate_nodes(&self, tilemap: &Tilemap2d) -> Vec<Option<&NodeGenerator>> {
+        let size = get_node_size(tilemap.get_size());
+        let mut generators = Vec::with_capacity(size.len());
+        let mut index = 0;
+
+        for _y in 0..size.height() {
+            for _x in 0..size.width() {
+                generators.push(self.calculate_node(tilemap, index));
+                index += 1;
+            }
+        }
+
+        generators
+    }
+
+    fn calculate_node(&self, tilemap: &Tilemap2d, index: usize) -> Option<&NodeGenerator> {
+        for side in Side::iterator() {
+            if let Border::Wall(id) = tilemap.get_border_at_node(index, *side) {
+                return self.wall_styles.get(id).map(|s| s.get_node_generator());
+            }
+        }
+
+        None
+    }
+
+    fn render_nodes(
+        &self,
+        tilemap: &Tilemap2d,
+        nodes: &[Option<&NodeGenerator>],
+        data: &mut RuntimeData,
+    ) {
+        let size = get_node_size(tilemap.get_size());
+        let mut point = Point::default();
+        let aabb = AABB::new(point, *data.get_size());
+        let step = self.tile_size as i32;
+        let mut index = 0;
+
+        for _y in 0..size.height() {
+            point.x = 0;
+
+            for _x in 0..size.width() {
+                if let Some(generator) = nodes[index] {
+                    generator.render(&aabb, point, data);
+                }
+
+                point.x += step;
+                index += 1;
+            }
+
+            point.y += step;
         }
     }
 

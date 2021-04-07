@@ -27,6 +27,10 @@ impl WallStyle {
         }
     }
 
+    pub fn get_node_generator(&self) -> &NodeGenerator {
+        &self.node_generator
+    }
+
     pub fn render_horizontal(
         &self,
         outer: &AABB,
@@ -40,9 +44,9 @@ impl WallStyle {
                 half_thickness,
                 component,
             } => {
-                let node_size = self.node_generator.half;
-                let start = Point::new(node.x + node_size, node.y - *half_thickness);
-                let size = Size::new(tile_size - (node_size * 2) as u32, *thickness);
+                let node_half = self.node_generator.half;
+                let start = Point::new(node.x + node_half, node.y - *half_thickness);
+                let size = Size::new(tile_size - (node_half * 2) as u32, *thickness);
                 let aabb = AABB::new(start, size);
                 component.render(data, outer, &aabb)
             }
@@ -71,7 +75,7 @@ impl WallGenerator {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct NodeGenerator {
-    size: u32,
+    size: Size,
     half: i32,
     component: RenderingComponent,
 }
@@ -79,9 +83,15 @@ pub struct NodeGenerator {
 impl NodeGenerator {
     pub fn new(size: u32, component: RenderingComponent) -> NodeGenerator {
         NodeGenerator {
-            size,
+            size: Size::square(size),
             half: (size / 2) as i32,
             component,
         }
+    }
+
+    pub fn render(&self, outer: &AABB, node: Point, data: &mut dyn Data) {
+        let start = node - self.half;
+        let aabb = AABB::new(start, self.size);
+        self.component.render(data, outer, &aabb)
     }
 }

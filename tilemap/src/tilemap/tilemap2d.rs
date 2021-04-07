@@ -154,7 +154,7 @@ pub fn get_vertical_borders_size(size: Size) -> Size {
     Size::new(size.width() + 1, size.height())
 }
 
-fn get_node_size(size: Size) -> Size {
+pub fn get_node_size(size: Size) -> Size {
     Size::new(size.width() + 1, size.height() + 1)
 }
 
