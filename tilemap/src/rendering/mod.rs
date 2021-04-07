@@ -50,10 +50,7 @@ impl Renderer {
         let mut data = RuntimeData::new(size, BLACK);
 
         self.render_tiles(tilemap, tile_size, &mut data);
-
-        data.set_base_depth(self.wall_height);
-        self.render_horizontal_borders(tilemap, self.tile_size, &mut data);
-
+        self.render_borders(tilemap, &mut data);
         self.post_process(&mut data);
 
         data
@@ -83,6 +80,11 @@ impl Renderer {
 
             start.y += tile_size.height() as i32;
         }
+    }
+
+    fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
+        data.set_base_depth(self.wall_height);
+        self.render_horizontal_borders(tilemap, self.tile_size, &mut data);
     }
 
     fn render_horizontal_borders(

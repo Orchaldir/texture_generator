@@ -175,15 +175,6 @@ fn main() {
 
     info!("Converted {} textures", texture_mgr.len());
 
-    info!("Init wall styles");
-
-    let wall_component = RenderingComponent::new_fill_area("wall", Color::gray(100), 0);
-    let wall_generator = WallGenerator::new_solid(10, wall_component);
-    let node_component = RenderingComponent::new_fill_area("node", BLUE, 20);
-    let node_generator = NodeGenerator::new(16, node_component);
-    let wall_style = WallStyle::new("stone", wall_generator, node_generator);
-    let wall_styles = ResourceManager::new(vec![wall_style]);
-
     info!("Init tilemap: width={} height={}", args.width, args.height);
 
     let tiles = Size::new(args.width, args.height);
@@ -193,19 +184,24 @@ fn main() {
     tilemap2d.set_tile(1, Tile::Floor(0));
     tilemap2d.set_tile(2, Tile::Floor(1));
     tilemap2d.set_border(1, Side::Bottom, Border::Wall(0));
+    tilemap2d.set_border(2, Side::Bottom, Border::Wall(0));
+    tilemap2d.set_border(3, Side::Bottom, Border::Wall(0));
+    tilemap2d.set_border(15, Side::Bottom, Border::Wall(0));
+    tilemap2d.set_border(16, Side::Bottom, Border::Wall(0));
+    tilemap2d.set_border(17, Side::Bottom, Border::Wall(0));
 
     info!(
         "Init renderer: tile_size={} wall_height={} ",
         args.tile_size, args.wall_height
     );
 
-    let post_process = AmbientOcclusion::new(50, -200.0, -1.0);
+    let ambient_occlusion = AmbientOcclusion::new(50, -200.0, -1.0);
     let renderer = tilemap::rendering::Renderer::new(
         args.tile_size,
         args.wall_height,
         texture_mgr,
-        ResourceManager::new(Vec::default()),
-        vec![PostProcess::AmbientOcclusion(post_process)],
+        crate_wall_styles(8),
+        vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
     );
 
     info!("Init preview renderer: tile_size={}", args.preview_size);
@@ -214,7 +210,7 @@ fn main() {
         args.preview_size,
         args.wall_height,
         preview_texture_mgr,
-        wall_styles,
+        crate_wall_styles(1),
         Vec::default(),
     );
 
@@ -227,4 +223,13 @@ fn main() {
     let app = Rc::new(RefCell::new(editor));
 
     window.run(app);
+}
+
+fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle> {
+    let wall_component = RenderingComponent::new_fill_area("wall", Color::gray(100), 0);
+    let wall_generator = WallGenerator::new_solid(10 * factor, wall_component);
+    let node_component = RenderingComponent::new_fill_area("node", BLUE, 20);
+    let node_generator = NodeGenerator::new(16 * factor, node_component);
+    let wall_style = WallStyle::new("stone", wall_generator, node_generator);
+    ResourceManager::new(vec![wall_style])
 }
