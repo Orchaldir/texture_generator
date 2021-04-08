@@ -1,6 +1,11 @@
-use crate::tilemap::border::Border;
-use crate::tilemap::tile::{Side, Tile};
+use crate::tilemap::border::{
+    below_tile, get_horizontal_borders_size, get_vertical_borders_size, right_of_tile, Border,
+};
+use crate::tilemap::node::get_nodes_size;
+use crate::tilemap::tile::Tile;
+use crate::tilemap::Side;
 use texture_generation::math::size::Size;
+use Side::*;
 
 /// The tilemap contains the information of what is where,
 /// but it doesn't contain how it is rendered.
@@ -88,47 +93,10 @@ impl Tilemap2d {
         }
 
         match side {
-            Side::Top => self.horizontal_borders[tile_index],
-            Side::Left => self.vertical_borders[tile_index],
-            Side::Bottom => self.horizontal_borders[bottom(self.size, tile_index)],
-            Side::Right => self.vertical_borders[right(tile_index)],
-        }
-    }
-
-    /// Returns the [`Border`] on a specific side of a node.
-    pub fn get_border_at_node(&self, node_index: usize, side: Side) -> Border {
-        let node_size = get_node_size(self.size);
-        let point = node_size.to_point(node_index);
-
-        match side {
-            Side::Top => {
-                if point.y == 0 {
-                    Border::Empty
-                } else {
-                    self.vertical_borders[node_index - node_size.width() as usize]
-                }
-            }
-            Side::Left => {
-                if point.x == 0 {
-                    Border::Empty
-                } else {
-                    self.horizontal_borders[node_index - 1 - point.y as usize]
-                }
-            }
-            Side::Bottom => {
-                if point.y >= (node_size.height() - 1) as i32 {
-                    Border::Empty
-                } else {
-                    self.vertical_borders[node_index]
-                }
-            }
-            Side::Right => {
-                if point.x == (node_size.width() - 1) as i32 {
-                    Border::Empty
-                } else {
-                    self.horizontal_borders[node_index - point.y as usize]
-                }
-            }
+            Top => self.horizontal_borders[tile_index],
+            Left => self.vertical_borders[tile_index],
+            Bottom => self.horizontal_borders[below_tile(self.size, tile_index)],
+            Right => self.vertical_borders[right_of_tile(tile_index)],
         }
     }
 
@@ -138,38 +106,58 @@ impl Tilemap2d {
         }
 
         match side {
-            Side::Top => self.horizontal_borders[tile_index] = border,
-            Side::Left => self.vertical_borders[tile_index] = border,
-            Side::Bottom => self.horizontal_borders[bottom(self.size, tile_index)] = border,
-            Side::Right => self.vertical_borders[right(tile_index)] = border,
+            Top => self.horizontal_borders[tile_index] = border,
+            Left => self.vertical_borders[tile_index] = border,
+            Bottom => self.horizontal_borders[below_tile(self.size, tile_index)] = border,
+            Right => self.vertical_borders[right_of_tile(tile_index)] = border,
         };
     }
-}
 
-pub fn get_horizontal_borders_size(size: Size) -> Size {
-    Size::new(size.width(), size.height() + 1)
-}
+    // nodes
 
-pub fn get_vertical_borders_size(size: Size) -> Size {
-    Size::new(size.width() + 1, size.height())
-}
+    /// Returns the [`Border`] on a specific side of a node.
+    pub fn get_border_at_node(&self, node_index: usize, side: Side) -> Border {
+        let node_size = get_nodes_size(self.size);
+        let point = node_size.to_point(node_index);
 
-pub fn get_node_size(size: Size) -> Size {
-    Size::new(size.width() + 1, size.height() + 1)
-}
-
-fn bottom(size: Size, tile_index: usize) -> usize {
-    tile_index + size.width() as usize
-}
-
-fn right(tile_index: usize) -> usize {
-    tile_index + 1
+        match side {
+            Top => {
+                if point.y == 0 {
+                    Border::Empty
+                } else {
+                    self.vertical_borders[node_index - node_size.width() as usize]
+                }
+            }
+            Left => {
+                if point.x == 0 {
+                    Border::Empty
+                } else {
+                    self.horizontal_borders[node_index - 1 - point.y as usize]
+                }
+            }
+            Bottom => {
+                if point.y >= (node_size.height() - 1) as i32 {
+                    Border::Empty
+                } else {
+                    self.vertical_borders[node_index]
+                }
+            }
+            Right => {
+                if point.x == (node_size.width() - 1) as i32 {
+                    Border::Empty
+                } else {
+                    self.horizontal_borders[node_index - point.y as usize]
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use texture_generation::math::size::Size;
+    use Border::Empty;
 
     const WALL0: Border = Border::Wall(0);
     const WALL1: Border = Border::Wall(1);
@@ -216,22 +204,22 @@ mod tests {
         let size = Size::new(3, 3);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
-        tilemap.set_border(4, Side::Top, WALL0);
-        tilemap.set_border(4, Side::Left, WALL1);
-        tilemap.set_border(4, Side::Bottom, WALL2);
-        tilemap.set_border(4, Side::Right, WALL3);
+        tilemap.set_border(4, Top, WALL0);
+        tilemap.set_border(4, Left, WALL1);
+        tilemap.set_border(4, Bottom, WALL2);
+        tilemap.set_border(4, Right, WALL3);
 
-        assert_eq!(tilemap.get_border(4, Side::Top), WALL0);
-        assert_eq!(tilemap.get_border(1, Side::Bottom), WALL0);
+        assert_eq!(tilemap.get_border(4, Top), WALL0);
+        assert_eq!(tilemap.get_border(1, Bottom), WALL0);
 
-        assert_eq!(tilemap.get_border(4, Side::Left), WALL1);
-        assert_eq!(tilemap.get_border(3, Side::Right), WALL1);
+        assert_eq!(tilemap.get_border(4, Left), WALL1);
+        assert_eq!(tilemap.get_border(3, Right), WALL1);
 
-        assert_eq!(tilemap.get_border(4, Side::Bottom), WALL2);
-        assert_eq!(tilemap.get_border(7, Side::Top), WALL2);
+        assert_eq!(tilemap.get_border(4, Bottom), WALL2);
+        assert_eq!(tilemap.get_border(7, Top), WALL2);
 
-        assert_eq!(tilemap.get_border(4, Side::Right), WALL3);
-        assert_eq!(tilemap.get_border(5, Side::Left), WALL3);
+        assert_eq!(tilemap.get_border(4, Right), WALL3);
+        assert_eq!(tilemap.get_border(5, Left), WALL3);
     }
 
     #[test]
@@ -241,36 +229,22 @@ mod tests {
         let tilemap = Tilemap2d::with_borders(
             size,
             vec![Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty],
-            vec![
-                Border::Empty,
-                Border::Empty,
-                WALL1,
-                WALL3,
-                Border::Empty,
-                Border::Empty,
-            ],
-            vec![
-                Border::Empty,
-                WALL0,
-                Border::Empty,
-                Border::Empty,
-                WALL2,
-                Border::Empty,
-            ],
+            vec![Empty, Empty, WALL1, WALL3, Empty, Empty],
+            vec![Empty, WALL0, Empty, Empty, WALL2, Empty],
         )
         .unwrap();
 
-        assert_eq!(tilemap.get_border_at_node(4, Side::Top), WALL0);
-        assert_eq!(tilemap.get_border_at_node(1, Side::Bottom), WALL0);
+        assert_eq!(tilemap.get_border_at_node(4, Top), WALL0);
+        assert_eq!(tilemap.get_border_at_node(1, Bottom), WALL0);
 
-        assert_eq!(tilemap.get_border_at_node(4, Side::Left), WALL1);
-        assert_eq!(tilemap.get_border_at_node(3, Side::Right), WALL1);
+        assert_eq!(tilemap.get_border_at_node(4, Left), WALL1);
+        assert_eq!(tilemap.get_border_at_node(3, Right), WALL1);
 
-        assert_eq!(tilemap.get_border_at_node(4, Side::Bottom), WALL2);
-        assert_eq!(tilemap.get_border_at_node(7, Side::Top), WALL2);
+        assert_eq!(tilemap.get_border_at_node(4, Bottom), WALL2);
+        assert_eq!(tilemap.get_border_at_node(7, Top), WALL2);
 
-        assert_eq!(tilemap.get_border_at_node(4, Side::Right), WALL3);
-        assert_eq!(tilemap.get_border_at_node(5, Side::Left), WALL3);
+        assert_eq!(tilemap.get_border_at_node(4, Right), WALL3);
+        assert_eq!(tilemap.get_border_at_node(5, Left), WALL3);
     }
 
     fn create_tiles() -> Vec<Tile> {

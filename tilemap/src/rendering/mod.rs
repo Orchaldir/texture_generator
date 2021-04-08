@@ -1,7 +1,9 @@
 use crate::rendering::wall::{NodeGenerator, WallStyle};
-use crate::tilemap::border::Border;
-use crate::tilemap::tile::{Side, Tile};
-use crate::tilemap::tilemap2d::{get_horizontal_borders_size, get_node_size, Tilemap2d};
+use crate::tilemap::border::{get_horizontal_borders_size, Border};
+use crate::tilemap::node::get_nodes_size;
+use crate::tilemap::tile::Tile;
+use crate::tilemap::tilemap2d::Tilemap2d;
+use crate::tilemap::Side;
 use texture_generation::generation::data::{Data, RuntimeData};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
@@ -126,7 +128,7 @@ impl Renderer {
     }
 
     fn calculate_nodes(&self, tilemap: &Tilemap2d) -> Vec<Option<&NodeGenerator>> {
-        let size = get_node_size(tilemap.get_size());
+        let size = get_nodes_size(tilemap.get_size());
         let mut generators = Vec::with_capacity(size.len());
         let mut index = 0;
 
@@ -156,7 +158,7 @@ impl Renderer {
         nodes: &[Option<&NodeGenerator>],
         data: &mut RuntimeData,
     ) {
-        let size = get_node_size(tilemap.get_size());
+        let size = get_nodes_size(tilemap.get_size());
         let mut point = Point::default();
         let aabb = AABB::new(point, *data.get_size());
         let step = self.tile_size as i32;

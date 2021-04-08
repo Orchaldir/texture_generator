@@ -25,8 +25,9 @@ use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceManager;
 use tilemap::rendering::wall::{NodeGenerator, WallGenerator, WallStyle};
 use tilemap::tilemap::border::Border;
-use tilemap::tilemap::tile::{Side, Tile};
+use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
+use tilemap::tilemap::Side::Bottom;
 
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]
@@ -183,12 +184,12 @@ fn main() {
     tilemap2d.set_tile(0, Tile::Full(0));
     tilemap2d.set_tile(1, Tile::Floor(0));
     tilemap2d.set_tile(2, Tile::Floor(1));
-    tilemap2d.set_border(1, Side::Bottom, Border::Wall(0));
-    tilemap2d.set_border(2, Side::Bottom, Border::Wall(0));
-    tilemap2d.set_border(3, Side::Bottom, Border::Wall(0));
-    tilemap2d.set_border(15, Side::Bottom, Border::Wall(0));
-    tilemap2d.set_border(16, Side::Bottom, Border::Wall(0));
-    tilemap2d.set_border(17, Side::Bottom, Border::Wall(0));
+    tilemap2d.set_border(1, Bottom, Border::Wall(0));
+    tilemap2d.set_border(2, Bottom, Border::Wall(0));
+    tilemap2d.set_border(3, Bottom, Border::Wall(0));
+    tilemap2d.set_border(15, Bottom, Border::Wall(0));
+    tilemap2d.set_border(16, Bottom, Border::Wall(0));
+    tilemap2d.set_border(17, Bottom, Border::Wall(0));
 
     info!(
         "Init renderer: tile_size={} wall_height={} ",
