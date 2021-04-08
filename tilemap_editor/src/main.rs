@@ -231,6 +231,6 @@ fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle> {
     let edge_style = EdgeStyle::new_solid(10 * factor, edge_component);
     let node_component = RenderingComponent::new_fill_area("node", BLUE, 20);
     let node_style = NodeStyle::new(16 * factor, node_component);
-    let wall_style = WallStyle::new("stone", edge_style, node_style);
+    let wall_style = WallStyle::new("stone", edge_style, None, node_style);
     ResourceManager::new(vec![wall_style])
 }

@@ -9,6 +9,15 @@ pub enum Border {
     Wall(usize),
 }
 
+impl Border {
+    pub fn get_wall_style(&self) -> Option<usize> {
+        match self {
+            Border::Empty => None,
+            Border::Wall(id) => Some(*id),
+        }
+    }
+}
+
 /// Returns the [`Size`] of the horizontal [`Border`]s based on the size of the [`Tilemap2d`].
 pub fn get_horizontal_borders_size(size: Size) -> Size {
     Size::new(size.width(), size.height() + 1)

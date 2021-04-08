@@ -7,7 +7,7 @@ pub mod tile;
 pub mod tilemap2d;
 
 /// The 4 sides of a [`Tile`].
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub enum Side {
     Top,
     Left,
@@ -20,5 +20,14 @@ impl Side {
     pub fn iterator() -> Iter<'static, Side> {
         static SIDES: [Side; 4] = [Top, Left, Bottom, Right];
         SIDES.iter()
+    }
+
+    pub fn is_straight(&self, other: Side) -> bool {
+        match self {
+            Top => other == Bottom,
+            Left => other == Right,
+            Bottom => other == Top,
+            Right => other == Left,
+        }
     }
 }

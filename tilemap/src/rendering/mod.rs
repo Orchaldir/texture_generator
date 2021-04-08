@@ -15,6 +15,7 @@ use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 use texture_generation::utils::resource::ResourceManager;
 
+pub mod node;
 pub mod wall;
 
 /// Renders a [`Tilemap2d`] in a specific style.
@@ -162,7 +163,7 @@ impl Renderer {
     fn calculate_node(&self, tilemap: &Tilemap2d, index: usize) -> Option<&NodeStyle> {
         for side in Side::iterator() {
             if let Border::Wall(id) = tilemap.get_border_at_node(index, *side) {
-                return self.wall_styles.get(id).map(|s| s.get_node_generator());
+                return self.wall_styles.get(id).map(|s| s.get_corner_style());
             }
         }
 

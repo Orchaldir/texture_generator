@@ -11,24 +11,36 @@ pub struct WallStyle {
     /// The style of a wall between or without nodes.
     edge_style: EdgeStyle,
     /// The optional style of a node between 2 wall segments in the same direction.
-    node_style: NodeStyle,
+    node_style: Option<NodeStyle>,
+    /// The style of corners.
+    corner_style: NodeStyle,
 }
 
 impl WallStyle {
     pub fn new<S: Into<String>>(
         name: S,
         edge_style: EdgeStyle,
-        node_style: NodeStyle,
+        node_style: Option<NodeStyle>,
+        corner_style: NodeStyle,
     ) -> WallStyle {
         WallStyle {
             name: name.into(),
             edge_style,
             node_style,
+            corner_style,
         }
     }
 
-    pub fn get_node_generator(&self) -> &NodeStyle {
+    pub fn get_node_style(&self) -> &Option<NodeStyle> {
         &self.node_style
+    }
+
+    pub fn get_corner_style(&self) -> &NodeStyle {
+        &self.corner_style
+    }
+
+    pub fn is_greater(&self, other: &WallStyle) -> bool {
+        self.edge_style.get_thickness() >= other.edge_style.get_thickness()
     }
 
     pub fn render_horizontal(
@@ -73,6 +85,14 @@ impl EdgeStyle {
             thickness,
             half_thickness: (thickness / 2) as i32,
             component,
+        }
+    }
+}
+
+impl EdgeStyle {
+    pub fn get_thickness(&self) -> u32 {
+        match self {
+            EdgeStyle::Solid { thickness, .. } => *thickness,
         }
     }
 }
