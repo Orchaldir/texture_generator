@@ -23,7 +23,7 @@ use texture_generation::math::color::{Color, BLUE};
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceManager;
-use tilemap::rendering::wall::{NodeGenerator, WallGenerator, WallStyle};
+use tilemap::rendering::wall::{EdgeStyle, NodeStyle, WallStyle};
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
@@ -227,10 +227,10 @@ fn main() {
 }
 
 fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle> {
-    let wall_component = RenderingComponent::new_fill_area("wall", Color::gray(100), 0);
-    let wall_generator = WallGenerator::new_solid(10 * factor, wall_component);
+    let edge_component = RenderingComponent::new_fill_area("wall", Color::gray(100), 0);
+    let edge_style = EdgeStyle::new_solid(10 * factor, edge_component);
     let node_component = RenderingComponent::new_fill_area("node", BLUE, 20);
-    let node_generator = NodeGenerator::new(16 * factor, node_component);
-    let wall_style = WallStyle::new("stone", wall_generator, node_generator);
+    let node_style = NodeStyle::new(16 * factor, node_component);
+    let wall_style = WallStyle::new("stone", edge_style, node_style);
     ResourceManager::new(vec![wall_style])
 }

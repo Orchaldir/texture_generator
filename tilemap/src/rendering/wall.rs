@@ -9,26 +9,26 @@ use texture_generation::math::size::Size;
 pub struct WallStyle {
     name: String,
     /// The style of a wall between or without nodes.
-    wall_generator: WallGenerator,
+    edge_style: EdgeStyle,
     /// The optional style of a node between 2 wall segments in the same direction.
-    node_generator: NodeGenerator,
+    node_style: NodeStyle,
 }
 
 impl WallStyle {
     pub fn new<S: Into<String>>(
         name: S,
-        wall_generator: WallGenerator,
-        node_generator: NodeGenerator,
+        edge_style: EdgeStyle,
+        node_style: NodeStyle,
     ) -> WallStyle {
         WallStyle {
             name: name.into(),
-            wall_generator,
-            node_generator,
+            edge_style,
+            node_style,
         }
     }
 
-    pub fn get_node_generator(&self) -> &NodeGenerator {
-        &self.node_generator
+    pub fn get_node_generator(&self) -> &NodeStyle {
+        &self.node_style
     }
 
     pub fn render_horizontal(
@@ -36,12 +36,12 @@ impl WallStyle {
         outer: &AABB,
         node: Point,
         tile_size: u32,
-        start_node: &NodeGenerator,
-        end_node: &NodeGenerator,
+        start_node: &NodeStyle,
+        end_node: &NodeStyle,
         data: &mut dyn Data,
     ) {
-        match &self.wall_generator {
-            WallGenerator::Solid {
+        match &self.edge_style {
+            EdgeStyle::Solid {
                 thickness,
                 half_thickness,
                 component,
@@ -59,7 +59,7 @@ impl WallStyle {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum WallGenerator {
+pub enum EdgeStyle {
     Solid {
         thickness: u32,
         half_thickness: i32,
@@ -67,9 +67,9 @@ pub enum WallGenerator {
     },
 }
 
-impl WallGenerator {
-    pub fn new_solid(thickness: u32, component: RenderingComponent) -> WallGenerator {
-        WallGenerator::Solid {
+impl EdgeStyle {
+    pub fn new_solid(thickness: u32, component: RenderingComponent) -> EdgeStyle {
+        EdgeStyle::Solid {
             thickness,
             half_thickness: (thickness / 2) as i32,
             component,
@@ -78,15 +78,15 @@ impl WallGenerator {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct NodeGenerator {
+pub struct NodeStyle {
     size: Size,
     half: i32,
     component: RenderingComponent,
 }
 
-impl NodeGenerator {
-    pub fn new(size: u32, component: RenderingComponent) -> NodeGenerator {
-        NodeGenerator {
+impl NodeStyle {
+    pub fn new(size: u32, component: RenderingComponent) -> NodeStyle {
+        NodeStyle {
             size: Size::square(size),
             half: (size / 2) as i32,
             component,

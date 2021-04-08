@@ -1,4 +1,4 @@
-use crate::rendering::wall::{NodeGenerator, WallStyle};
+use crate::rendering::wall::{NodeStyle, WallStyle};
 use crate::tilemap::border::{get_horizontal_borders_size, Border};
 use crate::tilemap::node::{
     get_end_of_horizontal_border, get_nodes_size, get_start_of_horizontal_border,
@@ -96,7 +96,7 @@ impl Renderer {
     fn render_horizontal_borders(
         &self,
         tilemap: &Tilemap2d,
-        nodes: &[Option<&NodeGenerator>],
+        nodes: &[Option<&NodeStyle>],
         data: &mut RuntimeData,
     ) {
         let size = get_horizontal_borders_size(tilemap.get_size());
@@ -144,7 +144,7 @@ impl Renderer {
         }
     }
 
-    fn calculate_nodes(&self, tilemap: &Tilemap2d) -> Vec<Option<&NodeGenerator>> {
+    fn calculate_nodes(&self, tilemap: &Tilemap2d) -> Vec<Option<&NodeStyle>> {
         let size = get_nodes_size(tilemap.get_size());
         let mut generators = Vec::with_capacity(size.len());
         let mut index = 0;
@@ -159,7 +159,7 @@ impl Renderer {
         generators
     }
 
-    fn calculate_node(&self, tilemap: &Tilemap2d, index: usize) -> Option<&NodeGenerator> {
+    fn calculate_node(&self, tilemap: &Tilemap2d, index: usize) -> Option<&NodeStyle> {
         for side in Side::iterator() {
             if let Border::Wall(id) = tilemap.get_border_at_node(index, *side) {
                 return self.wall_styles.get(id).map(|s| s.get_node_generator());
@@ -172,7 +172,7 @@ impl Renderer {
     fn render_nodes(
         &self,
         tilemap: &Tilemap2d,
-        nodes: &[Option<&NodeGenerator>],
+        nodes: &[Option<&NodeStyle>],
         data: &mut RuntimeData,
     ) {
         let size = get_nodes_size(tilemap.get_size());
