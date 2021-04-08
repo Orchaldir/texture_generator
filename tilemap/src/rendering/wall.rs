@@ -36,6 +36,8 @@ impl WallStyle {
         outer: &AABB,
         node: Point,
         tile_size: u32,
+        start_node: &NodeGenerator,
+        end_node: &NodeGenerator,
         data: &mut dyn Data,
     ) {
         match &self.wall_generator {
@@ -44,9 +46,11 @@ impl WallStyle {
                 half_thickness,
                 component,
             } => {
-                let node_half = self.node_generator.half;
-                let start = Point::new(node.x + node_half, node.y - *half_thickness);
-                let size = Size::new(tile_size - (node_half * 2) as u32, *thickness);
+                let start = Point::new(node.x + start_node.half, node.y - *half_thickness);
+                let size = Size::new(
+                    tile_size - (start_node.half + end_node.half) as u32,
+                    *thickness,
+                );
                 let aabb = AABB::new(start, size);
                 component.render(data, outer, &aabb)
             }

@@ -1,6 +1,8 @@
 use crate::rendering::wall::{NodeGenerator, WallStyle};
 use crate::tilemap::border::{get_horizontal_borders_size, Border};
-use crate::tilemap::node::get_nodes_size;
+use crate::tilemap::node::{
+    get_end_of_horizontal_border, get_nodes_size, get_start_of_horizontal_border,
+};
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
@@ -87,11 +89,16 @@ impl Renderer {
     fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
         data.set_base_depth(self.wall_height);
         let nodes = self.calculate_nodes(tilemap);
-        self.render_horizontal_borders(tilemap, &mut data);
+        self.render_horizontal_borders(tilemap, &nodes, &mut data);
         self.render_nodes(tilemap, &nodes, &mut data);
     }
 
-    fn render_horizontal_borders(&self, tilemap: &Tilemap2d, data: &mut RuntimeData) {
+    fn render_horizontal_borders(
+        &self,
+        tilemap: &Tilemap2d,
+        nodes: &[Option<&NodeGenerator>],
+        data: &mut RuntimeData,
+    ) {
         let size = get_horizontal_borders_size(tilemap.get_size());
         let borders = tilemap.get_horizontal_borders();
         let mut start = Point::default();
@@ -99,7 +106,7 @@ impl Renderer {
         let step = self.tile_size as i32;
         let mut index = 0;
 
-        for _y in 0..size.height() {
+        for y in 0..size.height() {
             start.x = 0;
 
             for _x in 0..size.width() {
@@ -109,7 +116,17 @@ impl Renderer {
                     Border::Empty => {}
                     Border::Wall(id) => {
                         if let Some(wall_style) = self.wall_styles.get(id) {
-                            wall_style.render_horizontal(&aabb, start, self.tile_size, data);
+                            let start_index = get_start_of_horizontal_border(index, y);
+                            let end_index = get_end_of_horizontal_border(index, y);
+
+                            wall_style.render_horizontal(
+                                &aabb,
+                                start,
+                                self.tile_size,
+                                nodes[start_index].unwrap(),
+                                nodes[end_index].unwrap(),
+                                data,
+                            );
                         } else {
                             warn!(
                                 "Cannot render unknown wall style '{}' for horizontal border '{}'!",
