@@ -27,7 +27,7 @@ use tilemap::rendering::wall::{EdgeStyle, NodeStyle, WallStyle};
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
-use tilemap::tilemap::Side::Bottom;
+use tilemap::tilemap::Side::{Bottom, Right};
 
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]
@@ -190,9 +190,10 @@ fn main() {
     tilemap2d.set_border(15, Bottom, Border::Wall(0));
     tilemap2d.set_border(16, Bottom, Border::Wall(0));
     tilemap2d.set_border(17, Bottom, Border::Wall(0));
+    tilemap2d.set_border(17, Right, Border::Wall(0));
 
     info!(
-        "Init renderer: tile_size={} wall_height={} ",
+        "Init renderer: tile_size={} wall_height={}",
         args.tile_size, args.wall_height
     );
 

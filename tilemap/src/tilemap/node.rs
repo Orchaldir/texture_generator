@@ -14,3 +14,13 @@ pub fn get_start_of_horizontal_border(border_index: usize, y: u32) -> usize {
 pub fn get_end_of_horizontal_border(border_index: usize, y: u32) -> usize {
     border_index + y as usize + 1
 }
+
+/// Returns the index of the node at the start of the vertical [`Border`].
+pub fn get_start_of_vertical_border(border_index: usize) -> usize {
+    border_index
+}
+
+/// Returns the index of the node at the end of the vertical [`Border`].
+pub fn get_end_of_vertical_border(size: Size, border_index: usize) -> usize {
+    border_index + size.width() as usize
+}

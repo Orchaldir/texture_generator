@@ -68,6 +68,32 @@ impl<T> WallStyle<T> {
             }
         }
     }
+
+    pub fn render_vertical(
+        &self,
+        outer: &AABB,
+        node: Point,
+        tile_size: u32,
+        start_node: Option<&NodeStyle>,
+        end_node: Option<&NodeStyle>,
+        data: &mut dyn Data,
+    ) {
+        match &self.edge_style {
+            EdgeStyle::Mock(..) => {}
+            EdgeStyle::Solid {
+                thickness,
+                half_thickness,
+                component,
+            } => {
+                let start_half = start_node.map(|n| n.half).unwrap_or(0);
+                let end_half = end_node.map(|n| n.half).unwrap_or(0);
+                let start = Point::new(node.x - *half_thickness, node.y + start_half);
+                let size = Size::new(*thickness, tile_size - (start_half + end_half) as u32);
+                let aabb = AABB::new(start, size);
+                component.render(data, outer, &aabb)
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]

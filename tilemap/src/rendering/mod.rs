@@ -1,8 +1,9 @@
 use crate::rendering::node::calculate_node_styles;
 use crate::rendering::wall::{NodeStyle, WallStyle};
-use crate::tilemap::border::{get_horizontal_borders_size, Border};
+use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use crate::tilemap::node::{
-    get_end_of_horizontal_border, get_nodes_size, get_start_of_horizontal_border,
+    get_end_of_horizontal_border, get_end_of_vertical_border, get_nodes_size,
+    get_start_of_horizontal_border, get_start_of_vertical_border,
 };
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
@@ -91,6 +92,7 @@ impl Renderer {
         data.set_base_depth(self.wall_height);
         let nodes = calculate_node_styles(&self.wall_styles, tilemap);
         self.render_horizontal_borders(tilemap, &nodes, &mut data);
+        self.render_vertical_borders(tilemap, &nodes, &mut data);
         self.render_nodes(tilemap, &nodes, &mut data);
     }
 
@@ -131,6 +133,57 @@ impl Renderer {
                         } else {
                             warn!(
                                 "Cannot render unknown wall style '{}' for horizontal border '{}'!",
+                                id, index
+                            );
+                        }
+                    }
+                }
+
+                start.x += step;
+                index += 1;
+            }
+
+            start.y += step;
+        }
+    }
+
+    fn render_vertical_borders(
+        &self,
+        tilemap: &Tilemap2d,
+        nodes: &[Option<&NodeStyle>],
+        data: &mut RuntimeData,
+    ) {
+        let size = get_vertical_borders_size(tilemap.get_size());
+        let borders = tilemap.get_vertical_borders();
+        let mut start = Point::default();
+        let aabb = AABB::new(start, *data.get_size());
+        let step = self.tile_size as i32;
+        let mut index = 0;
+
+        for _y in 0..size.height() {
+            start.x = 0;
+
+            for _x in 0..size.width() {
+                let border = borders[index];
+
+                match border {
+                    Border::Empty => {}
+                    Border::Wall(id) => {
+                        if let Some(wall_style) = self.wall_styles.get(id) {
+                            let start_index = get_start_of_vertical_border(index);
+                            let end_index = get_end_of_vertical_border(size, index);
+
+                            wall_style.render_vertical(
+                                &aabb,
+                                start,
+                                self.tile_size,
+                                nodes[start_index],
+                                nodes[end_index],
+                                data,
+                            );
+                        } else {
+                            warn!(
+                                "Cannot render unknown wall style '{}' for vertical border '{}'!",
                                 id, index
                             );
                         }
