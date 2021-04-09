@@ -262,6 +262,68 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_crossing() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(2, 2);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Bottom, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(0, Right, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(1, Bottom, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(2, Right, Border::Wall(HIGH_WITH_NODE));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                None, Some(&HIGH_CORNER), None,
+                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&HIGH_CORNER),
+                None, Some(&HIGH_CORNER), None
+            ]
+        );
+    }
+
+    /// Greater wall style gets the node.
+    #[test]
+    fn test_two_different_styles_straight() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(2, 1);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Bottom, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(1, Bottom, Border::Wall(LOW_WITH_NODE));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                None, None, None,
+                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&LOW_CORNER),
+            ]
+        );
+    }
+
+    /// Greater wall style gets the node.
+    #[test]
+    fn test_two_different_styles_corner() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(1, 1);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Left, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(0, Top, Border::Wall(LOW_WITH_NODE));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                Some(&HIGH_CORNER), Some(&LOW_CORNER),
+                Some(&HIGH_CORNER), None
+            ]
+        );
+    }
+
     fn crate_wall_styles() -> ResourceManager<WallStyle<usize>> {
         let low_style = crate_wall_style(10, None, LOW_CORNER);
         let low_style_with_nodes = crate_wall_style(10, Some(LOW_NODE), LOW_CORNER);
