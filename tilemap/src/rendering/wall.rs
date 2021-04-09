@@ -53,6 +53,7 @@ impl<T> WallStyle<T> {
         data: &mut dyn Data,
     ) {
         match &self.edge_style {
+            EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
                 thickness,
                 half_thickness,
@@ -72,6 +73,7 @@ impl<T> WallStyle<T> {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum EdgeStyle {
+    Mock(u32),
     Solid {
         thickness: u32,
         half_thickness: i32,
@@ -92,6 +94,7 @@ impl EdgeStyle {
 impl EdgeStyle {
     pub fn get_thickness(&self) -> u32 {
         match self {
+            EdgeStyle::Mock(thickness) => *thickness,
             EdgeStyle::Solid { thickness, .. } => *thickness,
         }
     }

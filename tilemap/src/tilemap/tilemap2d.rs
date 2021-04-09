@@ -1,5 +1,6 @@
 use crate::tilemap::border::{
-    below_tile, get_horizontal_borders_size, get_vertical_borders_size, right_of_tile, Border,
+    below_tile, get_horizontal_borders_size, get_vertical_borders_size, left_of_tile,
+    right_of_tile, Border,
 };
 use crate::tilemap::node::get_nodes_size;
 use crate::tilemap::tile::Tile;
@@ -94,9 +95,9 @@ impl Tilemap2d {
 
         match side {
             Top => self.horizontal_borders[tile_index],
-            Left => self.vertical_borders[tile_index],
+            Left => self.vertical_borders[left_of_tile(self.size, tile_index)],
             Bottom => self.horizontal_borders[below_tile(self.size, tile_index)],
-            Right => self.vertical_borders[right_of_tile(tile_index)],
+            Right => self.vertical_borders[right_of_tile(self.size, tile_index)],
         }
     }
 
@@ -107,9 +108,9 @@ impl Tilemap2d {
 
         match side {
             Top => self.horizontal_borders[tile_index] = border,
-            Left => self.vertical_borders[tile_index] = border,
+            Left => self.vertical_borders[left_of_tile(self.size, tile_index)] = border,
             Bottom => self.horizontal_borders[below_tile(self.size, tile_index)] = border,
-            Right => self.vertical_borders[right_of_tile(tile_index)] = border,
+            Right => self.vertical_borders[right_of_tile(self.size, tile_index)] = border,
         };
     }
 
@@ -117,15 +118,15 @@ impl Tilemap2d {
 
     /// Returns the [`Border`] on a specific side of a node.
     pub fn get_border_at_node(&self, node_index: usize, side: Side) -> Border {
-        let node_size = get_nodes_size(self.size);
-        let point = node_size.to_point(node_index);
+        let nodes_size = get_nodes_size(self.size);
+        let point = nodes_size.to_point(node_index);
 
         match side {
             Top => {
                 if point.y == 0 {
                     Border::Empty
                 } else {
-                    self.vertical_borders[node_index - node_size.width() as usize]
+                    self.vertical_borders[node_index - nodes_size.width() as usize]
                 }
             }
             Left => {
@@ -136,14 +137,14 @@ impl Tilemap2d {
                 }
             }
             Bottom => {
-                if point.y >= (node_size.height() - 1) as i32 {
+                if point.y >= (nodes_size.height() - 1) as i32 {
                     Border::Empty
                 } else {
                     self.vertical_borders[node_index]
                 }
             }
             Right => {
-                if point.x == (node_size.width() - 1) as i32 {
+                if point.x == (nodes_size.width() - 1) as i32 {
                     Border::Empty
                 } else {
                     self.horizontal_borders[node_index - point.y as usize]

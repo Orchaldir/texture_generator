@@ -130,15 +130,86 @@ fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::rendering::wall::EdgeStyle;
     use crate::tilemap::tile::Tile;
-    use crate::tilemap::Side::Top;
+    use crate::tilemap::Side::{Left, Top};
     use texture_generation::math::size::Size;
+
+    // wall styles
+    const LOW: usize = 0;
+    const LOW_WITH_NODE: usize = 1;
+    const HIGH: usize = 2;
+    const HIGH_WITH_NODE: usize = 3;
+
+    // Nodes styles
+    const LOW_CORNER: usize = 10;
+    const LOW_NODE: usize = 11;
+    const HIGH_CORNER: usize = 12;
+    const HIGH_NODE: usize = 13;
 
     #[test]
     fn test_single_horizontal_wall() {
+        let wall_styles = crate_wall_styles();
         let size = Size::new(1, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
-        tilemap.set_border(0, Top, Border::Wall(0));
+        tilemap.set_border(0, Top, Border::Wall(LOW));
+
+        assert_style(&wall_styles, &tilemap, 0, Some(&LOW_CORNER));
+        assert_style(&wall_styles, &tilemap, 1, Some(&LOW_CORNER));
+        assert_style(&wall_styles, &tilemap, 2, None);
+        assert_style(&wall_styles, &tilemap, 3, None);
+    }
+
+    #[test]
+    fn test_long_vertical_wall() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(1, 2);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Left, Border::Wall(HIGH));
+        tilemap.set_border(1, Left, Border::Wall(HIGH));
+
+        println!("horizontal={:?}", tilemap.get_horizontal_borders());
+        println!("vertical={:?}", tilemap.get_vertical_borders());
+
+        assert_style(&wall_styles, &tilemap, 0, Some(&HIGH_CORNER));
+        assert_style(&wall_styles, &tilemap, 1, None);
+        assert_style(&wall_styles, &tilemap, 2, None);
+        assert_style(&wall_styles, &tilemap, 3, None);
+        assert_style(&wall_styles, &tilemap, 4, Some(&HIGH_CORNER));
+        assert_style(&wall_styles, &tilemap, 5, None);
+    }
+
+    fn crate_wall_styles() -> ResourceManager<WallStyle<usize>> {
+        let low_style = crate_wall_style(10, None, LOW_CORNER);
+        let low_style_with_nodes = crate_wall_style(10, Some(LOW_NODE), LOW_CORNER);
+        let high_style = crate_wall_style(20, None, HIGH_CORNER);
+        let high_style_with_nodes = crate_wall_style(20, Some(HIGH_NODE), HIGH_CORNER);
+
+        ResourceManager::new(vec![
+            low_style,
+            low_style_with_nodes,
+            high_style,
+            high_style_with_nodes,
+        ])
+    }
+
+    fn crate_wall_style(
+        wall_thickness: u32,
+        node_style: Option<usize>,
+        corner_style: usize,
+    ) -> WallStyle<usize> {
+        let edge_style = EdgeStyle::Mock(wall_thickness);
+        WallStyle::new("test", edge_style, node_style, corner_style)
+    }
+
+    fn assert_style(
+        wall_styles: &ResourceManager<WallStyle<usize>>,
+        tilemap: &Tilemap2d,
+        index: usize,
+        style: Option<&usize>,
+    ) {
+        assert_eq!(calculate_node_style(wall_styles, tilemap, index), style);
     }
 }

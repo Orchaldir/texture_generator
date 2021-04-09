@@ -29,11 +29,16 @@ pub fn get_vertical_borders_size(size: Size) -> Size {
 }
 
 /// Returns the index of the horizontal [`Border`] below the [`Tile`].
+pub fn left_of_tile(size: Size, tile_index: usize) -> usize {
+    tile_index + size.to_y(tile_index) as usize
+}
+
+/// Returns the index of the horizontal [`Border`] below the [`Tile`].
 pub fn below_tile(size: Size, tile_index: usize) -> usize {
     tile_index + size.width() as usize
 }
 
 /// Returns the index of the vertical [`Border`] to the right of the [`Tile`].
-pub fn right_of_tile(tile_index: usize) -> usize {
-    tile_index + 1
+pub fn right_of_tile(size: Size, tile_index: usize) -> usize {
+    left_of_tile(size, tile_index) + 1
 }
