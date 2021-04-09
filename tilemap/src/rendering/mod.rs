@@ -49,6 +49,12 @@ impl Renderer {
         self.tile_size
     }
 
+    pub fn get_tile_index(&self, tilemap: &Tilemap2d, x: u32, y: u32) -> usize {
+        let tile_x = x / self.tile_size;
+        let tile_y = y / self.tile_size;
+        tilemap.get_size().convert_x_y(tile_x, tile_y)
+    }
+
     /// Renders a [`Tilemap2d`].
     pub fn render(&self, tilemap: &Tilemap2d) -> RuntimeData {
         let tile_size = Size::square(self.tile_size);

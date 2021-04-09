@@ -27,7 +27,7 @@ use tilemap::rendering::wall::{EdgeStyle, NodeStyle, WallStyle};
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
-use tilemap::tilemap::Side::{Bottom, Right};
+use tilemap::tilemap::Side::*;
 
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]
@@ -65,7 +65,8 @@ pub struct TilemapEditor {
     preview_renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
     has_changed: bool,
-    current_texture: usize,
+    is_tile_mode: bool,
+    current_id: usize,
 }
 
 impl TilemapEditor {
@@ -81,7 +82,8 @@ impl TilemapEditor {
             preview_renderer,
             tilemap,
             has_changed: true,
-            current_texture: 0,
+            is_tile_mode: true,
+            current_id: 0,
         }
     }
 
@@ -98,6 +100,51 @@ impl TilemapEditor {
 
             info!("Finished rendering preview");
         }
+    }
+
+    fn paint_tile(&mut self, button: MouseButton, index: usize) {
+        let tile = match button {
+            MouseButton::Left => Tile::Floor(self.current_id),
+            MouseButton::Middle => Tile::Empty,
+            MouseButton::Right => Tile::Full(self.current_id),
+        };
+
+        info!("Set tile {} to {:?}", index, tile);
+
+        self.tilemap.set_tile(index, tile);
+    }
+
+    fn paint_border(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
+        let tile_size = self.preview_renderer.get_tile_size();
+        let start = self.tilemap.get_size().to_point(index);
+        let x = (point.0 - start.x as u32 * tile_size) as f32 / tile_size as f32;
+        let y = (point.1 - start.y as u32 * tile_size) as f32 / tile_size as f32;
+        let border = 0.1;
+        let is_top = y < border;
+        let is_left = x < border;
+        let is_bottom = y > (1.0 - border);
+        let is_right = x > (1.0 - border);
+
+        let side = if is_top && !is_left && !is_right {
+            Top
+        } else if is_left && !is_top && !is_bottom {
+            Left
+        } else if is_bottom && !is_left && !is_right {
+            Bottom
+        } else if is_right && !is_top && !is_bottom {
+            Right
+        } else {
+            return;
+        };
+
+        let border = match button {
+            MouseButton::Left => Border::Wall(self.current_id),
+            _ => Border::Empty,
+        };
+
+        info!("Set {:?} border of tile {} to {:?}", side, index, border);
+
+        self.tilemap.set_border(index, side, border);
     }
 }
 
@@ -129,28 +176,27 @@ impl App for TilemapEditor {
             data.save_depth_image("tilemap-depth.png");
             info!("Finished saving tilemap images");
         } else if let Some(number) = get_number(key) {
-            self.current_texture = number;
+            self.current_id = number;
+        } else if key == KeyCode::F1 {
+            self.is_tile_mode = true;
+            self.current_id = 0;
+        } else if key == KeyCode::F2 {
+            self.is_tile_mode = false;
+            self.current_id = 0;
         }
     }
 
     fn on_button_released(&mut self, button: MouseButton, point: (u32, u32)) {
-        let tile_size = self.preview_renderer.get_tile_size();
-        let tile_x = point.0 / tile_size;
-        let tile_y = point.1 / tile_size;
-        let index = self.tilemap.get_size().convert_x_y(tile_x, tile_y);
+        let index = self
+            .preview_renderer
+            .get_tile_index(&self.tilemap, point.0, point.1);
 
-        let tile = match button {
-            MouseButton::Left => Tile::Floor(self.current_texture),
-            MouseButton::Middle => Tile::Empty,
-            MouseButton::Right => Tile::Full(self.current_texture),
-        };
+        if self.is_tile_mode {
+            self.paint_tile(button, index);
+        } else {
+            self.paint_border(button, point, index);
+        }
 
-        info!(
-            "Set tile {} (x={} y={}) to {:?}",
-            index, tile_x, tile_y, tile
-        );
-
-        self.tilemap.set_tile(index, tile);
         self.has_changed = true;
     }
 }
@@ -190,7 +236,7 @@ fn main() {
     tilemap2d.set_border(15, Bottom, Border::Wall(0));
     tilemap2d.set_border(16, Bottom, Border::Wall(0));
     tilemap2d.set_border(17, Bottom, Border::Wall(0));
-    tilemap2d.set_border(17, Right, Border::Wall(0));
+    tilemap2d.set_border(17, Right, Border::Wall(1));
 
     info!(
         "Init renderer: tile_size={} wall_height={}",
@@ -228,10 +274,22 @@ fn main() {
 }
 
 fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle<NodeStyle>> {
-    let edge_component = RenderingComponent::new_fill_area("wall", Color::gray(100), 0);
-    let edge_style = EdgeStyle::new_solid(10 * factor, edge_component);
-    let node_component = RenderingComponent::new_fill_area("node", BLUE, 20);
-    let node_style = NodeStyle::new(16 * factor, node_component);
-    let wall_style = WallStyle::new("stone", edge_style, None, node_style);
-    ResourceManager::new(vec![wall_style])
+    let style0 = crate_wall_style("stone", Color::gray(100), BLUE, 10 * factor, 16 * factor);
+    let brown = Color::convert(&"#8B4513").unwrap();
+    let style1 = crate_wall_style("wood", brown, brown, 6 * factor, 10 * factor);
+    ResourceManager::new(vec![style0, style1])
+}
+
+fn crate_wall_style(
+    name: &str,
+    edge: Color,
+    node: Color,
+    thickness: u32,
+    node_size: u32,
+) -> WallStyle<NodeStyle> {
+    let edge_component = RenderingComponent::new_fill_area("wall", edge, 0);
+    let edge_style = EdgeStyle::new_solid(thickness, edge_component);
+    let node_component = RenderingComponent::new_fill_area("node", node, 20);
+    let node_style = NodeStyle::new(node_size, node_component);
+    WallStyle::new(name, edge_style, None, node_style)
 }
