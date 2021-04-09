@@ -7,6 +7,8 @@ use crate::tilemap::node::{
 };
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
+use crate::tilemap::Side;
+use crate::tilemap::Side::*;
 use texture_generation::generation::data::{Data, RuntimeData};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
@@ -53,6 +55,30 @@ impl Renderer {
         let tile_x = x / self.tile_size;
         let tile_y = y / self.tile_size;
         tilemap.get_size().convert_x_y(tile_x, tile_y)
+    }
+
+    pub fn get_side(&self, tilemap: &Tilemap2d, x: u32, y: u32, tile_index: usize) -> Option<Side> {
+        let tile_size = self.tile_size;
+        let start = tilemap.get_size().to_point(tile_index);
+        let x = (x - start.x as u32 * tile_size) as f32 / tile_size as f32;
+        let y = (y - start.y as u32 * tile_size) as f32 / tile_size as f32;
+        let border = 0.1;
+        let is_top = y < border;
+        let is_left = x < border;
+        let is_bottom = y > (1.0 - border);
+        let is_right = x > (1.0 - border);
+
+        Some(if is_top && !is_left && !is_right {
+            Top
+        } else if is_left && !is_top && !is_bottom {
+            Left
+        } else if is_bottom && !is_left && !is_right {
+            Bottom
+        } else if is_right && !is_top && !is_bottom {
+            Right
+        } else {
+            return None;
+        })
     }
 
     /// Renders a [`Tilemap2d`].

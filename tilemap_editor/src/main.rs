@@ -112,39 +112,24 @@ impl TilemapEditor {
         info!("Set tile {} to {:?}", index, tile);
 
         self.tilemap.set_tile(index, tile);
+        self.has_changed = true;
     }
 
     fn paint_border(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
-        let tile_size = self.preview_renderer.get_tile_size();
-        let start = self.tilemap.get_size().to_point(index);
-        let x = (point.0 - start.x as u32 * tile_size) as f32 / tile_size as f32;
-        let y = (point.1 - start.y as u32 * tile_size) as f32 / tile_size as f32;
-        let border = 0.1;
-        let is_top = y < border;
-        let is_left = x < border;
-        let is_bottom = y > (1.0 - border);
-        let is_right = x > (1.0 - border);
+        if let Some(side) = self
+            .preview_renderer
+            .get_side(&self.tilemap, point.0, point.1, index)
+        {
+            let border = match button {
+                MouseButton::Left => Border::Wall(self.current_id),
+                _ => Border::Empty,
+            };
 
-        let side = if is_top && !is_left && !is_right {
-            Top
-        } else if is_left && !is_top && !is_bottom {
-            Left
-        } else if is_bottom && !is_left && !is_right {
-            Bottom
-        } else if is_right && !is_top && !is_bottom {
-            Right
-        } else {
-            return;
-        };
+            info!("Set {:?} border of tile {} to {:?}", side, index, border);
 
-        let border = match button {
-            MouseButton::Left => Border::Wall(self.current_id),
-            _ => Border::Empty,
-        };
-
-        info!("Set {:?} border of tile {} to {:?}", side, index, border);
-
-        self.tilemap.set_border(index, side, border);
+            self.tilemap.set_border(index, side, border);
+            self.has_changed = true;
+        }
     }
 }
 
@@ -196,8 +181,6 @@ impl App for TilemapEditor {
         } else {
             self.paint_border(button, point, index);
         }
-
-        self.has_changed = true;
     }
 }
 
