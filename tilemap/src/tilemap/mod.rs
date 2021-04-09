@@ -31,3 +31,35 @@ impl Side {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_straight() {
+        assert!(Top.is_straight(Bottom));
+        assert!(Left.is_straight(Right));
+        assert!(Bottom.is_straight(Top));
+        assert!(Right.is_straight(Left))
+    }
+
+    #[test]
+    fn test_is_not_straight() {
+        assert!(!Top.is_straight(Top));
+        assert!(!Top.is_straight(Left));
+        assert!(!Top.is_straight(Right));
+
+        assert!(!Left.is_straight(Top));
+        assert!(!Left.is_straight(Left));
+        assert!(!Left.is_straight(Bottom));
+
+        assert!(!Bottom.is_straight(Left));
+        assert!(!Bottom.is_straight(Bottom));
+        assert!(!Bottom.is_straight(Right));
+
+        assert!(!Right.is_straight(Top));
+        assert!(!Right.is_straight(Bottom));
+        assert!(!Right.is_straight(Right));
+    }
+}
