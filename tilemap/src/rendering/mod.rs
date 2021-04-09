@@ -1,3 +1,4 @@
+use crate::rendering::node::calculate_node_styles;
 use crate::rendering::wall::{NodeStyle, WallStyle};
 use crate::tilemap::border::{get_horizontal_borders_size, Border};
 use crate::tilemap::node::{
@@ -5,7 +6,6 @@ use crate::tilemap::node::{
 };
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use crate::tilemap::Side;
 use texture_generation::generation::data::{Data, RuntimeData};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
@@ -89,7 +89,7 @@ impl Renderer {
 
     fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
         data.set_base_depth(self.wall_height);
-        let nodes = self.calculate_nodes(tilemap);
+        let nodes = calculate_node_styles(&self.wall_styles, tilemap);
         self.render_horizontal_borders(tilemap, &nodes, &mut data);
         self.render_nodes(tilemap, &nodes, &mut data);
     }
@@ -124,8 +124,8 @@ impl Renderer {
                                 &aabb,
                                 start,
                                 self.tile_size,
-                                nodes[start_index].unwrap(),
-                                nodes[end_index].unwrap(),
+                                nodes[start_index],
+                                nodes[end_index],
                                 data,
                             );
                         } else {
@@ -143,31 +143,6 @@ impl Renderer {
 
             start.y += step;
         }
-    }
-
-    fn calculate_nodes(&self, tilemap: &Tilemap2d) -> Vec<Option<&NodeStyle>> {
-        let size = get_nodes_size(tilemap.get_size());
-        let mut generators = Vec::with_capacity(size.len());
-        let mut index = 0;
-
-        for _y in 0..size.height() {
-            for _x in 0..size.width() {
-                generators.push(self.calculate_node(tilemap, index));
-                index += 1;
-            }
-        }
-
-        generators
-    }
-
-    fn calculate_node(&self, tilemap: &Tilemap2d, index: usize) -> Option<&NodeStyle> {
-        for side in Side::iterator() {
-            if let Border::Wall(id) = tilemap.get_border_at_node(index, *side) {
-                return self.wall_styles.get(id).map(|s| s.get_corner_style());
-            }
-        }
-
-        None
     }
 
     fn render_nodes(

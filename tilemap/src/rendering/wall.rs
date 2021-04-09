@@ -48,8 +48,8 @@ impl<T> WallStyle<T> {
         outer: &AABB,
         node: Point,
         tile_size: u32,
-        start_node: &NodeStyle,
-        end_node: &NodeStyle,
+        start_node: Option<&NodeStyle>,
+        end_node: Option<&NodeStyle>,
         data: &mut dyn Data,
     ) {
         match &self.edge_style {
@@ -59,11 +59,10 @@ impl<T> WallStyle<T> {
                 half_thickness,
                 component,
             } => {
-                let start = Point::new(node.x + start_node.half, node.y - *half_thickness);
-                let size = Size::new(
-                    tile_size - (start_node.half + end_node.half) as u32,
-                    *thickness,
-                );
+                let start_half = start_node.map(|n| n.half).unwrap_or(0);
+                let end_half = end_node.map(|n| n.half).unwrap_or(0);
+                let start = Point::new(node.x + start_half, node.y - *half_thickness);
+                let size = Size::new(tile_size - (start_half + end_half) as u32, *thickness);
                 let aabb = AABB::new(start, size);
                 component.render(data, outer, &aabb)
             }
