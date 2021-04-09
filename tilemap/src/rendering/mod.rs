@@ -23,7 +23,7 @@ pub struct Renderer {
     tile_size: u32,
     wall_height: u8,
     textures: ResourceManager<TextureGenerator>,
-    wall_styles: ResourceManager<WallStyle>,
+    wall_styles: ResourceManager<WallStyle<NodeStyle>>,
     post_processes: Vec<PostProcess>,
 }
 
@@ -32,7 +32,7 @@ impl Renderer {
         tile_size: u32,
         wall_height: u8,
         textures: ResourceManager<TextureGenerator>,
-        wall_styles: ResourceManager<WallStyle>,
+        wall_styles: ResourceManager<WallStyle<NodeStyle>>,
         post_processes: Vec<PostProcess>,
     ) -> Self {
         Renderer {

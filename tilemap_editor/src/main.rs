@@ -226,7 +226,7 @@ fn main() {
     window.run(app);
 }
 
-fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle> {
+fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle<NodeStyle>> {
     let edge_component = RenderingComponent::new_fill_area("wall", Color::gray(100), 0);
     let edge_style = EdgeStyle::new_solid(10 * factor, edge_component);
     let node_component = RenderingComponent::new_fill_area("node", BLUE, 20);

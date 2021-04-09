@@ -6,23 +6,23 @@ use texture_generation::math::size::Size;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Determines how a wall is rendered.
-pub struct WallStyle {
+pub struct WallStyle<T> {
     name: String,
     /// The style of a wall between or without nodes.
     edge_style: EdgeStyle,
     /// The optional style of a node between 2 wall segments in the same direction.
-    node_style: Option<NodeStyle>,
+    node_style: Option<T>,
     /// The style of corners.
-    corner_style: NodeStyle,
+    corner_style: T,
 }
 
-impl WallStyle {
+impl<T> WallStyle<T> {
     pub fn new<S: Into<String>>(
         name: S,
         edge_style: EdgeStyle,
-        node_style: Option<NodeStyle>,
-        corner_style: NodeStyle,
-    ) -> WallStyle {
+        node_style: Option<T>,
+        corner_style: T,
+    ) -> WallStyle<T> {
         WallStyle {
             name: name.into(),
             edge_style,
@@ -31,15 +31,15 @@ impl WallStyle {
         }
     }
 
-    pub fn get_node_style(&self) -> &Option<NodeStyle> {
+    pub fn get_node_style(&self) -> &Option<T> {
         &self.node_style
     }
 
-    pub fn get_corner_style(&self) -> &NodeStyle {
+    pub fn get_corner_style(&self) -> &T {
         &self.corner_style
     }
 
-    pub fn is_greater(&self, other: &WallStyle) -> bool {
+    pub fn is_greater(&self, other: &WallStyle<T>) -> bool {
         self.edge_style.get_thickness() >= other.edge_style.get_thickness()
     }
 

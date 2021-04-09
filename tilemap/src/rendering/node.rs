@@ -1,4 +1,4 @@
-use crate::rendering::wall::{NodeStyle, WallStyle};
+use crate::rendering::wall::WallStyle;
 use crate::tilemap::border::Border;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
@@ -6,11 +6,11 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use texture_generation::utils::resource::ResourceManager;
 
-pub fn calculate_node_style<'a>(
-    wall_styles: &'a ResourceManager<WallStyle>,
+pub fn calculate_node_style<'a, T>(
+    wall_styles: &'a ResourceManager<WallStyle<T>>,
     tilemap: &'a Tilemap2d,
     index: usize,
-) -> Option<&'a NodeStyle> {
+) -> Option<&'a T> {
     let sides_per_style = calculate_sides_per_style(tilemap, index);
     let top_styles = get_top_styles(sides_per_style);
 
@@ -55,10 +55,10 @@ fn get_top_styles(input: HashMap<usize, Vec<Side>>) -> Vec<(usize, Vec<Side>)> {
     top_styles
 }
 
-fn select_best_node_style(
-    wall_styles: &ResourceManager<WallStyle>,
+fn select_best_node_style<T>(
+    wall_styles: &ResourceManager<WallStyle<T>>,
     top_styles: Vec<(usize, Vec<Side>)>,
-) -> Option<&NodeStyle> {
+) -> Option<&T> {
     if top_styles.len() == 1 {
         let top_style = &top_styles[0];
         let side_count = top_style.1.len();
@@ -89,8 +89,8 @@ fn select_best_node_style(
     None
 }
 
-fn select_best_wall_style(
-    wall_styles: &ResourceManager<WallStyle>,
+fn select_best_wall_style<T>(
+    wall_styles: &ResourceManager<WallStyle<T>>,
     top_styles: Vec<(usize, Vec<Side>)>,
 ) -> usize {
     let mut best_id = top_styles[0].0;
@@ -108,13 +108,13 @@ fn select_best_wall_style(
     best_id
 }
 
-fn get_corner_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> Option<&NodeStyle> {
+fn get_corner_style<T>(wall_styles: &ResourceManager<WallStyle<T>>, index: usize) -> Option<&T> {
     wall_styles
         .get(index)
         .map(|wall_style| wall_style.get_corner_style())
 }
 
-fn get_node_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> Option<&NodeStyle> {
+fn get_node_style<T>(wall_styles: &ResourceManager<WallStyle<T>>, index: usize) -> Option<&T> {
     wall_styles
         .get(index)
         .and_then(|wall_style| Option::from(wall_style.get_node_style()))
