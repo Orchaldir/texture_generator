@@ -167,6 +167,8 @@ mod tests {
     const LOW_NODE: usize = 11;
     const HIGH_CORNER: usize = 12;
     const HIGH_NODE: usize = 13;
+    const LOW_CORNER2: usize = 14;
+    const HIGH_CORNER2: usize = 15;
 
     #[test]
     fn test_single_horizontal_wall() {
@@ -180,7 +182,7 @@ mod tests {
         assert_eq!(
             calculate_node_styles(&wall_styles, &tilemap),
             vec![
-                Some(&LOW_CORNER), Some(&LOW_CORNER),
+                Some(&LOW_CORNER2), Some(&LOW_CORNER2),
                 None, None
             ]
         );
@@ -199,9 +201,9 @@ mod tests {
         assert_eq!(
             calculate_node_styles(&wall_styles, &tilemap),
             vec![
-                Some(&HIGH_CORNER), None,
+                Some(&HIGH_CORNER2), None,
                 None, None,
-                Some(&HIGH_CORNER), None
+                Some(&HIGH_CORNER2), None
             ]
         );
     }
@@ -340,7 +342,7 @@ mod tests {
         assert_eq!(
             calculate_node_styles(&wall_styles, &tilemap),
             vec![
-                Some(&LOW_CORNER), Some(&LOW_CORNER), Some(&LOW_CORNER),
+                Some(&LOW_CORNER2), Some(&LOW_CORNER2), Some(&LOW_CORNER2),
                 None, Some(&HIGH_CORNER), None
             ]
         );
@@ -360,17 +362,83 @@ mod tests {
         assert_eq!(
             calculate_node_styles(&wall_styles, &tilemap),
             vec![
-                Some(&LOW_CORNER), Some(&LOW_CORNER), Some(&HIGH_CORNER),
+                Some(&LOW_CORNER), Some(&LOW_CORNER), Some(&HIGH_CORNER2),
                 None, Some(&LOW_CORNER), None
             ]
         );
     }
 
+    #[test]
+    fn test_crossing_with_dominant_style_straight() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(2, 2);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Bottom, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(1, Bottom, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(0, Right, Border::Wall(LOW_WITH_NODE));
+        tilemap.set_border(2, Right, Border::Wall(LOW_WITH_NODE));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                None, Some(&LOW_CORNER), None,
+                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&HIGH_CORNER),
+                None, Some(&LOW_CORNER), None
+            ]
+        );
+    }
+
+    #[test]
+    fn test_crossing_with_dominant_style_corner() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(2, 2);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Bottom, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(0, Right, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(1, Bottom, Border::Wall(LOW_WITH_NODE));
+        tilemap.set_border(2, Right, Border::Wall(LOW_WITH_NODE));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                None, Some(&HIGH_CORNER), None,
+                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&LOW_CORNER),
+                None, Some(&LOW_CORNER), None
+            ]
+        );
+    }
+
+    #[test]
+    fn test_crossing_with_4_styles() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(2, 2);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Bottom, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(0, Right, Border::Wall(HIGH));
+        tilemap.set_border(1, Bottom, Border::Wall(LOW_WITH_NODE));
+        tilemap.set_border(2, Right, Border::Wall(LOW));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                None, Some(&HIGH_CORNER2), None,
+                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&LOW_CORNER),
+                None, Some(&LOW_CORNER2), None
+            ]
+        );
+    }
+
     fn crate_wall_styles() -> ResourceManager<WallStyle<usize>> {
-        let low_style = crate_wall_style(10, None, LOW_CORNER);
-        let low_style_with_nodes = crate_wall_style(10, Some(LOW_NODE), LOW_CORNER);
-        let high_style = crate_wall_style(20, None, HIGH_CORNER);
-        let high_style_with_nodes = crate_wall_style(20, Some(HIGH_NODE), HIGH_CORNER);
+        let low_style = crate_wall_style(10, None, LOW_CORNER2);
+        let low_style_with_nodes = crate_wall_style(15, Some(LOW_NODE), LOW_CORNER);
+        let high_style = crate_wall_style(20, None, HIGH_CORNER2);
+        let high_style_with_nodes = crate_wall_style(25, Some(HIGH_NODE), HIGH_CORNER);
 
         ResourceManager::new(vec![
             low_style,
