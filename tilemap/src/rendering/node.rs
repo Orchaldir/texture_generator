@@ -31,9 +31,10 @@ pub fn calculate_node_style<'a, T>(
     index: usize,
 ) -> Option<&'a T> {
     let sides_per_style = calculate_sides_per_style(tilemap, index);
+    let is_corner = sides_per_style.len() > 1;
     let top_styles = get_top_styles(sides_per_style);
 
-    select_best_node_style(wall_styles, top_styles)
+    select_best_node_style(wall_styles, top_styles, is_corner)
 }
 
 fn calculate_sides_per_style(tilemap: &Tilemap2d, index: usize) -> HashMap<usize, Vec<Side>> {
@@ -77,12 +78,13 @@ fn get_top_styles(input: HashMap<usize, Vec<Side>>) -> Vec<(usize, Vec<Side>)> {
 fn select_best_node_style<T>(
     wall_styles: &ResourceManager<WallStyle<T>>,
     top_styles: Vec<(usize, Vec<Side>)>,
+    is_corner: bool,
 ) -> Option<&T> {
     if top_styles.len() == 1 {
         let top_style = &top_styles[0];
         let side_count = top_style.1.len();
 
-        if side_count == 2 && is_straight(top_style) {
+        if !is_corner && side_count == 2 && is_straight(top_style) {
             return get_node_style(wall_styles, top_style.0);
         }
 
@@ -320,6 +322,46 @@ mod tests {
             vec![
                 Some(&HIGH_CORNER), Some(&LOW_CORNER),
                 Some(&HIGH_CORNER), None
+            ]
+        );
+    }
+
+    #[test]
+    fn test_t_crossing_with_dominant_style_straight() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(2, 1);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Top, Border::Wall(LOW));
+        tilemap.set_border(0, Right, Border::Wall(HIGH_WITH_NODE));
+        tilemap.set_border(1, Top, Border::Wall(LOW));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                Some(&LOW_CORNER), Some(&LOW_CORNER), Some(&LOW_CORNER),
+                None, Some(&HIGH_CORNER), None
+            ]
+        );
+    }
+
+    #[test]
+    fn test_t_crossing_with_dominant_style_corner() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(2, 1);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Top, Border::Wall(LOW_WITH_NODE));
+        tilemap.set_border(0, Right, Border::Wall(LOW_WITH_NODE));
+        tilemap.set_border(1, Top, Border::Wall(HIGH));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                Some(&LOW_CORNER), Some(&LOW_CORNER), Some(&HIGH_CORNER),
+                None, Some(&LOW_CORNER), None
             ]
         );
     }
