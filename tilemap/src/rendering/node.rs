@@ -41,7 +41,9 @@ fn calculate_sides_per_style(tilemap: &Tilemap2d, index: usize) -> HashMap<usize
     let mut wall_styles = HashMap::new();
 
     for side in Side::iterator() {
-        if let Border::Wall(id) = tilemap.get_border_at_node(index, *side) {
+        let wall_style = tilemap.get_border_at_node(index, *side).get_wall_style();
+
+        if let Some(id) = wall_style {
             match wall_styles.entry(id) {
                 Entry::Vacant(e) => {
                     e.insert(vec![*side]);
@@ -204,6 +206,28 @@ mod tests {
             calculate_node_styles(&wall_styles, &tilemap),
             vec![
                 Some(&HIGH_CORNER2), None,
+                None, None,
+                Some(&HIGH_CORNER2), None
+            ]
+        );
+    }
+
+    #[test]
+    fn test_long_vertical_wall_with_door() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(1, 3);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Left, Border::Wall(HIGH));
+        tilemap.set_border(1, Left, Border::new_door(HIGH, 0));
+        tilemap.set_border(2, Left, Border::Wall(HIGH));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                Some(&HIGH_CORNER2), None,
+                None, None,
                 None, None,
                 Some(&HIGH_CORNER2), None
             ]
