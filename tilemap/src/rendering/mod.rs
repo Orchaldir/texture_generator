@@ -9,7 +9,7 @@ use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
 use crate::tilemap::Side::*;
-use texture_generation::generation::data::{Data, RuntimeData};
+use texture_generation::generation::data::RuntimeData;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
 use texture_generation::math::aabb::AABB;
@@ -137,7 +137,7 @@ impl Renderer {
         let size = get_horizontal_borders_size(tilemap.get_size());
         let borders = tilemap.get_horizontal_borders();
         let mut start = Point::default();
-        let aabb = AABB::new(start, *data.get_size());
+        let aabb = data.get_aabb();
         let step = self.tile_size as i32;
         let mut index = 0;
 
@@ -188,7 +188,7 @@ impl Renderer {
         let size = get_vertical_borders_size(tilemap.get_size());
         let borders = tilemap.get_vertical_borders();
         let mut start = Point::default();
-        let aabb = AABB::new(start, *data.get_size());
+        let aabb = data.get_aabb();
         let step = self.tile_size as i32;
         let mut index = 0;
 
@@ -238,7 +238,7 @@ impl Renderer {
     ) {
         let size = get_nodes_size(tilemap.get_size());
         let mut point = Point::default();
-        let aabb = AABB::new(point, *data.get_size());
+        let aabb = data.get_aabb();
         let step = self.tile_size as i32;
         let mut index = 0;
 
@@ -292,6 +292,35 @@ mod tests {
     use texture_generation::generation::data::Data;
     use texture_generation::generation::TextureGenerator;
     use texture_generation::math::color::{Color, BLACK, BLUE, PINK, RED};
+
+    #[test]
+    fn test_get_tile_index() {
+        let textures = ResourceManager::new(Vec::default());
+        let wall_styles = ResourceManager::new(Vec::default());
+        let renderer = Renderer::new(100, 100, textures, wall_styles, Vec::default());
+        let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
+
+        assert_eq!(renderer.get_tile_index(&tilemap, 50, 50), 0);
+        assert_eq!(renderer.get_tile_index(&tilemap, 150, 50), 1);
+        assert_eq!(renderer.get_tile_index(&tilemap, 50, 150), 2);
+        assert_eq!(renderer.get_tile_index(&tilemap, 150, 150), 3);
+        assert_eq!(renderer.get_tile_index(&tilemap, 50, 250), 4);
+        assert_eq!(renderer.get_tile_index(&tilemap, 150, 250), 5);
+    }
+
+    #[test]
+    fn test_get_side() {
+        let textures = ResourceManager::new(Vec::default());
+        let wall_styles = ResourceManager::new(Vec::default());
+        let renderer = Renderer::new(100, 100, textures, wall_styles, Vec::default());
+        let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
+
+        assert_eq!(renderer.get_side(&tilemap, 50, 150, 2), None);
+        assert_eq!(renderer.get_side(&tilemap, 50, 105, 2), Some(Top));
+        assert_eq!(renderer.get_side(&tilemap, 5, 150, 2), Some(Left));
+        assert_eq!(renderer.get_side(&tilemap, 50, 195, 2), Some(Bottom));
+        assert_eq!(renderer.get_side(&tilemap, 95, 150, 2), Some(Right));
+    }
 
     #[test]
     fn test_render_tiles() {

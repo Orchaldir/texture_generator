@@ -1,4 +1,5 @@
 use crate::generation::process::PostProcess;
+use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -48,6 +49,10 @@ impl RuntimeData {
             depth,
             base_depth,
         }
+    }
+
+    pub fn get_aabb(&self) -> AABB {
+        AABB::with_size(self.size)
     }
 
     pub fn set_base_depth(&mut self, depth: u8) {

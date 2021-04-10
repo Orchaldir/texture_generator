@@ -224,7 +224,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_node() {
+    fn test_get_border_at_node() {
         let size = Size::new(2, 2);
 
         let tilemap = Tilemap2d::with_borders(

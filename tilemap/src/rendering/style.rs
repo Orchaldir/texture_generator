@@ -147,3 +147,42 @@ impl NodeStyle {
         self.component.render(data, outer, &aabb)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use texture_generation::generation::component::rendering::RenderingComponent;
+    use texture_generation::generation::data::{Data, RuntimeData};
+    use texture_generation::math::color::{BLACK, RED};
+
+    #[test]
+    fn test_render_node() {
+        let component = RenderingComponent::new_fill_area("corner", RED, 9);
+        let node_style = NodeStyle::new(2, component);
+        let mut data = RuntimeData::new(Size::new(6, 5), BLACK);
+
+        node_style.render(&data.get_aabb(), Point::new(3, 2), &mut data);
+
+        #[rustfmt::skip]
+        let result = vec![
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK,   RED,   RED, BLACK, BLACK,
+            BLACK, BLACK,   RED,   RED, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        ];
+
+        assert_eq!(data.get_color_data(), &result);
+
+        #[rustfmt::skip]
+        let depth = vec![
+            0, 0, 0, 0, 0, 0,
+            0, 0, 9, 9, 0, 0,
+            0, 0, 9, 9, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+        ];
+
+        assert_eq!(data.get_depth_data(), &depth);
+    }
+}
