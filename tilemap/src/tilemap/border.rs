@@ -7,6 +7,10 @@ pub enum Border {
     Empty,
     /// A wall blocks the border between the 2 tiles.
     Wall(usize),
+    Door {
+        wall_id: usize,
+        door_id: usize,
+    },
 }
 
 impl Border {
@@ -14,6 +18,15 @@ impl Border {
         match self {
             Border::Empty => None,
             Border::Wall(id) => Some(*id),
+            Border::Door { wall_id, .. } => Some(*wall_id),
+        }
+    }
+
+    pub fn reduce(&self) -> Border {
+        match self {
+            Border::Empty => Border::Empty,
+            Border::Wall(..) => Border::Empty,
+            Border::Door { wall_id, .. } => Border::Wall(*wall_id),
         }
     }
 }
@@ -41,4 +54,30 @@ pub fn below_tile(size: Size, tile_index: usize) -> usize {
 /// Returns the index of the vertical [`Border`] to the right of the [`Tile`].
 pub fn right_of_tile(size: Size, tile_index: usize) -> usize {
     left_of_tile(size, tile_index) + 1
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use Border::*;
+
+    const WALL: Border = Wall(42);
+    const DOOR: Border = Door {
+        wall_id: 42,
+        door_id: 2,
+    };
+
+    #[test]
+    fn test_get_wall_style() {
+        assert_eq!(Empty.get_wall_style(), None);
+        assert_eq!(WALL.get_wall_style(), Some(42));
+        assert_eq!(DOOR.get_wall_style(), Some(42));
+    }
+
+    #[test]
+    fn test_reduce() {
+        assert_eq!(Empty.reduce(), Empty);
+        assert_eq!(WALL.reduce(), Empty);
+        assert_eq!(DOOR.reduce(), WALL);
+    }
 }

@@ -169,6 +169,7 @@ impl Renderer {
                             );
                         }
                     }
+                    Border::Door { .. } => {}
                 }
 
                 start.x += step;
@@ -220,6 +221,7 @@ impl Renderer {
                             );
                         }
                     }
+                    Border::Door { .. } => {}
                 }
 
                 start.x += step;

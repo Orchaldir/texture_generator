@@ -12,7 +12,6 @@ pub fn calculate_node_styles<'a, T>(
     tilemap: &'a Tilemap2d,
 ) -> Vec<Option<&'a T>> {
     let size = get_nodes_size(tilemap.get_size());
-    println!("size={:?}", size);
     let mut node_styles = Vec::with_capacity(size.len());
     let mut index = 0;
 
@@ -32,11 +31,8 @@ pub fn calculate_node_style<'a, T>(
     index: usize,
 ) -> Option<&'a T> {
     let sides_per_style = calculate_sides_per_style(tilemap, index);
-    println!("sides_per_style={:?}", sides_per_style);
     let is_corner = sides_per_style.len() > 1;
-    println!("is_corner={}", is_corner);
     let top_styles = get_top_styles(sides_per_style);
-    println!("top_styles={:?}", top_styles);
 
     select_best_node_style(wall_styles, top_styles, is_corner)
 }
