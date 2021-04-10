@@ -12,17 +12,18 @@ pub fn calculate_node_styles<'a, T>(
     tilemap: &'a Tilemap2d,
 ) -> Vec<Option<&'a T>> {
     let size = get_nodes_size(tilemap.get_size());
-    let mut generators = Vec::with_capacity(size.len());
+    println!("size={:?}", size);
+    let mut node_styles = Vec::with_capacity(size.len());
     let mut index = 0;
 
     for _y in 0..size.height() {
         for _x in 0..size.width() {
-            generators.push(calculate_node_style(wall_styles, tilemap, index));
+            node_styles.push(calculate_node_style(wall_styles, tilemap, index));
             index += 1;
         }
     }
 
-    generators
+    node_styles
 }
 
 pub fn calculate_node_style<'a, T>(
@@ -31,8 +32,11 @@ pub fn calculate_node_style<'a, T>(
     index: usize,
 ) -> Option<&'a T> {
     let sides_per_style = calculate_sides_per_style(tilemap, index);
+    println!("sides_per_style={:?}", sides_per_style);
     let is_corner = sides_per_style.len() > 1;
+    println!("is_corner={}", is_corner);
     let top_styles = get_top_styles(sides_per_style);
+    println!("top_styles={:?}", top_styles);
 
     select_best_node_style(wall_styles, top_styles, is_corner)
 }
@@ -95,10 +99,12 @@ fn select_best_node_style<T>(
         if side_count == 2 {
             let style0 = &top_styles[0];
             let style1 = &top_styles[1];
+            let is_straight0 = is_straight(style0);
+            let is_straight1 = is_straight(style1);
 
-            if is_straight(style0) {
+            if is_straight0 && !is_straight1 {
                 return get_corner_style(wall_styles, style0.0);
-            } else if is_straight(style1) {
+            } else if is_straight1 && !is_straight0 {
                 return get_corner_style(wall_styles, style1.0);
             }
         }
@@ -378,6 +384,9 @@ mod tests {
         tilemap.set_border(1, Bottom, Border::Wall(HIGH_WITH_NODE));
         tilemap.set_border(0, Right, Border::Wall(LOW_WITH_NODE));
         tilemap.set_border(2, Right, Border::Wall(LOW_WITH_NODE));
+
+        println!("horizontal={:?}", tilemap.get_horizontal_borders());
+        println!("vertical={:?}", tilemap.get_vertical_borders());
 
         #[rustfmt::skip]
         assert_eq!(
