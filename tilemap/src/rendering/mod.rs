@@ -154,7 +154,7 @@ impl Renderer {
                             let start_index = get_start_of_horizontal_border(index, y);
                             let end_index = get_end_of_horizontal_border(index, y);
 
-                            wall_style.render_horizontal(
+                            wall_style.get_edge_style().render_horizontal(
                                 &aabb,
                                 start,
                                 self.tile_size,
@@ -206,7 +206,7 @@ impl Renderer {
                             let start_index = get_start_of_vertical_border(index);
                             let end_index = get_end_of_vertical_border(size, index);
 
-                            wall_style.render_vertical(
+                            wall_style.get_edge_style().render_vertical(
                                 &aabb,
                                 start,
                                 self.tile_size,
