@@ -1,4 +1,4 @@
-use crate::rendering::wall::WallStyle;
+use crate::rendering::style::wall::WallStyle;
 use crate::tilemap::border::Border;
 use crate::tilemap::node::get_nodes_size;
 use crate::tilemap::tilemap2d::Tilemap2d;
@@ -153,7 +153,7 @@ fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rendering::wall::EdgeStyle;
+    use crate::rendering::style::wall::EdgeStyle;
     use crate::tilemap::tile::Tile;
     use crate::tilemap::Side::{Bottom, Left, Right, Top};
     use texture_generation::math::size::Size;

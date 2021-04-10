@@ -1,5 +1,5 @@
 use crate::rendering::node::calculate_node_styles;
-use crate::rendering::wall::{NodeStyle, WallStyle};
+use crate::rendering::style::wall::{NodeStyle, WallStyle};
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use crate::tilemap::node::{
     get_end_of_horizontal_border, get_end_of_vertical_border, get_nodes_size,
@@ -19,7 +19,7 @@ use texture_generation::math::size::Size;
 use texture_generation::utils::resource::ResourceManager;
 
 pub mod node;
-pub mod wall;
+pub mod style;
 
 /// Renders a [`Tilemap2d`] in a specific style.
 pub struct Renderer {

@@ -23,7 +23,7 @@ use texture_generation::math::color::{Color, BLUE};
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceManager;
-use tilemap::rendering::wall::{EdgeStyle, NodeStyle, WallStyle};
+use tilemap::rendering::style::wall::{EdgeStyle, NodeStyle, WallStyle};
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
