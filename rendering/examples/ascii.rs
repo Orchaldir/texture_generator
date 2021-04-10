@@ -38,7 +38,7 @@ impl App for AsciiExample {
         renderer.finish();
 
         if self.take_screenshot {
-            info!("Take screenshot");
+            println!("Take screenshot");
             renderer.take_screenshot("ascii.png");
             self.take_screenshot = false;
         }
