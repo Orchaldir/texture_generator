@@ -3,6 +3,7 @@ use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::math::size::Size;
 use crate::utils::error::DefinitionError;
+use crate::utils::resource::ResourceManager;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::{DirEntry, File};
@@ -110,6 +111,18 @@ impl TextureDefinition {
             component,
         ))
     }
+}
+
+pub fn into_manager(
+    definitions: &[TextureDefinition],
+    size: u32,
+) -> ResourceManager<TextureGenerator> {
+    let textures: Vec<TextureGenerator> = definitions
+        .iter()
+        .filter_map(|d| d.convert(size).ok())
+        .collect();
+
+    ResourceManager::new(textures)
 }
 
 #[cfg(test)]

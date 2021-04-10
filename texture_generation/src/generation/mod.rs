@@ -37,7 +37,7 @@ impl TextureGenerator {
         let aabb = AABB::with_size(self.size);
         let mut data = RuntimeData::new(self.size, self.background);
 
-        self.component.generate(&mut data, &aabb);
+        self.component.generate(&mut data, &aabb, &aabb);
 
         data
     }
@@ -46,8 +46,8 @@ impl TextureGenerator {
     pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
         let background = RenderingComponent::new_fill_area("background", self.background, 0);
 
-        background.render(data, aabb);
-        self.component.generate(data, aabb);
+        background.render(data, aabb, aabb);
+        self.component.generate(data, aabb, aabb);
     }
 }
 

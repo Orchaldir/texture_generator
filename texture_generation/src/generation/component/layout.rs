@@ -114,7 +114,7 @@ impl LayoutComponent {
                     while point.x < aabb.end().x {
                         let square_aabb = AABB::new(point, *brick);
 
-                        component.generate(data, &square_aabb);
+                        component.generate(data, aabb, &square_aabb);
 
                         point.x += brick.width() as i32;
                     }
@@ -137,7 +137,7 @@ impl LayoutComponent {
                     while point.x <= end.x {
                         let square_aabb = AABB::new(point, square_size);
 
-                        component.generate(data, &square_aabb);
+                        component.generate(data, aabb, &square_aabb);
 
                         point.x += step;
                     }

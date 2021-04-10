@@ -14,16 +14,20 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 use structopt::StructOpt;
-use texture_generation::definition::generation::TextureDefinition;
+use texture_generation::definition::generation::{into_manager, TextureDefinition};
+use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::generation::TextureGenerator;
+use texture_generation::math::color::{Color, BLUE};
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
-use tilemap::rendering::texture::TextureManager;
+use texture_generation::utils::resource::ResourceManager;
+use tilemap::rendering::style::{EdgeStyle, NodeStyle, WallStyle};
+use tilemap::tilemap::border::Border;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
+use tilemap::tilemap::Side::*;
 
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]
@@ -61,7 +65,8 @@ pub struct TilemapEditor {
     preview_renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
     has_changed: bool,
-    current_texture: usize,
+    is_tile_mode: bool,
+    current_id: usize,
 }
 
 impl TilemapEditor {
@@ -77,7 +82,8 @@ impl TilemapEditor {
             preview_renderer,
             tilemap,
             has_changed: true,
-            current_texture: 0,
+            is_tile_mode: true,
+            current_id: 0,
         }
     }
 
@@ -93,6 +99,36 @@ impl TilemapEditor {
             self.has_changed = false;
 
             info!("Finished rendering preview");
+        }
+    }
+
+    fn paint_tile(&mut self, button: MouseButton, index: usize) {
+        let tile = match button {
+            MouseButton::Left => Tile::Floor(self.current_id),
+            MouseButton::Middle => Tile::Empty,
+            MouseButton::Right => Tile::Full(self.current_id),
+        };
+
+        info!("Set tile {} to {:?}", index, tile);
+
+        self.tilemap.set_tile(index, tile);
+        self.has_changed = true;
+    }
+
+    fn paint_border(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
+        if let Some(side) = self
+            .preview_renderer
+            .get_side(&self.tilemap, point.0, point.1, index)
+        {
+            let border = match button {
+                MouseButton::Left => Border::Wall(self.current_id),
+                _ => Border::Empty,
+            };
+
+            info!("Set {:?} border of tile {} to {:?}", side, index, border);
+
+            self.tilemap.set_border(index, side, border);
+            self.has_changed = true;
         }
     }
 }
@@ -125,29 +161,26 @@ impl App for TilemapEditor {
             data.save_depth_image("tilemap-depth.png");
             info!("Finished saving tilemap images");
         } else if let Some(number) = get_number(key) {
-            self.current_texture = number;
+            self.current_id = number;
+        } else if key == KeyCode::F1 {
+            self.is_tile_mode = true;
+            self.current_id = 0;
+        } else if key == KeyCode::F2 {
+            self.is_tile_mode = false;
+            self.current_id = 0;
         }
     }
 
     fn on_button_released(&mut self, button: MouseButton, point: (u32, u32)) {
-        let tile_size = self.preview_renderer.get_tile_size();
-        let tile_x = point.0 / tile_size;
-        let tile_y = point.1 / tile_size;
-        let index = self.tilemap.get_size().convert_x_y(tile_x, tile_y);
+        let index = self
+            .preview_renderer
+            .get_tile_index(&self.tilemap, point.0, point.1);
 
-        let tile = match button {
-            MouseButton::Left => Tile::Floor(self.current_texture),
-            MouseButton::Middle => Tile::Empty,
-            MouseButton::Right => Tile::Full(self.current_texture),
-        };
-
-        info!(
-            "Set tile {} (x={} y={}) to {:?}",
-            index, tile_x, tile_y, tile
-        );
-
-        self.tilemap.set_tile(index, tile);
-        self.has_changed = true;
+        if self.is_tile_mode {
+            self.paint_tile(button, index);
+        } else {
+            self.paint_border(button, point, index);
+        }
     }
 }
 
@@ -162,22 +195,15 @@ fn main() {
 
     info!("Loaded {} texture definitions", definitions.len());
 
-    let textures: Vec<TextureGenerator> = definitions
-        .clone()
-        .into_iter()
-        .filter_map(|d| d.convert(args.tile_size).ok())
-        .collect();
+    let texture_mgr = into_manager(&definitions, args.tile_size);
 
-    if textures.is_empty() {
+    if texture_mgr.is_empty() {
         panic!("Not enough textures!");
     }
 
-    let preview_textures: Vec<TextureGenerator> = definitions
-        .into_iter()
-        .filter_map(|d| d.convert(args.preview_size).ok())
-        .collect();
+    let preview_texture_mgr = into_manager(&definitions, args.preview_size);
 
-    info!("Loaded {} textures", textures.len());
+    info!("Converted {} textures", texture_mgr.len());
 
     info!("Init tilemap: width={} height={}", args.width, args.height);
 
@@ -187,28 +213,35 @@ fn main() {
     tilemap2d.set_tile(0, Tile::Full(0));
     tilemap2d.set_tile(1, Tile::Floor(0));
     tilemap2d.set_tile(2, Tile::Floor(1));
+    tilemap2d.set_border(1, Bottom, Border::Wall(0));
+    tilemap2d.set_border(2, Bottom, Border::Wall(0));
+    tilemap2d.set_border(3, Bottom, Border::Wall(0));
+    tilemap2d.set_border(15, Bottom, Border::Wall(0));
+    tilemap2d.set_border(16, Bottom, Border::Wall(0));
+    tilemap2d.set_border(17, Bottom, Border::Wall(0));
+    tilemap2d.set_border(17, Right, Border::Wall(1));
 
     info!(
-        "Init renderer: tile_size={} wall_height={} ",
+        "Init renderer: tile_size={} wall_height={}",
         args.tile_size, args.wall_height
     );
 
-    let texture_mgr = TextureManager::new(textures);
-    let post_process = AmbientOcclusion::new(50, -200.0, -1.0);
+    let ambient_occlusion = AmbientOcclusion::new(50, -200.0, -1.0);
     let renderer = tilemap::rendering::Renderer::new(
         args.tile_size,
         args.wall_height,
         texture_mgr,
-        vec![PostProcess::AmbientOcclusion(post_process)],
+        crate_wall_styles(8),
+        vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
     );
 
     info!("Init preview renderer: tile_size={}", args.preview_size);
 
-    let preview_texture_mgr = TextureManager::new(preview_textures);
     let preview_renderer = tilemap::rendering::Renderer::new(
         args.preview_size,
         args.wall_height,
         preview_texture_mgr,
+        crate_wall_styles(1),
         Vec::default(),
     );
 
@@ -221,4 +254,25 @@ fn main() {
     let app = Rc::new(RefCell::new(editor));
 
     window.run(app);
+}
+
+fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle<NodeStyle>> {
+    let style0 = crate_wall_style("stone", Color::gray(100), BLUE, 10 * factor, 16 * factor);
+    let brown = Color::convert(&"#8B4513").unwrap();
+    let style1 = crate_wall_style("wood", brown, brown, 6 * factor, 10 * factor);
+    ResourceManager::new(vec![style0, style1])
+}
+
+fn crate_wall_style(
+    name: &str,
+    edge: Color,
+    node: Color,
+    thickness: u32,
+    node_size: u32,
+) -> WallStyle<NodeStyle> {
+    let edge_component = RenderingComponent::new_fill_area("wall", edge, 0);
+    let edge_style = EdgeStyle::new_solid(thickness, edge_component);
+    let node_component = RenderingComponent::new_fill_area("node", node, 20);
+    let node_style = NodeStyle::new(node_size, node_component);
+    WallStyle::new(name, edge_style, None, node_style)
 }
