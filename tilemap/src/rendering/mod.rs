@@ -1,4 +1,5 @@
 use crate::rendering::node::calculate_node_styles;
+use crate::rendering::style::door::DoorStyle;
 use crate::rendering::style::wall::{NodeStyle, WallStyle};
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use crate::tilemap::node::{
@@ -27,6 +28,7 @@ pub struct Renderer {
     wall_height: u8,
     textures: ResourceManager<TextureGenerator>,
     wall_styles: ResourceManager<WallStyle<NodeStyle>>,
+    door_styles: ResourceManager<DoorStyle>,
     post_processes: Vec<PostProcess>,
 }
 
@@ -36,6 +38,7 @@ impl Renderer {
         wall_height: u8,
         textures: ResourceManager<TextureGenerator>,
         wall_styles: ResourceManager<WallStyle<NodeStyle>>,
+        door_styles: ResourceManager<DoorStyle>,
         post_processes: Vec<PostProcess>,
     ) -> Self {
         Renderer {
@@ -43,6 +46,7 @@ impl Renderer {
             wall_height,
             textures,
             wall_styles,
+            door_styles,
             post_processes,
         }
     }
@@ -169,7 +173,26 @@ impl Renderer {
                             );
                         }
                     }
-                    Border::Door { .. } => {}
+                    Border::Door { door_id, .. } => {
+                        if let Some(door_style) = self.door_styles.get(door_id) {
+                            let start_index = get_start_of_horizontal_border(index, y);
+                            let end_index = get_end_of_horizontal_border(index, y);
+
+                            door_style.get_edge_style().render_horizontal(
+                                &aabb,
+                                start,
+                                self.tile_size,
+                                nodes[start_index],
+                                nodes[end_index],
+                                data,
+                            );
+                        } else {
+                            warn!(
+                                "Cannot render unknown door style '{}' for horizontal border '{}'!",
+                                door_id, index
+                            );
+                        }
+                    }
                 }
 
                 start.x += step;
@@ -221,7 +244,26 @@ impl Renderer {
                             );
                         }
                     }
-                    Border::Door { .. } => {}
+                    Border::Door { door_id, .. } => {
+                        if let Some(door_style) = self.door_styles.get(door_id) {
+                            let start_index = get_start_of_vertical_border(index);
+                            let end_index = get_end_of_vertical_border(size, index);
+
+                            door_style.get_edge_style().render_vertical(
+                                &aabb,
+                                start,
+                                self.tile_size,
+                                nodes[start_index],
+                                nodes[end_index],
+                                data,
+                            );
+                        } else {
+                            warn!(
+                                "Cannot render unknown door style '{}' for vertical border '{}'!",
+                                door_id, index
+                            );
+                        }
+                    }
                 }
 
                 start.x += step;
@@ -297,9 +339,7 @@ mod tests {
 
     #[test]
     fn test_get_tile_index() {
-        let textures = ResourceManager::new(Vec::default());
-        let wall_styles = ResourceManager::new(Vec::default());
-        let renderer = Renderer::new(100, 100, textures, wall_styles, Vec::default());
+        let renderer = Renderer::new(100, 100, empty(), empty(), empty(), Vec::default());
         let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
 
         assert_eq!(renderer.get_tile_index(&tilemap, 50, 50), 0);
@@ -312,9 +352,7 @@ mod tests {
 
     #[test]
     fn test_get_side() {
-        let textures = ResourceManager::new(Vec::default());
-        let wall_styles = ResourceManager::new(Vec::default());
-        let renderer = Renderer::new(100, 100, textures, wall_styles, Vec::default());
+        let renderer = Renderer::new(100, 100, empty(), empty(), empty(), Vec::default());
         let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
 
         assert_eq!(renderer.get_side(&tilemap, 50, 150, 2), None);
@@ -329,8 +367,7 @@ mod tests {
         let texture0 = create_texture("texture0", RED, 99);
         let texture1 = create_texture("texture0", BLUE, 42);
         let textures = ResourceManager::new(vec![texture0, texture1]);
-        let wall_styles = ResourceManager::new(Vec::default());
-        let renderer = Renderer::new(2, 100, textures, wall_styles, Vec::default());
+        let renderer = Renderer::new(2, 100, textures, empty(), empty(), Vec::default());
         let tiles = vec![
             Tile::Empty,
             Tile::Floor(0),
@@ -372,5 +409,9 @@ mod tests {
         let rendering = RenderingComponent::new_fill_area(name, color, depth);
         let component = Component::Rendering(Box::new(rendering));
         TextureGenerator::new(name, Size::default(), PINK, component)
+    }
+
+    fn empty<T>() -> ResourceManager<T> {
+        ResourceManager::new(Vec::default())
     }
 }

@@ -23,6 +23,7 @@ use texture_generation::math::color::{Color, BLUE};
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceManager;
+use tilemap::rendering::style::door::DoorStyle;
 use tilemap::rendering::style::edge::EdgeStyle;
 use tilemap::rendering::style::wall::{NodeStyle, WallStyle};
 use tilemap::tilemap::border::Border;
@@ -218,7 +219,7 @@ fn main() {
     tilemap2d.set_border(2, Bottom, Border::Wall(0));
     tilemap2d.set_border(3, Bottom, Border::Wall(0));
     tilemap2d.set_border(15, Bottom, Border::Wall(0));
-    tilemap2d.set_border(16, Bottom, Border::Wall(0));
+    tilemap2d.set_border(16, Bottom, Border::new_door(0, 0));
     tilemap2d.set_border(17, Bottom, Border::Wall(0));
     tilemap2d.set_border(17, Right, Border::Wall(1));
 
@@ -233,6 +234,7 @@ fn main() {
         args.wall_height,
         texture_mgr,
         crate_wall_styles(8),
+        crate_door_styles(8),
         vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
     );
 
@@ -243,6 +245,7 @@ fn main() {
         args.wall_height,
         preview_texture_mgr,
         crate_wall_styles(1),
+        crate_door_styles(1),
         Vec::default(),
     );
 
@@ -276,4 +279,16 @@ fn crate_wall_style(
     let node_component = RenderingComponent::new_fill_area("node", node, 20);
     let node_style = NodeStyle::new(node_size, node_component);
     WallStyle::new(name, edge_style, None, node_style)
+}
+
+fn crate_door_styles(factor: u32) -> ResourceManager<DoorStyle> {
+    let brown = Color::convert(&"#B8860B").unwrap();
+    let style = crate_door_style("wooden", brown, 6 * factor);
+    ResourceManager::new(vec![style])
+}
+
+fn crate_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {
+    let edge_component = RenderingComponent::new_fill_area("door", color, 0);
+    let edge_style = EdgeStyle::new_solid(thickness, edge_component);
+    DoorStyle::new(name, edge_style)
 }

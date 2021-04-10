@@ -14,6 +14,10 @@ pub enum Border {
 }
 
 impl Border {
+    pub fn new_door(wall_id: usize, door_id: usize) -> Border {
+        Border::Door { wall_id, door_id }
+    }
+
     pub fn get_wall_style(&self) -> Option<usize> {
         match self {
             Border::Empty => None,
