@@ -31,6 +31,17 @@ impl Border {
         }
     }
 
+    pub fn switch_is_front(&self) -> Border {
+        match self {
+            Border::Door {
+                wall_id,
+                door_id,
+                is_front,
+            } => Border::new_door(*wall_id, *door_id, !*is_front),
+            _ => *self,
+        }
+    }
+
     pub fn reduce(&self) -> Border {
         match self {
             Border::Empty => Border::Empty,

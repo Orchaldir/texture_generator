@@ -31,6 +31,23 @@ use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
 
+#[derive(Copy, Clone)]
+enum Mode {
+    Tile,
+    Wall,
+    Door,
+}
+
+impl Mode {
+    pub fn get_resource_type(&self) -> usize {
+        match self {
+            Mode::Tile => 0,
+            Mode::Wall => 1,
+            Mode::Door => 2,
+        }
+    }
+}
+
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]
 /// The arguments of the application.
@@ -67,8 +84,8 @@ pub struct TilemapEditor {
     preview_renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
     has_changed: bool,
-    is_tile_mode: bool,
-    current_id: usize,
+    mode: Mode,
+    resource_ids: Vec<usize>,
 }
 
 impl TilemapEditor {
@@ -84,9 +101,17 @@ impl TilemapEditor {
             preview_renderer,
             tilemap,
             has_changed: true,
-            is_tile_mode: true,
-            current_id: 0,
+            mode: Mode::Tile,
+            resource_ids: vec![0; 3],
         }
+    }
+
+    fn get_resource_id(&self, mode: Mode) -> usize {
+        self.resource_ids[mode.get_resource_type()]
+    }
+
+    fn set_resource_id(&mut self, mode: Mode, id: usize) {
+        self.resource_ids[mode.get_resource_type()] = id;
     }
 
     fn render_preview(&mut self, renderer: &mut dyn Renderer) {
@@ -105,10 +130,12 @@ impl TilemapEditor {
     }
 
     fn paint_tile(&mut self, button: MouseButton, index: usize) {
+        let texture_id = self.get_resource_id(Mode::Tile);
+
         let tile = match button {
-            MouseButton::Left => Tile::Floor(self.current_id),
+            MouseButton::Left => Tile::Floor(texture_id),
             MouseButton::Middle => Tile::Empty,
-            MouseButton::Right => Tile::Full(self.current_id),
+            MouseButton::Right => Tile::Full(texture_id),
         };
 
         info!("Set tile {} to {:?}", index, tile);
@@ -117,13 +144,13 @@ impl TilemapEditor {
         self.has_changed = true;
     }
 
-    fn paint_border(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
+    fn paint_wall(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
         if let Some(side) = self
             .preview_renderer
             .get_side(&self.tilemap, point.0, point.1, index)
         {
             let border = match button {
-                MouseButton::Left => Border::Wall(self.current_id),
+                MouseButton::Left => Border::Wall(self.get_resource_id(Mode::Wall)),
                 _ => Border::Empty,
             };
 
@@ -131,6 +158,34 @@ impl TilemapEditor {
 
             self.tilemap.set_border(index, side, border);
             self.has_changed = true;
+        }
+    }
+
+    fn paint_door(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
+        if let Some(side) = self
+            .preview_renderer
+            .get_side(&self.tilemap, point.0, point.1, index)
+        {
+            let old_border = self.tilemap.get_border(index, side);
+
+            let border = match button {
+                MouseButton::Left => match old_border {
+                    Border::Door { .. } => old_border.switch_is_front(),
+                    _ => Border::new_door(
+                        self.get_resource_id(Mode::Wall),
+                        self.get_resource_id(Mode::Door),
+                        true,
+                    ),
+                },
+                _ => old_border.reduce(),
+            };
+
+            if old_border != border {
+                info!("Set {:?} border of tile {} to {:?}", side, index, border);
+
+                self.tilemap.set_border(index, side, border);
+                self.has_changed = true;
+            }
         }
     }
 }
@@ -163,13 +218,13 @@ impl App for TilemapEditor {
             data.save_depth_image("tilemap-depth.png");
             info!("Finished saving tilemap images");
         } else if let Some(number) = get_number(key) {
-            self.current_id = number;
+            self.set_resource_id(self.mode, number);
         } else if key == KeyCode::F1 {
-            self.is_tile_mode = true;
-            self.current_id = 0;
+            self.mode = Mode::Tile;
         } else if key == KeyCode::F2 {
-            self.is_tile_mode = false;
-            self.current_id = 0;
+            self.mode = Mode::Wall;
+        } else if key == KeyCode::F3 {
+            self.mode = Mode::Door;
         }
     }
 
@@ -178,10 +233,10 @@ impl App for TilemapEditor {
             .preview_renderer
             .get_tile_index(&self.tilemap, point.0, point.1);
 
-        if self.is_tile_mode {
-            self.paint_tile(button, index);
-        } else {
-            self.paint_border(button, point, index);
+        match self.mode {
+            Mode::Tile => self.paint_tile(button, index),
+            Mode::Wall => self.paint_wall(button, point, index),
+            Mode::Door => self.paint_door(button, point, index),
         }
     }
 }
