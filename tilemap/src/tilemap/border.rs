@@ -10,12 +10,17 @@ pub enum Border {
     Door {
         wall_id: usize,
         door_id: usize,
+        is_front: bool,
     },
 }
 
 impl Border {
-    pub fn new_door(wall_id: usize, door_id: usize) -> Border {
-        Border::Door { wall_id, door_id }
+    pub const fn new_door(wall_id: usize, door_id: usize, is_front: bool) -> Border {
+        Border::Door {
+            wall_id,
+            door_id,
+            is_front,
+        }
     }
 
     pub fn get_wall_style(&self) -> Option<usize> {
@@ -66,10 +71,7 @@ mod tests {
     use Border::*;
 
     const WALL: Border = Wall(42);
-    const DOOR: Border = Door {
-        wall_id: 42,
-        door_id: 2,
-    };
+    const DOOR: Border = Border::new_door(42, 2, true);
 
     #[test]
     fn test_get_wall_style() {

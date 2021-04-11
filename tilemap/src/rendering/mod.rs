@@ -162,20 +162,29 @@ impl Renderer {
                             &aabb,
                             start,
                             self.tile_size,
+                            0,
                             nodes[start_index],
                             nodes[end_index],
                             data,
                         );
                     }
-                    Border::Door { door_id, .. } => {
+                    Border::Door {
+                        wall_id,
+                        door_id,
+                        is_front,
+                    } => {
+                        let wall_style = self.wall_styles.get(wall_id);
                         let door_style = self.door_styles.get(door_id);
                         let start_index = get_start_of_horizontal_border(index, y);
                         let end_index = get_end_of_horizontal_border(index, y);
+                        let offset = door_style
+                            .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
 
                         door_style.get_edge_style().render_horizontal(
                             &aabb,
                             start,
                             self.tile_size,
+                            offset,
                             nodes[start_index],
                             nodes[end_index],
                             data,
@@ -221,20 +230,29 @@ impl Renderer {
                             &aabb,
                             start,
                             self.tile_size,
+                            0,
                             nodes[start_index],
                             nodes[end_index],
                             data,
                         );
                     }
-                    Border::Door { door_id, .. } => {
+                    Border::Door {
+                        wall_id,
+                        door_id,
+                        is_front,
+                    } => {
+                        let wall_style = self.wall_styles.get(wall_id);
                         let door_style = self.door_styles.get(door_id);
                         let start_index = get_start_of_vertical_border(index);
                         let end_index = get_end_of_vertical_border(size, index);
+                        let offset = door_style
+                            .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
 
                         door_style.get_edge_style().render_vertical(
                             &aabb,
                             start,
                             self.tile_size,
+                            offset,
                             nodes[start_index],
                             nodes[end_index],
                             data,

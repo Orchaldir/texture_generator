@@ -219,7 +219,7 @@ fn main() {
     tilemap2d.set_border(2, Bottom, Border::Wall(0));
     tilemap2d.set_border(3, Bottom, Border::Wall(0));
     tilemap2d.set_border(15, Bottom, Border::Wall(0));
-    tilemap2d.set_border(16, Bottom, Border::new_door(0, 0));
+    tilemap2d.set_border(16, Bottom, Border::new_door(0, 0, false));
     tilemap2d.set_border(17, Bottom, Border::Wall(0));
     tilemap2d.set_border(17, Right, Border::Wall(1));
 
@@ -292,5 +292,5 @@ fn crate_door_styles(factor: u32) -> ResourceManager<DoorStyle> {
 fn crate_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {
     let edge_component = RenderingComponent::new_fill_area("door", color, 0);
     let edge_style = EdgeStyle::new_solid(thickness, edge_component);
-    DoorStyle::new(name, edge_style)
+    DoorStyle::new(name, edge_style, false)
 }

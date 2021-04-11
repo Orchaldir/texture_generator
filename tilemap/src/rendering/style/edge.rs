@@ -40,6 +40,7 @@ impl EdgeStyle {
         outer: &AABB,
         node: Point,
         tile_size: u32,
+        offset: i32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
         data: &mut dyn Data,
@@ -53,7 +54,7 @@ impl EdgeStyle {
             } => {
                 let start_half = start_node.map(|n| n.get_half()).unwrap_or(0);
                 let end_half = end_node.map(|n| n.get_half()).unwrap_or(0);
-                let start = Point::new(node.x + start_half, node.y - *half_thickness);
+                let start = Point::new(node.x + start_half, node.y - *half_thickness + offset);
                 let size = Size::new(tile_size - (start_half + end_half) as u32, *thickness);
                 let aabb = AABB::new(start, size);
                 component.render(data, outer, &aabb)
@@ -66,6 +67,7 @@ impl EdgeStyle {
         outer: &AABB,
         node: Point,
         tile_size: u32,
+        offset: i32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
         data: &mut dyn Data,
@@ -79,7 +81,7 @@ impl EdgeStyle {
             } => {
                 let start_half = start_node.map(|n| n.get_half()).unwrap_or(0);
                 let end_half = end_node.map(|n| n.get_half()).unwrap_or(0);
-                let start = Point::new(node.x - *half_thickness, node.y + start_half);
+                let start = Point::new(node.x - *half_thickness + offset, node.y + start_half);
                 let size = Size::new(*thickness, tile_size - (start_half + end_half) as u32);
                 let aabb = AABB::new(start, size);
                 component.render(data, outer, &aabb)
@@ -114,6 +116,7 @@ mod tests {
             &data.get_aabb(),
             Point::new(3, 3),
             7,
+            0,
             Some(&node_style0),
             Some(&node_style1),
             &mut data,

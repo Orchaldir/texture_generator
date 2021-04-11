@@ -215,7 +215,7 @@ mod tests {
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
         tilemap.set_border(0, Left, Border::Wall(HIGH));
-        tilemap.set_border(1, Left, Border::new_door(HIGH, 0));
+        tilemap.set_border(1, Left, Border::new_door(HIGH, 0, false));
         tilemap.set_border(2, Left, Border::Wall(HIGH));
 
         #[rustfmt::skip]
