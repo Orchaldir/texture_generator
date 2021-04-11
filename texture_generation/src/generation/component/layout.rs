@@ -166,7 +166,7 @@ mod tests {
         let mut data = RuntimeData::new(size, WHITE);
 
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
-        let renderer = RenderingComponent::new_shape("tile", rectangle, RED);
+        let renderer = RenderingComponent::new_shape("tile", rectangle, RED, 200);
         let component = Component::Rendering(Box::new(renderer));
         let layout =
             LayoutComponent::new_brick_wall("test", Size::square(5), 2, component).unwrap();
@@ -205,7 +205,7 @@ mod tests {
         let mut data = RuntimeData::new(size, WHITE);
 
         let rectangle = Shape::new_rectangle(2, 2).unwrap();
-        let renderer = RenderingComponent::new_shape("tile", rectangle, RED);
+        let renderer = RenderingComponent::new_shape("tile", rectangle, RED, 200);
         let component = Component::Rendering(Box::new(renderer));
         let layout = LayoutComponent::new_square("test", 5, component).unwrap();
 

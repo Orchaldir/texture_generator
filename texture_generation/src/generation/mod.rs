@@ -69,7 +69,7 @@ mod tests {
     #[test]
     fn test_generate() {
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
-        let rendering = RenderingComponent::new_shape("test", rectangle, RED);
+        let rendering = RenderingComponent::new_shape("test", rectangle, RED, 200);
         let component = Component::Rendering(Box::new(rendering));
         let generator = TextureGenerator::new("test", Size::new(5, 7), GREEN, component);
 
