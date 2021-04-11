@@ -112,8 +112,8 @@ impl Renderer {
 
                 match tile {
                     Tile::Empty => {}
-                    Tile::Floor(id) => self.render_texture(index, id, 0, data, &aabb),
-                    Tile::Full(id) => self.render_texture(index, id, self.wall_height, data, &aabb),
+                    Tile::Floor(id) => self.render_texture(id, 0, data, &aabb),
+                    Tile::Full(id) => self.render_texture(id, self.wall_height, data, &aabb),
                 }
 
                 start.x += tile_size.width() as i32;
@@ -154,44 +154,32 @@ impl Renderer {
                 match border {
                     Border::Empty => {}
                     Border::Wall(id) => {
-                        if let Some(wall_style) = self.wall_styles.get(id) {
-                            let start_index = get_start_of_horizontal_border(index, y);
-                            let end_index = get_end_of_horizontal_border(index, y);
+                        let wall_style = self.wall_styles.get(id);
+                        let start_index = get_start_of_horizontal_border(index, y);
+                        let end_index = get_end_of_horizontal_border(index, y);
 
-                            wall_style.get_edge_style().render_horizontal(
-                                &aabb,
-                                start,
-                                self.tile_size,
-                                nodes[start_index],
-                                nodes[end_index],
-                                data,
-                            );
-                        } else {
-                            warn!(
-                                "Cannot render unknown wall style '{}' for horizontal border '{}'!",
-                                id, index
-                            );
-                        }
+                        wall_style.get_edge_style().render_horizontal(
+                            &aabb,
+                            start,
+                            self.tile_size,
+                            nodes[start_index],
+                            nodes[end_index],
+                            data,
+                        );
                     }
                     Border::Door { door_id, .. } => {
-                        if let Some(door_style) = self.door_styles.get(door_id) {
-                            let start_index = get_start_of_horizontal_border(index, y);
-                            let end_index = get_end_of_horizontal_border(index, y);
+                        let door_style = self.door_styles.get(door_id);
+                        let start_index = get_start_of_horizontal_border(index, y);
+                        let end_index = get_end_of_horizontal_border(index, y);
 
-                            door_style.get_edge_style().render_horizontal(
-                                &aabb,
-                                start,
-                                self.tile_size,
-                                nodes[start_index],
-                                nodes[end_index],
-                                data,
-                            );
-                        } else {
-                            warn!(
-                                "Cannot render unknown door style '{}' for horizontal border '{}'!",
-                                door_id, index
-                            );
-                        }
+                        door_style.get_edge_style().render_horizontal(
+                            &aabb,
+                            start,
+                            self.tile_size,
+                            nodes[start_index],
+                            nodes[end_index],
+                            data,
+                        );
                     }
                 }
 
@@ -225,44 +213,32 @@ impl Renderer {
                 match border {
                     Border::Empty => {}
                     Border::Wall(id) => {
-                        if let Some(wall_style) = self.wall_styles.get(id) {
-                            let start_index = get_start_of_vertical_border(index);
-                            let end_index = get_end_of_vertical_border(size, index);
+                        let wall_style = self.wall_styles.get(id);
+                        let start_index = get_start_of_vertical_border(index);
+                        let end_index = get_end_of_vertical_border(size, index);
 
-                            wall_style.get_edge_style().render_vertical(
-                                &aabb,
-                                start,
-                                self.tile_size,
-                                nodes[start_index],
-                                nodes[end_index],
-                                data,
-                            );
-                        } else {
-                            warn!(
-                                "Cannot render unknown wall style '{}' for vertical border '{}'!",
-                                id, index
-                            );
-                        }
+                        wall_style.get_edge_style().render_vertical(
+                            &aabb,
+                            start,
+                            self.tile_size,
+                            nodes[start_index],
+                            nodes[end_index],
+                            data,
+                        );
                     }
                     Border::Door { door_id, .. } => {
-                        if let Some(door_style) = self.door_styles.get(door_id) {
-                            let start_index = get_start_of_vertical_border(index);
-                            let end_index = get_end_of_vertical_border(size, index);
+                        let door_style = self.door_styles.get(door_id);
+                        let start_index = get_start_of_vertical_border(index);
+                        let end_index = get_end_of_vertical_border(size, index);
 
-                            door_style.get_edge_style().render_vertical(
-                                &aabb,
-                                start,
-                                self.tile_size,
-                                nodes[start_index],
-                                nodes[end_index],
-                                data,
-                            );
-                        } else {
-                            warn!(
-                                "Cannot render unknown door style '{}' for vertical border '{}'!",
-                                door_id, index
-                            );
-                        }
+                        door_style.get_edge_style().render_vertical(
+                            &aabb,
+                            start,
+                            self.tile_size,
+                            nodes[start_index],
+                            nodes[end_index],
+                            data,
+                        );
                     }
                 }
 
@@ -308,23 +284,10 @@ impl Renderer {
         }
     }
 
-    fn render_texture(
-        &self,
-        index: usize,
-        texture_id: usize,
-        height: u8,
-        data: &mut RuntimeData,
-        aabb: &AABB,
-    ) {
-        if let Some(texture) = self.textures.get(texture_id) {
-            data.set_base_depth(height);
-            texture.render(data, aabb);
-        } else {
-            warn!(
-                "Cannot render unknown texture '{}' for tile '{}'!",
-                texture_id, index
-            );
-        }
+    fn render_texture(&self, texture_id: usize, height: u8, data: &mut RuntimeData, aabb: &AABB) {
+        let texture = self.textures.get(texture_id);
+        data.set_base_depth(height);
+        texture.render(data, aabb);
     }
 }
 
@@ -366,7 +329,7 @@ mod tests {
     fn test_render_tiles() {
         let texture0 = create_texture("texture0", RED, 99);
         let texture1 = create_texture("texture0", BLUE, 42);
-        let textures = ResourceManager::new(vec![texture0, texture1]);
+        let textures = ResourceManager::new(vec![texture0, texture1], TextureGenerator::default());
         let renderer = Renderer::new(2, 100, textures, empty(), empty(), Vec::default());
         let tiles = vec![
             Tile::Empty,
@@ -411,7 +374,7 @@ mod tests {
         TextureGenerator::new(name, Size::default(), PINK, component)
     }
 
-    fn empty<T>() -> ResourceManager<T> {
-        ResourceManager::new(Vec::default())
+    fn empty<T: Default>() -> ResourceManager<T> {
+        ResourceManager::new(Vec::default(), T::default())
     }
 }

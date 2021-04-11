@@ -16,6 +16,10 @@ pub enum EdgeStyle {
 }
 
 impl EdgeStyle {
+    pub fn default(thickness: u32) -> EdgeStyle {
+        Self::new_solid(thickness, RenderingComponent::default())
+    }
+
     pub fn new_solid(thickness: u32, component: RenderingComponent) -> EdgeStyle {
         EdgeStyle::Solid {
             thickness,
@@ -81,6 +85,12 @@ impl EdgeStyle {
                 component.render(data, outer, &aabb)
             }
         }
+    }
+}
+
+impl Default for EdgeStyle {
+    fn default() -> Self {
+        EdgeStyle::default(1)
     }
 }
 

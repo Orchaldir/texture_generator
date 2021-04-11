@@ -2,7 +2,7 @@ use crate::generation::component::rendering::color::ColorSelector;
 use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
-use crate::math::color::Color;
+use crate::math::color::{Color, PINK};
 use crate::math::shape::Shape;
 
 pub mod color;
@@ -27,6 +27,10 @@ pub enum RenderingComponent {
 }
 
 impl RenderingComponent {
+    pub fn default() -> RenderingComponent {
+        Self::new_fill_area("default", PINK, 0)
+    }
+
     pub fn new_fill_area<S: Into<String>>(name: S, color: Color, depth: u8) -> RenderingComponent {
         RenderingComponent::FillArea {
             name: name.into(),

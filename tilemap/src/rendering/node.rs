@@ -1,5 +1,4 @@
 use crate::rendering::style::wall::WallStyle;
-use crate::tilemap::border::Border;
 use crate::tilemap::node::get_nodes_size;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
@@ -119,10 +118,10 @@ fn select_best_wall_style<T>(
     top_styles: Vec<(usize, Vec<Side>)>,
 ) -> usize {
     let mut best_id = top_styles[0].0;
-    let mut best_wall_style = wall_styles.get(best_id).unwrap();
+    let mut best_wall_style = wall_styles.get(best_id);
 
     for (id, _sides) in top_styles {
-        let wall_style = wall_styles.get(id).unwrap();
+        let wall_style = wall_styles.get(id);
 
         if wall_style.is_greater(best_wall_style) {
             best_id = id;
@@ -134,15 +133,11 @@ fn select_best_wall_style<T>(
 }
 
 fn get_corner_style<T>(wall_styles: &ResourceManager<WallStyle<T>>, index: usize) -> Option<&T> {
-    wall_styles
-        .get(index)
-        .map(|wall_style| wall_style.get_corner_style())
+    Some(wall_styles.get(index).get_corner_style())
 }
 
 fn get_node_style<T>(wall_styles: &ResourceManager<WallStyle<T>>, index: usize) -> Option<&T> {
-    wall_styles
-        .get(index)
-        .and_then(|wall_style| Option::from(wall_style.get_node_style()))
+    Option::from(wall_styles.get(index).get_node_style())
 }
 
 fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
@@ -156,6 +151,7 @@ fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
 mod tests {
     use super::*;
     use crate::rendering::style::edge::EdgeStyle;
+    use crate::tilemap::border::Border;
     use crate::tilemap::tile::Tile;
     use crate::tilemap::Side::{Bottom, Left, Right, Top};
     use texture_generation::math::size::Size;
@@ -469,12 +465,15 @@ mod tests {
         let high_style = crate_wall_style(20, None, HIGH_CORNER2);
         let high_style_with_nodes = crate_wall_style(25, Some(HIGH_NODE), HIGH_CORNER);
 
-        ResourceManager::new(vec![
-            low_style,
-            low_style_with_nodes,
-            high_style,
-            high_style_with_nodes,
-        ])
+        ResourceManager::new(
+            vec![
+                low_style,
+                low_style_with_nodes,
+                high_style,
+                high_style_with_nodes,
+            ],
+            WallStyle::default(10, 0),
+        )
     }
 
     fn crate_wall_style(

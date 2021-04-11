@@ -18,6 +18,15 @@ pub struct WallStyle<T> {
 }
 
 impl<T> WallStyle<T> {
+    pub fn default(thickness: u32, default_node_style: T) -> WallStyle<T> {
+        Self::new(
+            "default",
+            EdgeStyle::default(thickness),
+            None,
+            default_node_style,
+        )
+    }
+
     pub fn new<S: Into<String>>(
         name: S,
         edge_style: EdgeStyle,
@@ -49,6 +58,12 @@ impl<T> WallStyle<T> {
     }
 }
 
+impl Default for WallStyle<NodeStyle> {
+    fn default() -> Self {
+        WallStyle::default(1, NodeStyle::default())
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct NodeStyle {
     size: Size,
@@ -57,6 +72,10 @@ pub struct NodeStyle {
 }
 
 impl NodeStyle {
+    pub fn default_with_size(size: u32) -> NodeStyle {
+        Self::new(size, RenderingComponent::default())
+    }
+
     pub fn new(size: u32, component: RenderingComponent) -> NodeStyle {
         NodeStyle {
             size: Size::square(size),
@@ -73,6 +92,12 @@ impl NodeStyle {
         let start = node - self.half;
         let aabb = AABB::new(start, self.size);
         self.component.render(data, outer, &aabb)
+    }
+}
+
+impl Default for NodeStyle {
+    fn default() -> Self {
+        NodeStyle::default_with_size(1)
     }
 }
 

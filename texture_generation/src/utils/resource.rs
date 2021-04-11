@@ -1,10 +1,11 @@
 pub struct ResourceManager<T> {
+    default: T,
     resources: Vec<T>,
 }
 
 impl<T> ResourceManager<T> {
-    pub fn new(resources: Vec<T>) -> ResourceManager<T> {
-        ResourceManager { resources }
+    pub fn new(resources: Vec<T>, default: T) -> ResourceManager<T> {
+        ResourceManager { resources, default }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -15,7 +16,7 @@ impl<T> ResourceManager<T> {
         self.resources.len()
     }
 
-    pub fn get(&self, id: usize) -> Option<&T> {
-        self.resources.get(id)
+    pub fn get(&self, id: usize) -> &T {
+        self.resources.get(id).unwrap_or(&self.default)
     }
 }

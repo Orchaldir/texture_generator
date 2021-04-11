@@ -264,7 +264,9 @@ fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle<NodeStyle>> {
     let style0 = crate_wall_style("stone", Color::gray(100), BLUE, 10 * factor, 16 * factor);
     let brown = Color::convert(&"#8B4513").unwrap();
     let style1 = crate_wall_style("wood", brown, brown, 6 * factor, 10 * factor);
-    ResourceManager::new(vec![style0, style1])
+    let default_node = NodeStyle::default_with_size(16 * factor);
+    let default_wall = WallStyle::default(10 * factor, default_node);
+    ResourceManager::new(vec![style0, style1], default_wall)
 }
 
 fn crate_wall_style(
@@ -284,7 +286,7 @@ fn crate_wall_style(
 fn crate_door_styles(factor: u32) -> ResourceManager<DoorStyle> {
     let brown = Color::convert(&"#B8860B").unwrap();
     let style = crate_door_style("wooden", brown, 6 * factor);
-    ResourceManager::new(vec![style])
+    ResourceManager::new(vec![style], DoorStyle::default(6 * factor))
 }
 
 fn crate_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {

@@ -9,6 +9,10 @@ pub struct DoorStyle {
 }
 
 impl DoorStyle {
+    pub fn default(thickness: u32) -> DoorStyle {
+        Self::new("default", EdgeStyle::default(thickness))
+    }
+
     pub fn new<S: Into<String>>(name: S, edge_style: EdgeStyle) -> DoorStyle {
         DoorStyle {
             name: name.into(),
@@ -18,5 +22,11 @@ impl DoorStyle {
 
     pub fn get_edge_style(&self) -> &EdgeStyle {
         &self.edge_style
+    }
+}
+
+impl Default for DoorStyle {
+    fn default() -> Self {
+        DoorStyle::default(1)
     }
 }

@@ -122,7 +122,7 @@ pub fn into_manager(
         .filter_map(|d| d.convert(size).ok())
         .collect();
 
-    ResourceManager::new(textures)
+    ResourceManager::new(textures, TextureGenerator::default())
 }
 
 #[cfg(test)]
