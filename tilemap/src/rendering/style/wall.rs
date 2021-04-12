@@ -1,3 +1,4 @@
+use crate::rendering::style::edge::EdgeStyle;
 use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
@@ -17,6 +18,15 @@ pub struct WallStyle<T> {
 }
 
 impl<T> WallStyle<T> {
+    pub fn default(thickness: u32, default_node_style: T) -> WallStyle<T> {
+        Self::new(
+            "default",
+            EdgeStyle::default(thickness),
+            None,
+            default_node_style,
+        )
+    }
+
     pub fn new<S: Into<String>>(
         name: S,
         edge_style: EdgeStyle,
@@ -31,6 +41,10 @@ impl<T> WallStyle<T> {
         }
     }
 
+    pub fn get_edge_style(&self) -> &EdgeStyle {
+        &self.edge_style
+    }
+
     pub fn get_node_style(&self) -> &Option<T> {
         &self.node_style
     }
@@ -42,86 +56,11 @@ impl<T> WallStyle<T> {
     pub fn is_greater(&self, other: &WallStyle<T>) -> bool {
         self.edge_style.get_thickness() >= other.edge_style.get_thickness()
     }
-
-    pub fn render_horizontal(
-        &self,
-        outer: &AABB,
-        node: Point,
-        tile_size: u32,
-        start_node: Option<&NodeStyle>,
-        end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
-    ) {
-        match &self.edge_style {
-            EdgeStyle::Mock(..) => {}
-            EdgeStyle::Solid {
-                thickness,
-                half_thickness,
-                component,
-            } => {
-                let start_half = start_node.map(|n| n.half).unwrap_or(0);
-                let end_half = end_node.map(|n| n.half).unwrap_or(0);
-                let start = Point::new(node.x + start_half, node.y - *half_thickness);
-                let size = Size::new(tile_size - (start_half + end_half) as u32, *thickness);
-                let aabb = AABB::new(start, size);
-                component.render(data, outer, &aabb)
-            }
-        }
-    }
-
-    pub fn render_vertical(
-        &self,
-        outer: &AABB,
-        node: Point,
-        tile_size: u32,
-        start_node: Option<&NodeStyle>,
-        end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
-    ) {
-        match &self.edge_style {
-            EdgeStyle::Mock(..) => {}
-            EdgeStyle::Solid {
-                thickness,
-                half_thickness,
-                component,
-            } => {
-                let start_half = start_node.map(|n| n.half).unwrap_or(0);
-                let end_half = end_node.map(|n| n.half).unwrap_or(0);
-                let start = Point::new(node.x - *half_thickness, node.y + start_half);
-                let size = Size::new(*thickness, tile_size - (start_half + end_half) as u32);
-                let aabb = AABB::new(start, size);
-                component.render(data, outer, &aabb)
-            }
-        }
-    }
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum EdgeStyle {
-    Mock(u32),
-    Solid {
-        thickness: u32,
-        half_thickness: i32,
-        component: RenderingComponent,
-    },
-}
-
-impl EdgeStyle {
-    pub fn new_solid(thickness: u32, component: RenderingComponent) -> EdgeStyle {
-        EdgeStyle::Solid {
-            thickness,
-            half_thickness: (thickness / 2) as i32,
-            component,
-        }
-    }
-}
-
-impl EdgeStyle {
-    pub fn get_thickness(&self) -> u32 {
-        match self {
-            EdgeStyle::Mock(thickness) => *thickness,
-            EdgeStyle::Solid { thickness, .. } => *thickness,
-        }
+impl Default for WallStyle<NodeStyle> {
+    fn default() -> Self {
+        WallStyle::default(1, NodeStyle::default())
     }
 }
 
@@ -133,6 +72,10 @@ pub struct NodeStyle {
 }
 
 impl NodeStyle {
+    pub fn default_with_size(size: u32) -> NodeStyle {
+        Self::new(size, RenderingComponent::default())
+    }
+
     pub fn new(size: u32, component: RenderingComponent) -> NodeStyle {
         NodeStyle {
             size: Size::square(size),
@@ -141,10 +84,20 @@ impl NodeStyle {
         }
     }
 
+    pub fn get_half(&self) -> i32 {
+        self.half
+    }
+
     pub fn render(&self, outer: &AABB, node: Point, data: &mut dyn Data) {
         let start = node - self.half;
         let aabb = AABB::new(start, self.size);
         self.component.render(data, outer, &aabb)
+    }
+}
+
+impl Default for NodeStyle {
+    fn default() -> Self {
+        NodeStyle::default_with_size(1)
     }
 }
 

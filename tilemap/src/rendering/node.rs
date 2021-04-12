@@ -1,5 +1,4 @@
-use crate::rendering::style::WallStyle;
-use crate::tilemap::border::Border;
+use crate::rendering::style::wall::WallStyle;
 use crate::tilemap::node::get_nodes_size;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
@@ -12,7 +11,6 @@ pub fn calculate_node_styles<'a, T>(
     tilemap: &'a Tilemap2d,
 ) -> Vec<Option<&'a T>> {
     let size = get_nodes_size(tilemap.get_size());
-    println!("size={:?}", size);
     let mut node_styles = Vec::with_capacity(size.len());
     let mut index = 0;
 
@@ -32,11 +30,8 @@ pub fn calculate_node_style<'a, T>(
     index: usize,
 ) -> Option<&'a T> {
     let sides_per_style = calculate_sides_per_style(tilemap, index);
-    println!("sides_per_style={:?}", sides_per_style);
     let is_corner = sides_per_style.len() > 1;
-    println!("is_corner={}", is_corner);
     let top_styles = get_top_styles(sides_per_style);
-    println!("top_styles={:?}", top_styles);
 
     select_best_node_style(wall_styles, top_styles, is_corner)
 }
@@ -45,7 +40,9 @@ fn calculate_sides_per_style(tilemap: &Tilemap2d, index: usize) -> HashMap<usize
     let mut wall_styles = HashMap::new();
 
     for side in Side::iterator() {
-        if let Border::Wall(id) = tilemap.get_border_at_node(index, *side) {
+        let wall_style = tilemap.get_border_at_node(index, *side).get_wall_style();
+
+        if let Some(id) = wall_style {
             match wall_styles.entry(id) {
                 Entry::Vacant(e) => {
                     e.insert(vec![*side]);
@@ -121,10 +118,10 @@ fn select_best_wall_style<T>(
     top_styles: Vec<(usize, Vec<Side>)>,
 ) -> usize {
     let mut best_id = top_styles[0].0;
-    let mut best_wall_style = wall_styles.get(best_id).unwrap();
+    let mut best_wall_style = wall_styles.get(best_id);
 
     for (id, _sides) in top_styles {
-        let wall_style = wall_styles.get(id).unwrap();
+        let wall_style = wall_styles.get(id);
 
         if wall_style.is_greater(best_wall_style) {
             best_id = id;
@@ -136,15 +133,11 @@ fn select_best_wall_style<T>(
 }
 
 fn get_corner_style<T>(wall_styles: &ResourceManager<WallStyle<T>>, index: usize) -> Option<&T> {
-    wall_styles
-        .get(index)
-        .map(|wall_style| wall_style.get_corner_style())
+    Some(wall_styles.get(index).get_corner_style())
 }
 
 fn get_node_style<T>(wall_styles: &ResourceManager<WallStyle<T>>, index: usize) -> Option<&T> {
-    wall_styles
-        .get(index)
-        .and_then(|wall_style| Option::from(wall_style.get_node_style()))
+    Option::from(wall_styles.get(index).get_node_style())
 }
 
 fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
@@ -157,7 +150,8 @@ fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rendering::style::EdgeStyle;
+    use crate::rendering::style::edge::EdgeStyle;
+    use crate::tilemap::border::Border;
     use crate::tilemap::tile::Tile;
     use crate::tilemap::Side::{Bottom, Left, Right, Top};
     use texture_generation::math::size::Size;
@@ -208,6 +202,28 @@ mod tests {
             calculate_node_styles(&wall_styles, &tilemap),
             vec![
                 Some(&HIGH_CORNER2), None,
+                None, None,
+                Some(&HIGH_CORNER2), None
+            ]
+        );
+    }
+
+    #[test]
+    fn test_long_vertical_wall_with_door() {
+        let wall_styles = crate_wall_styles();
+        let size = Size::new(1, 3);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Left, Border::Wall(HIGH));
+        tilemap.set_border(1, Left, Border::new_door(HIGH, 0, false));
+        tilemap.set_border(2, Left, Border::Wall(HIGH));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_styles(&wall_styles, &tilemap),
+            vec![
+                Some(&HIGH_CORNER2), None,
+                None, None,
                 None, None,
                 Some(&HIGH_CORNER2), None
             ]
@@ -449,12 +465,15 @@ mod tests {
         let high_style = crate_wall_style(20, None, HIGH_CORNER2);
         let high_style_with_nodes = crate_wall_style(25, Some(HIGH_NODE), HIGH_CORNER);
 
-        ResourceManager::new(vec![
-            low_style,
-            low_style_with_nodes,
-            high_style,
-            high_style_with_nodes,
-        ])
+        ResourceManager::new(
+            vec![
+                low_style,
+                low_style_with_nodes,
+                high_style,
+                high_style_with_nodes,
+            ],
+            WallStyle::default(10, 0),
+        )
     }
 
     fn crate_wall_style(

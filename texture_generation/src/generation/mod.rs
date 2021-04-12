@@ -2,7 +2,7 @@ use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::component::Component;
 use crate::generation::data::{Data, RuntimeData};
 use crate::math::aabb::AABB;
-use crate::math::color::Color;
+use crate::math::color::{Color, PINK};
 use crate::math::size::Size;
 
 pub mod component;
@@ -51,6 +51,12 @@ impl TextureGenerator {
     }
 }
 
+impl Default for TextureGenerator {
+    fn default() -> Self {
+        TextureGenerator::new("default", Size::square(1), PINK, Component::Mock(42))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::generation::component::rendering::RenderingComponent;
@@ -63,7 +69,7 @@ mod tests {
     #[test]
     fn test_generate() {
         let rectangle = Shape::new_rectangle(2, 4).unwrap();
-        let rendering = RenderingComponent::new_shape("test", rectangle, RED);
+        let rendering = RenderingComponent::new_shape("test", rectangle, RED, 200);
         let component = Component::Rendering(Box::new(rendering));
         let generator = TextureGenerator::new("test", Size::new(5, 7), GREEN, component);
 

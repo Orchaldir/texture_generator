@@ -7,13 +7,56 @@ pub enum Border {
     Empty,
     /// A wall blocks the border between the 2 tiles.
     Wall(usize),
+    Door {
+        wall_id: usize,
+        door_id: usize,
+        is_front: bool,
+    },
+    Window {
+        wall_id: usize,
+        window_id: usize,
+    },
 }
 
 impl Border {
+    pub const fn new_door(wall_id: usize, door_id: usize, is_front: bool) -> Border {
+        Border::Door {
+            wall_id,
+            door_id,
+            is_front,
+        }
+    }
+
+    pub const fn new_window(wall_id: usize, window_id: usize) -> Border {
+        Border::Window { wall_id, window_id }
+    }
+
     pub fn get_wall_style(&self) -> Option<usize> {
         match self {
             Border::Empty => None,
             Border::Wall(id) => Some(*id),
+            Border::Door { wall_id, .. } => Some(*wall_id),
+            Border::Window { wall_id, .. } => Some(*wall_id),
+        }
+    }
+
+    pub fn switch_is_front(&self) -> Border {
+        match self {
+            Border::Door {
+                wall_id,
+                door_id,
+                is_front,
+            } => Border::new_door(*wall_id, *door_id, !*is_front),
+            _ => *self,
+        }
+    }
+
+    pub fn reduce(&self) -> Border {
+        match self {
+            Border::Empty => Border::Empty,
+            Border::Wall(..) => Border::Empty,
+            Border::Door { wall_id, .. } => Border::Wall(*wall_id),
+            Border::Window { wall_id, .. } => Border::Wall(*wall_id),
         }
     }
 }
@@ -41,4 +84,40 @@ pub fn below_tile(size: Size, tile_index: usize) -> usize {
 /// Returns the index of the vertical [`Border`] to the right of the [`Tile`].
 pub fn right_of_tile(size: Size, tile_index: usize) -> usize {
     left_of_tile(size, tile_index) + 1
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use Border::*;
+
+    const WALL: Border = Wall(42);
+    const DOOR: Border = Border::new_door(42, 2, true);
+    const DOOR2: Border = Border::new_door(42, 2, false);
+    const WINDOW: Border = Border::new_window(42, 5);
+
+    #[test]
+    fn test_get_wall_style() {
+        assert_eq!(Empty.get_wall_style(), None);
+        assert_eq!(WALL.get_wall_style(), Some(42));
+        assert_eq!(DOOR.get_wall_style(), Some(42));
+        assert_eq!(WINDOW.get_wall_style(), Some(42));
+    }
+
+    #[test]
+    fn test_switch_is_front() {
+        assert_eq!(Empty.switch_is_front(), Empty);
+        assert_eq!(WALL.switch_is_front(), WALL);
+        assert_eq!(DOOR.switch_is_front(), DOOR2);
+        assert_eq!(DOOR2.switch_is_front(), DOOR);
+        assert_eq!(WINDOW.switch_is_front(), WINDOW);
+    }
+
+    #[test]
+    fn test_reduce() {
+        assert_eq!(Empty.reduce(), Empty);
+        assert_eq!(WALL.reduce(), Empty);
+        assert_eq!(DOOR.reduce(), WALL);
+        assert_eq!(WINDOW.reduce(), WALL);
+    }
 }

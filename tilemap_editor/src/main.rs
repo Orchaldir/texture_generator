@@ -19,15 +19,37 @@ use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::math::color::{Color, BLUE};
+use texture_generation::math::color::{Color, BLUE, CYAN};
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceManager;
-use tilemap::rendering::style::{EdgeStyle, NodeStyle, WallStyle};
+use tilemap::rendering::style::door::DoorStyle;
+use tilemap::rendering::style::edge::EdgeStyle;
+use tilemap::rendering::style::wall::{NodeStyle, WallStyle};
+use tilemap::rendering::style::window::WindowStyle;
+use tilemap::rendering::Resources;
 use tilemap::tilemap::border::Border;
+use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
+
+#[derive(Copy, Clone)]
+enum Mode {
+    Tile,
+    Wall,
+    Door,
+}
+
+impl Mode {
+    pub fn get_resource_type(&self) -> usize {
+        match self {
+            Mode::Tile => 0,
+            Mode::Wall => 1,
+            Mode::Door => 2,
+        }
+    }
+}
 
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]
@@ -64,9 +86,10 @@ pub struct TilemapEditor {
     renderer: tilemap::rendering::Renderer,
     preview_renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
+    selector: Selector,
     has_changed: bool,
-    is_tile_mode: bool,
-    current_id: usize,
+    mode: Mode,
+    resource_ids: Vec<usize>,
 }
 
 impl TilemapEditor {
@@ -75,16 +98,27 @@ impl TilemapEditor {
         preview_renderer: tilemap::rendering::Renderer,
         tilemap: Tilemap2d,
     ) -> TilemapEditor {
+        let selector = Selector::new(preview_renderer.get_tile_size());
+
         TilemapEditor {
             font_id: 0,
             preview_id: 0,
             renderer,
             preview_renderer,
             tilemap,
+            selector,
             has_changed: true,
-            is_tile_mode: true,
-            current_id: 0,
+            mode: Mode::Tile,
+            resource_ids: vec![0; 3],
         }
+    }
+
+    fn get_resource_id(&self, mode: Mode) -> usize {
+        self.resource_ids[mode.get_resource_type()]
+    }
+
+    fn set_resource_id(&mut self, mode: Mode, id: usize) {
+        self.resource_ids[mode.get_resource_type()] = id;
     }
 
     fn render_preview(&mut self, renderer: &mut dyn Renderer) {
@@ -103,10 +137,12 @@ impl TilemapEditor {
     }
 
     fn paint_tile(&mut self, button: MouseButton, index: usize) {
+        let texture_id = self.get_resource_id(Mode::Tile);
+
         let tile = match button {
-            MouseButton::Left => Tile::Floor(self.current_id),
+            MouseButton::Left => Tile::Floor(texture_id),
             MouseButton::Middle => Tile::Empty,
-            MouseButton::Right => Tile::Full(self.current_id),
+            MouseButton::Right => Tile::Full(texture_id),
         };
 
         info!("Set tile {} to {:?}", index, tile);
@@ -115,13 +151,13 @@ impl TilemapEditor {
         self.has_changed = true;
     }
 
-    fn paint_border(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
+    fn paint_wall(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
         if let Some(side) = self
-            .preview_renderer
+            .selector
             .get_side(&self.tilemap, point.0, point.1, index)
         {
             let border = match button {
-                MouseButton::Left => Border::Wall(self.current_id),
+                MouseButton::Left => Border::Wall(self.get_resource_id(Mode::Wall)),
                 _ => Border::Empty,
             };
 
@@ -129,6 +165,34 @@ impl TilemapEditor {
 
             self.tilemap.set_border(index, side, border);
             self.has_changed = true;
+        }
+    }
+
+    fn paint_door(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
+        if let Some(side) = self
+            .selector
+            .get_side(&self.tilemap, point.0, point.1, index)
+        {
+            let old_border = self.tilemap.get_border(index, side);
+
+            let border = match button {
+                MouseButton::Left => match old_border {
+                    Border::Door { .. } => old_border.switch_is_front(),
+                    _ => Border::new_door(
+                        self.get_resource_id(Mode::Wall),
+                        self.get_resource_id(Mode::Door),
+                        true,
+                    ),
+                },
+                _ => old_border.reduce(),
+            };
+
+            if old_border != border {
+                info!("Set {:?} border of tile {} to {:?}", side, index, border);
+
+                self.tilemap.set_border(index, side, border);
+                self.has_changed = true;
+            }
         }
     }
 }
@@ -161,25 +225,25 @@ impl App for TilemapEditor {
             data.save_depth_image("tilemap-depth.png");
             info!("Finished saving tilemap images");
         } else if let Some(number) = get_number(key) {
-            self.current_id = number;
+            self.set_resource_id(self.mode, number);
         } else if key == KeyCode::F1 {
-            self.is_tile_mode = true;
-            self.current_id = 0;
+            self.mode = Mode::Tile;
         } else if key == KeyCode::F2 {
-            self.is_tile_mode = false;
-            self.current_id = 0;
+            self.mode = Mode::Wall;
+        } else if key == KeyCode::F3 {
+            self.mode = Mode::Door;
         }
     }
 
     fn on_button_released(&mut self, button: MouseButton, point: (u32, u32)) {
         let index = self
-            .preview_renderer
+            .selector
             .get_tile_index(&self.tilemap, point.0, point.1);
 
-        if self.is_tile_mode {
-            self.paint_tile(button, index);
-        } else {
-            self.paint_border(button, point, index);
+        match self.mode {
+            Mode::Tile => self.paint_tile(button, index),
+            Mode::Wall => self.paint_wall(button, point, index),
+            Mode::Door => self.paint_door(button, point, index),
         }
     }
 }
@@ -214,10 +278,10 @@ fn main() {
     tilemap2d.set_tile(1, Tile::Floor(0));
     tilemap2d.set_tile(2, Tile::Floor(1));
     tilemap2d.set_border(1, Bottom, Border::Wall(0));
-    tilemap2d.set_border(2, Bottom, Border::Wall(0));
+    tilemap2d.set_border(2, Bottom, Border::new_window(0, 0));
     tilemap2d.set_border(3, Bottom, Border::Wall(0));
     tilemap2d.set_border(15, Bottom, Border::Wall(0));
-    tilemap2d.set_border(16, Bottom, Border::Wall(0));
+    tilemap2d.set_border(16, Bottom, Border::new_door(0, 0, false));
     tilemap2d.set_border(17, Bottom, Border::Wall(0));
     tilemap2d.set_border(17, Right, Border::Wall(1));
 
@@ -226,24 +290,27 @@ fn main() {
         args.tile_size, args.wall_height
     );
 
-    let ambient_occlusion = AmbientOcclusion::new(50, -200.0, -1.0);
-    let renderer = tilemap::rendering::Renderer::new(
-        args.tile_size,
-        args.wall_height,
+    let ambient_occlusion = AmbientOcclusion::new(50, -150.0, -1.0);
+    let resources = Resources::new(
         texture_mgr,
         crate_wall_styles(8),
+        crate_door_styles(8),
+        crate_window_styles(8),
         vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
     );
+    let renderer = tilemap::rendering::Renderer::new(args.tile_size, args.wall_height, resources);
 
     info!("Init preview renderer: tile_size={}", args.preview_size);
 
-    let preview_renderer = tilemap::rendering::Renderer::new(
-        args.preview_size,
-        args.wall_height,
+    let preview_resources = Resources::new(
         preview_texture_mgr,
         crate_wall_styles(1),
+        crate_door_styles(1),
+        crate_window_styles(1),
         Vec::default(),
     );
+    let preview_renderer =
+        tilemap::rendering::Renderer::new(args.preview_size, args.wall_height, preview_resources);
 
     let window_size = (
         args.width * args.preview_size,
@@ -260,7 +327,9 @@ fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle<NodeStyle>> {
     let style0 = crate_wall_style("stone", Color::gray(100), BLUE, 10 * factor, 16 * factor);
     let brown = Color::convert(&"#8B4513").unwrap();
     let style1 = crate_wall_style("wood", brown, brown, 6 * factor, 10 * factor);
-    ResourceManager::new(vec![style0, style1])
+    let default_node = NodeStyle::default_with_size(16 * factor);
+    let default_wall = WallStyle::default(10 * factor, default_node);
+    ResourceManager::new(vec![style0, style1], default_wall)
 }
 
 fn crate_wall_style(
@@ -270,9 +339,40 @@ fn crate_wall_style(
     thickness: u32,
     node_size: u32,
 ) -> WallStyle<NodeStyle> {
-    let edge_component = RenderingComponent::new_fill_area("wall", edge, 0);
+    let edge_component = RenderingComponent::new_fill_area("wall", edge, 250);
     let edge_style = EdgeStyle::new_solid(thickness, edge_component);
-    let node_component = RenderingComponent::new_fill_area("node", node, 20);
+    let node_component = RenderingComponent::new_fill_area("node", node, 250);
     let node_style = NodeStyle::new(node_size, node_component);
     WallStyle::new(name, edge_style, None, node_style)
+}
+
+fn crate_door_styles(factor: u32) -> ResourceManager<DoorStyle> {
+    let brown = Color::convert(&"#B8860B").unwrap();
+    let style = crate_door_style("wooden", brown, 6 * factor);
+    ResourceManager::new(vec![style], DoorStyle::default(6 * factor))
+}
+
+fn crate_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {
+    let edge_component = RenderingComponent::new_fill_area("door", color, 220);
+    let edge_style = EdgeStyle::new_solid(thickness, edge_component);
+    DoorStyle::new(name, edge_style, false)
+}
+
+fn crate_window_styles(factor: u32) -> ResourceManager<WindowStyle> {
+    let style = crate_window_style("glass", CYAN, 2 * factor, Color::gray(100), 16 * factor);
+    ResourceManager::new(vec![style], WindowStyle::default(6 * factor))
+}
+
+fn crate_window_style(
+    name: &str,
+    pane_color: Color,
+    pane_thickness: u32,
+    stool_color: Color,
+    stool_thickness: u32,
+) -> WindowStyle {
+    let pane_component = RenderingComponent::new_fill_area("pane", pane_color, 100);
+    let pane_style = EdgeStyle::new_solid(pane_thickness, pane_component);
+    let stool_component = RenderingComponent::new_fill_area("stool", stool_color, 100);
+    let stool_style = EdgeStyle::new_solid(stool_thickness, stool_component);
+    WindowStyle::new(name, pane_style, stool_style)
 }

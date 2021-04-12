@@ -2,7 +2,7 @@ use crate::generation::component::rendering::color::ColorSelector;
 use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
-use crate::math::color::Color;
+use crate::math::color::{Color, PINK};
 use crate::math::shape::Shape;
 
 pub mod color;
@@ -27,6 +27,10 @@ pub enum RenderingComponent {
 }
 
 impl RenderingComponent {
+    pub fn default() -> RenderingComponent {
+        Self::new_fill_area("default", PINK, 0)
+    }
+
     pub fn new_fill_area<S: Into<String>>(name: S, color: Color, depth: u8) -> RenderingComponent {
         RenderingComponent::FillArea {
             name: name.into(),
@@ -35,12 +39,17 @@ impl RenderingComponent {
         }
     }
 
-    pub fn new_shape<S: Into<String>>(name: S, shape: Shape, color: Color) -> RenderingComponent {
+    pub fn new_shape<S: Into<String>>(
+        name: S,
+        shape: Shape,
+        color: Color,
+        depth: u8,
+    ) -> RenderingComponent {
         RenderingComponent::new_shape_with_depth(
             name,
             shape,
             ColorSelector::ConstantColor(color),
-            DepthCalculator::Uniform(200),
+            DepthCalculator::Uniform(depth),
         )
     }
 
@@ -172,7 +181,7 @@ mod tests {
         let aabb = AABB::new(start, size);
 
         let mut data = RuntimeData::with_base_depth(data_size, WHITE, 10);
-        let renderer = RenderingComponent::new_shape("test", rectangle, RED);
+        let renderer = RenderingComponent::new_shape("test", rectangle, RED, 200);
 
         renderer.render(&mut data, &outer, &aabb);
 
@@ -217,7 +226,7 @@ mod tests {
         let aabb = AABB::new(start, size);
 
         let mut data = RuntimeData::new(data_size, WHITE);
-        let renderer = RenderingComponent::new_shape("test", rectangle, RED);
+        let renderer = RenderingComponent::new_shape("test", rectangle, RED, 200);
 
         renderer.render(&mut data, &outer, &aabb);
 
