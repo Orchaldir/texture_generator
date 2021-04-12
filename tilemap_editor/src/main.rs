@@ -29,6 +29,7 @@ use tilemap::rendering::style::wall::{NodeStyle, WallStyle};
 use tilemap::rendering::style::window::WindowStyle;
 use tilemap::rendering::Resources;
 use tilemap::tilemap::border::Border;
+use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
@@ -85,6 +86,7 @@ pub struct TilemapEditor {
     renderer: tilemap::rendering::Renderer,
     preview_renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
+    selector: Selector,
     has_changed: bool,
     mode: Mode,
     resource_ids: Vec<usize>,
@@ -96,12 +98,15 @@ impl TilemapEditor {
         preview_renderer: tilemap::rendering::Renderer,
         tilemap: Tilemap2d,
     ) -> TilemapEditor {
+        let selector = Selector::new(preview_renderer.get_tile_size());
+
         TilemapEditor {
             font_id: 0,
             preview_id: 0,
             renderer,
             preview_renderer,
             tilemap,
+            selector,
             has_changed: true,
             mode: Mode::Tile,
             resource_ids: vec![0; 3],
@@ -148,7 +153,7 @@ impl TilemapEditor {
 
     fn paint_wall(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
         if let Some(side) = self
-            .preview_renderer
+            .selector
             .get_side(&self.tilemap, point.0, point.1, index)
         {
             let border = match button {
@@ -165,7 +170,7 @@ impl TilemapEditor {
 
     fn paint_door(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
         if let Some(side) = self
-            .preview_renderer
+            .selector
             .get_side(&self.tilemap, point.0, point.1, index)
         {
             let old_border = self.tilemap.get_border(index, side);
@@ -232,7 +237,7 @@ impl App for TilemapEditor {
 
     fn on_button_released(&mut self, button: MouseButton, point: (u32, u32)) {
         let index = self
-            .preview_renderer
+            .selector
             .get_tile_index(&self.tilemap, point.0, point.1);
 
         match self.mode {
