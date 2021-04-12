@@ -290,7 +290,7 @@ fn main() {
         args.tile_size, args.wall_height
     );
 
-    let ambient_occlusion = AmbientOcclusion::new(50, -200.0, -1.0);
+    let ambient_occlusion = AmbientOcclusion::new(50, -150.0, -1.0);
     let resources = Resources::new(
         texture_mgr,
         crate_wall_styles(8),
@@ -339,9 +339,9 @@ fn crate_wall_style(
     thickness: u32,
     node_size: u32,
 ) -> WallStyle<NodeStyle> {
-    let edge_component = RenderingComponent::new_fill_area("wall", edge, 0);
+    let edge_component = RenderingComponent::new_fill_area("wall", edge, 250);
     let edge_style = EdgeStyle::new_solid(thickness, edge_component);
-    let node_component = RenderingComponent::new_fill_area("node", node, 20);
+    let node_component = RenderingComponent::new_fill_area("node", node, 250);
     let node_style = NodeStyle::new(node_size, node_component);
     WallStyle::new(name, edge_style, None, node_style)
 }
@@ -353,13 +353,13 @@ fn crate_door_styles(factor: u32) -> ResourceManager<DoorStyle> {
 }
 
 fn crate_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {
-    let edge_component = RenderingComponent::new_fill_area("door", color, 0);
+    let edge_component = RenderingComponent::new_fill_area("door", color, 220);
     let edge_style = EdgeStyle::new_solid(thickness, edge_component);
     DoorStyle::new(name, edge_style, false)
 }
 
 fn crate_window_styles(factor: u32) -> ResourceManager<WindowStyle> {
-    let style = crate_window_style("glass", CYAN, 2 * factor, Color::gray(100), 18 * factor);
+    let style = crate_window_style("glass", CYAN, 2 * factor, Color::gray(100), 16 * factor);
     ResourceManager::new(vec![style], WindowStyle::default(6 * factor))
 }
 
@@ -370,9 +370,9 @@ fn crate_window_style(
     stool_color: Color,
     stool_thickness: u32,
 ) -> WindowStyle {
-    let pane_component = RenderingComponent::new_fill_area("pane", pane_color, 0);
+    let pane_component = RenderingComponent::new_fill_area("pane", pane_color, 100);
     let pane_style = EdgeStyle::new_solid(pane_thickness, pane_component);
-    let stool_component = RenderingComponent::new_fill_area("stool", stool_color, 0);
+    let stool_component = RenderingComponent::new_fill_area("stool", stool_color, 100);
     let stool_style = EdgeStyle::new_solid(stool_thickness, stool_component);
     WindowStyle::new(name, pane_style, stool_style)
 }

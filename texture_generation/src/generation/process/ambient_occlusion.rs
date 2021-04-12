@@ -29,8 +29,14 @@ impl AmbientOcclusion {
             let mut index = size.convert_x_y(self.radius, y);
 
             for x in self.radius..max_x {
-                let average = self.calculate_average_depth(data, x, y);
                 let current = data.get_depth_data()[index];
+
+                if current == 0 {
+                    index += 1;
+                    continue;
+                }
+
+                let average = self.calculate_average_depth(data, x, y);
                 let diff = (current as f32 - average as f32).min(0.0);
                 let factor = diff.max(self.max_diff) / self.max_diff;
                 let penalty = factor * self.max_penalty;

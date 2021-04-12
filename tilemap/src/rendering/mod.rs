@@ -104,7 +104,7 @@ impl Renderer {
 
                 match tile {
                     Tile::Empty => {}
-                    Tile::Floor(id) => self.render_texture(id, 0, data, &aabb),
+                    Tile::Floor(id) => self.render_texture(id, 1, data, &aabb),
                     Tile::Full(id) => self.render_texture(id, self.wall_height, data, &aabb),
                 }
 
@@ -117,7 +117,7 @@ impl Renderer {
     }
 
     fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
-        data.set_base_depth(self.wall_height);
+        data.set_base_depth(1);
         let nodes = calculate_node_styles(&self.resources.wall_styles, tilemap);
         self.render_horizontal_borders(tilemap, &nodes, &mut data);
         self.render_vertical_borders(tilemap, &nodes, &mut data);
