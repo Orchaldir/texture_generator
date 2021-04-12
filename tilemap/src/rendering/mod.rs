@@ -341,11 +341,11 @@ mod tests {
     #[test]
     fn test_render_tiles() {
         let mut resources = Resources::empty();
-        let texture0 = create_texture("texture0", RED, 99);
-        let texture1 = create_texture("texture0", BLUE, 42);
+        let texture0 = create_texture("texture0", RED, 98);
+        let texture1 = create_texture("texture0", BLUE, 41);
         resources.textures =
             ResourceManager::new(vec![texture0, texture1], TextureGenerator::default());
-        let renderer = Renderer::new(2, 100, resources);
+        let renderer = Renderer::new(2, 101, resources);
         let tiles = vec![
             Tile::Empty,
             Tile::Floor(0),
