@@ -20,3 +20,9 @@ impl<T> ResourceManager<T> {
         self.resources.get(id).unwrap_or(&self.default)
     }
 }
+
+impl<T: Default> Default for ResourceManager<T> {
+    fn default() -> Self {
+        ResourceManager::new(Vec::default(), T::default())
+    }
+}

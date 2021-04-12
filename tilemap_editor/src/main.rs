@@ -19,13 +19,15 @@ use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::math::color::{Color, BLUE};
+use texture_generation::math::color::{Color, BLUE, CYAN};
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceManager;
 use tilemap::rendering::style::door::DoorStyle;
 use tilemap::rendering::style::edge::EdgeStyle;
 use tilemap::rendering::style::wall::{NodeStyle, WallStyle};
+use tilemap::rendering::style::window::WindowStyle;
+use tilemap::rendering::Resources;
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
@@ -271,7 +273,7 @@ fn main() {
     tilemap2d.set_tile(1, Tile::Floor(0));
     tilemap2d.set_tile(2, Tile::Floor(1));
     tilemap2d.set_border(1, Bottom, Border::Wall(0));
-    tilemap2d.set_border(2, Bottom, Border::Wall(0));
+    tilemap2d.set_border(2, Bottom, Border::new_window(0, 0));
     tilemap2d.set_border(3, Bottom, Border::Wall(0));
     tilemap2d.set_border(15, Bottom, Border::Wall(0));
     tilemap2d.set_border(16, Bottom, Border::new_door(0, 0, false));
@@ -284,25 +286,26 @@ fn main() {
     );
 
     let ambient_occlusion = AmbientOcclusion::new(50, -200.0, -1.0);
-    let renderer = tilemap::rendering::Renderer::new(
-        args.tile_size,
-        args.wall_height,
+    let resources = Resources::new(
         texture_mgr,
         crate_wall_styles(8),
         crate_door_styles(8),
+        crate_window_styles(8),
         vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
     );
+    let renderer = tilemap::rendering::Renderer::new(args.tile_size, args.wall_height, resources);
 
     info!("Init preview renderer: tile_size={}", args.preview_size);
 
-    let preview_renderer = tilemap::rendering::Renderer::new(
-        args.preview_size,
-        args.wall_height,
+    let preview_resources = Resources::new(
         preview_texture_mgr,
         crate_wall_styles(1),
         crate_door_styles(1),
+        crate_window_styles(1),
         Vec::default(),
     );
+    let preview_renderer =
+        tilemap::rendering::Renderer::new(args.preview_size, args.wall_height, preview_resources);
 
     let window_size = (
         args.width * args.preview_size,
@@ -348,4 +351,23 @@ fn crate_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {
     let edge_component = RenderingComponent::new_fill_area("door", color, 0);
     let edge_style = EdgeStyle::new_solid(thickness, edge_component);
     DoorStyle::new(name, edge_style, false)
+}
+
+fn crate_window_styles(factor: u32) -> ResourceManager<WindowStyle> {
+    let style = crate_window_style("glass", CYAN, 2 * factor, Color::gray(100), 18 * factor);
+    ResourceManager::new(vec![style], WindowStyle::default(6 * factor))
+}
+
+fn crate_window_style(
+    name: &str,
+    pane_color: Color,
+    pane_thickness: u32,
+    stool_color: Color,
+    stool_thickness: u32,
+) -> WindowStyle {
+    let pane_component = RenderingComponent::new_fill_area("pane", pane_color, 0);
+    let pane_style = EdgeStyle::new_solid(pane_thickness, pane_component);
+    let stool_component = RenderingComponent::new_fill_area("stool", stool_color, 0);
+    let stool_style = EdgeStyle::new_solid(stool_thickness, stool_component);
+    WindowStyle::new(name, pane_style, stool_style)
 }

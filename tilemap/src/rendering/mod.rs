@@ -1,6 +1,7 @@
 use crate::rendering::node::calculate_node_styles;
 use crate::rendering::style::door::DoorStyle;
 use crate::rendering::style::wall::{NodeStyle, WallStyle};
+use crate::rendering::style::window::WindowStyle;
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use crate::tilemap::node::{
     get_end_of_horizontal_border, get_end_of_vertical_border, get_nodes_size,
@@ -22,32 +23,55 @@ use texture_generation::utils::resource::ResourceManager;
 pub mod node;
 pub mod style;
 
+pub struct Resources {
+    pub textures: ResourceManager<TextureGenerator>,
+    pub wall_styles: ResourceManager<WallStyle<NodeStyle>>,
+    pub door_styles: ResourceManager<DoorStyle>,
+    pub window_styles: ResourceManager<WindowStyle>,
+    pub post_processes: Vec<PostProcess>,
+}
+
+impl Resources {
+    pub fn empty() -> Resources {
+        Self::new(
+            ResourceManager::default(),
+            ResourceManager::default(),
+            ResourceManager::default(),
+            ResourceManager::default(),
+            Vec::default(),
+        )
+    }
+
+    pub fn new(
+        textures: ResourceManager<TextureGenerator>,
+        wall_styles: ResourceManager<WallStyle<NodeStyle>>,
+        door_styles: ResourceManager<DoorStyle>,
+        window_styles: ResourceManager<WindowStyle>,
+        post_processes: Vec<PostProcess>,
+    ) -> Self {
+        Resources {
+            textures,
+            wall_styles,
+            door_styles,
+            window_styles,
+            post_processes,
+        }
+    }
+}
+
 /// Renders a [`Tilemap2d`] in a specific style.
 pub struct Renderer {
     tile_size: u32,
     wall_height: u8,
-    textures: ResourceManager<TextureGenerator>,
-    wall_styles: ResourceManager<WallStyle<NodeStyle>>,
-    door_styles: ResourceManager<DoorStyle>,
-    post_processes: Vec<PostProcess>,
+    resources: Resources,
 }
 
 impl Renderer {
-    pub fn new(
-        tile_size: u32,
-        wall_height: u8,
-        textures: ResourceManager<TextureGenerator>,
-        wall_styles: ResourceManager<WallStyle<NodeStyle>>,
-        door_styles: ResourceManager<DoorStyle>,
-        post_processes: Vec<PostProcess>,
-    ) -> Self {
+    pub fn new(tile_size: u32, wall_height: u8, resources: Resources) -> Self {
         Renderer {
             tile_size,
             wall_height,
-            textures,
-            wall_styles,
-            door_styles,
-            post_processes,
+            resources,
         }
     }
 
@@ -126,7 +150,7 @@ impl Renderer {
 
     fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
         data.set_base_depth(self.wall_height);
-        let nodes = calculate_node_styles(&self.wall_styles, tilemap);
+        let nodes = calculate_node_styles(&self.resources.wall_styles, tilemap);
         self.render_horizontal_borders(tilemap, &nodes, &mut data);
         self.render_vertical_borders(tilemap, &nodes, &mut data);
         self.render_nodes(tilemap, &nodes, &mut data);
@@ -154,7 +178,7 @@ impl Renderer {
                 match border {
                     Border::Empty => {}
                     Border::Wall(id) => {
-                        let wall_style = self.wall_styles.get(id);
+                        let wall_style = self.resources.wall_styles.get(id);
                         let start_index = get_start_of_horizontal_border(index, y);
                         let end_index = get_end_of_horizontal_border(index, y);
 
@@ -173,8 +197,8 @@ impl Renderer {
                         door_id,
                         is_front,
                     } => {
-                        let wall_style = self.wall_styles.get(wall_id);
-                        let door_style = self.door_styles.get(door_id);
+                        let wall_style = self.resources.wall_styles.get(wall_id);
+                        let door_style = self.resources.door_styles.get(door_id);
                         let start_index = get_start_of_horizontal_border(index, y);
                         let end_index = get_end_of_horizontal_border(index, y);
                         let offset = door_style
@@ -185,6 +209,20 @@ impl Renderer {
                             start,
                             self.tile_size,
                             offset,
+                            nodes[start_index],
+                            nodes[end_index],
+                            data,
+                        );
+                    }
+                    Border::Window { window_id, .. } => {
+                        let window_style = self.resources.window_styles.get(window_id);
+                        let start_index = get_start_of_horizontal_border(index, y);
+                        let end_index = get_end_of_horizontal_border(index, y);
+
+                        window_style.render_horizontal(
+                            &aabb,
+                            start,
+                            self.tile_size,
                             nodes[start_index],
                             nodes[end_index],
                             data,
@@ -222,7 +260,7 @@ impl Renderer {
                 match border {
                     Border::Empty => {}
                     Border::Wall(id) => {
-                        let wall_style = self.wall_styles.get(id);
+                        let wall_style = self.resources.wall_styles.get(id);
                         let start_index = get_start_of_vertical_border(index);
                         let end_index = get_end_of_vertical_border(size, index);
 
@@ -241,8 +279,8 @@ impl Renderer {
                         door_id,
                         is_front,
                     } => {
-                        let wall_style = self.wall_styles.get(wall_id);
-                        let door_style = self.door_styles.get(door_id);
+                        let wall_style = self.resources.wall_styles.get(wall_id);
+                        let door_style = self.resources.door_styles.get(door_id);
                         let start_index = get_start_of_vertical_border(index);
                         let end_index = get_end_of_vertical_border(size, index);
                         let offset = door_style
@@ -253,6 +291,20 @@ impl Renderer {
                             start,
                             self.tile_size,
                             offset,
+                            nodes[start_index],
+                            nodes[end_index],
+                            data,
+                        );
+                    }
+                    Border::Window { window_id, .. } => {
+                        let window_style = self.resources.window_styles.get(window_id);
+                        let start_index = get_start_of_vertical_border(index);
+                        let end_index = get_end_of_vertical_border(size, index);
+
+                        window_style.render_vertical(
+                            &aabb,
+                            start,
+                            self.tile_size,
                             nodes[start_index],
                             nodes[end_index],
                             data,
@@ -297,13 +349,13 @@ impl Renderer {
     }
 
     fn post_process(&self, data: &mut RuntimeData) {
-        for post_process in self.post_processes.iter() {
+        for post_process in self.resources.post_processes.iter() {
             post_process.process(data);
         }
     }
 
     fn render_texture(&self, texture_id: usize, height: u8, data: &mut RuntimeData, aabb: &AABB) {
-        let texture = self.textures.get(texture_id);
+        let texture = self.resources.textures.get(texture_id);
         data.set_base_depth(height);
         texture.render(data, aabb);
     }
@@ -320,7 +372,7 @@ mod tests {
 
     #[test]
     fn test_get_tile_index() {
-        let renderer = Renderer::new(100, 100, empty(), empty(), empty(), Vec::default());
+        let renderer = Renderer::new(100, 100, Resources::empty());
         let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
 
         assert_eq!(renderer.get_tile_index(&tilemap, 50, 50), 0);
@@ -333,7 +385,7 @@ mod tests {
 
     #[test]
     fn test_get_side() {
-        let renderer = Renderer::new(100, 100, empty(), empty(), empty(), Vec::default());
+        let renderer = Renderer::new(100, 100, Resources::empty());
         let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
 
         assert_eq!(renderer.get_side(&tilemap, 50, 150, 2), None);
@@ -345,10 +397,12 @@ mod tests {
 
     #[test]
     fn test_render_tiles() {
+        let mut resources = Resources::empty();
         let texture0 = create_texture("texture0", RED, 99);
         let texture1 = create_texture("texture0", BLUE, 42);
-        let textures = ResourceManager::new(vec![texture0, texture1], TextureGenerator::default());
-        let renderer = Renderer::new(2, 100, textures, empty(), empty(), Vec::default());
+        resources.textures =
+            ResourceManager::new(vec![texture0, texture1], TextureGenerator::default());
+        let renderer = Renderer::new(2, 100, resources);
         let tiles = vec![
             Tile::Empty,
             Tile::Floor(0),
@@ -390,9 +444,5 @@ mod tests {
         let rendering = RenderingComponent::new_fill_area(name, color, depth);
         let component = Component::Rendering(Box::new(rendering));
         TextureGenerator::new(name, Size::default(), PINK, component)
-    }
-
-    fn empty<T: Default>() -> ResourceManager<T> {
-        ResourceManager::new(Vec::default(), T::default())
     }
 }
