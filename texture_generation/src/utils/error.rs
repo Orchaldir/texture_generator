@@ -77,9 +77,13 @@ impl ValueError {
     }
 }
 
-#[derive(Error, Debug, Eq, PartialEq)]
+#[derive(Error, Debug, PartialEq)]
 /// An error type for [`Shape`](crate::math:.shape::TextureGenerator).
 pub enum ShapeError {
+    #[error("Factor {0} is too big")]
+    FactorTooBig(f32),
+    #[error("Factor {0} is too small")]
+    FactorTooSmall(f32),
     #[error("Radius {0} is too big")]
     RadiusTooBig(u32),
     #[error("Radius {0} is too small")]

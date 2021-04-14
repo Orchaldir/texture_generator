@@ -12,6 +12,16 @@ pub enum ShapeFactory {
 }
 
 impl ShapeFactory {
+    pub fn new_rounded(factor: f32) -> Result<ShapeFactory, ShapeError> {
+        if factor <= 0.0 {
+            return Err(ShapeError::FactorTooSmall(factor));
+        } else if factor >= 1.0 {
+            return Err(ShapeError::FactorTooBig(factor));
+        }
+
+        Ok(ShapeFactory::RoundedRectangle(factor))
+    }
+
     /// Creates a shape that fits inside the [`AABB`].
     pub fn create_shape(&self, aabb: &AABB) -> Result<Shape, ShapeError> {
         let size = aabb.size();
