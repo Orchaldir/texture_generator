@@ -3,6 +3,7 @@ use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 
+pub mod border;
 pub mod layout;
 pub mod rendering;
 
