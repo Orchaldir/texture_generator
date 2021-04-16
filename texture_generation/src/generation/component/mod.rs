@@ -1,3 +1,4 @@
+use crate::generation::component::border::BorderComponent;
 use crate::generation::component::layout::LayoutComponent;
 use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::data::Data;
@@ -10,6 +11,7 @@ pub mod rendering;
 #[derive(Clone, Debug, PartialEq)]
 /// A wrapper for different types of components.
 pub enum Component {
+    Border(Box<BorderComponent>),
     Layout(Box<LayoutComponent>),
     Mock(u8),
     Rendering(Box<RenderingComponent>),
@@ -19,6 +21,7 @@ impl Component {
     /// Generates the texture inside the [`AABB`].
     pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
         match self {
+            Component::Border(component) => component.generate(data, outer, inner),
             Component::Layout(component) => component.generate(data, inner),
             Component::Mock(id) => info!("Generate mock {}", *id),
             Component::Rendering(component) => component.render(data, outer, inner),
