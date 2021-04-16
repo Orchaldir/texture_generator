@@ -152,10 +152,11 @@ impl LayoutComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generation::component::border::BorderComponent;
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::RuntimeData;
     use crate::math::color::{RED, WHITE};
-    use crate::math::shape::Shape;
+    use crate::math::shape_factory::ShapeFactory::Rectangle;
     use crate::math::size::Size;
 
     #[test]
@@ -165,11 +166,13 @@ mod tests {
 
         let mut data = RuntimeData::new(size, WHITE);
 
-        let rectangle = Shape::new_rectangle(2, 2).unwrap();
-        let renderer = RenderingComponent::new_shape("tile", rectangle, RED, 200);
-        let component = Component::Rendering(Box::new(renderer));
+        //let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
+        let renderer = RenderingComponent::new_fill_area("tile", RED, 200);
+        let rendering_component = Component::Rendering(Box::new(renderer));
+        let border = BorderComponent::new_uniform(1, rendering_component).unwrap();
+        let border_component = Component::Border(Box::new(border));
         let layout =
-            LayoutComponent::new_brick_wall("test", Size::square(5), 2, component).unwrap();
+            LayoutComponent::new_brick_wall("test", Size::square(5), 2, border_component).unwrap();
 
         layout.generate(&mut data, &aabb);
 
@@ -204,10 +207,11 @@ mod tests {
 
         let mut data = RuntimeData::new(size, WHITE);
 
-        let rectangle = Shape::new_rectangle(2, 2).unwrap();
-        let renderer = RenderingComponent::new_shape("tile", rectangle, RED, 200);
-        let component = Component::Rendering(Box::new(renderer));
-        let layout = LayoutComponent::new_square("test", 5, component).unwrap();
+        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
+        let rendering_component = Component::Rendering(Box::new(renderer));
+        let border = BorderComponent::new_uniform(1, rendering_component).unwrap();
+        let border_component = Component::Border(Box::new(border));
+        let layout = LayoutComponent::new_square("test", 5, border_component).unwrap();
 
         layout.generate(&mut data, &aabb);
 

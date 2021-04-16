@@ -68,7 +68,7 @@ mod tests {
     use crate::math::size::Size;
 
     #[test]
-    fn test_brick_wall() {
+    fn test_uniform() {
         let size = Size::new(5, 5);
         let aabb = AABB::with_size(size);
 

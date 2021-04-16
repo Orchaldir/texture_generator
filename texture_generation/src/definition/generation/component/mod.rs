@@ -9,7 +9,7 @@ pub mod border;
 pub mod layout;
 pub mod rendering;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ComponentDefinition {
     Border(Box<BorderDefinition>),

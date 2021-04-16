@@ -4,7 +4,7 @@ use crate::generation::component::border::BorderComponent;
 use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum BorderDefinition {
     UniformBorder {
         border: u32,

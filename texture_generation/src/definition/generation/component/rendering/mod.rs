@@ -1,6 +1,6 @@
 use crate::definition::generation::component::rendering::color::ColorSelectorDefinition;
 use crate::definition::generation::component::rendering::depth::DepthDefinition;
-use crate::definition::math::shape::ShapeDefinition;
+use crate::definition::math::shape_factor::ShapeFactorDefinition;
 use crate::generation::component::rendering::RenderingComponent;
 use crate::math::color::Color;
 use crate::utils::error::DefinitionError;
@@ -10,7 +10,7 @@ use std::convert::TryInto;
 pub mod color;
 pub mod depth;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum RenderingDefinition {
     FillArea {
         name: String,
@@ -19,14 +19,14 @@ pub enum RenderingDefinition {
     },
     Shape {
         name: String,
-        shape: ShapeDefinition,
+        shape_factory: ShapeFactorDefinition,
         color: ColorSelectorDefinition,
         depth: DepthDefinition,
     },
 }
 
 impl RenderingDefinition {
-    pub fn convert(&self, factor: f32) -> Result<RenderingComponent, DefinitionError> {
+    pub fn convert(&self, _factor: f32) -> Result<RenderingComponent, DefinitionError> {
         match self {
             RenderingDefinition::FillArea { name, color, depth } => {
                 let color = Color::convert(&color)
@@ -35,10 +35,10 @@ impl RenderingDefinition {
             }
             RenderingDefinition::Shape {
                 name,
-                shape,
+                shape_factory,
                 color,
                 depth,
-            } => match shape.convert(factor) {
+            } => match shape_factory.convert() {
                 Ok(shape) => match depth.clone().try_into() {
                     Ok(depth) => {
                         let color = color.convert(name)?;
@@ -60,7 +60,7 @@ mod tests {
     use crate::generation::component::rendering::color::ColorSelector;
     use crate::generation::component::rendering::depth::DepthCalculator;
     use crate::math::color::ORANGE;
-    use crate::math::shape::Shape;
+    use crate::math::shape_factory::ShapeFactory;
 
     #[test]
     fn test_convert_fill_area() {
@@ -76,18 +76,18 @@ mod tests {
 
     #[test]
     fn test_convert_shape() {
-        let shape = ShapeDefinition::Circle(42);
+        let shape_factory = ShapeFactorDefinition::Circle;
         let color = ColorSelectorDefinition::ConstantColor("#FFA500".to_string());
         let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
             name: "circle".to_string(),
-            shape,
+            shape_factory,
             color,
             depth,
         };
         let component = RenderingComponent::new_shape_with_depth(
             "circle",
-            Shape::Circle(126),
+            ShapeFactory::Circle,
             ColorSelector::ConstantColor(ORANGE),
             DepthCalculator::Uniform(111),
         );
@@ -97,12 +97,12 @@ mod tests {
 
     #[test]
     fn test_convert_invalid_shape() {
-        let shape = ShapeDefinition::Circle(0);
+        let shape_factory = ShapeFactorDefinition::RoundedRectangle(-1.0);
         let color = ColorSelectorDefinition::ConstantColor("#FFA500".to_string());
         let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
             name: "brick".to_string(),
-            shape,
+            shape_factory,
             color,
             depth,
         };
