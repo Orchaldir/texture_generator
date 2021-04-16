@@ -13,21 +13,22 @@ component:
       height: 64
     offset: 64
     component:
-      type: Rendering
-      Shape:
-        name: red brick
-        shape:
-          RoundedRectangle:
-            width: 120
-            height: 56
-            radius: 20
-        color:
-          Sequence:
-            - "#4E0707"
-            - "#A91B0D"
-            - "#E3242B"
-            - "#990F02"
-        depth:
-          Linear:
-            center: 25
-            border: 10
+      type: Border
+      UniformBorder:
+        border: 4
+        component:
+          type: Rendering
+          Shape:
+            name: red brick
+            shape_factory:
+              RoundedRectangle: 0.7
+            color:
+              Sequence:
+                - "#4E0707"
+                - "#A91B0D"
+                - "#E3242B"
+                - "#990F02"
+            depth:
+              Linear:
+                center: 25
+                border: 10
