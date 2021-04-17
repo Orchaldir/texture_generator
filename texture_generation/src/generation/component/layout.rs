@@ -211,16 +211,10 @@ mod tests {
     fn test_brick_wall() {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
-
         let mut data = RuntimeData::new(size, WHITE);
-
-        //let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
-        let renderer = RenderingComponent::new_fill_area("tile", RED, 200);
-        let rendering_component = Component::Rendering(Box::new(renderer));
-        let border = BorderComponent::new_uniform(1, rendering_component);
-        let border_component = Component::Border(Box::new(border));
         let layout =
-            LayoutComponent::new_brick_wall("test", Size::square(5), 2, border_component).unwrap();
+            LayoutComponent::new_brick_wall("test", Size::square(5), 2, create_component())
+                .unwrap();
 
         layout.generate(&mut data, &aabb);
 
@@ -252,14 +246,8 @@ mod tests {
     fn test_repeat_x() {
         let size = Size::new(15, 5);
         let aabb = AABB::with_size(size);
-
         let mut data = RuntimeData::new(size, WHITE);
-
-        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
-        let rendering_component = Component::Rendering(Box::new(renderer));
-        let border = BorderComponent::new_uniform(1, rendering_component);
-        let border_component = Component::Border(Box::new(border));
-        let layout = LayoutComponent::new_repeat_x(5, border_component).unwrap();
+        let layout = LayoutComponent::new_repeat_x(5, create_component()).unwrap();
 
         layout.generate(&mut data, &aabb);
 
@@ -279,14 +267,8 @@ mod tests {
     fn test_repeat_y() {
         let size = Size::new(5, 15);
         let aabb = AABB::with_size(size);
-
         let mut data = RuntimeData::new(size, WHITE);
-
-        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
-        let rendering_component = Component::Rendering(Box::new(renderer));
-        let border = BorderComponent::new_uniform(1, rendering_component);
-        let border_component = Component::Border(Box::new(border));
-        let layout = LayoutComponent::new_repeat_y(5, border_component).unwrap();
+        let layout = LayoutComponent::new_repeat_y(5, create_component()).unwrap();
 
         layout.generate(&mut data, &aabb);
 
@@ -318,14 +300,8 @@ mod tests {
     fn test_square_layout() {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
-
         let mut data = RuntimeData::new(size, WHITE);
-
-        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
-        let rendering_component = Component::Rendering(Box::new(renderer));
-        let border = BorderComponent::new_uniform(1, rendering_component);
-        let border_component = Component::Border(Box::new(border));
-        let layout = LayoutComponent::new_square("test", 5, border_component).unwrap();
+        let layout = LayoutComponent::new_square("test", 5, create_component()).unwrap();
 
         layout.generate(&mut data, &aabb);
 
@@ -351,5 +327,12 @@ mod tests {
         ];
 
         assert_eq!(data.get_color_data(), &expected_colors);
+    }
+
+    fn create_component() -> Component {
+        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
+        let rendering_component = Component::Rendering(Box::new(renderer));
+        let border = BorderComponent::new_uniform(1, rendering_component);
+        Component::Border(Box::new(border))
     }
 }
