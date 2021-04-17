@@ -169,7 +169,7 @@ mod tests {
         //let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
         let renderer = RenderingComponent::new_fill_area("tile", RED, 200);
         let rendering_component = Component::Rendering(Box::new(renderer));
-        let border = BorderComponent::new_uniform(1, rendering_component).unwrap();
+        let border = BorderComponent::new_uniform(1, rendering_component);
         let border_component = Component::Border(Box::new(border));
         let layout =
             LayoutComponent::new_brick_wall("test", Size::square(5), 2, border_component).unwrap();
@@ -209,7 +209,7 @@ mod tests {
 
         let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
         let rendering_component = Component::Rendering(Box::new(renderer));
-        let border = BorderComponent::new_uniform(1, rendering_component).unwrap();
+        let border = BorderComponent::new_uniform(1, rendering_component);
         let border_component = Component::Border(Box::new(border));
         let layout = LayoutComponent::new_square("test", 5, border_component).unwrap();
 

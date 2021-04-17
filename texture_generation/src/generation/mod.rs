@@ -70,7 +70,7 @@ mod tests {
     fn test_generate() {
         let rendering = RenderingComponent::new_fill_area("test", RED, 200);
         let rendering_component = Component::Rendering(Box::new(rendering));
-        let border = BorderComponent::new_uniform(1, rendering_component).unwrap();
+        let border = BorderComponent::new_uniform(1, rendering_component);
         let border_component = Component::Border(Box::new(border));
         let generator = TextureGenerator::new("test", Size::new(5, 7), GREEN, border_component);
 

@@ -17,7 +17,7 @@ impl BorderDefinition {
         match self {
             BorderDefinition::UniformBorder { border, component } => {
                 let component = component.convert(factor)?;
-                let border = BorderComponent::new_uniform(convert(*border, factor), component)?;
+                let border = BorderComponent::new_uniform(convert(*border, factor), component);
                 Ok(border)
             }
         }
@@ -35,7 +35,7 @@ mod tests {
             border: 10,
             component: ComponentDefinition::Mock(66),
         };
-        let component = BorderComponent::new_uniform(20, Component::Mock(66)).unwrap();
+        let component = BorderComponent::new_uniform(20, Component::Mock(66));
 
         assert_eq!(component, definition.convert(2.0).unwrap())
     }

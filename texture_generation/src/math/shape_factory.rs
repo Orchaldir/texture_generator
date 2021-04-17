@@ -32,6 +32,10 @@ impl ShapeFactory {
             ShapeFactory::Circle => Shape::new_circle(radius),
             ShapeFactory::Rectangle => Shape::new_rectangle(size.width(), size.height()),
             ShapeFactory::RoundedRectangle(factor) => {
+                if min_side < 5 {
+                    return Shape::new_rectangle(size.width(), size.height());
+                }
+
                 let radius = (radius as f32 * *factor) as u32;
                 Shape::new_rounded(size.width(), size.height(), radius)
             }
