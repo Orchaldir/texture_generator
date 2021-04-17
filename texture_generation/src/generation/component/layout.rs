@@ -181,12 +181,12 @@ impl LayoutComponent {
             }
             LayoutComponent::RepeatX { size, component } => {
                 let mut point = inner.start();
-                let inner_size = Size::new(*size, inner.size().height());
                 let end = inner.end().x;
-                let step = *size as i32;
+                let step = calculate_repeat_step(inner.size().width(), *size);
+                let aabb_size = Size::new(step as u32, inner.size().height());
 
                 while point.x < end {
-                    let aabb = AABB::new(point, inner_size);
+                    let aabb = AABB::new(point, aabb_size);
 
                     component.generate(data, &limited, &aabb);
 
@@ -195,12 +195,12 @@ impl LayoutComponent {
             }
             LayoutComponent::RepeatY { size, component } => {
                 let mut point = inner.start();
-                let inner_size = Size::new(inner.size().width(), *size);
                 let end = inner.end().y;
-                let step = *size as i32;
+                let step = calculate_repeat_step(inner.size().height(), *size);
+                let aabb_size = Size::new(inner.size().width(), step as u32);
 
                 while point.y < end {
-                    let aabb = AABB::new(point, inner_size);
+                    let aabb = AABB::new(point, aabb_size);
 
                     component.generate(data, &limited, &aabb);
 
@@ -231,6 +231,13 @@ impl LayoutComponent {
             }
         }
     }
+}
+
+fn calculate_repeat_step(size: u32, side: u32) -> i32 {
+    let factor = (size % side) as f32 / side as f32;
+    let n = size / side;
+
+    (size / if factor < 0.5 { n } else { n + 1 }) as i32
 }
 
 #[cfg(test)]
