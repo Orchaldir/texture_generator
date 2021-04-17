@@ -5,7 +5,7 @@ use crate::math::size::Size;
 use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum LayoutDefinition {
     BrickWall {
         name: String,

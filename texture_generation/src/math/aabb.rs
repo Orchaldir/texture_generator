@@ -113,6 +113,19 @@ impl AxisAlignedBoundingBox {
             && point.x < self.end.x
             && point.y < self.end.y
     }
+
+    /// Limit the other aabb to this one.
+    pub fn limit(&self, other: &AABB) -> AABB {
+        let start = self.limit_to(&other.start);
+        let end = self.limit_to(&other.end);
+        let size = Size::new((end.x - start.x) as u32, (end.y - start.y) as u32);
+        AABB { start, end, size }
+    }
+
+    /// Limit a [`Point`] to this aabb.
+    pub fn limit_to(&self, point: &Point) -> Point {
+        point.max(&self.start).min(&self.end)
+    }
 }
 
 #[cfg(test)]
@@ -142,5 +155,15 @@ mod tests {
         for (index, result) in results.iter().enumerate() {
             assert_eq!(aabb.is_inside(&test_size.to_point(index)), *result);
         }
+    }
+
+    #[test]
+    fn test_limit_inside() {
+        let aabb0 = AxisAlignedBoundingBox::with_size(Size::square(10));
+        let aabb1 = AxisAlignedBoundingBox::new(Point::new(1, 2), Size::new(3, 4));
+
+        assert_eq!(aabb0.limit(&aabb1), aabb1);
+        assert_eq!(aabb1.limit(&aabb0), aabb1);
+        assert_eq!(aabb1.limit(&aabb1), aabb1);
     }
 }

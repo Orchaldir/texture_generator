@@ -15,11 +15,14 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::definition::generation::{into_manager, TextureDefinition};
+use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
+use texture_generation::generation::component::Component;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::color::{Color, BLUE, CYAN};
+use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceManager;
@@ -339,8 +342,11 @@ fn crate_wall_style(
     thickness: u32,
     node_size: u32,
 ) -> WallStyle<NodeStyle> {
-    let edge_component = RenderingComponent::new_fill_area("wall", edge, 250);
-    let edge_style = EdgeStyle::new_solid(thickness, edge_component);
+    let edge_rendering =
+        RenderingComponent::new_shape("wall", ShapeFactory::RoundedRectangle(0.5), edge, 250);
+    let edge_component = Component::Rendering(Box::new(edge_rendering));
+    let edge_layout = LayoutComponent::new_repeat_x(thickness * 2, edge_component).unwrap();
+    let edge_style = EdgeStyle::new_layout(thickness, edge_layout);
     let node_component = RenderingComponent::new_fill_area("node", node, 250);
     let node_style = NodeStyle::new(node_size, node_component);
     WallStyle::new(name, edge_style, None, node_style)

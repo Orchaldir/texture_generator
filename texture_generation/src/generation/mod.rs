@@ -62,16 +62,17 @@ mod tests {
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::Data;
     use crate::math::color::{GREEN, RED};
-    use crate::math::shape::Shape;
 
     use super::*;
+    use crate::generation::component::border::BorderComponent;
 
     #[test]
     fn test_generate() {
-        let rectangle = Shape::new_rectangle(2, 4).unwrap();
-        let rendering = RenderingComponent::new_shape("test", rectangle, RED, 200);
-        let component = Component::Rendering(Box::new(rendering));
-        let generator = TextureGenerator::new("test", Size::new(5, 7), GREEN, component);
+        let rendering = RenderingComponent::new_fill_area("test", RED, 200);
+        let rendering_component = Component::Rendering(Box::new(rendering));
+        let border = BorderComponent::new_uniform(1, rendering_component);
+        let border_component = Component::Border(Box::new(border));
+        let generator = TextureGenerator::new("test", Size::new(5, 7), GREEN, border_component);
 
         let data = generator.generate();
 

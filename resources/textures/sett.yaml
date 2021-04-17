@@ -10,14 +10,15 @@ component:
     name: layout
     side: 128
     component:
-      type: Rendering
-      Shape:
-        name: circle
-        shape:
-          Rectangle:
-            width: 120
-            height: 120
-        color:
-          ConstantColor: "#808080"
-        depth:
-          Uniform: 25
+      type: Border
+      UniformBorder:
+        border: 4
+        component:
+          type: Rendering
+          Shape:
+            name: circle
+            shape_factory: Rectangle
+            color:
+              ConstantColor: "#808080"
+            depth:
+              Uniform: 25

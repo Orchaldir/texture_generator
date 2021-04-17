@@ -3,7 +3,7 @@ use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::color::{Color, PINK};
-use crate::math::shape::Shape;
+use crate::math::shape_factory::ShapeFactory;
 
 pub mod color;
 pub mod depth;
@@ -20,7 +20,7 @@ pub enum RenderingComponent {
     /// Renders a [`Shape`].
     Shape {
         name: String,
-        shape: Shape,
+        shape_factory: ShapeFactory,
         color_selector: ColorSelector,
         depth_calculator: DepthCalculator,
     },
@@ -41,13 +41,13 @@ impl RenderingComponent {
 
     pub fn new_shape<S: Into<String>>(
         name: S,
-        shape: Shape,
+        shape_factory: ShapeFactory,
         color: Color,
         depth: u8,
     ) -> RenderingComponent {
         RenderingComponent::new_shape_with_depth(
             name,
-            shape,
+            shape_factory,
             ColorSelector::ConstantColor(color),
             DepthCalculator::Uniform(depth),
         )
@@ -55,16 +55,21 @@ impl RenderingComponent {
 
     pub fn new_shape_with_depth<S: Into<String>>(
         name: S,
-        shape: Shape,
+        shape_factory: ShapeFactory,
         color_selector: ColorSelector,
         depth_calculator: DepthCalculator,
     ) -> RenderingComponent {
         RenderingComponent::Shape {
             name: name.into(),
-            shape,
+            shape_factory,
             color_selector,
             depth_calculator,
         }
+    }
+
+    /// Flips between horizontal & vertical mode.
+    pub fn flip(&self) -> RenderingComponent {
+        self.clone()
     }
 
     /// Renders the texture in the area defined by the [`AABB`].
@@ -89,7 +94,7 @@ impl RenderingComponent {
                 }
             }
             RenderingComponent::Shape {
-                shape,
+                shape_factory,
                 color_selector,
                 depth_calculator,
                 ..
@@ -100,23 +105,24 @@ impl RenderingComponent {
                 let center = inner.center();
                 let color = color_selector.select();
                 let base_depth = data.get_base_depth();
+                if let Ok(shape) = shape_factory.create_shape(inner) {
+                    while point.y < end.y {
+                        point.x = start.x;
 
-                while point.y < end.y {
-                    point.x = start.x;
+                        while point.x < end.x {
+                            let distance = shape.distance(&center, &point);
 
-                    while point.x < end.x {
-                        let distance = shape.distance(&center, &point);
+                            if distance <= 1.0 {
+                                let depth = depth_calculator.calculate(distance);
+                                let depth = base_depth.saturating_add(depth);
+                                data.set(&point, &color, depth);
+                            }
 
-                        if distance <= 1.0 {
-                            let depth = depth_calculator.calculate(distance);
-                            let depth = base_depth.saturating_add(depth);
-                            data.set(&point, &color, depth);
+                            point.x += 1;
                         }
 
-                        point.x += 1;
+                        point.y += 1;
                     }
-
-                    point.y += 1;
                 }
             }
         }
@@ -130,6 +136,7 @@ mod tests {
     use crate::math::color::{RED, WHITE};
     use crate::math::point::Point;
     use crate::math::size::Size;
+    use ShapeFactory::Rectangle;
 
     #[test]
     fn test_render_fill_area() {
@@ -173,44 +180,39 @@ mod tests {
 
     #[test]
     fn test_render_shape() {
-        let size = Size::new(4, 6);
-        let data_size = Size::new(6, 9);
+        let size = Size::new(3, 4);
+        let data_size = Size::new(5, 7);
         let start = Point::new(1, 2);
-        let rectangle = Shape::new_rectangle(2, 4).unwrap();
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = RuntimeData::with_base_depth(data_size, WHITE, 10);
-        let renderer = RenderingComponent::new_shape("test", rectangle, RED, 200);
+        let mut data = RuntimeData::with_base_depth(data_size, WHITE, 3);
+        let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 42);
 
         renderer.render(&mut data, &outer, &aabb);
 
         #[rustfmt::skip]
-        let colors = vec![
-            WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE, WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
+            let colors = vec![
+            WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
         assert_eq!(data.get_color_data(), &colors);
 
         #[rustfmt::skip]
-        let depth = vec![
-            0, 0,   0,   0,   0, 0,
-            0, 0,   0,   0,   0, 0,
-            0, 0,   0,   0,   0, 0,
-            0, 0, 210, 210, 210, 0,
-            0, 0, 210, 210, 210, 0,
-            0, 0, 210, 210, 210, 0,
-            0, 0, 210, 210, 210, 0,
-            0, 0, 210, 210, 210, 0,
-            0, 0,   0,   0,   0, 0,
+            let depth = vec![
+            0,  0,  0,  0, 0,
+            0,  0,  0,  0, 0,
+            0, 45, 45, 45, 0,
+            0, 45, 45, 45, 0,
+            0, 45, 45, 45, 0,
+            0, 45, 45, 45, 0,
+            0,  0,  0,  0, 0,
         ];
 
         assert_eq!(data.get_depth_data(), &depth);
@@ -221,12 +223,11 @@ mod tests {
         let size = Size::new(4, 2);
         let data_size = Size::square(4);
         let start = Point::new(-2, -1);
-        let rectangle = Shape::new_rectangle(4, 2).unwrap();
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
         let mut data = RuntimeData::new(data_size, WHITE);
-        let renderer = RenderingComponent::new_shape("test", rectangle, RED, 200);
+        let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 200);
 
         renderer.render(&mut data, &outer, &aabb);
 
