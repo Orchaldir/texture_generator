@@ -293,7 +293,7 @@ fn main() {
         args.tile_size, args.wall_height
     );
 
-    let ambient_occlusion = AmbientOcclusion::new(50, -150.0, -1.0);
+    let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.5);
     let resources = Resources::new(
         texture_mgr,
         crate_wall_styles(8),
