@@ -116,6 +116,40 @@ impl LayoutComponent {
         })
     }
 
+    /// Flips between horizontal & vertical mode.
+    pub fn flip(&self) -> LayoutComponent {
+        match self.clone() {
+            LayoutComponent::BrickWall {
+                name,
+                brick,
+                offset,
+                component,
+            } => LayoutComponent::BrickWall {
+                name,
+                brick,
+                offset,
+                component: component.flip(),
+            },
+            LayoutComponent::RepeatX { size, component } => LayoutComponent::RepeatY {
+                size,
+                component: component.flip(),
+            },
+            LayoutComponent::RepeatY { size, component } => LayoutComponent::RepeatX {
+                size,
+                component: component.flip(),
+            },
+            LayoutComponent::Square {
+                name,
+                side,
+                component,
+            } => LayoutComponent::Square {
+                name,
+                side,
+                component: component.flip(),
+            },
+        }
+    }
+
     /// Generates the layout in the area defined by the [`AABB`].
     pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
         match self {
@@ -268,7 +302,9 @@ mod tests {
         let size = Size::new(5, 15);
         let aabb = AABB::with_size(size);
         let mut data = RuntimeData::new(size, WHITE);
-        let layout = LayoutComponent::new_repeat_y(5, create_component()).unwrap();
+        let layout = LayoutComponent::new_repeat_x(5, create_component())
+            .unwrap()
+            .flip();
 
         layout.generate(&mut data, &aabb);
 

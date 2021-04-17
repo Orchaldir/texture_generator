@@ -67,6 +67,11 @@ impl RenderingComponent {
         }
     }
 
+    /// Flips between horizontal & vertical mode.
+    pub fn flip(&self) -> RenderingComponent {
+        self.clone()
+    }
+
     /// Renders the texture in the area defined by the [`AABB`].
     pub fn render(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
         match self {
