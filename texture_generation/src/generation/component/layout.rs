@@ -27,6 +27,8 @@ pub enum LayoutComponent {
         offset: i32,
         component: Component,
     },
+    /// Repeats a component along the x-axis.
+    RepeatX { size: u32, component: Component },
     /// A grid of squares that have the same size.
     ///
     /// # Diagram
@@ -80,6 +82,14 @@ impl LayoutComponent {
         })
     }
 
+    pub fn new_repeat_x(size: u32, component: Component) -> Result<LayoutComponent, ValueError> {
+        if size < 1 {
+            return Err(ValueError::value_too_small("repeat_x", "size", size));
+        }
+
+        Ok(LayoutComponent::RepeatX { size, component })
+    }
+
     pub fn new_square<S: Into<String>>(
         name: S,
         side: u32,
@@ -121,6 +131,20 @@ impl LayoutComponent {
 
                     point.y += brick.height() as i32;
                     is_offset_row = !is_offset_row;
+                }
+            }
+            LayoutComponent::RepeatX { size, component } => {
+                let mut point = aabb.start();
+                let inner_size = Size::new(*size, aabb.size().height());
+                let end = aabb.end().x;
+                let step = *size as i32;
+
+                while point.x < end {
+                    let inner_aabb = AABB::new(point, inner_size);
+
+                    component.generate(data, aabb, &inner_aabb);
+
+                    point.x += step;
                 }
             }
             LayoutComponent::Square {
@@ -195,6 +219,33 @@ mod tests {
             WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
             WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
             WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+        ];
+
+        assert_eq!(data.get_color_data(), &expected_colors);
+    }
+
+    #[test]
+    fn test_repeat_x() {
+        let size = Size::new(15, 5);
+        let aabb = AABB::with_size(size);
+
+        let mut data = RuntimeData::new(size, WHITE);
+
+        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
+        let rendering_component = Component::Rendering(Box::new(renderer));
+        let border = BorderComponent::new_uniform(1, rendering_component);
+        let border_component = Component::Border(Box::new(border));
+        let layout = LayoutComponent::new_repeat_x(5, border_component).unwrap();
+
+        layout.generate(&mut data, &aabb);
+
+        #[rustfmt::skip]
+            let expected_colors = vec![
+            WHITE, WHITE, WHITE, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,  WHITE,   RED,   RED,   RED, WHITE,  WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,  WHITE,   RED,   RED,   RED, WHITE,  WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,  WHITE,   RED,   RED,   RED, WHITE,  WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
         assert_eq!(data.get_color_data(), &expected_colors);

@@ -24,10 +24,7 @@ pub enum BorderComponent {
     ///   |        |
     ///   *--*--*--*
     /// ```
-    UniformBorder {
-        border: u32,
-        component: Component,
-    },
+    UniformBorder { border: u32, component: Component },
 }
 
 impl BorderComponent {
