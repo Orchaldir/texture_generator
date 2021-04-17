@@ -151,7 +151,9 @@ impl LayoutComponent {
     }
 
     /// Generates the layout in the area defined by the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, aabb: &AABB) {
+    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+        let limited = outer.limit(inner);
+
         match self {
             LayoutComponent::BrickWall {
                 brick,
@@ -159,16 +161,16 @@ impl LayoutComponent {
                 component,
                 ..
             } => {
-                let mut point = aabb.start();
+                let mut point = inner.start();
                 let mut is_offset_row = false;
 
-                while point.y < aabb.end().y {
-                    point.x = aabb.start().x + if is_offset_row { *offset } else { 0 };
+                while point.y < inner.end().y {
+                    point.x = inner.start().x + if is_offset_row { *offset } else { 0 };
 
-                    while point.x < aabb.end().x {
-                        let square_aabb = AABB::new(point, *brick);
+                    while point.x < inner.end().x {
+                        let aabb = AABB::new(point, *brick);
 
-                        component.generate(data, aabb, &square_aabb);
+                        component.generate(data, &limited, &aabb);
 
                         point.x += brick.width() as i32;
                     }
@@ -178,29 +180,29 @@ impl LayoutComponent {
                 }
             }
             LayoutComponent::RepeatX { size, component } => {
-                let mut point = aabb.start();
-                let inner_size = Size::new(*size, aabb.size().height());
-                let end = aabb.end().x;
+                let mut point = inner.start();
+                let inner_size = Size::new(*size, inner.size().height());
+                let end = inner.end().x;
                 let step = *size as i32;
 
                 while point.x < end {
-                    let inner_aabb = AABB::new(point, inner_size);
+                    let aabb = AABB::new(point, inner_size);
 
-                    component.generate(data, aabb, &inner_aabb);
+                    component.generate(data, &limited, &aabb);
 
                     point.x += step;
                 }
             }
             LayoutComponent::RepeatY { size, component } => {
-                let mut point = aabb.start();
-                let inner_size = Size::new(aabb.size().width(), *size);
-                let end = aabb.end().y;
+                let mut point = inner.start();
+                let inner_size = Size::new(inner.size().width(), *size);
+                let end = inner.end().y;
                 let step = *size as i32;
 
                 while point.y < end {
-                    let inner_aabb = AABB::new(point, inner_size);
+                    let aabb = AABB::new(point, inner_size);
 
-                    component.generate(data, aabb, &inner_aabb);
+                    component.generate(data, &limited, &aabb);
 
                     point.y += step;
                 }
@@ -208,18 +210,18 @@ impl LayoutComponent {
             LayoutComponent::Square {
                 side, component, ..
             } => {
-                let mut point = aabb.start();
+                let mut point = inner.start();
                 let square_size = Size::square(*side);
-                let end = aabb.end() - square_size;
+                let end = inner.end() - square_size;
                 let step = *side as i32;
 
                 while point.y <= end.y {
-                    point.x = aabb.start().x;
+                    point.x = inner.start().x;
 
                     while point.x <= end.x {
-                        let square_aabb = AABB::new(point, square_size);
+                        let aabb = AABB::new(point, square_size);
 
-                        component.generate(data, aabb, &square_aabb);
+                        component.generate(data, &limited, &aabb);
 
                         point.x += step;
                     }
@@ -250,7 +252,7 @@ mod tests {
             LayoutComponent::new_brick_wall("test", Size::square(5), 2, create_component())
                 .unwrap();
 
-        layout.generate(&mut data, &aabb);
+        layout.generate(&mut data, &aabb, &aabb);
 
         #[rustfmt::skip]
         let expected_colors = vec![
@@ -283,7 +285,7 @@ mod tests {
         let mut data = RuntimeData::new(size, WHITE);
         let layout = LayoutComponent::new_repeat_x(5, create_component()).unwrap();
 
-        layout.generate(&mut data, &aabb);
+        layout.generate(&mut data, &aabb, &aabb);
 
         #[rustfmt::skip]
             let expected_colors = vec![
@@ -306,7 +308,7 @@ mod tests {
             .unwrap()
             .flip();
 
-        layout.generate(&mut data, &aabb);
+        layout.generate(&mut data, &aabb, &aabb);
 
         #[rustfmt::skip]
             let expected_colors = vec![
@@ -339,7 +341,7 @@ mod tests {
         let mut data = RuntimeData::new(size, WHITE);
         let layout = LayoutComponent::new_square("test", 5, create_component()).unwrap();
 
-        layout.generate(&mut data, &aabb);
+        layout.generate(&mut data, &aabb, &aabb);
 
         #[rustfmt::skip]
         let expected_colors = vec![

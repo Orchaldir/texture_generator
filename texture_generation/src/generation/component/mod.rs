@@ -32,7 +32,7 @@ impl Component {
     pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
         match self {
             Component::Border(component) => component.generate(data, outer, inner),
-            Component::Layout(component) => component.generate(data, inner),
+            Component::Layout(component) => component.generate(data, outer, inner),
             Component::Mock(id) => info!("Generate mock {}", *id),
             Component::Rendering(component) => component.render(data, outer, inner),
         }
