@@ -1,16 +1,17 @@
 use crate::generation::data::Data;
+use crate::math::size::Size;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct AmbientOcclusion {
-    radius: u32,
+    step: u8,
     max_diff: f32,
     max_penalty: f32,
 }
 
 impl AmbientOcclusion {
-    pub fn new(radius: u32, max_diff: f32, max_penalty: f32) -> AmbientOcclusion {
+    pub fn new(step: u8, max_diff: f32, max_penalty: f32) -> AmbientOcclusion {
         AmbientOcclusion {
-            radius,
+            step,
             max_diff,
             max_penalty,
         }
@@ -20,24 +21,28 @@ impl AmbientOcclusion {
         info!("Post Processing: Ambient Occlusion");
 
         let size = *data.get_size();
-        let max_x = size.width().saturating_sub(self.radius);
-        let max_y = size.height().saturating_sub(self.radius);
+        let mut depth = data.get_depth_data().to_owned();
 
-        for y in self.radius..max_y {
+        info!("Star blurring");
+
+        blur_right_down(size, &mut depth, self.step);
+        blur_left_up(size, &mut depth, self.step);
+
+        for y in 0..size.height() {
             info!("Line {}/{}", y + 1, size.height());
 
-            let mut index = size.convert_x_y(self.radius, y);
+            let mut index = size.convert_x_y(0, y);
 
-            for x in self.radius..max_x {
+            for _x in 0..size.width() {
                 let current = data.get_depth_data()[index];
+                let blurred = depth[index];
 
-                if current == 0 {
+                if blurred == 0 {
                     index += 1;
                     continue;
                 }
 
-                let average = self.calculate_average_depth(data, x, y);
-                let diff = (current as f32 - average as f32).min(0.0);
+                let diff = (current as f32 - blurred as f32).min(0.0);
                 let factor = diff.max(self.max_diff) / self.max_diff;
                 let penalty = factor * self.max_penalty;
 
@@ -49,32 +54,46 @@ impl AmbientOcclusion {
             }
         }
     }
+}
 
-    fn calculate_average_depth(&self, data: &dyn Data, x: u32, y: u32) -> u8 {
-        let mut sum = 0u32;
-        let mut pixels = 0u32;
-        let depth_data = data.get_depth_data();
-        let size = data.get_size();
+fn blur_right_down(size: Size, depth: &mut Vec<u8>, step: u8) {
+    let width = size.width();
 
-        let start_x = x - self.radius;
-        let start_y = y - self.radius;
-        let end_y = y + self.radius - 1;
-        let side = self.radius * 2;
+    for y in 1..size.height() {
+        let mut index = size.convert_x_y(1, y);
+        let mut last_depth = depth[index - 1];
 
-        for i in 0..side {
-            let index_x = size.convert_x_y(start_x + i, y);
-            let index_y = size.convert_x_y(x, start_y + i);
-            let index_d0 = size.convert_x_y(start_x + i, start_y + i);
-            let index_d1 = size.convert_x_y(start_x + i, end_y - i);
+        for _x in 1..width {
+            let last_line = depth[index - width as usize];
+            let previous = last_depth.max(last_line).saturating_sub(step);
+            let current = depth[index];
+            let new = previous.max(current);
 
-            sum += depth_data[index_x] as u32;
-            sum += depth_data[index_y] as u32;
-            sum += depth_data[index_d0] as u32;
-            sum += depth_data[index_d1] as u32;
-
-            pixels += 4;
+            depth[index] = new;
+            last_depth = new;
+            index += 1;
         }
+    }
+}
 
-        (sum / pixels) as u8
+fn blur_left_up(size: Size, depth: &mut Vec<u8>, step: u8) {
+    let width = size.width();
+    let start_x = width - 2;
+    let start_y = size.height() - 2;
+
+    for y in (0..start_y).rev() {
+        let mut index = size.convert_x_y(start_x, y);
+        let mut last_depth = depth[index + 1];
+
+        for _x in (0..start_x).rev() {
+            let last_line = depth[index + width as usize];
+            let previous = last_depth.max(last_line).saturating_sub(step);
+            let current = depth[index];
+            let new = previous.max(current);
+
+            depth[index] = new;
+            last_depth = new;
+            index -= 1;
+        }
     }
 }
