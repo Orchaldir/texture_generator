@@ -23,9 +23,10 @@ pub mod node;
 pub mod style;
 
 pub struct Resources {
-    pub textures: ResourceManager<TextureGenerator>,
-    pub wall_styles: ResourceManager<WallStyle<NodeStyle>>,
     pub door_styles: ResourceManager<DoorStyle>,
+    pub node_styles: ResourceManager<NodeStyle>,
+    pub textures: ResourceManager<TextureGenerator>,
+    pub wall_styles: ResourceManager<WallStyle>,
     pub window_styles: ResourceManager<WindowStyle>,
     pub post_processes: Vec<PostProcess>,
 }
@@ -37,21 +38,24 @@ impl Resources {
             ResourceManager::default(),
             ResourceManager::default(),
             ResourceManager::default(),
+            ResourceManager::default(),
             Vec::default(),
         )
     }
 
     pub fn new(
-        textures: ResourceManager<TextureGenerator>,
-        wall_styles: ResourceManager<WallStyle<NodeStyle>>,
         door_styles: ResourceManager<DoorStyle>,
+        node_styles: ResourceManager<NodeStyle>,
+        textures: ResourceManager<TextureGenerator>,
+        wall_styles: ResourceManager<WallStyle>,
         window_styles: ResourceManager<WindowStyle>,
         post_processes: Vec<PostProcess>,
     ) -> Self {
         Resources {
+            door_styles,
+            node_styles,
             textures,
             wall_styles,
-            door_styles,
             window_styles,
             post_processes,
         }
@@ -119,7 +123,11 @@ impl Renderer {
 
     fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
         data.set_base_depth(1);
-        let nodes = calculate_node_styles(&self.resources.wall_styles, tilemap);
+        let nodes = calculate_node_styles(
+            &self.resources.node_styles,
+            &self.resources.wall_styles,
+            tilemap,
+        );
         self.render_horizontal_borders(tilemap, &nodes, &mut data);
         self.render_vertical_borders(tilemap, &nodes, &mut data);
         self.render_nodes(tilemap, &nodes, &mut data);

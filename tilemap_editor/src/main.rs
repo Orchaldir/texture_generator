@@ -296,10 +296,11 @@ fn main() {
 
     let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.5);
     let resources = Resources::new(
+        create_door_styles(8),
+        create_node_styles(8),
         texture_mgr,
-        crate_wall_styles(8),
-        crate_door_styles(8),
-        crate_window_styles(8),
+        create_wall_styles(8),
+        create_window_styles(8),
         vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
     );
     let renderer = tilemap::rendering::Renderer::new(args.tile_size, args.wall_height, resources);
@@ -307,10 +308,11 @@ fn main() {
     info!("Init preview renderer: tile_size={}", args.preview_size);
 
     let preview_resources = Resources::new(
+        create_door_styles(1),
+        create_node_styles(1),
         preview_texture_mgr,
-        crate_wall_styles(1),
-        crate_door_styles(1),
-        crate_window_styles(1),
+        create_wall_styles(1),
+        create_window_styles(1),
         Vec::default(),
     );
     let preview_renderer =
@@ -327,50 +329,56 @@ fn main() {
     window.run(app);
 }
 
-fn crate_wall_styles(factor: u32) -> ResourceManager<WallStyle<NodeStyle>> {
-    let style0 = crate_wall_style("stone", Color::gray(100), BLUE, 10 * factor, 16 * factor);
+fn create_wall_styles(factor: u32) -> ResourceManager<WallStyle> {
+    let style0 = create_wall_style("stone", Color::gray(100), 0, 10 * factor);
     let brown = Color::convert(&"#8B4513").unwrap();
-    let style1 = crate_wall_style("wood", brown, brown, 6 * factor, 10 * factor);
-    let default_node = NodeStyle::default_with_size(16 * factor);
-    let default_wall = WallStyle::default(10 * factor, default_node);
+    let style1 = create_wall_style("wood", brown, 1, 6 * factor);
+    let default_wall = WallStyle::default(10 * factor);
     ResourceManager::new(vec![style0, style1], default_wall)
 }
 
-fn crate_wall_style(
-    name: &str,
-    edge: Color,
-    node: Color,
-    thickness: u32,
-    node_size: u32,
-) -> WallStyle<NodeStyle> {
+fn create_wall_style(name: &str, edge: Color, node: usize, thickness: u32) -> WallStyle {
     let edge_rendering =
         RenderingComponent::new_shape("wall", ShapeFactory::RoundedRectangle(0.5), edge, 250);
     let edge_component = Component::Rendering(Box::new(edge_rendering));
     let edge_layout = LayoutComponent::new_repeat_x(thickness * 2, edge_component).unwrap();
     let edge_style = EdgeStyle::new_layout(thickness, edge_layout);
-    let node_component = RenderingComponent::new_fill_area("node", node, 250);
-    let node_style = NodeStyle::new(node_size, node_component);
-    WallStyle::new(name, edge_style, None, node_style)
+    WallStyle::new(name, edge_style, None, node)
 }
 
-fn crate_door_styles(factor: u32) -> ResourceManager<DoorStyle> {
+fn create_node_styles(factor: u32) -> ResourceManager<NodeStyle> {
+    let brown = Color::convert(&"#8B4513").unwrap();
+    let style0 = create_node_style(BLUE, 16 * factor);
+    let style1 = create_node_style(brown, 10 * factor);
+    ResourceManager::new(
+        vec![style0, style1],
+        NodeStyle::default_with_size(6 * factor),
+    )
+}
+
+fn create_node_style(color: Color, size: u32) -> NodeStyle {
+    let component = RenderingComponent::new_fill_area("door", color, 220);
+    NodeStyle::new(size, component)
+}
+
+fn create_door_styles(factor: u32) -> ResourceManager<DoorStyle> {
     let brown = Color::convert(&"#B8860B").unwrap();
-    let style = crate_door_style("wooden", brown, 6 * factor);
+    let style = create_door_style("wooden", brown, 6 * factor);
     ResourceManager::new(vec![style], DoorStyle::default(6 * factor))
 }
 
-fn crate_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {
+fn create_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {
     let edge_component = RenderingComponent::new_fill_area("door", color, 220);
     let edge_style = EdgeStyle::new_solid(thickness, edge_component);
     DoorStyle::new(name, edge_style, false)
 }
 
-fn crate_window_styles(factor: u32) -> ResourceManager<WindowStyle> {
-    let style = crate_window_style("glass", CYAN, 2 * factor, Color::gray(100), 16 * factor);
+fn create_window_styles(factor: u32) -> ResourceManager<WindowStyle> {
+    let style = create_window_style("glass", CYAN, 2 * factor, Color::gray(100), 16 * factor);
     ResourceManager::new(vec![style], WindowStyle::default(6 * factor))
 }
 
-fn crate_window_style(
+fn create_window_style(
     name: &str,
     pane_color: Color,
     pane_thickness: u32,
