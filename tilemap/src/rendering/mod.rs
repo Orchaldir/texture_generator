@@ -1,6 +1,7 @@
 use crate::rendering::node::calculate_node_styles;
 use crate::rendering::style::door::DoorStyle;
-use crate::rendering::style::wall::{NodeStyle, WallStyle};
+use crate::rendering::style::node::NodeStyle;
+use crate::rendering::style::wall::WallStyle;
 use crate::rendering::style::window::WindowStyle;
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use crate::tilemap::node::{
