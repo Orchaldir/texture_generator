@@ -101,7 +101,7 @@ fn select_best_node_style(
             return get_node_style(wall_styles, top_style.0);
         }
 
-        return get_corner_style(wall_styles, top_style.0);
+        return Some(get_corner_style(wall_styles, top_style.0));
     } else if top_styles.len() > 1 {
         let side_count = top_styles[0].1.len();
 
@@ -112,14 +112,14 @@ fn select_best_node_style(
             let is_straight1 = is_straight(style1);
 
             if is_straight0 && !is_straight1 {
-                return get_corner_style(wall_styles, style0.0);
+                return Some(get_corner_style(wall_styles, style0.0));
             } else if is_straight1 && !is_straight0 {
-                return get_corner_style(wall_styles, style1.0);
+                return Some(get_corner_style(wall_styles, style1.0));
             }
         }
 
         let best_id = select_best_wall_style(wall_styles, top_styles);
-        return get_corner_style(wall_styles, best_id);
+        return Some(get_corner_style(wall_styles, best_id));
     }
 
     None
@@ -144,8 +144,8 @@ fn select_best_wall_style(
     best_id
 }
 
-fn get_corner_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> Option<usize> {
-    Some(wall_styles.get(index).get_corner_style())
+fn get_corner_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> usize {
+    wall_styles.get(index).get_corner_style()
 }
 
 fn get_node_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> Option<usize> {
