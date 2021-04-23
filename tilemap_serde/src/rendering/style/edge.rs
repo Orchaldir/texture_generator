@@ -25,7 +25,7 @@ impl EdgeDefinition {
                 convert(*thickness, factor),
                 layout.convert(factor)?,
             )),
-            EdgeDefinition::Mock(value) => Ok(EdgeStyle::Mock(*value)),
+            EdgeDefinition::Mock(value) => Ok(EdgeStyle::Mock(convert(*value, factor))),
             EdgeDefinition::Solid {
                 thickness,
                 component,
