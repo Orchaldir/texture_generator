@@ -38,6 +38,7 @@ use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
+use tilemap_serde::rendering::style::door::DoorDefinition;
 
 #[derive(Copy, Clone)]
 enum Mode {
@@ -60,9 +61,9 @@ impl Mode {
 #[structopt(name = "texture_generator")]
 /// The arguments of the application.
 struct Cli {
-    /// The path of the texture definitions.
-    #[structopt(parse(from_os_str), default_value = "resources/textures/")]
-    texture_path: PathBuf,
+    /// The path of the resource definitions.
+    #[structopt(parse(from_os_str), default_value = "resources/")]
+    resource_path: PathBuf,
 
     /// The width of the tilemap.
     #[structopt(default_value = "14")]
@@ -258,11 +259,15 @@ fn main() {
 
     let args = Cli::from_args();
 
-    info!("Load texture definitions from {:?}", args.texture_path);
+    info!("Load definitions from {:?}", args.resource_path);
 
     let definitions = read_dir("resources/textures/".as_ref());
 
     info!("Loaded {} texture definitions", definitions.len());
+
+    let door_definitions: Vec<DoorDefinition> = read_dir("resources/styles/doors/".as_ref());
+
+    info!("Loaded {} door definitions", door_definitions.len());
 
     let texture_mgr = into_manager(&definitions, args.tile_size);
 

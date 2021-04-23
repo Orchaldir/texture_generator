@@ -1,0 +1,12 @@
+---
+name: "Wooden Door"
+size: 512
+is_centered: false
+edge_style:
+  Solid:
+    thickness: 48
+    component:
+      FillArea:
+        name: "Door"
+        color: "#B8860B"
+        depth: 220
