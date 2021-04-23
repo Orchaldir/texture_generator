@@ -13,6 +13,7 @@ pub enum LayoutDefinition {
         offset: u32,
         component: ComponentDefinition,
     },
+    Mock(u32),
     Square {
         name: String,
         side: u32,
@@ -38,6 +39,7 @@ impl LayoutDefinition {
                 )?;
                 Ok(layout)
             }
+            LayoutDefinition::Mock(id) => Ok(LayoutComponent::Mock(*id)),
             LayoutDefinition::Square {
                 name,
                 side,
