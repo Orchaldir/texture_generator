@@ -27,7 +27,6 @@ use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::{into_manager, ResourceManager};
-use tilemap::rendering::style::door::DoorStyle;
 use tilemap::rendering::style::edge::EdgeStyle;
 use tilemap::rendering::style::node::NodeStyle;
 use tilemap::rendering::style::wall::WallStyle;
@@ -302,7 +301,7 @@ fn main() {
 
     let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.5);
     let resources = Resources::new(
-        create_door_styles(8),
+        into_manager(&door_definitions, args.tile_size),
         create_node_styles(8),
         texture_mgr,
         create_wall_styles(8),
@@ -314,7 +313,7 @@ fn main() {
     info!("Init preview renderer: tile_size={}", args.preview_size);
 
     let preview_resources = Resources::new(
-        create_door_styles(1),
+        into_manager(&door_definitions, args.preview_size),
         create_node_styles(1),
         preview_texture_mgr,
         create_wall_styles(1),
@@ -365,18 +364,6 @@ fn create_node_styles(factor: u32) -> ResourceManager<NodeStyle> {
 fn create_node_style(color: Color, size: u32) -> NodeStyle {
     let component = RenderingComponent::new_fill_area("door", color, 220);
     NodeStyle::new(size, component)
-}
-
-fn create_door_styles(factor: u32) -> ResourceManager<DoorStyle> {
-    let brown = Color::convert(&"#B8860B").unwrap();
-    let style = create_door_style("wooden", brown, 6 * factor);
-    ResourceManager::new(vec![style], DoorStyle::default(6 * factor))
-}
-
-fn create_door_style(name: &str, color: Color, thickness: u32) -> DoorStyle {
-    let edge_component = RenderingComponent::new_fill_area("door", color, 220);
-    let edge_style = EdgeStyle::new_solid(thickness, edge_component);
-    DoorStyle::new(name, edge_style, false)
 }
 
 fn create_window_styles(factor: u32) -> ResourceManager<WindowStyle> {

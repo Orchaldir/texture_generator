@@ -1,6 +1,7 @@
 use crate::rendering::style::edge::EdgeDefinition;
 use serde::{Deserialize, Serialize};
 use texture_generation::utils::error::DefinitionError;
+use texture_generation::utils::resource::ResourceDefinition;
 use tilemap::rendering::style::door::DoorStyle;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -11,8 +12,10 @@ pub struct DoorDefinition {
     is_centered: bool,
 }
 
-impl DoorDefinition {
-    pub fn convert(&self, size: u32) -> Result<DoorStyle, DefinitionError> {
+impl ResourceDefinition for DoorDefinition {
+    type R = DoorStyle;
+
+    fn convert(&self, size: u32) -> Result<DoorStyle, DefinitionError> {
         let factor = size as f32 / self.size as f32;
         let edge_style = self.edge_style.convert(factor)?;
         Ok(DoorStyle::new(
