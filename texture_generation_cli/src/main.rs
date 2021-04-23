@@ -11,6 +11,7 @@ use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
 use texture_generation::utils::error::DefinitionError;
 use texture_generation::utils::logging::init_logging;
+use texture_generation::utils::resource::ResourceDefinition;
 
 #[derive(StructOpt)]
 #[structopt(name = "texture_generator")]

@@ -14,7 +14,7 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 use structopt::StructOpt;
-use texture_generation::definition::generation::into_manager;
+use texture_generation::definition::generation::TextureDefinition;
 use texture_generation::definition::read_dir;
 use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
@@ -26,7 +26,7 @@ use texture_generation::math::color::{Color, BLUE, CYAN};
 use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
-use texture_generation::utils::resource::ResourceManager;
+use texture_generation::utils::resource::{into_manager, ResourceManager};
 use tilemap::rendering::style::door::DoorStyle;
 use tilemap::rendering::style::edge::EdgeStyle;
 use tilemap::rendering::style::node::NodeStyle;
@@ -261,7 +261,7 @@ fn main() {
 
     info!("Load definitions from {:?}", args.resource_path);
 
-    let definitions = read_dir("resources/textures/".as_ref());
+    let definitions: Vec<TextureDefinition> = read_dir("resources/textures/".as_ref());
 
     info!("Loaded {} texture definitions", definitions.len());
 
