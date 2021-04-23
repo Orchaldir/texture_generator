@@ -14,7 +14,8 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 use structopt::StructOpt;
-use texture_generation::definition::generation::{into_manager, TextureDefinition};
+use texture_generation::definition::generation::into_manager;
+use texture_generation::definition::read_dir;
 use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::component::Component;
@@ -259,7 +260,7 @@ fn main() {
 
     info!("Load texture definitions from {:?}", args.texture_path);
 
-    let definitions = TextureDefinition::read_dir("resources/textures/".as_ref());
+    let definitions = read_dir("resources/textures/".as_ref());
 
     info!("Loaded {} texture definitions", definitions.len());
 

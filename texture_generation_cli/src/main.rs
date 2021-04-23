@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use structopt::StructOpt;
 use texture_generation::definition::generation::process::PostProcessDefinition;
 use texture_generation::definition::generation::TextureDefinition;
+use texture_generation::definition::read;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
 use texture_generation::utils::error::DefinitionError;
@@ -53,7 +54,7 @@ fn main() -> Result<()> {
 
     info!("Load texture definition");
 
-    let definition = TextureDefinition::read(&args.input)?;
+    let definition: TextureDefinition = read(&args.input)?;
     let generator: TextureGenerator = definition.convert(args.size)?;
     let color_path = format!("{}-color.png", args.output);
     let depth_path = format!("{}-depth.png", args.output);
