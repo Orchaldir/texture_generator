@@ -14,8 +14,6 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 use structopt::StructOpt;
-use texture_generation::definition::generation::TextureDefinition;
-use texture_generation::definition::read_dir;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
@@ -26,11 +24,7 @@ use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
-use tilemap_serde::rendering::from_definitions;
-use tilemap_serde::rendering::style::door::DoorDefinition;
-use tilemap_serde::rendering::style::node::NodeDefinition;
-use tilemap_serde::rendering::style::wall::WallDefinition;
-use tilemap_serde::rendering::style::window::WindowDefinition;
+use tilemap_serde::rendering::resource::ResourceDefinitions;
 
 #[derive(Copy, Clone)]
 enum Mode {
@@ -253,25 +247,7 @@ fn main() {
 
     info!("Load definitions from {:?}", args.resource_path);
 
-    let definitions: Vec<TextureDefinition> = read_dir("resources/textures/".as_ref());
-
-    info!("Loaded {} texture definitions", definitions.len());
-
-    let node_definitions: Vec<NodeDefinition> = read_dir("resources/styles/nodes/".as_ref());
-
-    info!("Loaded {} node definitions", node_definitions.len());
-
-    let door_definitions: Vec<DoorDefinition> = read_dir("resources/styles/doors/".as_ref());
-
-    info!("Loaded {} door definitions", door_definitions.len());
-
-    let wall_definitions: Vec<WallDefinition> = read_dir("resources/styles/walls/".as_ref());
-
-    info!("Loaded {} wall definitions", wall_definitions.len());
-
-    let window_definitions: Vec<WindowDefinition> = read_dir("resources/styles/windows/".as_ref());
-
-    info!("Loaded {} window definitions", window_definitions.len());
+    let definitions = ResourceDefinitions::load(&args.resource_path);
 
     info!("Init tilemap: width={} height={}", args.width, args.height);
 
@@ -295,12 +271,7 @@ fn main() {
     );
 
     let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.5);
-    let resources = from_definitions(
-        &door_definitions,
-        &node_definitions,
-        &definitions,
-        &wall_definitions,
-        &window_definitions,
+    let resources = definitions.convert(
         vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
         args.tile_size,
     );
@@ -308,15 +279,7 @@ fn main() {
 
     info!("Init preview renderer: tile_size={}", args.preview_size);
 
-    let preview_resources = from_definitions(
-        &door_definitions,
-        &node_definitions,
-        &definitions,
-        &wall_definitions,
-        &window_definitions,
-        Vec::default(),
-        args.preview_size,
-    );
+    let preview_resources = definitions.convert(Vec::default(), args.preview_size);
     let preview_renderer =
         tilemap::rendering::Renderer::new(args.preview_size, args.wall_height, preview_resources);
 
