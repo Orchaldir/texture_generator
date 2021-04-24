@@ -16,19 +16,12 @@ use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::definition::generation::TextureDefinition;
 use texture_generation::definition::read_dir;
-use texture_generation::generation::component::layout::LayoutComponent;
-use texture_generation::generation::component::rendering::RenderingComponent;
-use texture_generation::generation::component::Component;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::math::color::Color;
-use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
-use texture_generation::utils::resource::{into_manager, ResourceManager};
-use tilemap::rendering::style::edge::EdgeStyle;
-use tilemap::rendering::style::wall::WallStyle;
+use texture_generation::utils::resource::into_manager;
 use tilemap::rendering::Resources;
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::selector::Selector;
@@ -37,6 +30,7 @@ use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
 use tilemap_serde::rendering::style::door::DoorDefinition;
 use tilemap_serde::rendering::style::node::NodeDefinition;
+use tilemap_serde::rendering::style::wall::WallDefinition;
 use tilemap_serde::rendering::style::window::WindowDefinition;
 
 #[derive(Copy, Clone)]
@@ -272,6 +266,10 @@ fn main() {
 
     info!("Loaded {} door definitions", door_definitions.len());
 
+    let wall_definitions: Vec<WallDefinition> = read_dir("resources/styles/walls/".as_ref());
+
+    info!("Loaded {} wall definitions", wall_definitions.len());
+
     let window_definitions: Vec<WindowDefinition> = read_dir("resources/styles/windows/".as_ref());
 
     info!("Loaded {} window definitions", window_definitions.len());
@@ -312,7 +310,7 @@ fn main() {
         into_manager(&door_definitions, args.tile_size),
         into_manager(&node_definitions, args.tile_size),
         texture_mgr,
-        create_wall_styles(8),
+        into_manager(&wall_definitions, args.tile_size),
         into_manager(&window_definitions, args.tile_size),
         vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
     );
@@ -324,7 +322,7 @@ fn main() {
         into_manager(&door_definitions, args.preview_size),
         into_manager(&node_definitions, args.preview_size),
         preview_texture_mgr,
-        create_wall_styles(1),
+        into_manager(&wall_definitions, args.preview_size),
         into_manager(&window_definitions, args.preview_size),
         Vec::default(),
     );
@@ -340,21 +338,4 @@ fn main() {
     let app = Rc::new(RefCell::new(editor));
 
     window.run(app);
-}
-
-fn create_wall_styles(factor: u32) -> ResourceManager<WallStyle> {
-    let style0 = create_wall_style("stone", Color::gray(100), 0, 10 * factor);
-    let brown = Color::convert(&"#8B4513").unwrap();
-    let style1 = create_wall_style("wood", brown, 1, 6 * factor);
-    let default_wall = WallStyle::default(10 * factor);
-    ResourceManager::new(vec![style0, style1], default_wall)
-}
-
-fn create_wall_style(name: &str, edge: Color, node: usize, thickness: u32) -> WallStyle {
-    let edge_rendering =
-        RenderingComponent::new_shape("wall", ShapeFactory::RoundedRectangle(0.5), edge, 250);
-    let edge_component = Component::Rendering(Box::new(edge_rendering));
-    let edge_layout = LayoutComponent::new_repeat_x(thickness * 2, edge_component).unwrap();
-    let edge_style = EdgeStyle::new_layout(thickness, edge_layout);
-    WallStyle::new(name, edge_style, None, node)
 }

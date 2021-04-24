@@ -1,0 +1,20 @@
+---
+name: "Wooden Wall"
+tile_size: 512
+edge_style:
+  Layout:
+    thickness: 48
+    layout:
+      RepeatX:
+        size: 96
+        component:
+          type: Rendering
+          Shape:
+            name: "plank"
+            shape_factory:
+              RoundedRectangle: 0.5
+            color:
+              ConstantColor: "#8B4513"
+            depth:
+              Uniform: 250
+corner_style: 1
