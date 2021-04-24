@@ -1,0 +1,20 @@
+---
+name: "glass window with stone stool"
+size: 512
+is_centered: false
+pane_style:
+  Solid:
+    thickness: 16
+    component:
+      FillArea:
+        name: "pane"
+        color: "#00FFFF"
+        depth: 100
+stool_style:
+  Solid:
+    thickness: 128
+    component:
+      FillArea:
+        name: "stool"
+        color: "#646464"
+        depth: 100

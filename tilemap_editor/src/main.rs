@@ -22,7 +22,7 @@ use texture_generation::generation::component::Component;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::math::color::{Color, BLUE, CYAN};
+use texture_generation::math::color::{Color, BLUE};
 use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
@@ -30,7 +30,6 @@ use texture_generation::utils::resource::{into_manager, ResourceManager};
 use tilemap::rendering::style::edge::EdgeStyle;
 use tilemap::rendering::style::node::NodeStyle;
 use tilemap::rendering::style::wall::WallStyle;
-use tilemap::rendering::style::window::WindowStyle;
 use tilemap::rendering::Resources;
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::selector::Selector;
@@ -38,6 +37,7 @@ use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
 use tilemap_serde::rendering::style::door::DoorDefinition;
+use tilemap_serde::rendering::style::window::WindowDefinition;
 
 #[derive(Copy, Clone)]
 enum Mode {
@@ -268,6 +268,10 @@ fn main() {
 
     info!("Loaded {} door definitions", door_definitions.len());
 
+    let window_definitions: Vec<WindowDefinition> = read_dir("resources/styles/windows/".as_ref());
+
+    info!("Loaded {} window definitions", window_definitions.len());
+
     let texture_mgr = into_manager(&definitions, args.tile_size);
 
     if texture_mgr.is_empty() {
@@ -305,7 +309,7 @@ fn main() {
         create_node_styles(8),
         texture_mgr,
         create_wall_styles(8),
-        create_window_styles(8),
+        into_manager(&window_definitions, args.tile_size),
         vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
     );
     let renderer = tilemap::rendering::Renderer::new(args.tile_size, args.wall_height, resources);
@@ -317,7 +321,7 @@ fn main() {
         create_node_styles(1),
         preview_texture_mgr,
         create_wall_styles(1),
-        create_window_styles(1),
+        into_manager(&window_definitions, args.preview_size),
         Vec::default(),
     );
     let preview_renderer =
@@ -364,23 +368,4 @@ fn create_node_styles(factor: u32) -> ResourceManager<NodeStyle> {
 fn create_node_style(color: Color, size: u32) -> NodeStyle {
     let component = RenderingComponent::new_fill_area("door", color, 220);
     NodeStyle::new(size, component)
-}
-
-fn create_window_styles(factor: u32) -> ResourceManager<WindowStyle> {
-    let style = create_window_style("glass", CYAN, 2 * factor, Color::gray(100), 16 * factor);
-    ResourceManager::new(vec![style], WindowStyle::default(6 * factor))
-}
-
-fn create_window_style(
-    name: &str,
-    pane_color: Color,
-    pane_thickness: u32,
-    stool_color: Color,
-    stool_thickness: u32,
-) -> WindowStyle {
-    let pane_component = RenderingComponent::new_fill_area("pane", pane_color, 100);
-    let pane_style = EdgeStyle::new_solid(pane_thickness, pane_component);
-    let stool_component = RenderingComponent::new_fill_area("stool", stool_color, 100);
-    let stool_style = EdgeStyle::new_solid(stool_thickness, stool_component);
-    WindowStyle::new(name, pane_style, stool_style)
 }
