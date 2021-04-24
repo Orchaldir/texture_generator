@@ -7,7 +7,7 @@ use tilemap::rendering::style::window::WindowStyle;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WindowDefinition {
     name: String,
-    size: u32,
+    tile_size: u32,
     pane_style: EdgeDefinition,
     stool_style: EdgeDefinition,
 }
@@ -16,7 +16,7 @@ impl ResourceDefinition for WindowDefinition {
     type R = WindowStyle;
 
     fn convert(&self, size: u32) -> Result<WindowStyle, DefinitionError> {
-        let factor = size as f32 / self.size as f32;
+        let factor = size as f32 / self.tile_size as f32;
         let pane_style = self.pane_style.convert(factor)?;
         let stool_style = self.stool_style.convert(factor)?;
         Ok(WindowStyle::new(self.name.clone(), pane_style, stool_style))
@@ -32,7 +32,7 @@ mod tests {
     fn test_convert() {
         let definition = WindowDefinition {
             name: "window0".to_string(),
-            size: 200,
+            tile_size: 200,
             pane_style: EdgeDefinition::Mock(10),
             stool_style: EdgeDefinition::Mock(30),
         };

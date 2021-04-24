@@ -22,13 +22,12 @@ use texture_generation::generation::component::Component;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::math::color::{Color, BLUE};
+use texture_generation::math::color::Color;
 use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::{into_manager, ResourceManager};
 use tilemap::rendering::style::edge::EdgeStyle;
-use tilemap::rendering::style::node::NodeStyle;
 use tilemap::rendering::style::wall::WallStyle;
 use tilemap::rendering::Resources;
 use tilemap::tilemap::border::Border;
@@ -37,6 +36,7 @@ use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
 use tilemap_serde::rendering::style::door::DoorDefinition;
+use tilemap_serde::rendering::style::node::NodeDefinition;
 use tilemap_serde::rendering::style::window::WindowDefinition;
 
 #[derive(Copy, Clone)]
@@ -264,6 +264,10 @@ fn main() {
 
     info!("Loaded {} texture definitions", definitions.len());
 
+    let node_definitions: Vec<NodeDefinition> = read_dir("resources/styles/nodes/".as_ref());
+
+    info!("Loaded {} node definitions", node_definitions.len());
+
     let door_definitions: Vec<DoorDefinition> = read_dir("resources/styles/doors/".as_ref());
 
     info!("Loaded {} door definitions", door_definitions.len());
@@ -306,7 +310,7 @@ fn main() {
     let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.5);
     let resources = Resources::new(
         into_manager(&door_definitions, args.tile_size),
-        create_node_styles(8),
+        into_manager(&node_definitions, args.tile_size),
         texture_mgr,
         create_wall_styles(8),
         into_manager(&window_definitions, args.tile_size),
@@ -318,7 +322,7 @@ fn main() {
 
     let preview_resources = Resources::new(
         into_manager(&door_definitions, args.preview_size),
-        create_node_styles(1),
+        into_manager(&node_definitions, args.preview_size),
         preview_texture_mgr,
         create_wall_styles(1),
         into_manager(&window_definitions, args.preview_size),
@@ -353,19 +357,4 @@ fn create_wall_style(name: &str, edge: Color, node: usize, thickness: u32) -> Wa
     let edge_layout = LayoutComponent::new_repeat_x(thickness * 2, edge_component).unwrap();
     let edge_style = EdgeStyle::new_layout(thickness, edge_layout);
     WallStyle::new(name, edge_style, None, node)
-}
-
-fn create_node_styles(factor: u32) -> ResourceManager<NodeStyle> {
-    let brown = Color::convert(&"#8B4513").unwrap();
-    let style0 = create_node_style(BLUE, 16 * factor);
-    let style1 = create_node_style(brown, 10 * factor);
-    ResourceManager::new(
-        vec![style0, style1],
-        NodeStyle::default_with_size(6 * factor),
-    )
-}
-
-fn create_node_style(color: Color, size: u32) -> NodeStyle {
-    let component = RenderingComponent::new_fill_area("door", color, 220);
-    NodeStyle::new(size, component)
 }

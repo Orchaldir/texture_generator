@@ -1,0 +1,9 @@
+---
+name: "Blue Node"
+tile_size: 512
+size: 128
+component:
+  FillArea:
+    name: "node"
+    color: "#0000FF"
+    depth: 220
