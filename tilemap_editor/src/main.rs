@@ -21,13 +21,12 @@ use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
-use texture_generation::utils::resource::into_manager;
-use tilemap::rendering::Resources;
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
+use tilemap_serde::rendering::from_definitions;
 use tilemap_serde::rendering::style::door::DoorDefinition;
 use tilemap_serde::rendering::style::node::NodeDefinition;
 use tilemap_serde::rendering::style::wall::WallDefinition;
@@ -274,16 +273,6 @@ fn main() {
 
     info!("Loaded {} window definitions", window_definitions.len());
 
-    let texture_mgr = into_manager(&definitions, args.tile_size);
-
-    if texture_mgr.is_empty() {
-        panic!("Not enough textures!");
-    }
-
-    let preview_texture_mgr = into_manager(&definitions, args.preview_size);
-
-    info!("Converted {} textures", texture_mgr.len());
-
     info!("Init tilemap: width={} height={}", args.width, args.height);
 
     let tiles = Size::new(args.width, args.height);
@@ -306,25 +295,27 @@ fn main() {
     );
 
     let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.5);
-    let resources = Resources::new(
-        into_manager(&door_definitions, args.tile_size),
-        into_manager(&node_definitions, args.tile_size),
-        texture_mgr,
-        into_manager(&wall_definitions, args.tile_size),
-        into_manager(&window_definitions, args.tile_size),
+    let resources = from_definitions(
+        &door_definitions,
+        &node_definitions,
+        &definitions,
+        &wall_definitions,
+        &window_definitions,
         vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
+        args.tile_size,
     );
     let renderer = tilemap::rendering::Renderer::new(args.tile_size, args.wall_height, resources);
 
     info!("Init preview renderer: tile_size={}", args.preview_size);
 
-    let preview_resources = Resources::new(
-        into_manager(&door_definitions, args.preview_size),
-        into_manager(&node_definitions, args.preview_size),
-        preview_texture_mgr,
-        into_manager(&wall_definitions, args.preview_size),
-        into_manager(&window_definitions, args.preview_size),
+    let preview_resources = from_definitions(
+        &door_definitions,
+        &node_definitions,
+        &definitions,
+        &wall_definitions,
+        &window_definitions,
         Vec::default(),
+        args.preview_size,
     );
     let preview_renderer =
         tilemap::rendering::Renderer::new(args.preview_size, args.wall_height, preview_resources);
