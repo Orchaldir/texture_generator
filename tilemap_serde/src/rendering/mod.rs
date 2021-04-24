@@ -5,7 +5,7 @@ use crate::rendering::style::window::WindowDefinition;
 use texture_generation::definition::generation::TextureDefinition;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::utils::resource::into_manager;
-use tilemap::rendering::Resources;
+use tilemap::rendering::resource::Resources;
 
 pub mod style;
 

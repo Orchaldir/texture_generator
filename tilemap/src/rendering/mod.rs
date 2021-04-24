@@ -1,8 +1,6 @@
 use crate::rendering::node::calculate_node_styles;
-use crate::rendering::style::door::DoorStyle;
+use crate::rendering::resource::Resources;
 use crate::rendering::style::node::NodeStyle;
-use crate::rendering::style::wall::WallStyle;
-use crate::rendering::style::window::WindowStyle;
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use crate::tilemap::node::{
     get_end_of_horizontal_border, get_end_of_vertical_border, get_nodes_size,
@@ -11,56 +9,14 @@ use crate::tilemap::node::{
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use texture_generation::generation::data::RuntimeData;
-use texture_generation::generation::process::PostProcess;
-use texture_generation::generation::TextureGenerator;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
-use texture_generation::utils::resource::ResourceManager;
 
 pub mod node;
+pub mod resource;
 pub mod style;
-
-pub struct Resources {
-    pub door_styles: ResourceManager<DoorStyle>,
-    pub node_styles: ResourceManager<NodeStyle>,
-    pub textures: ResourceManager<TextureGenerator>,
-    pub wall_styles: ResourceManager<WallStyle>,
-    pub window_styles: ResourceManager<WindowStyle>,
-    pub post_processes: Vec<PostProcess>,
-}
-
-impl Resources {
-    pub fn empty() -> Resources {
-        Self::new(
-            ResourceManager::default(),
-            ResourceManager::default(),
-            ResourceManager::default(),
-            ResourceManager::default(),
-            ResourceManager::default(),
-            Vec::default(),
-        )
-    }
-
-    pub fn new(
-        door_styles: ResourceManager<DoorStyle>,
-        node_styles: ResourceManager<NodeStyle>,
-        textures: ResourceManager<TextureGenerator>,
-        wall_styles: ResourceManager<WallStyle>,
-        window_styles: ResourceManager<WindowStyle>,
-        post_processes: Vec<PostProcess>,
-    ) -> Self {
-        Resources {
-            door_styles,
-            node_styles,
-            textures,
-            wall_styles,
-            window_styles,
-            post_processes,
-        }
-    }
-}
 
 /// Renders a [`Tilemap2d`] in a specific style.
 pub struct Renderer {
@@ -346,6 +302,7 @@ mod tests {
     use texture_generation::generation::data::Data;
     use texture_generation::generation::TextureGenerator;
     use texture_generation::math::color::{Color, BLACK, BLUE, PINK, RED};
+    use texture_generation::utils::resource::ResourceManager;
 
     #[test]
     fn test_render_tiles() {
