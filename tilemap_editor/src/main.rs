@@ -11,19 +11,17 @@ use rendering::interface::rendering::{Initialization, Renderer};
 use rendering::interface::window::Window;
 use rendering::interface::{TextureId, BLACK, WHITE};
 use std::cell::RefCell;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::PostProcess;
-use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
-use tilemap::tilemap::Side::*;
 use tilemap_io::rendering::resource::ResourceDefinitions;
 use tilemap_io::tilemap::{load, save};
 
@@ -52,16 +50,20 @@ struct Cli {
     #[structopt(parse(from_os_str), default_value = "resources/")]
     resource_path: PathBuf,
 
+    /// The path of the resource definitions.
+    #[structopt(parse(from_os_str), default_value = "resources/tilemaps/example.tm")]
+    tilemap_path: PathBuf,
+
     /// The width of the tilemap.
-    #[structopt(default_value = "14")]
+    #[structopt(default_value = "7")]
     width: u32,
 
     /// The height of the tilemap.
-    #[structopt(default_value = "10")]
+    #[structopt(default_value = "5")]
     height: u32,
 
     /// The size of a tile for the preview.
-    #[structopt(default_value = "64")]
+    #[structopt(default_value = "128")]
     preview_size: u32,
 
     /// The size of a tile.
@@ -228,7 +230,7 @@ impl App for TilemapEditor {
         } else if key == KeyCode::S {
             save(&self.tilemap, "tilemap.tm").unwrap();
         } else if key == KeyCode::L {
-            match load("tilemap.tm") {
+            match load(&Path::new("tilemap.tm")) {
                 Ok(new_tilemap) => {
                     self.tilemap = new_tilemap;
                     self.has_changed = true;
@@ -260,21 +262,13 @@ fn main() {
 
     let definitions = ResourceDefinitions::load(&args.resource_path);
 
-    info!("Init tilemap: width={} height={}", args.width, args.height);
+    let tilemap2d = load(&args.tilemap_path).unwrap();
 
-    let tiles = Size::new(args.width, args.height);
-    let mut tilemap2d = Tilemap2d::default(tiles, Tile::Empty);
-
-    tilemap2d.set_tile(0, Tile::Solid(0));
-    tilemap2d.set_tile(1, Tile::Floor(0));
-    tilemap2d.set_tile(2, Tile::Floor(1));
-    tilemap2d.set_border(1, Bottom, Border::Wall(0));
-    tilemap2d.set_border(2, Bottom, Border::new_window(0, 0));
-    tilemap2d.set_border(3, Bottom, Border::Wall(0));
-    tilemap2d.set_border(15, Bottom, Border::Wall(0));
-    tilemap2d.set_border(16, Bottom, Border::new_door(0, 0, false));
-    tilemap2d.set_border(17, Bottom, Border::Wall(0));
-    tilemap2d.set_border(17, Right, Border::Wall(1));
+    info!(
+        "Load tilemap: width={} height={}",
+        tilemap2d.get_size().width(),
+        tilemap2d.get_size().height()
+    );
 
     info!(
         "Init renderer: tile_size={} wall_height={}",

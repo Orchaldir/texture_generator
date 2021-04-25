@@ -2,16 +2,17 @@ use anyhow::{Context, Result};
 use std::fs::File;
 use std::io;
 use std::io::{BufRead, BufReader, Write};
+use std::path::Path;
 use std::str::Split;
 use texture_generation::math::size::Size;
 use tilemap::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 
-pub fn load(filename: &str) -> Result<Tilemap2d> {
-    info!("Load tilemap from '{}'", filename);
+pub fn load(path: &Path) -> Result<Tilemap2d> {
+    info!("Load tilemap from '{:?}'", path);
 
-    let file = File::open(filename).context(format!("Unable to open '{}'", filename))?;
+    let file = File::open(path).context(format!("Unable to open '{:?}'", path))?;
     let mut reader = io::BufReader::new(file);
 
     let width = parse_u32(&mut reader, "width")?;
