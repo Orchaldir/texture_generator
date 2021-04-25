@@ -24,7 +24,7 @@ use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
-use tilemap_serde::rendering::resource::ResourceDefinitions;
+use tilemap_io::rendering::resource::ResourceDefinitions;
 
 #[derive(Copy, Clone)]
 enum Mode {

@@ -16,4 +16,4 @@ structopt = "0.3"
 svgbobdoc = "0.2"
 texture_generation = { path = "../texture_generation" }
 tilemap = { path = "../tilemap" }
-tilemap_serde = { path = "../tilemap_serde" }
+tilemap_io = { path = "../tilemap_io" }

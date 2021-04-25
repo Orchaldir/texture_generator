@@ -1,5 +1,5 @@
 [package]
-name = "tilemap_serde"
+name = "tilemap_io"
 version = "0.2.0"
 authors = ["Orchaldir <orchaldir@gmail.com>"]
 edition = "2018"
