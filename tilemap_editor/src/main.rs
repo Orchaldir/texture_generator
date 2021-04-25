@@ -25,6 +25,7 @@ use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap::tilemap::Side::*;
 use tilemap_io::rendering::resource::ResourceDefinitions;
+use tilemap_io::tilemap::{load, save};
 
 #[derive(Copy, Clone)]
 enum Mode {
@@ -224,6 +225,16 @@ impl App for TilemapEditor {
             self.mode = Mode::Wall;
         } else if key == KeyCode::F3 {
             self.mode = Mode::Door;
+        } else if key == KeyCode::S {
+            save(&self.tilemap, "tilemap.tm").unwrap();
+        } else if key == KeyCode::L {
+            match load("tilemap.tm") {
+                Ok(new_tilemap) => {
+                    self.tilemap = new_tilemap;
+                    self.has_changed = true;
+                }
+                Err(e) => eprintln!("Error: {:?}", e),
+            }
         }
     }
 

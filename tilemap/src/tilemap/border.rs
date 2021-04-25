@@ -7,15 +7,14 @@ pub enum Border {
     Empty,
     /// A wall blocks the border between the 2 tiles.
     Wall(usize),
+    /// A wall with a door.
     Door {
         wall_id: usize,
         door_id: usize,
         is_front: bool,
     },
-    Window {
-        wall_id: usize,
-        window_id: usize,
-    },
+    /// A wall with a window.
+    Window { wall_id: usize, window_id: usize },
 }
 
 impl Border {
