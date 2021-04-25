@@ -1,4 +1,4 @@
-use crate::rendering::style::wall::NodeStyle;
+use crate::rendering::style::node::NodeStyle;
 use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::Data;

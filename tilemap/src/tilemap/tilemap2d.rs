@@ -193,7 +193,7 @@ mod tests {
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
         tilemap.set_tile(0, Tile::Floor(1));
-        tilemap.set_tile(2, Tile::Full(3));
+        tilemap.set_tile(2, Tile::Solid(3));
         tilemap.set_tile(4, Tile::Floor(4));
 
         assert_eq!(tilemap.get_size(), size);
@@ -252,7 +252,7 @@ mod tests {
         vec![
             Tile::Floor(1),
             Tile::Empty,
-            Tile::Full(3),
+            Tile::Solid(3),
             Tile::Empty,
             Tile::Floor(4),
             Tile::Empty,

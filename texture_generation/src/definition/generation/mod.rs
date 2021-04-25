@@ -3,12 +3,10 @@ use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::math::size::Size;
 use crate::utils::error::DefinitionError;
-use crate::utils::resource::ResourceManager;
+use crate::utils::resource::ResourceDefinition;
 use serde::{Deserialize, Serialize};
-use std::fs;
-use std::fs::{DirEntry, File};
-use std::io::{Error, Write};
-use std::path::Path;
+use std::fs::File;
+use std::io::Write;
 
 pub mod component;
 pub mod process;
@@ -36,57 +34,6 @@ impl TextureDefinition {
         }
     }
 
-    pub fn read(path: &Path) -> Result<TextureDefinition, DefinitionError> {
-        let string = fs::read_to_string(path)?;
-        let data: TextureDefinition = serde_yaml::from_str(&string)?;
-        Ok(data)
-    }
-
-    pub fn read_dir(dir: &Path) -> Vec<TextureDefinition> {
-        if !dir.is_dir() {
-            warn!(
-                "Couldn't read texture definitions, because the path {:?} is not a directory!",
-                dir
-            );
-            return Vec::default();
-        }
-
-        let mut results = Vec::new();
-
-        match fs::read_dir(dir) {
-            Ok(entries) => {
-                for entry in entries {
-                    Self::read_entry(&mut results, entry);
-                }
-            }
-            Err(error) => warn!("Couldn't read directory {:?}, because of {:?}", dir, error),
-        }
-
-        results
-    }
-
-    fn read_entry(results: &mut Vec<TextureDefinition>, entry: Result<DirEntry, Error>) {
-        match entry {
-            Ok(entry) => {
-                let path = entry.path();
-
-                if !path.is_file() {
-                    info!("Skip entry {:?}, because it is not a file", path);
-                    return;
-                }
-
-                match Self::read(&path) {
-                    Ok(definition) => results.push(definition),
-                    Err(error) => warn!(
-                        "Couldn't read definition {:?}, because of {:?}",
-                        path, error
-                    ),
-                }
-            }
-            Err(error) => warn!("Couldn't read entry, because of {:?}", error),
-        }
-    }
-
     pub fn write(&self, path: &str) -> Result<(), DefinitionError> {
         let mut file = File::create(path)?;
 
@@ -96,8 +43,12 @@ impl TextureDefinition {
 
         Ok(())
     }
+}
 
-    pub fn convert(&self, size: u32) -> Result<TextureGenerator, DefinitionError> {
+impl ResourceDefinition for TextureDefinition {
+    type R = TextureGenerator;
+
+    fn convert(&self, size: u32) -> Result<TextureGenerator, DefinitionError> {
         let max = self.size.width().max(self.size.height());
         let factor = size as f32 / max as f32;
         let component = self.component.convert(factor)?;
@@ -111,18 +62,6 @@ impl TextureDefinition {
             component,
         ))
     }
-}
-
-pub fn into_manager(
-    definitions: &[TextureDefinition],
-    size: u32,
-) -> ResourceManager<TextureGenerator> {
-    let textures: Vec<TextureGenerator> = definitions
-        .iter()
-        .filter_map(|d| d.convert(size).ok())
-        .collect();
-
-    ResourceManager::new(textures, TextureGenerator::default())
 }
 
 #[cfg(test)]

@@ -1,5 +1,5 @@
 use crate::rendering::style::edge::EdgeStyle;
-use crate::rendering::style::wall::NodeStyle;
+use crate::rendering::style::node::NodeStyle;
 use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;

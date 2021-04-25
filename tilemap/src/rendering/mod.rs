@@ -1,7 +1,6 @@
 use crate::rendering::node::calculate_node_styles;
-use crate::rendering::style::door::DoorStyle;
-use crate::rendering::style::wall::{NodeStyle, WallStyle};
-use crate::rendering::style::window::WindowStyle;
+use crate::rendering::resource::Resources;
+use crate::rendering::style::node::NodeStyle;
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use crate::tilemap::node::{
     get_end_of_horizontal_border, get_end_of_vertical_border, get_nodes_size,
@@ -10,52 +9,14 @@ use crate::tilemap::node::{
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use texture_generation::generation::data::RuntimeData;
-use texture_generation::generation::process::PostProcess;
-use texture_generation::generation::TextureGenerator;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
-use texture_generation::utils::resource::ResourceManager;
 
 pub mod node;
+pub mod resource;
 pub mod style;
-
-pub struct Resources {
-    pub textures: ResourceManager<TextureGenerator>,
-    pub wall_styles: ResourceManager<WallStyle<NodeStyle>>,
-    pub door_styles: ResourceManager<DoorStyle>,
-    pub window_styles: ResourceManager<WindowStyle>,
-    pub post_processes: Vec<PostProcess>,
-}
-
-impl Resources {
-    pub fn empty() -> Resources {
-        Self::new(
-            ResourceManager::default(),
-            ResourceManager::default(),
-            ResourceManager::default(),
-            ResourceManager::default(),
-            Vec::default(),
-        )
-    }
-
-    pub fn new(
-        textures: ResourceManager<TextureGenerator>,
-        wall_styles: ResourceManager<WallStyle<NodeStyle>>,
-        door_styles: ResourceManager<DoorStyle>,
-        window_styles: ResourceManager<WindowStyle>,
-        post_processes: Vec<PostProcess>,
-    ) -> Self {
-        Resources {
-            textures,
-            wall_styles,
-            door_styles,
-            window_styles,
-            post_processes,
-        }
-    }
-}
 
 /// Renders a [`Tilemap2d`] in a specific style.
 pub struct Renderer {
@@ -105,7 +66,7 @@ impl Renderer {
                 match tile {
                     Tile::Empty => {}
                     Tile::Floor(id) => self.render_texture(id, 1, data, &aabb),
-                    Tile::Full(id) => self.render_texture(id, self.wall_height, data, &aabb),
+                    Tile::Solid(id) => self.render_texture(id, self.wall_height, data, &aabb),
                 }
 
                 start.x += tile_size.width() as i32;
@@ -118,7 +79,11 @@ impl Renderer {
 
     fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
         data.set_base_depth(1);
-        let nodes = calculate_node_styles(&self.resources.wall_styles, tilemap);
+        let nodes = calculate_node_styles(
+            &self.resources.node_styles,
+            &self.resources.wall_styles,
+            tilemap,
+        );
         self.render_horizontal_borders(tilemap, &nodes, &mut data);
         self.render_vertical_borders(tilemap, &nodes, &mut data);
         self.render_nodes(tilemap, &nodes, &mut data);
@@ -337,6 +302,7 @@ mod tests {
     use texture_generation::generation::data::Data;
     use texture_generation::generation::TextureGenerator;
     use texture_generation::math::color::{Color, BLACK, BLUE, PINK, RED};
+    use texture_generation::utils::resource::ResourceManager;
 
     #[test]
     fn test_render_tiles() {
@@ -349,7 +315,7 @@ mod tests {
         let tiles = vec![
             Tile::Empty,
             Tile::Floor(0),
-            Tile::Full(1),
+            Tile::Solid(1),
             Tile::Empty,
             Tile::Empty,
             Tile::Floor(1),

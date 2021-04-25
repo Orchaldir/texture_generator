@@ -1,0 +1,9 @@
+---
+name: "Wooden Node"
+tile_size: 512
+size: 80
+component:
+  FillArea:
+    name: "node"
+    color: "#8B4513"
+    depth: 220

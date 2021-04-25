@@ -13,6 +13,15 @@ pub enum LayoutDefinition {
         offset: u32,
         component: ComponentDefinition,
     },
+    Mock(u32),
+    RepeatX {
+        size: u32,
+        component: ComponentDefinition,
+    },
+    RepeatY {
+        size: u32,
+        component: ComponentDefinition,
+    },
     Square {
         name: String,
         side: u32,
@@ -36,6 +45,17 @@ impl LayoutDefinition {
                     convert(*offset, factor),
                     component,
                 )?;
+                Ok(layout)
+            }
+            LayoutDefinition::Mock(id) => Ok(LayoutComponent::Mock(*id)),
+            LayoutDefinition::RepeatX { size, component } => {
+                let component = component.convert(factor)?;
+                let layout = LayoutComponent::new_repeat_x(convert(*size, factor), component)?;
+                Ok(layout)
+            }
+            LayoutDefinition::RepeatY { size, component } => {
+                let component = component.convert(factor)?;
+                let layout = LayoutComponent::new_repeat_y(convert(*size, factor), component)?;
                 Ok(layout)
             }
             LayoutDefinition::Square {
@@ -69,6 +89,28 @@ mod tests {
                 .unwrap();
 
         assert_eq!(component, definition.convert(2.0).unwrap())
+    }
+
+    #[test]
+    fn test_convert_repeat_x() {
+        let definition = LayoutDefinition::RepeatX {
+            size: 20,
+            component: ComponentDefinition::Mock(88),
+        };
+        let component = LayoutComponent::new_repeat_x(30, Component::Mock(88)).unwrap();
+
+        assert_eq!(component, definition.convert(1.5).unwrap())
+    }
+
+    #[test]
+    fn test_convert_repeat_y() {
+        let definition = LayoutDefinition::RepeatY {
+            size: 50,
+            component: ComponentDefinition::Mock(11),
+        };
+        let component = LayoutComponent::new_repeat_y(75, Component::Mock(11)).unwrap();
+
+        assert_eq!(component, definition.convert(1.5).unwrap())
     }
 
     #[test]

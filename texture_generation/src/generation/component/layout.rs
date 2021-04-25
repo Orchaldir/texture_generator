@@ -27,10 +27,17 @@ pub enum LayoutComponent {
         offset: i32,
         component: Component,
     },
+    Mock(u32),
     /// Repeats a component along the x-axis.
-    RepeatX { size: u32, component: Component },
+    RepeatX {
+        size: u32,
+        component: Component,
+    },
     /// Repeats a component along the y-axis.
-    RepeatY { size: u32, component: Component },
+    RepeatY {
+        size: u32,
+        component: Component,
+    },
     /// A grid of squares that have the same size.
     ///
     /// # Diagram
@@ -130,6 +137,7 @@ impl LayoutComponent {
                 offset,
                 component: component.flip(),
             },
+            LayoutComponent::Mock(_id) => self.clone(),
             LayoutComponent::RepeatX { size, component } => LayoutComponent::RepeatY {
                 size,
                 component: component.flip(),
@@ -179,6 +187,7 @@ impl LayoutComponent {
                     is_offset_row = !is_offset_row;
                 }
             }
+            LayoutComponent::Mock(id) => info!("Generate layout mock {}", *id),
             LayoutComponent::RepeatX { size, component } => {
                 let mut point = inner.start();
                 let end = inner.end().x;

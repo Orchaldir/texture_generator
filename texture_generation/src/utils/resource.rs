@@ -1,3 +1,11 @@
+use crate::utils::error::DefinitionError;
+
+pub trait ResourceDefinition {
+    type R: Default;
+
+    fn convert(&self, size: u32) -> Result<Self::R, DefinitionError>;
+}
+
 pub struct ResourceManager<T> {
     default: T,
     resources: Vec<T>,
@@ -25,4 +33,13 @@ impl<T: Default> Default for ResourceManager<T> {
     fn default() -> Self {
         ResourceManager::new(Vec::default(), T::default())
     }
+}
+
+pub fn into_manager<T: ResourceDefinition>(definitions: &[T], size: u32) -> ResourceManager<T::R> {
+    let textures: Vec<T::R> = definitions
+        .iter()
+        .filter_map(|d| d.convert(size).ok())
+        .collect();
+
+    ResourceManager::new(textures, T::R::default())
 }

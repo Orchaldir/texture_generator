@@ -1,3 +1,4 @@
+use crate::rendering::style::node::NodeStyle;
 use crate::rendering::style::wall::WallStyle;
 use crate::tilemap::node::get_nodes_size;
 use crate::tilemap::tilemap2d::Tilemap2d;
@@ -6,10 +7,21 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use texture_generation::utils::resource::ResourceManager;
 
-pub fn calculate_node_styles<'a, T>(
-    wall_styles: &'a ResourceManager<WallStyle<T>>,
+pub fn calculate_node_styles<'a>(
+    node_styles: &'a ResourceManager<NodeStyle>,
+    wall_styles: &'a ResourceManager<WallStyle>,
     tilemap: &'a Tilemap2d,
-) -> Vec<Option<&'a T>> {
+) -> Vec<Option<&'a NodeStyle>> {
+    calculate_node_style_ids(wall_styles, tilemap)
+        .into_iter()
+        .map(|option| option.map(|id| node_styles.get(id)))
+        .collect()
+}
+
+pub fn calculate_node_style_ids(
+    wall_styles: &ResourceManager<WallStyle>,
+    tilemap: &Tilemap2d,
+) -> Vec<Option<usize>> {
     let size = get_nodes_size(tilemap.get_size());
     let mut node_styles = Vec::with_capacity(size.len());
     let mut index = 0;
@@ -24,11 +36,11 @@ pub fn calculate_node_styles<'a, T>(
     node_styles
 }
 
-pub fn calculate_node_style<'a, T>(
-    wall_styles: &'a ResourceManager<WallStyle<T>>,
-    tilemap: &'a Tilemap2d,
+pub fn calculate_node_style(
+    wall_styles: &ResourceManager<WallStyle>,
+    tilemap: &Tilemap2d,
     index: usize,
-) -> Option<&'a T> {
+) -> Option<usize> {
     let sides_per_style = calculate_sides_per_style(tilemap, index);
     let is_corner = sides_per_style.len() > 1;
     let top_styles = get_top_styles(sides_per_style);
@@ -76,11 +88,11 @@ fn get_top_styles(input: HashMap<usize, Vec<Side>>) -> Vec<(usize, Vec<Side>)> {
     top_styles
 }
 
-fn select_best_node_style<T>(
-    wall_styles: &ResourceManager<WallStyle<T>>,
+fn select_best_node_style(
+    wall_styles: &ResourceManager<WallStyle>,
     top_styles: Vec<(usize, Vec<Side>)>,
     is_corner: bool,
-) -> Option<&T> {
+) -> Option<usize> {
     if top_styles.len() == 1 {
         let top_style = &top_styles[0];
         let side_count = top_style.1.len();
@@ -89,7 +101,7 @@ fn select_best_node_style<T>(
             return get_node_style(wall_styles, top_style.0);
         }
 
-        return get_corner_style(wall_styles, top_style.0);
+        return Some(get_corner_style(wall_styles, top_style.0));
     } else if top_styles.len() > 1 {
         let side_count = top_styles[0].1.len();
 
@@ -100,21 +112,21 @@ fn select_best_node_style<T>(
             let is_straight1 = is_straight(style1);
 
             if is_straight0 && !is_straight1 {
-                return get_corner_style(wall_styles, style0.0);
+                return Some(get_corner_style(wall_styles, style0.0));
             } else if is_straight1 && !is_straight0 {
-                return get_corner_style(wall_styles, style1.0);
+                return Some(get_corner_style(wall_styles, style1.0));
             }
         }
 
         let best_id = select_best_wall_style(wall_styles, top_styles);
-        return get_corner_style(wall_styles, best_id);
+        return Some(get_corner_style(wall_styles, best_id));
     }
 
     None
 }
 
-fn select_best_wall_style<T>(
-    wall_styles: &ResourceManager<WallStyle<T>>,
+fn select_best_wall_style(
+    wall_styles: &ResourceManager<WallStyle>,
     top_styles: Vec<(usize, Vec<Side>)>,
 ) -> usize {
     let mut best_id = top_styles[0].0;
@@ -132,12 +144,12 @@ fn select_best_wall_style<T>(
     best_id
 }
 
-fn get_corner_style<T>(wall_styles: &ResourceManager<WallStyle<T>>, index: usize) -> Option<&T> {
-    Some(wall_styles.get(index).get_corner_style())
+fn get_corner_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> usize {
+    wall_styles.get(index).get_corner_style()
 }
 
-fn get_node_style<T>(wall_styles: &ResourceManager<WallStyle<T>>, index: usize) -> Option<&T> {
-    Option::from(wall_styles.get(index).get_node_style())
+fn get_node_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> Option<usize> {
+    wall_styles.get(index).get_node_style()
 }
 
 fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
@@ -180,9 +192,9 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(&LOW_CORNER2), Some(&LOW_CORNER2),
+                Some(LOW_CORNER2), Some(LOW_CORNER2),
                 None, None
             ]
         );
@@ -199,11 +211,11 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(&HIGH_CORNER2), None,
+                Some(HIGH_CORNER2), None,
                 None, None,
-                Some(&HIGH_CORNER2), None
+                Some(HIGH_CORNER2), None
             ]
         );
     }
@@ -220,12 +232,12 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(&HIGH_CORNER2), None,
+                Some(HIGH_CORNER2), None,
                 None, None,
                 None, None,
-                Some(&HIGH_CORNER2), None
+                Some(HIGH_CORNER2), None
             ]
         );
     }
@@ -241,10 +253,10 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
                 None, None, None,
-                Some(&LOW_CORNER), Some(&LOW_NODE), Some(&LOW_CORNER)
+                Some(LOW_CORNER), Some(LOW_NODE), Some(LOW_CORNER)
             ]
         );
     }
@@ -260,10 +272,10 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(&HIGH_CORNER),
-                Some(&HIGH_CORNER), Some(&HIGH_CORNER)
+                None, Some(HIGH_CORNER),
+                Some(HIGH_CORNER), Some(HIGH_CORNER)
             ]
         );
     }
@@ -280,10 +292,10 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&HIGH_CORNER),
-                None, Some(&HIGH_CORNER), None
+                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(HIGH_CORNER),
+                None, Some(HIGH_CORNER), None
             ]
         );
     }
@@ -301,11 +313,11 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(&HIGH_CORNER), None,
-                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&HIGH_CORNER),
-                None, Some(&HIGH_CORNER), None
+                None, Some(HIGH_CORNER), None,
+                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(HIGH_CORNER),
+                None, Some(HIGH_CORNER), None
             ]
         );
     }
@@ -322,10 +334,10 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
                 None, None, None,
-                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&LOW_CORNER),
+                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(LOW_CORNER),
             ]
         );
     }
@@ -342,10 +354,10 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(&HIGH_CORNER), Some(&LOW_CORNER),
-                Some(&HIGH_CORNER), None
+                Some(HIGH_CORNER), Some(LOW_CORNER),
+                Some(HIGH_CORNER), None
             ]
         );
     }
@@ -362,10 +374,10 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(&LOW_CORNER2), Some(&LOW_CORNER2), Some(&LOW_CORNER2),
-                None, Some(&HIGH_CORNER), None
+                Some(LOW_CORNER2), Some(LOW_CORNER2), Some(LOW_CORNER2),
+                None, Some(HIGH_CORNER), None
             ]
         );
     }
@@ -382,10 +394,10 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(&LOW_CORNER), Some(&LOW_CORNER), Some(&HIGH_CORNER2),
-                None, Some(&LOW_CORNER), None
+                Some(LOW_CORNER), Some(LOW_CORNER), Some(HIGH_CORNER2),
+                None, Some(LOW_CORNER), None
             ]
         );
     }
@@ -406,11 +418,11 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(&LOW_CORNER), None,
-                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&HIGH_CORNER),
-                None, Some(&LOW_CORNER), None
+                None, Some(LOW_CORNER), None,
+                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(HIGH_CORNER),
+                None, Some(LOW_CORNER), None
             ]
         );
     }
@@ -428,11 +440,11 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(&HIGH_CORNER), None,
-                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&LOW_CORNER),
-                None, Some(&LOW_CORNER), None
+                None, Some(HIGH_CORNER), None,
+                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(LOW_CORNER),
+                None, Some(LOW_CORNER), None
             ]
         );
     }
@@ -450,16 +462,16 @@ mod tests {
 
         #[rustfmt::skip]
         assert_eq!(
-            calculate_node_styles(&wall_styles, &tilemap),
+            calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(&HIGH_CORNER2), None,
-                Some(&HIGH_CORNER), Some(&HIGH_CORNER), Some(&LOW_CORNER),
-                None, Some(&LOW_CORNER2), None
+                None, Some(HIGH_CORNER2), None,
+                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(LOW_CORNER),
+                None, Some(LOW_CORNER2), None
             ]
         );
     }
 
-    fn crate_wall_styles() -> ResourceManager<WallStyle<usize>> {
+    fn crate_wall_styles() -> ResourceManager<WallStyle> {
         let low_style = crate_wall_style(10, None, LOW_CORNER2);
         let low_style_with_nodes = crate_wall_style(15, Some(LOW_NODE), LOW_CORNER);
         let high_style = crate_wall_style(20, None, HIGH_CORNER2);
@@ -472,7 +484,7 @@ mod tests {
                 high_style,
                 high_style_with_nodes,
             ],
-            WallStyle::default(10, 0),
+            WallStyle::default(10),
         )
     }
 
@@ -480,7 +492,7 @@ mod tests {
         wall_thickness: u32,
         node_style: Option<usize>,
         corner_style: usize,
-    ) -> WallStyle<usize> {
+    ) -> WallStyle {
         let edge_style = EdgeStyle::Mock(wall_thickness);
         WallStyle::new("test", edge_style, node_style, corner_style)
     }
