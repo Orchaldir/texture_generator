@@ -16,5 +16,7 @@ edge_style:
             color:
               ConstantColor: "#646464"
             depth:
-              Uniform: 250
+              Linear:
+                center: 250
+                border: 220
 corner_style: 0

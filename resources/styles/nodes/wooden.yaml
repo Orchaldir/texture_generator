@@ -3,7 +3,12 @@ name: "Wooden Node"
 tile_size: 512
 size: 80
 component:
-  FillArea:
+  Shape:
     name: "node"
-    color: "#8B4513"
-    depth: 220
+    shape_factory: Circle
+    color:
+      ConstantColor: "#8B4513"
+    depth:
+      Linear:
+        center: 250
+        border: 220

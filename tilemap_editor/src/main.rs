@@ -16,7 +16,9 @@ use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::generation::data::{convert, Data};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
+use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
+use texture_generation::math::vector3::Vector3;
 use texture_generation::utils::logging::init_logging;
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::selector::Selector;
@@ -277,7 +279,10 @@ fn main() {
 
     let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.5);
     let resources = definitions.convert(
-        vec![PostProcess::AmbientOcclusion(ambient_occlusion)],
+        vec![
+            PostProcess::AmbientOcclusion(ambient_occlusion),
+            PostProcess::Lighting(Lighting::new(Vector3::new(1.0, 0.0, 2.0), 10, 32)),
+        ],
         args.tile_size,
     );
     let renderer = tilemap::rendering::Renderer::new(args.tile_size, args.wall_height, resources);
