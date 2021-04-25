@@ -16,9 +16,15 @@ pub fn load(filename: &str) -> Result<Tilemap2d> {
     let width = parse_u32(&mut reader, "width")?;
     let height = parse_u32(&mut reader, "height")?;
     let size = Size::new(width, height);
+    let tiles = load_tiles(&mut reader, size)?;
+
+    Tilemap2d::new(size, tiles).ok_or_else(|| anyhow!("Could not create tilemap"))
+}
+
+fn load_tiles(reader: &mut BufReader<File>, size: Size) -> Result<Vec<Tile>> {
     let mut tiles = Vec::with_capacity(size.len());
 
-    for y in 0..height {
+    for y in 0..size.height() {
         let mut line = String::new();
         reader
             .read_line(&mut line)
@@ -37,7 +43,7 @@ pub fn load(filename: &str) -> Result<Tilemap2d> {
             x += 1;
         }
 
-        if x > width {
+        if x > size.width() {
             return Err(anyhow!(
                 "{}.row of tiles is too long with {} elements: '{}'",
                 y + 1,
@@ -47,7 +53,7 @@ pub fn load(filename: &str) -> Result<Tilemap2d> {
         }
     }
 
-    Tilemap2d::new(size, tiles).ok_or_else(|| anyhow!("Could not create tilemap"))
+    Ok(tiles)
 }
 
 pub fn save(tilemap: &Tilemap2d, path: &str) -> io::Result<()> {
@@ -58,6 +64,13 @@ pub fn save(tilemap: &Tilemap2d, path: &str) -> io::Result<()> {
     writeln!(&mut file, "width={}", size.width())?;
     writeln!(&mut file, "height={}", size.height())?;
 
+    save_tiles(tilemap, &mut file)?;
+
+    Ok(())
+}
+
+fn save_tiles(tilemap: &Tilemap2d, file: &mut File) -> io::Result<()> {
+    let size = tilemap.get_size();
     let tiles = tilemap.get_tiles();
     let capacity = (size.width() * 4) as usize;
     let mut index = 0;
@@ -75,7 +88,7 @@ pub fn save(tilemap: &Tilemap2d, path: &str) -> io::Result<()> {
             index += 1;
         }
 
-        writeln!(&mut file, "{}", line)?;
+        writeln!(file, "{}", line)?;
     }
 
     Ok(())
