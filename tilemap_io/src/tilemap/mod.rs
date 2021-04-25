@@ -18,8 +18,11 @@ pub fn load(filename: &str) -> Result<Tilemap2d> {
     let height = parse_u32(&mut reader, "height")?;
     let size = Size::new(width, height);
     let tiles = load_tiles(&mut reader, size)?;
+    let horizontal_borders = load_borders(&mut reader, get_horizontal_borders_size(size))?;
+    let vertical_borders = load_borders(&mut reader, get_vertical_borders_size(size))?;
 
-    Tilemap2d::new(size, tiles).ok_or_else(|| anyhow!("Could not create tilemap"))
+    Tilemap2d::with_borders(size, tiles, horizontal_borders, vertical_borders)
+        .ok_or_else(|| anyhow!("Could not create tilemap"))
 }
 
 fn load_tiles(reader: &mut BufReader<File>, size: Size) -> Result<Vec<Tile>> {
@@ -55,6 +58,41 @@ fn load_tiles(reader: &mut BufReader<File>, size: Size) -> Result<Vec<Tile>> {
     }
 
     Ok(tiles)
+}
+
+fn load_borders(reader: &mut BufReader<File>, size: Size) -> Result<Vec<Border>> {
+    let mut borders = Vec::with_capacity(size.len());
+
+    for y in 0..size.height() {
+        let mut line = String::new();
+        reader
+            .read_line(&mut line)
+            .context(format!("Unable to read {}.row of borders", y + 1))?;
+
+        let mut x = 0;
+
+        for split in line.split(';') {
+            let border = parse_border(split).context(format!(
+                "Unable to read the {}.border of {}.row from '{}'",
+                x + 1,
+                y + 1,
+                split,
+            ))?;
+            borders.push(border);
+            x += 1;
+        }
+
+        if x > size.width() {
+            return Err(anyhow!(
+                "{}.row of borders is too long with {} elements: '{}'",
+                y + 1,
+                x,
+                line
+            ));
+        }
+    }
+
+    Ok(borders)
 }
 
 pub fn save(tilemap: &Tilemap2d, path: &str) -> io::Result<()> {
@@ -147,21 +185,39 @@ fn parse_tile(string: &str) -> Result<Tile> {
     let mut parts = string.trim().split(',');
 
     match parts.next() {
-        Some("F") => Ok(Tile::Floor(parse_tile_id(&mut parts)?)),
-        Some("S") => Ok(Tile::Solid(parse_tile_id(&mut parts)?)),
+        Some("F") => Ok(Tile::Floor(parse_usize("Tile Id", &mut parts)?)),
+        Some("S") => Ok(Tile::Solid(parse_usize("Tile Id", &mut parts)?)),
         Some("E") => Ok(Tile::Empty),
-        Some(s) => Err(anyhow!("Unable to parse tilecdsaf from '{}'", s)),
         _ => Err(anyhow!("Unable to parse tile from '{}'", string)),
     }
 }
 
-fn parse_tile_id(parts: &mut Split<char>) -> Result<usize> {
+fn parse_border(string: &str) -> Result<Border> {
+    let mut parts = string.trim().split(',');
+
+    match parts.next() {
+        Some("E") => Ok(Border::Empty),
+        Some("Wa") => Ok(Border::Wall(parse_usize("Wall Id", &mut parts)?)),
+        Some("D") => Ok(Border::new_door(
+            parse_usize("Wall Id", &mut parts)?,
+            parse_usize("Door Id", &mut parts)?,
+            parse_usize("Is Front", &mut parts)? == 1,
+        )),
+        Some("Wi") => Ok(Border::new_window(
+            parse_usize("Wall Id", &mut parts)?,
+            parse_usize("Window Id", &mut parts)?,
+        )),
+        _ => Err(anyhow!("Unable to parse border from '{}'", string)),
+    }
+}
+
+fn parse_usize(name: &str, parts: &mut Split<char>) -> Result<usize> {
     if let Some(string) = parts.next() {
         string
             .parse()
-            .context(format!("Unable to parse tile id from '{}'", string))
+            .context(format!("Unable to parse {} from '{}'", name, string))
     } else {
-        Err(anyhow!("Tile id is missing"))
+        Err(anyhow!("{} is missing", name))
     }
 }
 
