@@ -66,7 +66,7 @@ impl Renderer {
                 match tile {
                     Tile::Empty => {}
                     Tile::Floor(id) => self.render_texture(id, 1, data, &aabb),
-                    Tile::Full(id) => self.render_texture(id, self.wall_height, data, &aabb),
+                    Tile::Solid(id) => self.render_texture(id, self.wall_height, data, &aabb),
                 }
 
                 start.x += tile_size.width() as i32;
@@ -315,7 +315,7 @@ mod tests {
         let tiles = vec![
             Tile::Empty,
             Tile::Floor(0),
-            Tile::Full(1),
+            Tile::Solid(1),
             Tile::Empty,
             Tile::Empty,
             Tile::Floor(1),

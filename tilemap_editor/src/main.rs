@@ -134,7 +134,7 @@ impl TilemapEditor {
         let tile = match button {
             MouseButton::Left => Tile::Floor(texture_id),
             MouseButton::Middle => Tile::Empty,
-            MouseButton::Right => Tile::Full(texture_id),
+            MouseButton::Right => Tile::Solid(texture_id),
         };
 
         info!("Set tile {} to {:?}", index, tile);
@@ -254,7 +254,7 @@ fn main() {
     let tiles = Size::new(args.width, args.height);
     let mut tilemap2d = Tilemap2d::default(tiles, Tile::Empty);
 
-    tilemap2d.set_tile(0, Tile::Full(0));
+    tilemap2d.set_tile(0, Tile::Solid(0));
     tilemap2d.set_tile(1, Tile::Floor(0));
     tilemap2d.set_tile(2, Tile::Floor(1));
     tilemap2d.set_border(1, Bottom, Border::Wall(0));
