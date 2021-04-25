@@ -4,6 +4,7 @@ use std::io;
 use std::io::{BufRead, BufReader, Write};
 use std::str::Split;
 use texture_generation::math::size::Size;
+use tilemap::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 
@@ -65,6 +66,16 @@ pub fn save(tilemap: &Tilemap2d, path: &str) -> io::Result<()> {
     writeln!(&mut file, "height={}", size.height())?;
 
     save_tiles(tilemap, &mut file)?;
+    save_borders(
+        tilemap.get_horizontal_borders(),
+        get_horizontal_borders_size(size),
+        &mut file,
+    )?;
+    save_borders(
+        tilemap.get_vertical_borders(),
+        get_vertical_borders_size(size),
+        &mut file,
+    )?;
 
     Ok(())
 }
@@ -80,6 +91,29 @@ fn save_tiles(tilemap: &Tilemap2d, file: &mut File) -> io::Result<()> {
 
         for x in 0..size.width() {
             line.push_str(&format_tile(&tiles[index]));
+
+            if x < size.width() - 1 {
+                line.push(';');
+            }
+
+            index += 1;
+        }
+
+        writeln!(file, "{}", line)?;
+    }
+
+    Ok(())
+}
+
+fn save_borders(borders: &[Border], size: Size, file: &mut File) -> io::Result<()> {
+    let capacity = (size.width() * 7) as usize;
+    let mut index = 0;
+
+    for _y in 0..size.height() {
+        let mut line = String::with_capacity(capacity);
+
+        for x in 0..size.width() {
+            line.push_str(&format_border(&borders[index]));
 
             if x < size.width() - 1 {
                 line.push(';');
@@ -136,5 +170,18 @@ fn format_tile(tile: &Tile) -> String {
         Tile::Empty => "E  ".to_string(),
         Tile::Floor(id) => format!("F,{}", *id),
         Tile::Solid(id) => format!("S,{}", *id),
+    }
+}
+
+fn format_border(border: &Border) -> String {
+    match border {
+        Border::Empty => "E      ".to_string(),
+        Border::Wall(id) => format!("Wa,{}   ", *id),
+        Border::Door {
+            wall_id,
+            door_id,
+            is_front,
+        } => format!("D,{},{},{}", *wall_id, *door_id, *is_front as usize),
+        Border::Window { wall_id, window_id } => format!("Wi,{},{} ", *wall_id, *window_id),
     }
 }
