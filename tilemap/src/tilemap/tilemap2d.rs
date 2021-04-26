@@ -10,6 +10,7 @@ use Side::*;
 
 /// The tilemap contains the information of what is where,
 /// but it doesn't contain how it is rendered.
+#[derive(Debug, Eq, PartialEq)]
 pub struct Tilemap2d {
     /// The size of a rectangle of [`Tile`].
     size: Size,

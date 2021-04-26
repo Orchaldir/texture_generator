@@ -1,9 +1,10 @@
 use anyhow::{Context, Result};
+use std::fmt::Write as FmtWrite;
 use std::fs::File;
-use std::io;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 use std::str::Split;
+use std::{fs, io};
 use texture_generation::math::size::Size;
 use tilemap::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use tilemap::tilemap::tile::Tile;
@@ -12,8 +13,12 @@ use tilemap::tilemap::tilemap2d::Tilemap2d;
 pub fn load(path: &Path) -> Result<Tilemap2d> {
     info!("Load tilemap from '{:?}'", path);
 
-    let file = File::open(path).context(format!("Unable to open '{:?}'", path))?;
-    let mut reader = io::BufReader::new(file);
+    let string = fs::read_to_string(path).context(format!("Unable to read {:?}", path))?;
+    load_from_string(string)
+}
+
+pub fn load_from_string(string: String) -> Result<Tilemap2d> {
+    let mut reader = io::BufReader::new(string.as_bytes());
 
     let width = parse_u32(&mut reader, "width")?;
     let height = parse_u32(&mut reader, "height")?;
@@ -26,7 +31,7 @@ pub fn load(path: &Path) -> Result<Tilemap2d> {
         .ok_or_else(|| anyhow!("Could not create tilemap"))
 }
 
-fn load_tiles(reader: &mut BufReader<File>, size: Size) -> Result<Vec<Tile>> {
+fn load_tiles(reader: &mut BufReader<&[u8]>, size: Size) -> Result<Vec<Tile>> {
     let mut tiles = Vec::with_capacity(size.len());
 
     for y in 0..size.height() {
@@ -61,7 +66,7 @@ fn load_tiles(reader: &mut BufReader<File>, size: Size) -> Result<Vec<Tile>> {
     Ok(tiles)
 }
 
-fn load_borders(reader: &mut BufReader<File>, size: Size) -> Result<Vec<Border>> {
+fn load_borders(reader: &mut BufReader<&[u8]>, size: Size) -> Result<Vec<Border>> {
     let mut borders = Vec::with_capacity(size.len());
 
     for y in 0..size.height() {
@@ -96,30 +101,41 @@ fn load_borders(reader: &mut BufReader<File>, size: Size) -> Result<Vec<Border>>
     Ok(borders)
 }
 
-pub fn save(tilemap: &Tilemap2d, path: &str) -> io::Result<()> {
+pub fn save(tilemap: &Tilemap2d, path: &str) -> Result<()> {
     info!("Save tilemap to '{}'", path);
+
     let mut file = File::create(path)?;
-    let size = tilemap.get_size();
 
-    writeln!(&mut file, "width={}", size.width())?;
-    writeln!(&mut file, "height={}", size.height())?;
+    let s = save_to_string(tilemap)?;
 
-    save_tiles(tilemap, &mut file)?;
-    save_borders(
-        tilemap.get_horizontal_borders(),
-        get_horizontal_borders_size(size),
-        &mut file,
-    )?;
-    save_borders(
-        tilemap.get_vertical_borders(),
-        get_vertical_borders_size(size),
-        &mut file,
-    )?;
+    file.write_all(s.as_bytes())?;
 
     Ok(())
 }
 
-fn save_tiles(tilemap: &Tilemap2d, file: &mut File) -> io::Result<()> {
+pub fn save_to_string(tilemap: &Tilemap2d) -> Result<String> {
+    let mut string = String::new();
+    let size = tilemap.get_size();
+
+    writeln!(&mut string, "width={}", size.width())?;
+    writeln!(&mut string, "height={}", size.height())?;
+
+    save_tiles(tilemap, &mut string)?;
+    save_borders(
+        tilemap.get_horizontal_borders(),
+        get_horizontal_borders_size(size),
+        &mut string,
+    )?;
+    save_borders(
+        tilemap.get_vertical_borders(),
+        get_vertical_borders_size(size),
+        &mut string,
+    )?;
+
+    Ok(string)
+}
+
+fn save_tiles(tilemap: &Tilemap2d, string: &mut String) -> Result<()> {
     let size = tilemap.get_size();
     let tiles = tilemap.get_tiles();
     let capacity = (size.width() * 4) as usize;
@@ -138,13 +154,13 @@ fn save_tiles(tilemap: &Tilemap2d, file: &mut File) -> io::Result<()> {
             index += 1;
         }
 
-        writeln!(file, "{}", line)?;
+        writeln!(string, "{}", line)?;
     }
 
     Ok(())
 }
 
-fn save_borders(borders: &[Border], size: Size, file: &mut File) -> io::Result<()> {
+fn save_borders(borders: &[Border], size: Size, string: &mut String) -> Result<()> {
     let capacity = (size.width() * 7) as usize;
     let mut index = 0;
 
@@ -161,13 +177,13 @@ fn save_borders(borders: &[Border], size: Size, file: &mut File) -> io::Result<(
             index += 1;
         }
 
-        writeln!(file, "{}", line)?;
+        writeln!(string, "{}", line)?;
     }
 
     Ok(())
 }
 
-fn parse_u32(reader: &mut BufReader<File>, value: &str) -> Result<u32> {
+fn parse_u32(reader: &mut BufReader<&[u8]>, value: &str) -> Result<u32> {
     let mut line = String::new();
     reader
         .read_line(&mut line)
@@ -240,5 +256,30 @@ fn format_border(border: &Border) -> String {
             is_front,
         } => format!("D,{},{},{}", *wall_id, *door_id, *is_front as usize),
         Border::Window { wall_id, window_id } => format!("Wi,{},{} ", *wall_id, *window_id),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tilemap::tilemap::Side::*;
+
+    #[test]
+    fn test_save_and_load() {
+        let size = Size::new(2, 3);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_tile(0, Tile::Solid(1));
+        tilemap.set_tile(2, Tile::Floor(2));
+        tilemap.set_tile(4, Tile::Floor(3));
+        tilemap.set_border(2, Bottom, Border::Wall(1));
+        tilemap.set_border(2, Left, Border::new_window(2, 1));
+        tilemap.set_border(2, Right, Border::new_door(3, 2, false));
+        tilemap.set_border(2, Top, Border::new_door(4, 5, true));
+
+        let string = save_to_string(&tilemap).unwrap();
+        let new_tilemap = load_from_string(string).unwrap();
+
+        assert_eq!(tilemap, new_tilemap);
     }
 }
