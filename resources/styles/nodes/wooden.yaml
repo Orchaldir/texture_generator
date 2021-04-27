@@ -7,7 +7,7 @@ component:
     name: "node"
     shape_factory: Circle
     color:
-      ConstantColor: "#8B4513"
+      ConstantColor: "#432711"
     depth:
       Linear:
         center: 250
