@@ -8,6 +8,7 @@ pub enum Shape {
     Rectangle {
         half_x: i32,
         half_y: i32,
+        max_half: f32,
     },
     /// A rectangle with rounded corners.
     RoundedRectangle {
@@ -33,9 +34,12 @@ impl Shape {
             return Err(ShapeError::HeightTooSmall(height));
         }
 
+        let half_x = (width / 2) as i32;
+        let half_y = (height / 2) as i32;
         Ok(Shape::Rectangle {
-            half_x: (width / 2) as i32,
-            half_y: (height / 2) as i32,
+            half_x,
+            half_y,
+            max_half: half_x.min(half_y) as f32,
         })
     }
 
@@ -77,11 +81,14 @@ impl Shape {
     pub fn distance(&self, center: &Point, point: &Point) -> f32 {
         match self {
             Shape::Circle(radius) => center.calculate_distance(point) / *radius as f32,
-            Shape::Rectangle { half_x, half_y } => {
-                let max_half = *half_x.min(half_y) as f32;
+            Shape::Rectangle {
+                half_x,
+                half_y,
+                max_half,
+            } => {
                 let diff = *point - *center;
                 let distance = (diff.x.abs() - *half_x).max(diff.y.abs() - *half_y) as f32;
-                (distance + max_half) / max_half
+                (distance + *max_half) / *max_half
             }
             Shape::RoundedRectangle {
                 half_x,
