@@ -27,17 +27,18 @@ impl ShapeFactory {
         let size = aabb.size();
         let min_side = size.width().min(size.height());
         let radius = min_side / 2;
+        let center = aabb.center();
 
         match self {
-            ShapeFactory::Circle => Shape::new_circle(radius),
-            ShapeFactory::Rectangle => Shape::new_rectangle(size.width(), size.height()),
+            ShapeFactory::Circle => Shape::new_circle(center, radius),
+            ShapeFactory::Rectangle => Shape::new_rectangle(center, size.width(), size.height()),
             ShapeFactory::RoundedRectangle(factor) => {
                 if min_side < 5 {
-                    return Shape::new_rectangle(size.width(), size.height());
+                    return Shape::new_rectangle(center, size.width(), size.height());
                 }
 
                 let radius = (radius as f32 * *factor) as u32;
-                Shape::new_rounded(size.width(), size.height(), radius)
+                Shape::new_rounded(center, size.width(), size.height(), radius)
             }
         }
     }
@@ -46,8 +47,10 @@ impl ShapeFactory {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::math::point::Point;
     use crate::math::size::Size;
 
+    const CENTER: Point = Point::new(6, 10);
     const SIZE: Size = Size::new(12, 20);
 
     #[test]
@@ -55,7 +58,7 @@ mod tests {
         let aabb = AABB::with_size(SIZE);
         let factory = ShapeFactory::Circle;
 
-        assert_eq!(factory.create_shape(&aabb), Ok(Shape::Circle(6)));
+        assert_eq!(factory.create_shape(&aabb), Shape::new_circle(CENTER, 6));
     }
 
     #[test]
@@ -63,7 +66,10 @@ mod tests {
         let aabb = AABB::with_size(SIZE);
         let factory = ShapeFactory::Rectangle;
 
-        assert_eq!(factory.create_shape(&aabb), Shape::new_rectangle(12, 20));
+        assert_eq!(
+            factory.create_shape(&aabb),
+            Shape::new_rectangle(CENTER, 12, 20)
+        );
     }
 
     #[test]
@@ -71,6 +77,9 @@ mod tests {
         let aabb = AABB::with_size(SIZE);
         let factory = ShapeFactory::RoundedRectangle(0.5);
 
-        assert_eq!(factory.create_shape(&aabb), Shape::new_rounded(12, 20, 3));
+        assert_eq!(
+            factory.create_shape(&aabb),
+            Shape::new_rounded(CENTER, 12, 20, 3)
+        );
     }
 }
