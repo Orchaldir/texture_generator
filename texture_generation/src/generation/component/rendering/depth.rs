@@ -5,6 +5,8 @@ pub enum DepthCalculator {
     Uniform(u8),
     /// A linear interpolation between the center & the border.
     Linear { center: f32, diff: f32 },
+    /// Creates a dome.
+    Dome { center: f32, diff: f32 },
 }
 
 impl DepthCalculator {
@@ -16,11 +18,23 @@ impl DepthCalculator {
         }
     }
 
-    /// Calculates the depth value based on a distance between 0 & 1.
-    pub fn calculate(&self, distance: f32) -> u8 {
+    pub fn new_dome(center: u8, border: u8) -> DepthCalculator {
+        let diff = border as f32 - center as f32;
+        DepthCalculator::Dome {
+            center: center as f32,
+            diff,
+        }
+    }
+
+    /// Calculates the depth value based on a factor between 0 & 1.
+    pub fn calculate(&self, factor: f32) -> u8 {
         match self {
             DepthCalculator::Uniform(depth) => *depth,
-            DepthCalculator::Linear { center, diff } => (*center + distance * (*diff)) as u8,
+            DepthCalculator::Linear { center, diff } => (*center + factor * (*diff)) as u8,
+            DepthCalculator::Dome { center, diff } => {
+                let factor = 1.0 - (1.0 - factor * factor).sqrt();
+                (*center + factor * (*diff)) as u8
+            }
         }
     }
 }
@@ -72,6 +86,24 @@ mod tests {
         assert_eq!(calculator.calculate(0.25), 150);
         assert_eq!(calculator.calculate(0.5), 100);
         assert_eq!(calculator.calculate(0.75), 50);
+        assert_eq!(calculator.calculate(1.0), 0);
+    }
+
+    #[test]
+    fn test_dome() {
+        let calculator = DepthCalculator::new_dome(100, 200);
+
+        assert_eq!(calculator.calculate(0.0), 100);
+        assert_eq!(calculator.calculate(0.5), 113);
+        assert_eq!(calculator.calculate(1.0), 200);
+    }
+
+    #[test]
+    fn test_dome_decreasing() {
+        let calculator = DepthCalculator::new_dome(200, 0);
+
+        assert_eq!(calculator.calculate(0.0), 200);
+        assert_eq!(calculator.calculate(0.5), 173);
         assert_eq!(calculator.calculate(1.0), 0);
     }
 }

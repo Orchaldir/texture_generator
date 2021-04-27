@@ -18,7 +18,7 @@ pub enum DefinitionError {
     ValueError(#[from] ValueError),
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Eq, PartialEq)]
 /// The different errors for creating new objects.
 pub enum ValueError {
     #[error("Value {name:?} of component {component:?} is too big ({value})")]

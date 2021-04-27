@@ -9,6 +9,6 @@ component:
     color:
       ConstantColor: "#432711"
     depth:
-      Linear:
+      Dome:
         center: 250
         border: 220
