@@ -14,7 +14,7 @@ edge_style:
             shape_factory:
               RoundedRectangle: 0.5
             color:
-              ConstantColor: "#8B4513"
+              ConstantColor: "#432711"
             depth:
               Linear:
                 center: 250

@@ -29,11 +29,35 @@ pub enum LayoutComponent {
     },
     Mock(u32),
     /// Repeats a component along the x-axis.
+    ///
+    /// # Diagram
+    ///
+    /// ```svgbob
+    ///   +--*--*--*
+    ///   |  |  |  |
+    ///   *  *  *  *
+    ///   |  |  |  |
+    ///   *  *  *  *
+    ///   |  |  |  |
+    ///   *--*--*--*
+    /// ```
     RepeatX {
         size: u32,
         component: Component,
     },
     /// Repeats a component along the y-axis.
+    ///
+    /// # Diagram
+    ///
+    /// ```svgbob
+    ///   +--*--*--*
+    ///   |        |
+    ///   *--*--*--*
+    ///   |        |
+    ///   *--*--*--*
+    ///   |        |
+    ///   *--*--*--*
+    /// ```
     RepeatY {
         size: u32,
         component: Component,
@@ -190,30 +214,48 @@ impl LayoutComponent {
             LayoutComponent::Mock(id) => info!("Generate layout mock {}", *id),
             LayoutComponent::RepeatX { size, component } => {
                 let mut point = inner.start();
+                let mut i = 0;
                 let end = inner.end().x;
-                let step = calculate_repeat_step(inner.size().width(), *size);
+                let (step, remain) = calculate_repeat_step(inner.size().width(), *size);
+                let bigger_step = step + 1;
                 let aabb_size = Size::new(step as u32, inner.size().height());
+                let bigger_size = Size::new(bigger_step as u32, inner.size().height());
 
                 while point.x < end {
-                    let aabb = AABB::new(point, aabb_size);
+                    let (size, step) = if i < remain {
+                        (bigger_size, bigger_step)
+                    } else {
+                        (aabb_size, step)
+                    };
+                    let aabb = AABB::new(point, size);
 
                     component.generate(data, &limited, &aabb);
 
                     point.x += step;
+                    i += 1;
                 }
             }
             LayoutComponent::RepeatY { size, component } => {
                 let mut point = inner.start();
+                let mut i = 0;
                 let end = inner.end().y;
-                let step = calculate_repeat_step(inner.size().height(), *size);
+                let (step, remain) = calculate_repeat_step(inner.size().height(), *size);
+                let bigger_step = step + 1;
                 let aabb_size = Size::new(inner.size().width(), step as u32);
+                let bigger_size = Size::new(inner.size().width(), bigger_step as u32);
 
                 while point.y < end {
-                    let aabb = AABB::new(point, aabb_size);
+                    let (size, step) = if i < remain {
+                        (bigger_size, bigger_step)
+                    } else {
+                        (aabb_size, step)
+                    };
+                    let aabb = AABB::new(point, size);
 
                     component.generate(data, &limited, &aabb);
 
                     point.y += step;
+                    i += 1;
                 }
             }
             LayoutComponent::Square {
@@ -242,11 +284,18 @@ impl LayoutComponent {
     }
 }
 
-fn calculate_repeat_step(size: u32, side: u32) -> i32 {
+fn calculate_repeat_step(size: u32, side: u32) -> (i32, u32) {
     let factor = (size % side) as f32 / side as f32;
     let n = size / side;
 
-    (size / if factor < 0.5 { n } else { n + 1 }) as i32
+    let n_step = if factor < 0.5 { n } else { n + 1 };
+    let step = (size / n_step) as i32;
+    let remain = size - n_step * step as u32;
+    info!(
+        "size={} side={} n={} step={} n_step={} remain={}",
+        size, side, n, step, n_step, remain
+    );
+    (step, remain)
 }
 
 #[cfg(test)]
