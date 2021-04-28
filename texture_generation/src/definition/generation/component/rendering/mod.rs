@@ -39,15 +39,12 @@ impl RenderingDefinition {
                 color,
                 depth,
             } => match shape_factory.convert() {
-                Ok(shape) => match depth.clone().try_into() {
-                    Ok(depth) => {
-                        let color = color.convert(name)?;
-                        Ok(RenderingComponent::new_shape_with_depth(
-                            name, shape, color, depth,
-                        ))
-                    }
-                    Err(error) => Err(error),
-                },
+                Ok(shape) => Ok(RenderingComponent::new_shape_with_depth(
+                    name,
+                    shape,
+                    color.convert(name)?,
+                    depth.clone().try_into()?,
+                )),
                 Err(error) => Err(DefinitionError::invalid_shape(name, error)),
             },
         }

@@ -3,7 +3,12 @@ name: "Blue Node"
 tile_size: 512
 size: 128
 component:
-  FillArea:
+  Shape:
     name: "node"
-    color: "#0000FF"
-    depth: 220
+    shape_factory: Rectangle
+    color:
+      ConstantColor: "#0000FF"
+    depth:
+      InterpolateMany:
+        - [0.8,255]
+        - [1.0,200]

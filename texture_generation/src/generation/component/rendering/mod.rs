@@ -102,7 +102,6 @@ impl RenderingComponent {
                 let start = outer.start().max(&inner.start());
                 let end = outer.end().min(&inner.end());
                 let mut point = start;
-                let center = inner.center();
                 let color = color_selector.select();
                 let base_depth = data.get_base_depth();
                 if let Ok(shape) = shape_factory.create_shape(inner) {
@@ -110,7 +109,7 @@ impl RenderingComponent {
                         point.x = start.x;
 
                         while point.x < end.x {
-                            let distance = shape.distance(&center, &point);
+                            let distance = shape.distance(&point);
 
                             if distance <= 1.0 {
                                 let depth = depth_calculator.calculate(distance);
