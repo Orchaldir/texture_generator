@@ -3,16 +3,16 @@
 pub enum DepthCalculator {
     /// All pixels have the same depth value.
     Uniform(u8),
-    /// A linear interpolation between the center & the border.
-    Linear { center: f32, diff: f32 },
+    /// A linear interpolation between 2 depth values at the center & the border.
+    InterpolateTwo { center: f32, diff: f32 },
     /// Creates a dome.
     Dome { center: f32, diff: f32 },
 }
 
 impl DepthCalculator {
-    pub fn new_linear(center: u8, border: u8) -> DepthCalculator {
+    pub fn new_interpolate_two(center: u8, border: u8) -> DepthCalculator {
         let diff = border as f32 - center as f32;
-        DepthCalculator::Linear {
+        DepthCalculator::InterpolateTwo {
             center: center as f32,
             diff,
         }
@@ -30,7 +30,7 @@ impl DepthCalculator {
     pub fn calculate(&self, factor: f32) -> u8 {
         match self {
             DepthCalculator::Uniform(depth) => *depth,
-            DepthCalculator::Linear { center, diff } => (*center + factor * (*diff)) as u8,
+            DepthCalculator::InterpolateTwo { center, diff } => (*center + factor * (*diff)) as u8,
             DepthCalculator::Dome { center, diff } => {
                 let factor = 1.0 - (1.0 - factor * factor).sqrt();
                 (*center + factor * (*diff)) as u8
@@ -68,8 +68,8 @@ mod tests {
     }
 
     #[test]
-    fn test_linear() {
-        let calculator = DepthCalculator::new_linear(100, 200);
+    fn test_interpolate_two() {
+        let calculator = DepthCalculator::new_interpolate_two(100, 200);
 
         assert_eq!(calculator.calculate(0.0), 100);
         assert_eq!(calculator.calculate(0.25), 125);
@@ -79,8 +79,8 @@ mod tests {
     }
 
     #[test]
-    fn test_linear_decreasing() {
-        let calculator = DepthCalculator::new_linear(200, 0);
+    fn test_interpolate_two_decreasing() {
+        let calculator = DepthCalculator::new_interpolate_two(200, 0);
 
         assert_eq!(calculator.calculate(0.0), 200);
         assert_eq!(calculator.calculate(0.25), 150);

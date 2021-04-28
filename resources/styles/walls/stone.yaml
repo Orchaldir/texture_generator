@@ -16,7 +16,7 @@ edge_style:
             color:
               ConstantColor: "#646464"
             depth:
-              Linear:
+              InterpolateTwo:
                 center: 250
                 border: 220
 corner_style: 0

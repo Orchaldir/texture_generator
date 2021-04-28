@@ -6,7 +6,7 @@ use std::convert::TryFrom;
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum DepthDefinition {
     Uniform(u8),
-    Linear { center: u8, border: u8 },
+    InterpolateTwo { center: u8, border: u8 },
     Dome { center: u8, border: u8 },
 }
 
@@ -16,8 +16,8 @@ impl TryFrom<DepthDefinition> for DepthCalculator {
     fn try_from(definition: DepthDefinition) -> Result<Self, Self::Error> {
         match definition {
             DepthDefinition::Uniform(depth) => Ok(DepthCalculator::Uniform(depth)),
-            DepthDefinition::Linear { center, border } => {
-                Ok(DepthCalculator::new_linear(center, border))
+            DepthDefinition::InterpolateTwo { center, border } => {
+                Ok(DepthCalculator::new_interpolate_two(center, border))
             }
             DepthDefinition::Dome { center, border } => {
                 Ok(DepthCalculator::new_dome(center, border))
@@ -40,14 +40,14 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_linear() {
+    fn test_convert_interpolate_two() {
         assert_eq!(
-            DepthDefinition::Linear {
+            DepthDefinition::InterpolateTwo {
                 center: 100,
                 border: 200,
             }
             .try_into(),
-            Ok(DepthCalculator::new_linear(100, 200))
+            Ok(DepthCalculator::new_interpolate_two(100, 200))
         );
     }
 
