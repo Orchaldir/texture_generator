@@ -21,6 +21,8 @@ pub enum DefinitionError {
 #[derive(Error, Debug, Eq, PartialEq)]
 /// The different errors for creating new objects.
 pub enum ValueError {
+    #[error("Vector {name:?} has not enough values! min={min}")]
+    NotEnoughValues { name: String, min: u32 },
     #[error("Value {name:?} of component {component:?} is too big ({value})")]
     ValueTooBig {
         component: String,
@@ -52,6 +54,13 @@ impl DefinitionError {
 }
 
 impl ValueError {
+    pub fn not_enough_values<S: Into<String>>(name: S, min: u32) -> ValueError {
+        ValueError::NotEnoughValues {
+            name: name.into(),
+            min,
+        }
+    }
+
     pub fn value_too_big<S: Into<String>, T: Into<String>>(
         component: S,
         name: T,

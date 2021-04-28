@@ -9,6 +9,6 @@ component:
     color:
       ConstantColor: "#0000FF"
     depth:
-      Dome:
-        center: 250
-        border: 200
+      InterpolateMany:
+        - [0.8,255]
+        - [1.0,200]
