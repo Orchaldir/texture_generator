@@ -102,3 +102,42 @@ impl HerringbonePattern {
 fn calculate_repeating_side(side: u32, multiplier: u32) -> u32 {
     side * multiplier * 2
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::generation::component::rendering::RenderingComponent;
+    use crate::generation::data::RuntimeData;
+    use crate::math::color::{Color, BLUE, PINK, WHITE};
+    use crate::math::size::Size;
+
+    #[test]
+    fn test_brick_wall() {
+        let size = Size::square(8);
+        let aabb = AABB::with_size(size);
+        let mut data = RuntimeData::new(size, WHITE);
+        let horizontal = create_component("h", PINK);
+        let vertical = create_component("v", BLUE);
+        let pattern = HerringbonePattern::new(1, 2, horizontal, vertical);
+
+        pattern.generate(&mut data, &aabb, &aabb);
+
+        #[rustfmt::skip]
+        let expected_colors = vec![
+            PINK, PINK, BLUE, BLUE, PINK, PINK, BLUE, BLUE,
+            BLUE, PINK, PINK, BLUE, BLUE, PINK, PINK, BLUE,
+            BLUE, BLUE, PINK, PINK, BLUE, BLUE, PINK, PINK,
+            PINK, BLUE, BLUE, PINK, PINK, BLUE, BLUE, PINK,
+            PINK, PINK, BLUE, BLUE, PINK, PINK, BLUE, BLUE,
+            BLUE, PINK, PINK, BLUE, BLUE, PINK, PINK, BLUE,
+            BLUE, BLUE, PINK, PINK, BLUE, BLUE, PINK, PINK,
+            PINK, BLUE, BLUE, PINK, PINK, BLUE, BLUE, PINK,
+        ];
+
+        assert_eq!(data.get_color_data(), &expected_colors);
+    }
+
+    fn create_component(name: &str, color: Color) -> Component {
+        Component::Rendering(Box::new(RenderingComponent::new_fill_area(name, color, 0)))
+    }
+}

@@ -3,7 +3,7 @@ name: "herringbone black & gold"
 size:
   width: 1024
   height: 1024
-background: "#AAAAAA"
+background: "#FFFFFF"
 component:
   type: Layout
   Herringbone:
