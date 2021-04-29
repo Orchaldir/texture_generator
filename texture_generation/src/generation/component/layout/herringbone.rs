@@ -5,6 +5,7 @@ use crate::math::point::Point;
 use crate::math::size::Size;
 
 /// The [Herringbone Pattern](https://en.wikipedia.org/wiki/RGB_color_model).
+#[derive(Clone, Debug, PartialEq)]
 pub struct HerringbonePattern {
     side: i32,
     multiplier: u32,

@@ -1,3 +1,4 @@
+use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::Component;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
@@ -29,6 +30,26 @@ pub enum LayoutComponent {
         offset: i32,
         component: Component,
     },
+    /// A herringbone pattern.
+    ///
+    /// # Diagram
+    ///
+    /// ```svgbob
+    ///               *-----*
+    ///               |     |
+    ///   +-----*-----*     *-----*
+    ///   |           |     |     |
+    ///   *-----*-----*-----*     *-----*
+    ///   |     |           |     |     |
+    ///   |     *-----*-----*-----*     |
+    ///   |     |     |           |     |
+    ///   *-----*     *-----*-----*-----*
+    ///         |     |     |           |
+    ///         *-----*     *-----------*
+    ///               |     |
+    ///               *-----*
+    /// ```
+    Herringbone(HerringbonePattern),
     Mock(u32),
     /// Repeats a component along the x-axis.
     ///
@@ -163,6 +184,8 @@ impl LayoutComponent {
                 offset,
                 component: component.flip(),
             },
+
+            LayoutComponent::Herringbone(..) => self.clone(),
             LayoutComponent::Mock(_id) => self.clone(),
             LayoutComponent::RepeatX { size, component } => LayoutComponent::RepeatY {
                 size,
@@ -213,6 +236,7 @@ impl LayoutComponent {
                     is_offset_row = !is_offset_row;
                 }
             }
+            LayoutComponent::Herringbone(pattern) => pattern.generate(data, outer, inner),
             LayoutComponent::Mock(id) => info!("Generate layout mock {}", *id),
             LayoutComponent::RepeatX { size, component } => {
                 let mut point = inner.start();

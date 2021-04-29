@@ -1,0 +1,23 @@
+---
+name: "herringbone black & gold"
+size:
+  width: 1024
+  height: 1024
+background: "#AAAAAA"
+component:
+  type: Layout
+  Herringbone:
+    side: 64
+    multiplier: 2
+    horizontal_component:
+      type: Rendering
+      FillArea:
+        name: "black"
+        color: "#000000"
+        depth: 100
+    vertical_component:
+      type: Rendering
+      FillArea:
+        name: "gold"
+        color: "#FFD700"
+        depth: 200
