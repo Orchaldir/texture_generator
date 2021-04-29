@@ -317,10 +317,6 @@ fn calculate_repeat_step(size: u32, side: u32) -> (i32, u32) {
     let n_step = if factor < 0.5 { n } else { n + 1 };
     let step = (size / n_step) as i32;
     let remain = size - n_step * step as u32;
-    info!(
-        "size={} side={} n={} step={} n_step={} remain={}",
-        size, side, n, step, n_step, remain
-    );
     (step, remain)
 }
 

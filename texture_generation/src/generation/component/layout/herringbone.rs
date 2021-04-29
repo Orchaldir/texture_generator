@@ -53,14 +53,25 @@ impl HerringbonePattern {
     fn generate_repeatable(&self, data: &mut dyn Data, limited: &AABB, x: i32, y: i32) {
         let start = Point::new(x, y) * self.repeating_side;
         let limited = AABB::new(start, Size::square(self.repeating_side)).limit(limited);
+        let multiplier = self.multiplier as i32;
 
-        for i in 0..(self.multiplier as i32 * 2) {
+        for i in 0..(multiplier * 2) {
             let aabb = self.get_horizontal_aabb(start, i, i);
             self.horizontal_component.generate(data, &limited, &aabb);
         }
 
-        for i in 0..(self.multiplier as i32 * 2 - 1) {
+        for i in 0..(multiplier - 1) {
+            let aabb = self.get_horizontal_aabb(start, i - multiplier + 1, i + multiplier + 1);
+            self.horizontal_component.generate(data, &limited, &aabb);
+        }
+
+        for i in 0..(multiplier * 2 - 1) {
             let aabb = self.get_vertical_aabb(start, i, i + 1);
+            self.vertical_component.generate(data, &limited, &aabb);
+        }
+
+        for i in 0..(multiplier) {
+            let aabb = self.get_vertical_aabb(start, i + multiplier, i - multiplier + 1);
             self.vertical_component.generate(data, &limited, &aabb);
         }
     }

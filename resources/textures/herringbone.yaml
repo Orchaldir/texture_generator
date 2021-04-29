@@ -8,24 +8,24 @@ component:
   type: Layout
   Herringbone:
     side: 64
-    multiplier: 2
+    multiplier: 3
     horizontal_component:
       type: Border
       UniformBorder:
-        border: 4
+        border: 2
         component:
           type: Rendering
           FillArea:
             name: "black"
             color: "#000000"
-            depth: 100
+            depth: 25
     vertical_component:
       type: Border
       UniformBorder:
-        border: 4
+        border: 2
         component:
           type: Rendering
           FillArea:
             name: "gold"
             color: "#FFD700"
-            depth: 200
+            depth: 25
