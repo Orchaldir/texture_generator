@@ -1,5 +1,6 @@
 use crate::definition::generation::component::ComponentDefinition;
 use crate::definition::{convert, convert_size};
+use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::LayoutComponent;
 use crate::math::size::Size;
 use crate::utils::error::DefinitionError;
@@ -12,6 +13,12 @@ pub enum LayoutDefinition {
         brick: Size,
         offset: u32,
         component: ComponentDefinition,
+    },
+    Herringbone {
+        side: u32,
+        multiplier: u32,
+        horizontal_component: ComponentDefinition,
+        vertical_component: ComponentDefinition,
     },
     Mock(u32),
     RepeatX {
@@ -46,6 +53,20 @@ impl LayoutDefinition {
                     component,
                 )?;
                 Ok(layout)
+            }
+            LayoutDefinition::Herringbone {
+                side,
+                multiplier,
+                horizontal_component,
+                vertical_component,
+            } => {
+                let pattern = HerringbonePattern::new(
+                    convert(*side, factor),
+                    *multiplier,
+                    horizontal_component.convert(factor)?,
+                    vertical_component.convert(factor)?,
+                );
+                Ok(LayoutComponent::Herringbone(pattern))
             }
             LayoutDefinition::Mock(id) => Ok(LayoutComponent::Mock(*id)),
             LayoutDefinition::RepeatX { size, component } => {

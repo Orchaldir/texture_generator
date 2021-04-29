@@ -1,8 +1,11 @@
+use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::Component;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use crate::utils::error::ValueError;
+
+pub mod herringbone;
 
 #[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
@@ -27,6 +30,26 @@ pub enum LayoutComponent {
         offset: i32,
         component: Component,
     },
+    /// A herringbone pattern.
+    ///
+    /// # Diagram
+    ///
+    /// ```svgbob
+    ///               *-----*
+    ///               |     |
+    ///   +-----*-----*     *-----*
+    ///   |           |     |     |
+    ///   *-----*-----*-----*     *-----*
+    ///   |     |           |     |     |
+    ///   |     *-----*-----*-----*     |
+    ///   |     |     |           |     |
+    ///   *-----*     *-----*-----*-----*
+    ///         |     |     |           |
+    ///         *-----*     *-----------*
+    ///               |     |
+    ///               *-----*
+    /// ```
+    Herringbone(HerringbonePattern),
     Mock(u32),
     /// Repeats a component along the x-axis.
     ///
@@ -161,6 +184,8 @@ impl LayoutComponent {
                 offset,
                 component: component.flip(),
             },
+
+            LayoutComponent::Herringbone(..) => self.clone(),
             LayoutComponent::Mock(_id) => self.clone(),
             LayoutComponent::RepeatX { size, component } => LayoutComponent::RepeatY {
                 size,
@@ -211,6 +236,7 @@ impl LayoutComponent {
                     is_offset_row = !is_offset_row;
                 }
             }
+            LayoutComponent::Herringbone(pattern) => pattern.generate(data, outer, inner),
             LayoutComponent::Mock(id) => info!("Generate layout mock {}", *id),
             LayoutComponent::RepeatX { size, component } => {
                 let mut point = inner.start();
@@ -291,10 +317,6 @@ fn calculate_repeat_step(size: u32, side: u32) -> (i32, u32) {
     let n_step = if factor < 0.5 { n } else { n + 1 };
     let step = (size / n_step) as i32;
     let remain = size - n_step * step as u32;
-    info!(
-        "size={} side={} n={} step={} n_step={} remain={}",
-        size, side, n, step, n_step, remain
-    );
     (step, remain)
 }
 
