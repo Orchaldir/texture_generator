@@ -52,24 +52,33 @@ impl HerringbonePattern {
 
     fn generate_repeatable(&self, data: &mut dyn Data, limited: &AABB, x: i32, y: i32) {
         let start = Point::new(x, y) * self.repeating_side;
+        let limited = AABB::new(start, Size::square(self.repeating_side)).limit(limited);
 
-        self.generate_horizontal(data, limited, start, 0, 0);
+        for i in 0..(self.multiplier as i32 * 2) {
+            let aabb = self.get_horizontal_aabb(start, i, i);
+            self.horizontal_component.generate(data, &limited, &aabb);
+        }
+
+        for i in 0..(self.multiplier as i32 * 2 - 1) {
+            let aabb = self.get_vertical_aabb(start, i, i + 1);
+            self.vertical_component.generate(data, &limited, &aabb);
+        }
     }
 
-    fn generate_horizontal(
-        &self,
-        data: &mut dyn Data,
-        limited: &AABB,
-        start: Point,
-        offset_x: i32,
-        offset_y: i32,
-    ) {
+    fn get_horizontal_aabb(&self, start: Point, offset_x: i32, offset_y: i32) -> AABB {
         let point = Point::new(
             start.x + offset_x * self.side,
             start.y + offset_y * self.side,
         );
-        let aabb = AABB::new(point, self.horizontal_size);
-        self.horizontal_component.generate(data, limited, &aabb);
+        AABB::new(point, self.horizontal_size)
+    }
+
+    fn get_vertical_aabb(&self, start: Point, offset_x: i32, offset_y: i32) -> AABB {
+        let point = Point::new(
+            start.x + offset_x * self.side,
+            start.y + offset_y * self.side,
+        );
+        AABB::new(point, self.vertical_size)
     }
 
     /// In which repeating area is this point?
@@ -80,5 +89,5 @@ impl HerringbonePattern {
 
 /// How large is the repeating area of this pattern?
 fn calculate_repeating_side(side: u32, multiplier: u32) -> u32 {
-    side * multiplier * 3
+    side * multiplier * 2
 }

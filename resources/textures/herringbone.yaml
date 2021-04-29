@@ -10,14 +10,22 @@ component:
     side: 64
     multiplier: 2
     horizontal_component:
-      type: Rendering
-      FillArea:
-        name: "black"
-        color: "#000000"
-        depth: 100
+      type: Border
+      UniformBorder:
+        border: 4
+        component:
+          type: Rendering
+          FillArea:
+            name: "black"
+            color: "#000000"
+            depth: 100
     vertical_component:
-      type: Rendering
-      FillArea:
-        name: "gold"
-        color: "#FFD700"
-        depth: 200
+      type: Border
+      UniformBorder:
+        border: 4
+        component:
+          type: Rendering
+          FillArea:
+            name: "gold"
+            color: "#FFD700"
+            depth: 200
