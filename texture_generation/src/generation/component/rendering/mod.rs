@@ -104,6 +104,7 @@ impl RenderingComponent {
                 let mut point = start;
                 let color = color_selector.select();
                 let base_depth = data.get_base_depth();
+
                 if let Ok(shape) = shape_factory.create_shape(inner) {
                     while point.y < end.y {
                         point.x = start.x;
