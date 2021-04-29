@@ -4,6 +4,8 @@ use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use crate::utils::error::ValueError;
 
+pub mod herringbone;
+
 #[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
 /// Generates a layout,

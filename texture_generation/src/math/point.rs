@@ -1,6 +1,6 @@
 use crate::math::size::Size;
 use serde::{Deserialize, Serialize};
-use std::ops::{Add, Sub};
+use std::ops::{Add, Div, Mul, Sub};
 
 #[svgbobdoc::transform]
 /// Defines a point in 2 dimensions.
@@ -107,7 +107,23 @@ impl Point {
     }
 }
 
-/// Add a [`Size`] to a [`Point`].
+/// Adds an integer to a [`Point`].
+///
+/// ```
+///# use texture_generation::math::point::Point;
+/// let point = Point::new(1, 2);
+///
+/// assert_eq!(point + 2, Point::new(3, 4));
+/// ```
+impl Add<i32> for Point {
+    type Output = Point;
+
+    fn add(self, value: i32) -> Point {
+        Point::new(self.x + value, self.y + value)
+    }
+}
+
+/// Adds a [`Size`] to a [`Point`].
 ///
 /// ```
 ///# use texture_generation::math::point::Point;
@@ -125,7 +141,7 @@ impl Add<Size> for Point {
     }
 }
 
-/// Subtract an integer from a [`Point`].
+/// Subtracts an integer from a [`Point`].
 ///
 /// ```
 ///# use texture_generation::math::point::Point;
@@ -141,7 +157,7 @@ impl Sub<i32> for Point {
     }
 }
 
-/// Subtract a [`Point`] from another [`Point`].
+/// Subtracts a [`Point`] from another [`Point`].
 ///
 /// ```
 ///# use texture_generation::math::point::Point;
@@ -159,7 +175,7 @@ impl Sub<Point> for Point {
     }
 }
 
-/// Subtract a [`Size`] from a [`Point`].
+/// Subtracts a [`Size`] from a [`Point`].
 ///
 /// ```
 ///# use texture_generation::math::point::Point;
@@ -174,5 +190,37 @@ impl Sub<Size> for Point {
 
     fn sub(self, size: Size) -> Point {
         Point::new(self.x - size.width() as i32, self.y - size.height() as i32)
+    }
+}
+
+/// Multiplies a [`Point`] by an integer.
+///
+/// ```
+///# use texture_generation::math::point::Point;
+/// let point = Point::new(10, 30);
+///
+/// assert_eq!(point * 2, Point::new(20, 60));
+/// ```
+impl Mul<u32> for Point {
+    type Output = Self;
+
+    fn mul(self, value: u32) -> Self::Output {
+        Point::new(self.x * value as i32, self.y * value as i32)
+    }
+}
+
+/// Divides a [`Point`] by an integer.
+///
+/// ```
+///# use texture_generation::math::point::Point;
+/// let point = Point::new(10, 30);
+///
+/// assert_eq!(point / 2, Point::new(5, 15));
+/// ```
+impl Div<u32> for Point {
+    type Output = Self;
+
+    fn div(self, value: u32) -> Self::Output {
+        Point::new(self.x / value as i32, self.y / value as i32)
     }
 }

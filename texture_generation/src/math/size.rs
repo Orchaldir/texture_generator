@@ -41,6 +41,17 @@ impl Size {
         Size::new(size, size)
     }
 
+    /// Returns a new size with switched width & height.
+    ///
+    /// ```
+    ///# use texture_generation::math::size::Size;
+    /// let size = Size::new(10, 30);
+    /// assert_eq!(size.flip(), Size::new(30, 10));
+    /// ```
+    pub fn flip(&self) -> Size {
+        Size::new(self.height, self.width)
+    }
+
     /// Returns a new size divided by a value.
     ///
     /// ```
