@@ -1,8 +1,6 @@
 ---
 name: test
-size:
-  width: 1024
-  height: 1024
+size: 1024
 background: "#8B4513"
 component:
   type: Layout

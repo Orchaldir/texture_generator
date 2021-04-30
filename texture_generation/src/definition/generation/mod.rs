@@ -14,7 +14,7 @@ pub mod process;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
     name: String,
-    size: Size,
+    size: u32,
     background: String,
     component: ComponentDefinition,
 }
@@ -22,7 +22,7 @@ pub struct TextureDefinition {
 impl TextureDefinition {
     pub fn new<S: Into<String>>(
         name: S,
-        size: Size,
+        size: u32,
         background: String,
         component: ComponentDefinition,
     ) -> TextureDefinition {
@@ -49,15 +49,14 @@ impl ResourceDefinition for TextureDefinition {
     type R = TextureGenerator;
 
     fn convert(&self, size: u32) -> Result<TextureGenerator, DefinitionError> {
-        let max = self.size.width().max(self.size.height());
-        let factor = size as f32 / max as f32;
+        let factor = size as f32 / self.size as f32;
         let component = self.component.convert(factor)?;
         let color = Color::convert(&self.background)
             .ok_or_else(|| DefinitionError::invalid_color("background", &self.background))?;
 
         Ok(TextureGenerator::new(
             self.name.clone(),
-            self.size * factor,
+            Size::square(size),
             color,
             component,
         ))
@@ -74,12 +73,11 @@ mod tests {
     fn test_convert_layout() {
         let definition = TextureDefinition::new(
             "test",
-            Size::new(100, 50),
+            100,
             "#0000FF".to_string(),
             ComponentDefinition::Mock(42),
         );
-        let generator =
-            TextureGenerator::new("test", Size::new(200, 100), BLUE, Component::Mock(42));
+        let generator = TextureGenerator::new("test", Size::square(200), BLUE, Component::Mock(42));
 
         assert_eq!(generator, definition.convert(200).unwrap());
     }

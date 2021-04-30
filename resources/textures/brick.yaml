@@ -1,8 +1,6 @@
 ---
 name: brick_wall
-size:
-  width: 1024
-  height: 1024
+size: 1024
 background: "#AAAAAA"
 component:
   type: Layout
