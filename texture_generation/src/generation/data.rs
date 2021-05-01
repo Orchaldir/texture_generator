@@ -1,8 +1,10 @@
+use crate::generation::occupancy::OccupancyMap;
 use crate::generation::process::PostProcess;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
 use crate::math::point::Point;
 use crate::math::size::Size;
+use std::collections::HashMap;
 
 /// A trait used to store the data during the generation of the texture.
 pub trait Data {
@@ -29,6 +31,9 @@ pub trait Data {
 
     /// Gets the base depth for the current tile of the tilemap.
     fn get_base_depth(&self) -> u8;
+
+    /// Gets the mutable [`OccupancyMap`] with a specific resolution. Creates it, if it doesn't exist yet.
+    fn get_occupancy_map_mut(&mut self, cells_per_side: usize) -> &mut OccupancyMap;
 }
 
 /// An implementation of [`Data`] for the actual usage.
@@ -39,6 +44,7 @@ pub struct RuntimeData {
     colors: Vec<Color>,
     depth: Vec<u8>,
     base_depth: u8,
+    occupancy_maps: HashMap<usize, OccupancyMap>,
 }
 
 impl RuntimeData {
@@ -72,6 +78,7 @@ impl RuntimeData {
             colors,
             depth,
             base_depth,
+            occupancy_maps: HashMap::new(),
         }
     }
 
@@ -155,6 +162,13 @@ impl Data for RuntimeData {
 
     fn get_base_depth(&self) -> u8 {
         self.base_depth
+    }
+
+    fn get_occupancy_map_mut(&mut self, cells_per_side: usize) -> &mut OccupancyMap {
+        let tiles = self.tiles;
+        self.occupancy_maps
+            .entry(cells_per_side)
+            .or_insert_with(|| OccupancyMap::new(tiles, cells_per_side))
     }
 }
 
