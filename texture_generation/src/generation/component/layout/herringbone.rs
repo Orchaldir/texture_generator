@@ -37,7 +37,7 @@ impl HerringbonePattern {
         }
     }
 
-    /// Generates the pattern in the area defined by the [`AABB`].
+    /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
     pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
         let start = self.calculate_repeating_point(inner.start());
         let end = self.calculate_repeating_point(inner.end()) + 1i32;
@@ -45,12 +45,13 @@ impl HerringbonePattern {
 
         for y in start.y..end.y {
             for x in start.x..end.x {
-                self.generate_repeatable(data, &limited, x, y);
+                self.generate_repeating_area(data, &limited, x, y);
             }
         }
     }
 
-    fn generate_repeatable(&self, data: &mut dyn Data, limited: &AABB, x: i32, y: i32) {
+    /// Generates the repeating area of the Herringbone pattern.
+    fn generate_repeating_area(&self, data: &mut dyn Data, limited: &AABB, x: i32, y: i32) {
         let start = Point::new(x, y) * self.repeating_side;
         let limited = AABB::new(start, Size::square(self.repeating_side)).limit(limited);
         let multiplier = self.multiplier as i32;
