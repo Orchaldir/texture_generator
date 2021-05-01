@@ -146,3 +146,44 @@ pub fn check_column(
 
     true
 }
+
+/// Checks if several cells in a row are free.
+///
+/// ```
+///# use texture_generation::math::occupancy::tile::{OccupancyTile, FREE, check_row};
+///# use texture_generation::math::size::Size;
+/// let size = Size::square(3);
+/// let tile = OccupancyTile::from_cells(vec![
+///   2, FREE, FREE,
+///   FREE, 2, FREE,
+///   FREE, FREE, 2]);
+///
+/// assert_eq!(check_row(&tile, size, 0, 0, 2), false);
+/// assert_eq!(check_row(&tile, size, 1, 0, 2), true);
+/// assert_eq!(check_row(&tile, size, 2, 0, 1), true);
+/// assert_eq!(check_row(&tile, size, 0, 1, 2), false);
+/// assert_eq!(check_row(&tile, size, 1, 1, 2), false);
+/// assert_eq!(check_row(&tile, size, 2, 1, 1), true);
+/// assert_eq!(check_row(&tile, size, 0, 2, 2), true);
+/// assert_eq!(check_row(&tile, size, 1, 2, 2), false);
+/// assert_eq!(check_row(&tile, size, 2, 2, 1), false);
+/// ```
+pub fn check_row(
+    occupancy_tile: &OccupancyTile,
+    tile_size: Size,
+    x: u32,
+    y: u32,
+    width: u32,
+) -> bool {
+    let mut start_index = tile_size.convert_x_y(x, y);
+
+    for _i in 0..width {
+        if !occupancy_tile.is_free(start_index) {
+            return false;
+        }
+
+        start_index += 1;
+    }
+
+    true
+}
