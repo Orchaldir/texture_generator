@@ -5,6 +5,7 @@ use crate::math::occupancy::tile::{check_column, check_row, fill_area, Occupancy
 use crate::math::point::Point;
 use crate::math::size::Size;
 use rand::distributions::{Distribution, Uniform};
+use rand::prelude::ThreadRng;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RandomAshlarPattern {
@@ -15,7 +16,12 @@ pub struct RandomAshlarPattern {
 }
 
 impl RandomAshlarPattern {
-    pub fn new(cells_per_side: u32, min_size: u32, max_size: u32, component: Component) -> RandomAshlarPattern {
+    pub fn new(
+        cells_per_side: u32,
+        min_size: u32,
+        max_size: u32,
+        component: Component,
+    ) -> RandomAshlarPattern {
         RandomAshlarPattern {
             cells_per_side,
             min_size,
@@ -39,41 +45,14 @@ impl RandomAshlarPattern {
         for y in 0..self.cells_per_side {
             for x in 0..self.cells_per_side {
                 if occupancy_tile.is_free(cell_index) {
-                    let remaining_x = self.cells_per_side - x;
-                    let remaining_y = self.cells_per_side - y;
-                    let max_size_x = size_distribution.sample(&mut rng).min(remaining_x as u32);
-                    let max_size_y = size_distribution.sample(&mut rng).min(remaining_y as u32);
-                    let mut size_x = 1;
-                    let mut size_y = 1;
-                    let mut is_x_ongoing = size_x < max_size_x;
-                    let mut is_y_ongoing = size_y < max_size_y;
-
-                    while is_x_ongoing || is_y_ongoing {
-                        if is_x_ongoing {
-                            is_x_ongoing = if check_column(
-                                &occupancy_tile,
-                                tile_size,
-                                x + size_x,
-                                y,
-                                size_y,
-                            ) {
-                                size_x += 1;
-                                size_x < max_size_x
-                            } else {
-                                false
-                            };
-                        }
-
-                        if is_y_ongoing {
-                            is_y_ongoing =
-                                if check_row(&occupancy_tile, tile_size, x, y + size_y, size_x) {
-                                    size_y += 1;
-                                    size_y < max_size_y
-                                } else {
-                                    false
-                                };
-                        }
-                    }
+                    let (size_x, size_y) = self.create_size(
+                        &mut rng,
+                        size_distribution,
+                        &mut occupancy_tile,
+                        tile_size,
+                        y,
+                        x,
+                    );
 
                     fill_area(
                         &mut occupancy_tile,
@@ -99,5 +78,45 @@ impl RandomAshlarPattern {
                 cell_index += 1;
             }
         }
+    }
+
+    fn create_size(
+        &self,
+        mut rng: &mut ThreadRng,
+        size_distribution: Uniform<u32>,
+        occupancy_tile: &mut OccupancyTile,
+        tile_size: Size,
+        y: u32,
+        x: u32,
+    ) -> (u32, u32) {
+        let remaining_x = self.cells_per_side - x;
+        let remaining_y = self.cells_per_side - y;
+        let max_size_x = size_distribution.sample(&mut rng).min(remaining_x as u32);
+        let max_size_y = size_distribution.sample(&mut rng).min(remaining_y as u32);
+        let mut size_x = 1;
+        let mut size_y = 1;
+        let mut is_x_ongoing = size_x < max_size_x;
+        let mut is_y_ongoing = size_y < max_size_y;
+
+        while is_x_ongoing || is_y_ongoing {
+            if is_x_ongoing {
+                is_x_ongoing = if check_column(&occupancy_tile, tile_size, x + size_x, y, size_y) {
+                    size_x += 1;
+                    size_x < max_size_x
+                } else {
+                    false
+                };
+            }
+
+            if is_y_ongoing {
+                is_y_ongoing = if check_row(&occupancy_tile, tile_size, x, y + size_y, size_x) {
+                    size_y += 1;
+                    size_y < max_size_y
+                } else {
+                    false
+                };
+            }
+        }
+        (size_x, size_y)
     }
 }
