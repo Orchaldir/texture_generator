@@ -41,8 +41,7 @@ impl Renderer {
     /// Renders a [`Tilemap2d`].
     pub fn render(&self, tilemap: &Tilemap2d) -> RuntimeData {
         let tile_size = Size::square(self.tile_size);
-        let size = tile_size * tilemap.get_size();
-        let mut data = RuntimeData::new(size, BLACK);
+        let mut data = RuntimeData::for_tilemap(tilemap.get_size(), tile_size, BLACK);
 
         self.render_tiles(tilemap, tile_size, &mut data);
         self.render_borders(tilemap, &mut data);

@@ -146,7 +146,7 @@ mod tests {
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = RuntimeData::with_base_depth(data_size, WHITE, 3);
+        let mut data = RuntimeData::with_depth(data_size, WHITE, 3);
         let renderer = RenderingComponent::new_fill_area("test", RED, 42);
 
         renderer.render(&mut data, &outer, &aabb);
@@ -186,7 +186,7 @@ mod tests {
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = RuntimeData::with_base_depth(data_size, WHITE, 3);
+        let mut data = RuntimeData::with_depth(data_size, WHITE, 3);
         let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 42);
 
         renderer.render(&mut data, &outer, &aabb);

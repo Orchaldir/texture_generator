@@ -9,6 +9,12 @@ pub trait Data {
     /// Gets the [`Size`] of the textures.
     fn get_size(&self) -> &Size;
 
+    /// Gets the [`Size`] of the tilemap.
+    fn get_tiles(&self) -> &Size;
+
+    /// Gets the [`Size`] of each tile.
+    fn get_tile_size(&self) -> &Size;
+
     /// Sets the [`Color`] & depth at the [`Point`].
     fn set(&mut self, point: &Point, color: &Color, depth: u8);
 
@@ -28,6 +34,8 @@ pub trait Data {
 /// An implementation of [`Data`] for the actual usage.
 pub struct RuntimeData {
     size: Size,
+    tiles: Size,
+    tile_size: Size,
     colors: Vec<Color>,
     depth: Vec<u8>,
     base_depth: u8,
@@ -35,16 +43,32 @@ pub struct RuntimeData {
 
 impl RuntimeData {
     pub fn new(size: Size, default: Color) -> RuntimeData {
-        RuntimeData::with_base_depth(size, default, 0)
+        Self::with_depth(size, default, 0)
     }
 
-    pub fn with_base_depth(size: Size, default: Color, base_depth: u8) -> RuntimeData {
+    pub fn with_depth(size: Size, default: Color, base_depth: u8) -> RuntimeData {
+        Self::tilemap_with_depth(Size::square(1), size, default, base_depth)
+    }
+
+    pub fn for_tilemap(tiles: Size, tile_size: Size, default: Color) -> RuntimeData {
+        Self::tilemap_with_depth(tiles, tile_size, default, 0)
+    }
+
+    pub fn tilemap_with_depth(
+        tiles: Size,
+        tile_size: Size,
+        default: Color,
+        base_depth: u8,
+    ) -> RuntimeData {
+        let size = tile_size * tiles;
         let n = size.len();
         let colors = vec![default; n];
         let depth = vec![0; n];
 
         RuntimeData {
             size,
+            tiles,
+            tile_size,
             colors,
             depth,
             base_depth,
@@ -100,6 +124,14 @@ impl RuntimeData {
 impl Data for RuntimeData {
     fn get_size(&self) -> &Size {
         &self.size
+    }
+
+    fn get_tiles(&self) -> &Size {
+        &self.tiles
+    }
+
+    fn get_tile_size(&self) -> &Size {
+        &self.tile_size
     }
 
     fn set(&mut self, point: &Point, color: &Color, depth: u8) {
