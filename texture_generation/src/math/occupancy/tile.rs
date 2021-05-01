@@ -3,6 +3,7 @@ use std::ops::SubAssign;
 
 pub const FREE: usize = 0;
 pub const BLOCKED: usize = 1;
+pub const START: usize = 2;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum OccupancyTile {
@@ -186,4 +187,39 @@ pub fn check_row(
     }
 
     true
+}
+
+/// Fills an area in the tile.
+///
+/// ```
+///# use texture_generation::math::occupancy::tile::{OccupancyTile, FREE, fill_area};
+///# use texture_generation::math::size::Size;
+/// let size = Size::square(4);
+/// let mut tile = OccupancyTile::from_cells(vec![FREE; 16]);
+///
+/// fill_area(&mut tile, size, 1, 2, 3, 2, 1234);
+///
+/// assert_eq!(tile, OccupancyTile::from_cells(vec![
+///   FREE, FREE, FREE, FREE,
+///   FREE, FREE, FREE, FREE,
+///   FREE, 1234, 1234, 1234,
+///   FREE, 1234, 1234, 1234
+/// ]));
+/// ```
+pub fn fill_area(
+    occupancy_tile: &mut OccupancyTile,
+    tile_size: Size,
+    start_x: u32,
+    start_y: u32,
+    width: u32,
+    height: u32,
+    value: usize,
+) {
+    for y in start_y..(start_y + height) {
+        let index = tile_size.convert_x_y(start_x, y);
+
+        for i in 0..width {
+            occupancy_tile.fill(index + i as usize, value);
+        }
+    }
 }

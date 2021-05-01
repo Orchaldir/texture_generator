@@ -1,6 +1,6 @@
+use crate::math::occupancy::tile::OccupancyTile;
 use crate::math::size::Size;
 use std::ops::SubAssign;
-use crate::math::occupancy::tile::OccupancyTile;
 
 pub mod tile;
 
