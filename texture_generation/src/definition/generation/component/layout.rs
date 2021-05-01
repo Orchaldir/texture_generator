@@ -24,6 +24,7 @@ pub enum LayoutDefinition {
     Mock(u32),
     RandomAshlar {
         cells_per_side: u32,
+        min_size: u32,
         max_size: u32,
         component: ComponentDefinition,
     },
@@ -77,11 +78,13 @@ impl LayoutDefinition {
             LayoutDefinition::Mock(id) => Ok(LayoutComponent::Mock(*id)),
             LayoutDefinition::RandomAshlar {
                 cells_per_side,
+                min_size,
                 max_size,
                 component,
             } => {
                 let pattern = RandomAshlarPattern::new(
                     *cells_per_side,
+                    *min_size,
                     *max_size,
                     component.convert(factor)?,
                 );

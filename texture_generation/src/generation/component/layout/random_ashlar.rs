@@ -9,14 +9,16 @@ use rand::distributions::{Distribution, Uniform};
 #[derive(Clone, Debug, PartialEq)]
 pub struct RandomAshlarPattern {
     cells_per_side: u32,
+    min_size: u32,
     max_size: u32,
     component: Component,
 }
 
 impl RandomAshlarPattern {
-    pub fn new(cells_per_side: u32, max_size: u32, component: Component) -> RandomAshlarPattern {
+    pub fn new(cells_per_side: u32, min_size: u32, max_size: u32, component: Component) -> RandomAshlarPattern {
         RandomAshlarPattern {
             cells_per_side,
+            min_size,
             max_size,
             component,
         }
@@ -25,7 +27,7 @@ impl RandomAshlarPattern {
     /// Generates the pattern in the area defined by the [`AABB`].
     pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
         let mut rng = rand::thread_rng();
-        let size_distribution = Uniform::from(1..(self.max_size + 1));
+        let size_distribution = Uniform::from(self.min_size..(self.max_size + 1));
         let mut occupancy_tile = OccupancyTile::new_active(self.cells_per_side as usize);
         let mut cell_index = 0;
         let mut area_index = START;
