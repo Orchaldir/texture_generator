@@ -1,4 +1,5 @@
 use crate::generation::component::layout::herringbone::HerringbonePattern;
+use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::Component;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
@@ -6,6 +7,7 @@ use crate::math::size::Size;
 use crate::utils::error::ValueError;
 
 pub mod herringbone;
+pub mod random_ashlar;
 
 #[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
@@ -51,6 +53,7 @@ pub enum LayoutComponent {
     /// ```
     Herringbone(HerringbonePattern),
     Mock(u32),
+    RandomAshlar(RandomAshlarPattern),
     /// Repeats a component along the x-axis.
     ///
     /// # Diagram
@@ -184,9 +187,9 @@ impl LayoutComponent {
                 offset,
                 component: component.flip(),
             },
-
             LayoutComponent::Herringbone(..) => self.clone(),
             LayoutComponent::Mock(_id) => self.clone(),
+            LayoutComponent::RandomAshlar(..) => self.clone(),
             LayoutComponent::RepeatX { size, component } => LayoutComponent::RepeatY {
                 size,
                 component: component.flip(),
@@ -238,6 +241,7 @@ impl LayoutComponent {
             }
             LayoutComponent::Herringbone(pattern) => pattern.generate(data, outer, inner),
             LayoutComponent::Mock(id) => info!("Generate layout mock {}", *id),
+            LayoutComponent::RandomAshlar(pattern) => pattern.generate(data, outer, inner),
             LayoutComponent::RepeatX { size, component } => {
                 let mut point = inner.start();
                 let mut i = 0;
