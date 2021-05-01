@@ -1,7 +1,7 @@
-use crate::generation::occupancy::OccupancyMap;
 use crate::generation::process::PostProcess;
 use crate::math::aabb::AABB;
 use crate::math::color::Color;
+use crate::math::occupancy::OccupancyMap;
 use crate::math::point::Point;
 use crate::math::size::Size;
 use std::collections::HashMap;

@@ -7,7 +7,6 @@ use crate::math::size::Size;
 
 pub mod component;
 pub mod data;
-pub mod occupancy;
 pub mod process;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -60,12 +59,12 @@ impl Default for TextureGenerator {
 
 #[cfg(test)]
 mod tests {
+    use crate::generation::component::border::BorderComponent;
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::Data;
     use crate::math::color::{GREEN, RED};
 
     use super::*;
-    use crate::generation::component::border::BorderComponent;
 
     #[test]
     fn test_generate() {

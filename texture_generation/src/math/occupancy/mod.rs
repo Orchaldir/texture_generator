@@ -35,7 +35,7 @@ impl OccupancyTile {
     /// Does the tile have free cells?
     ///
     /// ```
-    ///# use texture_generation::generation::occupancy::{OccupancyTile, FREE};
+    ///# use texture_generation::math::occupancy::{OccupancyTile, FREE};
     /// assert_eq!(OccupancyTile::Disabled.has_free_cells(), false);
     /// assert_eq!(OccupancyTile::Empty.has_free_cells(), true);
     /// assert_eq!(OccupancyTile::from_cells(vec![FREE, 2]).has_free_cells(), true);
@@ -54,7 +54,7 @@ impl OccupancyTile {
     /// Is the cell free?
     ///
     /// ```
-    ///# use texture_generation::generation::occupancy::{OccupancyTile, FREE};
+    ///# use texture_generation::math::occupancy::{OccupancyTile, FREE};
     /// let active_tile = OccupancyTile::from_cells(vec![FREE, 2]);
     ///
     /// assert_eq!(OccupancyTile::Disabled.is_free(0), false);
@@ -75,7 +75,7 @@ impl OccupancyTile {
     /// Fills a free cell with a spcific value. Returns true if it was possible.
     ///
     /// ```
-    ///# use texture_generation::generation::occupancy::{OccupancyTile, FREE};
+    ///# use texture_generation::math::occupancy::{OccupancyTile, FREE};
     /// let mut active_tile = OccupancyTile::from_cells(vec![FREE, FREE, 2]);
     ///
     /// assert_eq!(active_tile.fill(0, 10), true);
@@ -86,7 +86,7 @@ impl OccupancyTile {
     /// Its not possible for tile types other than Active:
     ///
     /// ```
-    ///# use texture_generation::generation::occupancy::{OccupancyTile, FREE};
+    ///# use texture_generation::math::occupancy::{OccupancyTile, FREE};
     /// assert_eq!(OccupancyTile::Disabled.fill(0,10), false);
     /// assert_eq!(OccupancyTile::Empty.fill(0,10), false);
     /// assert_eq!(OccupancyTile::Full.fill(0,10), false);
@@ -109,7 +109,7 @@ impl OccupancyTile {
 /// Checks if several cells in a column are free.
 ///
 /// ```
-///# use texture_generation::generation::occupancy::{OccupancyTile, FREE, check_column};
+///# use texture_generation::math::occupancy::{OccupancyTile, FREE, check_column};
 ///# use texture_generation::math::size::Size;
 /// let size = Size::square(3);
 /// let tile = OccupancyTile::from_cells(vec![
@@ -178,7 +178,7 @@ impl OccupancyMap {
     /// Panics if the tile is already enabled.
     ///
     /// ```
-    ///# use texture_generation::generation::occupancy::{OccupancyMap, OccupancyTile};
+    ///# use texture_generation::math::occupancy::{OccupancyMap, OccupancyTile};
     ///# use texture_generation::math::size::Size;
     /// let mut map = OccupancyMap::new(Size::square(2), 3);
     /// map.enable(1);
@@ -205,7 +205,7 @@ impl OccupancyMap {
     /// Panics if the tile is not empty.
     ///
     /// ```
-    ///# use texture_generation::generation::occupancy::{OccupancyMap, OccupancyTile};
+    ///# use texture_generation::math::occupancy::{OccupancyMap, OccupancyTile};
     ///# use texture_generation::math::size::Size;
     /// let mut map = OccupancyMap::new(Size::square(2), 3);
     /// map.enable(1);
