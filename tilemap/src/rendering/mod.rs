@@ -45,7 +45,8 @@ impl Renderer {
 
         self.render_tiles(tilemap, tile_size, &mut data);
         self.render_borders(tilemap, &mut data);
-        self.post_process(&mut data);
+
+        data.apply(&self.resources.post_processes);
 
         data
     }
@@ -277,12 +278,6 @@ impl Renderer {
             }
 
             point.y += step;
-        }
-    }
-
-    fn post_process(&self, data: &mut RuntimeData) {
-        for post_process in self.resources.post_processes.iter() {
-            post_process.process(data);
         }
     }
 

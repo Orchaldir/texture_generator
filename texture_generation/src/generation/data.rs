@@ -1,6 +1,6 @@
 use crate::generation::process::PostProcess;
 use crate::math::aabb::AABB;
-use crate::math::color::Color;
+use crate::math::color::{convert, Color};
 use crate::math::occupancy::OccupancyMap;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -170,17 +170,4 @@ impl Data for RuntimeData {
             .entry(cells_per_side)
             .or_insert_with(|| OccupancyMap::new(tiles, cells_per_side))
     }
-}
-
-pub fn convert(colors: &[Color]) -> Vec<u8> {
-    let n = colors.len();
-    let mut data = Vec::with_capacity(n * 3);
-
-    for color in colors {
-        data.push(color.r());
-        data.push(color.g());
-        data.push(color.b());
-    }
-
-    data
 }

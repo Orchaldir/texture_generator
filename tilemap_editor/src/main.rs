@@ -14,7 +14,7 @@ use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use structopt::StructOpt;
-use texture_generation::generation::data::{convert, Data};
+use texture_generation::generation::data::Data;
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
@@ -26,6 +26,7 @@ use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap_io::rendering::resource::ResourceDefinitions;
 use tilemap_io::tilemap::{load, save};
+use texture_generation::math::color::convert;
 
 #[derive(Copy, Clone)]
 enum Mode {
