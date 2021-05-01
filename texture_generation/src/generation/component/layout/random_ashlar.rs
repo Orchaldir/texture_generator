@@ -47,7 +47,7 @@ impl RandomAshlarPattern {
                 if occupancy_tile.is_free(cell_index) {
                     let (size_x, size_y) = self.create_size(
                         &mut rng,
-                        size_distribution,
+                        &size_distribution,
                         &mut occupancy_tile,
                         tile_size,
                         y,
@@ -82,17 +82,15 @@ impl RandomAshlarPattern {
 
     fn create_size(
         &self,
-        mut rng: &mut ThreadRng,
-        size_distribution: Uniform<u32>,
+        rng: &mut ThreadRng,
+        size_distribution: &Uniform<u32>,
         occupancy_tile: &mut OccupancyTile,
         tile_size: Size,
         y: u32,
         x: u32,
     ) -> (u32, u32) {
-        let remaining_x = self.cells_per_side - x;
-        let remaining_y = self.cells_per_side - y;
-        let max_size_x = size_distribution.sample(&mut rng).min(remaining_x as u32);
-        let max_size_y = size_distribution.sample(&mut rng).min(remaining_y as u32);
+        let max_size_x = self.calculate_max_size(rng, size_distribution, x);
+        let max_size_y = self.calculate_max_size(rng, size_distribution, y);
         let mut size_x = 1;
         let mut size_y = 1;
         let mut is_x_ongoing = size_x < max_size_x;
@@ -118,5 +116,15 @@ impl RandomAshlarPattern {
             }
         }
         (size_x, size_y)
+    }
+
+    fn calculate_max_size(
+        &self,
+        rng: &mut ThreadRng,
+        size_distribution: &Uniform<u32>,
+        pos: u32,
+    ) -> u32 {
+        let remaining = self.cells_per_side - pos;
+        size_distribution.sample(rng).min(remaining as u32)
     }
 }

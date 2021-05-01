@@ -6,7 +6,7 @@ component:
   type: Layout
   RandomAshlar:
     cells_per_side: 16
-    min_size: 2
+    min_size: 3
     max_size: 6
     component:
       type: Border

@@ -22,7 +22,6 @@ impl DepthCalculator {
         }
     }
     pub fn new_interpolate_many(data: Vec<(f32, u8)>) -> Result<DepthCalculator, ValueError> {
-        info!("new_interpolate_many(): {:?}", data);
         if data.len() < 2 {
             return Err(ValueError::not_enough_values("InterpolateMany.data", 2));
         }
