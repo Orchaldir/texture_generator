@@ -106,6 +106,47 @@ impl OccupancyTile {
     }
 }
 
+/// Checks if several cells in a column are free.
+///
+/// ```
+///# use texture_generation::generation::occupancy::{OccupancyTile, FREE, check_column};
+///# use texture_generation::math::size::Size;
+/// let size = Size::square(3);
+/// let tile = OccupancyTile::from_cells(vec![
+///   2, FREE, FREE,
+///   FREE, 2, FREE,
+///   FREE, FREE, 2]);
+///
+/// assert_eq!(check_column(&tile, size, 0, 0, 2), false);
+/// assert_eq!(check_column(&tile, size, 1, 0, 2), false);
+/// assert_eq!(check_column(&tile, size, 2, 0, 2), true);
+/// assert_eq!(check_column(&tile, size, 0, 1, 2), true);
+/// assert_eq!(check_column(&tile, size, 1, 1, 2), false);
+/// assert_eq!(check_column(&tile, size, 2, 1, 2), false);
+/// assert_eq!(check_column(&tile, size, 0, 2, 1), true);
+/// assert_eq!(check_column(&tile, size, 1, 2, 1), true);
+/// assert_eq!(check_column(&tile, size, 2, 2, 1), false);
+/// ```
+pub fn check_column(
+    occupancy_tile: &OccupancyTile,
+    tile_size: Size,
+    x: u32,
+    y: u32,
+    height: u32,
+) -> bool {
+    let mut start_index = tile_size.convert_x_y(x, y);
+
+    for _i in 0..height {
+        if !occupancy_tile.is_free(start_index) {
+            return false;
+        }
+
+        start_index += tile_size.width() as usize;
+    }
+
+    true
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OccupancyMap {
     tiles: Size,
