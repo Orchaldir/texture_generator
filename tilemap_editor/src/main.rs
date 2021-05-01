@@ -18,6 +18,7 @@ use texture_generation::generation::data::Data;
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
+use texture_generation::math::color::convert;
 use texture_generation::math::vector3::Vector3;
 use texture_generation::utils::logging::init_logging;
 use tilemap::tilemap::border::Border;
@@ -26,7 +27,6 @@ use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap_io::rendering::resource::ResourceDefinitions;
 use tilemap_io::tilemap::{load, save};
-use texture_generation::math::color::convert;
 
 #[derive(Copy, Clone)]
 enum Mode {

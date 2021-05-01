@@ -1,6 +1,6 @@
 use crate::generation::component::Component;
 use crate::generation::data::Data;
-use crate::math::aabb::AABB;
+use crate::math::aabb::{AxisAlignedBoundingBox, AABB};
 use crate::math::occupancy::tile::{check_column, check_row, fill_area, OccupancyTile, START};
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -45,7 +45,7 @@ impl RandomAshlarPattern {
         for y in 0..self.cells_per_side {
             for x in 0..self.cells_per_side {
                 if occupancy_tile.is_free(cell_index) {
-                    let (size_x, size_y) = self.create_size(
+                    let cells = self.grow_size(
                         &mut rng,
                         &size_distribution,
                         &mut occupancy_tile,
@@ -54,25 +54,11 @@ impl RandomAshlarPattern {
                         x,
                     );
 
-                    fill_area(
-                        &mut occupancy_tile,
-                        tile_size,
-                        x,
-                        y,
-                        size_x,
-                        size_y,
-                        area_index,
-                    );
+                    fill_area(&mut occupancy_tile, tile_size, x, y, cells, area_index);
                     area_index += 1;
 
-                    let point = Point::new(
-                        start.x + (x * cell_size.width()) as i32,
-                        start.y + (y * cell_size.width()) as i32,
-                    );
-                    let size = Size::new(cell_size.width() * size_x, cell_size.height() * size_y);
-
-                    self.component
-                        .generate(data, &limited, &AABB::new(point, size));
+                    let aabb = create_aabb(start, cells, cell_size, x, y);
+                    self.component.generate(data, &limited, &aabb);
                 }
 
                 cell_index += 1;
@@ -80,7 +66,7 @@ impl RandomAshlarPattern {
         }
     }
 
-    fn create_size(
+    fn grow_size(
         &self,
         rng: &mut ThreadRng,
         size_distribution: &Uniform<u32>,
@@ -88,7 +74,7 @@ impl RandomAshlarPattern {
         tile_size: Size,
         y: u32,
         x: u32,
-    ) -> (u32, u32) {
+    ) -> Size {
         let max_size_x = self.calculate_max_size(rng, size_distribution, x);
         let max_size_y = self.calculate_max_size(rng, size_distribution, y);
         let mut size_x = 1;
@@ -115,7 +101,8 @@ impl RandomAshlarPattern {
                 };
             }
         }
-        (size_x, size_y)
+
+        Size::new(size_x, size_y)
     }
 
     fn calculate_max_size(
@@ -127,4 +114,20 @@ impl RandomAshlarPattern {
         let remaining = self.cells_per_side - pos;
         size_distribution.sample(rng).min(remaining as u32)
     }
+}
+
+fn create_aabb(
+    tile_start: Point,
+    cells: Size,
+    cell_size: Size,
+    x: u32,
+    y: u32,
+) -> AxisAlignedBoundingBox {
+    let point = Point::new(
+        tile_start.x + (x * cell_size.width()) as i32,
+        tile_start.y + (y * cell_size.height()) as i32,
+    );
+    let size = cell_size * cells;
+
+    AABB::new(point, size)
 }

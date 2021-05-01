@@ -197,7 +197,7 @@ pub fn check_row(
 /// let size = Size::square(4);
 /// let mut tile = OccupancyTile::from_cells(vec![FREE; 16]);
 ///
-/// fill_area(&mut tile, size, 1, 2, 3, 2, 1234);
+/// fill_area(&mut tile, size, 1, 2, Size::new(3, 2), 1234);
 ///
 /// assert_eq!(tile, OccupancyTile::from_cells(vec![
 ///   FREE, FREE, FREE, FREE,
@@ -211,14 +211,13 @@ pub fn fill_area(
     tile_size: Size,
     start_x: u32,
     start_y: u32,
-    width: u32,
-    height: u32,
+    size: Size,
     value: usize,
 ) {
-    for y in start_y..(start_y + height) {
+    for y in start_y..(start_y + size.height()) {
         let index = tile_size.convert_x_y(start_x, y);
 
-        for i in 0..width {
+        for i in 0..size.width() {
             occupancy_tile.fill(index + i as usize, value);
         }
     }
