@@ -27,6 +27,6 @@ component:
                 - "#E3242B"
                 - "#990F02"
             depth:
-              InterpolateTwo:
+              Dome:
                 center: 25
                 border: 10

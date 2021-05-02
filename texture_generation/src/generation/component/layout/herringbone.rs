@@ -119,7 +119,7 @@ mod tests {
     use crate::math::size::Size;
 
     #[test]
-    fn test_brick_wall() {
+    fn test_herringbone_pattern() {
         let size = Size::square(8);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);

@@ -154,3 +154,49 @@ fn create_aabb(
 
     AABB::new(point, size)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::generation::component::rendering::color::ColorSelector;
+    use crate::generation::component::rendering::depth::DepthCalculator;
+    use crate::generation::component::rendering::RenderingComponent;
+    use crate::generation::data::texture::Texture;
+    use crate::math::color::*;
+    use crate::math::shape_factory::ShapeFactory;
+    use crate::math::size::Size;
+
+    #[test]
+    fn test_random_ashlar_pattern() {
+        let size = Size::square(8);
+        let aabb = AABB::with_size(size);
+        let mut texture = Texture::new(size, WHITE);
+        let color_selector = ColorSelector::Sequence(vec![
+            BLACK, BLUE, CYAN, GREEN, MAGENTA, ORANGE, RED, PINK, YELLOW,
+        ]);
+        let rendering = RenderingComponent::new_shape_with_depth(
+            "test",
+            ShapeFactory::Rectangle,
+            color_selector,
+            DepthCalculator::Uniform(255),
+        );
+        let component = Component::Rendering(Box::new(rendering));
+        let pattern = RandomAshlarPattern::new(8, 2, 4, component);
+
+        pattern.generate(&mut texture, Data::for_texture(aabb));
+
+        #[rustfmt::skip]
+        let expected_colors = vec![
+            BLACK, BLACK, BLACK, BLACK, BLUE, BLUE, CYAN, CYAN,
+            BLACK, BLACK, BLACK, BLACK, BLUE, BLUE, CYAN, CYAN,
+            GREEN, GREEN, GREEN, WHITE, BLUE, BLUE, ORANGE, ORANGE,
+            GREEN, GREEN, GREEN, WHITE, BLUE, BLUE, ORANGE, ORANGE,
+            GREEN, GREEN, GREEN, RED, RED, WHITE, ORANGE, ORANGE,
+            GREEN, GREEN, GREEN, RED, RED, WHITE, YELLOW, YELLOW,
+            BLACK, BLACK, BLUE, BLUE, BLUE, WHITE, YELLOW, YELLOW,
+            BLACK, BLACK, BLUE, BLUE, BLUE, WHITE, YELLOW, YELLOW,
+        ];
+
+        assert_eq!(texture.get_color_data(), &expected_colors);
+    }
+}

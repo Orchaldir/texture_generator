@@ -24,4 +24,6 @@ component:
                 - "#C0C0C0"
                 - "#A9A9A9"
             depth:
-              Uniform: 25
+              InterpolateMany:
+                - [ 0.9,25 ]
+                - [ 1.0,10 ]
