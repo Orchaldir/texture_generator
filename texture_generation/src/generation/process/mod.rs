@@ -1,4 +1,4 @@
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::generation::process::ambient_occlusion::AmbientOcclusion;
 use crate::generation::process::lighting::Lighting;
 
@@ -13,7 +13,7 @@ pub enum PostProcess {
 }
 
 impl PostProcess {
-    pub fn process(&self, data: &mut dyn Data) {
+    pub fn process(&self, data: &mut Texture) {
         match self {
             PostProcess::AmbientOcclusion(occlusion) => occlusion.process(data),
             PostProcess::Lighting(lighting) => lighting.process(data),

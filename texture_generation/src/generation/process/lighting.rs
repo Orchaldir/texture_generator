@@ -1,4 +1,4 @@
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::size::Size;
 use crate::math::vector3::Vector3;
 
@@ -19,7 +19,7 @@ impl Lighting {
         }
     }
 
-    pub fn process(&self, data: &mut dyn Data) {
+    pub fn process(&self, data: &mut Texture) {
         info!("Post Processing: Lighting");
 
         let size = *data.get_size();

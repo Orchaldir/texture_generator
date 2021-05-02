@@ -1,6 +1,6 @@
 use crate::generation::component::rendering::color::ColorSelector;
 use crate::generation::component::rendering::depth::DepthCalculator;
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::aabb::AABB;
 use crate::math::color::{Color, PINK};
 use crate::math::shape_factory::ShapeFactory;
@@ -73,7 +73,7 @@ impl RenderingComponent {
     }
 
     /// Renders the texture in the area defined by the [`AABB`].
-    pub fn render(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+    pub fn render(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
         match self {
             RenderingComponent::FillArea { color, depth, .. } => {
                 let start = outer.start().max(&inner.start());
@@ -132,7 +132,7 @@ impl RenderingComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::data::texture::RuntimeData;
+    use crate::generation::data::texture::Texture;
     use crate::math::color::{RED, WHITE};
     use crate::math::point::Point;
     use crate::math::size::Size;
@@ -146,7 +146,7 @@ mod tests {
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = RuntimeData::with_depth(data_size, WHITE, 3);
+        let mut data = Texture::with_depth(data_size, WHITE, 3);
         let renderer = RenderingComponent::new_fill_area("test", RED, 42);
 
         renderer.render(&mut data, &outer, &aabb);
@@ -186,7 +186,7 @@ mod tests {
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = RuntimeData::with_depth(data_size, WHITE, 3);
+        let mut data = Texture::with_depth(data_size, WHITE, 3);
         let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 42);
 
         renderer.render(&mut data, &outer, &aabb);
@@ -226,7 +226,7 @@ mod tests {
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = RuntimeData::new(data_size, WHITE);
+        let mut data = Texture::new(data_size, WHITE);
         let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 200);
 
         renderer.render(&mut data, &outer, &aabb);

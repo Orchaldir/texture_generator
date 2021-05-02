@@ -1,6 +1,6 @@
 use crate::rendering::style::edge::EdgeStyle;
 use crate::rendering::style::node::NodeStyle;
-use texture_generation::generation::data::texture::Data;
+use texture_generation::generation::data::texture::Texture;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
 
@@ -42,7 +42,7 @@ impl WindowStyle {
         tile_size: u32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
+        data: &mut Texture,
     ) {
         self.stool_style
             .render_horizontal(outer, node, tile_size, 0, start_node, end_node, data);
@@ -57,7 +57,7 @@ impl WindowStyle {
         tile_size: u32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
+        data: &mut Texture,
     ) {
         self.stool_style
             .render_vertical(outer, node, tile_size, 0, start_node, end_node, data);

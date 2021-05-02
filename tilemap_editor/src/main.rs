@@ -14,7 +14,6 @@ use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use structopt::StructOpt;
-use texture_generation::generation::data::texture::Data;
 use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::lighting::Lighting;

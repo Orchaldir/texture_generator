@@ -1,5 +1,5 @@
 use crate::generation::component::Component;
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -50,7 +50,7 @@ impl BorderComponent {
     }
 
     /// Generates the border in the area defined by the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+    pub fn generate(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
         let size = inner.size();
 
         match self {
@@ -85,7 +85,7 @@ impl BorderComponent {
 mod tests {
     use super::*;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::texture::RuntimeData;
+    use crate::generation::data::texture::Texture;
     use crate::math::color::{RED, WHITE};
     use crate::math::size::Size;
 
@@ -94,7 +94,7 @@ mod tests {
         let size = Size::new(5, 5);
         let aabb = AABB::with_size(size);
 
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut data = Texture::new(size, WHITE);
 
         let renderer = RenderingComponent::new_fill_area("red", RED, 0);
         let component = Component::Rendering(Box::new(renderer));

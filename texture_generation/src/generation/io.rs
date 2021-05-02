@@ -1,8 +1,8 @@
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::color::convert;
 
 /// Save the color image.
-pub fn save_color_image(texture: &dyn Data, path: &str) {
+pub fn save_color_image(texture: &Texture, path: &str) {
     info!("Save color to {:?}", path);
 
     let size = texture.get_size();
@@ -19,7 +19,7 @@ pub fn save_color_image(texture: &dyn Data, path: &str) {
 }
 
 /// Save the depth image.
-pub fn save_depth_image(texture: &dyn Data, path: &str) {
+pub fn save_depth_image(texture: &Texture, path: &str) {
     info!("Save depth to {:?}", path);
 
     let size = texture.get_size();

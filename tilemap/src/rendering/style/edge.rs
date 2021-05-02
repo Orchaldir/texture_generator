@@ -1,7 +1,7 @@
 use crate::rendering::style::node::NodeStyle;
 use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
-use texture_generation::generation::data::texture::Data;
+use texture_generation::generation::data::texture::Texture;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
@@ -61,7 +61,7 @@ impl EdgeStyle {
         offset: i32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
+        data: &mut Texture,
     ) {
         match self {
             EdgeStyle::Layout {
@@ -109,7 +109,7 @@ impl EdgeStyle {
         offset: i32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
+        data: &mut Texture,
     ) {
         match self {
             EdgeStyle::Layout {
@@ -192,7 +192,7 @@ impl Default for EdgeStyle {
 mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
-    use texture_generation::generation::data::texture::{Data, RuntimeData};
+    use texture_generation::generation::data::texture::Texture;
     use texture_generation::math::color::{BLACK, GREEN, RED};
 
     #[test]
@@ -202,7 +202,7 @@ mod tests {
         let node_style0 = NodeStyle::new(4, component.clone());
         let node_style1 = NodeStyle::new(2, component);
         let edge_style = EdgeStyle::new_solid(2, edge_component);
-        let mut data = RuntimeData::new(Size::new(11, 6), BLACK);
+        let mut data = Texture::new(Size::new(11, 6), BLACK);
 
         edge_style.render_horizontal(
             &data.get_aabb(),

@@ -1,7 +1,7 @@
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::Component;
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use crate::utils::error::ValueError;
@@ -211,7 +211,7 @@ impl LayoutComponent {
     }
 
     /// Generates the layout in the area defined by the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+    pub fn generate(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
         let limited = outer.limit(inner);
 
         match self {
@@ -329,7 +329,7 @@ mod tests {
     use super::*;
     use crate::generation::component::border::BorderComponent;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::texture::RuntimeData;
+    use crate::generation::data::texture::Texture;
     use crate::math::color::{RED, WHITE};
     use crate::math::shape_factory::ShapeFactory::Rectangle;
     use crate::math::size::Size;
@@ -338,7 +338,7 @@ mod tests {
     fn test_brick_wall() {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut data = Texture::new(size, WHITE);
         let layout =
             LayoutComponent::new_brick_wall("test", Size::square(5), 2, create_component())
                 .unwrap();
@@ -373,7 +373,7 @@ mod tests {
     fn test_repeat_x() {
         let size = Size::new(15, 5);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut data = Texture::new(size, WHITE);
         let layout = LayoutComponent::new_repeat_x(5, create_component()).unwrap();
 
         layout.generate(&mut data, &aabb, &aabb);
@@ -394,7 +394,7 @@ mod tests {
     fn test_repeat_y() {
         let size = Size::new(5, 15);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut data = Texture::new(size, WHITE);
         let layout = LayoutComponent::new_repeat_x(5, create_component())
             .unwrap()
             .flip();
@@ -429,7 +429,7 @@ mod tests {
     fn test_square_layout() {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut data = Texture::new(size, WHITE);
         let layout = LayoutComponent::new_square("test", 5, create_component()).unwrap();
 
         layout.generate(&mut data, &aabb, &aabb);

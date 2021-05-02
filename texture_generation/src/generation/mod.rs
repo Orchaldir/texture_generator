@@ -1,4 +1,4 @@
-use data::texture::{Data, RuntimeData};
+use data::texture::Texture;
 
 use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::component::Component;
@@ -35,9 +35,9 @@ impl TextureGenerator {
     }
 
     /// Generates the texture with a specific size.
-    pub fn generate(&self) -> RuntimeData {
+    pub fn generate(&self) -> Texture {
         let aabb = AABB::with_size(self.size);
-        let mut data = RuntimeData::new(self.size, self.background);
+        let mut data = Texture::new(self.size, self.background);
 
         self.component.generate(&mut data, &aabb, &aabb);
 
@@ -45,7 +45,7 @@ impl TextureGenerator {
     }
 
     /// Generates the texture to a specific part of [`Data`].
-    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
+    pub fn render(&self, data: &mut Texture, aabb: &AABB) {
         let background = RenderingComponent::new_fill_area("background", self.background, 0);
 
         background.render(data, aabb, aabb);
@@ -63,7 +63,6 @@ impl Default for TextureGenerator {
 mod tests {
     use crate::generation::component::border::BorderComponent;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::texture::Data;
     use crate::math::color::{GREEN, RED};
 
     use super::*;

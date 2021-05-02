@@ -1,5 +1,5 @@
 use crate::generation::component::Component;
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::aabb::{AxisAlignedBoundingBox, AABB};
 use crate::math::occupancy::tile::{check_column, check_row, fill_area, OccupancyTile, START};
 use crate::math::point::Point;
@@ -31,7 +31,7 @@ impl RandomAshlarPattern {
     }
 
     /// Generates the pattern in the area defined by the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+    pub fn generate(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
         let mut creator = RandomAshlarCreator::new(
             self.cells_per_side,
             self.min_size,
@@ -81,7 +81,7 @@ impl RandomAshlarCreator {
         }
     }
 
-    pub fn try_generate(&mut self, data: &mut dyn Data, component: &Component, x: u32, y: u32) {
+    pub fn try_generate(&mut self, data: &mut Texture, component: &Component, x: u32, y: u32) {
         let cell_index = self.tile_size.convert_x_y(x, y);
 
         if self.occupancy_tile.is_free(cell_index) {

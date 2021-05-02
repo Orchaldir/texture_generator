@@ -1,5 +1,5 @@
 use crate::generation::component::Component;
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -38,7 +38,7 @@ impl HerringbonePattern {
     }
 
     /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+    pub fn generate(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
         let start = self.calculate_repeating_point(inner.start());
         let end = self.calculate_repeating_point(inner.end()) + 1i32;
         let limited = outer.limit(inner);
@@ -51,7 +51,7 @@ impl HerringbonePattern {
     }
 
     /// Generates the repeating area of the Herringbone pattern.
-    fn generate_repeating_area(&self, data: &mut dyn Data, limited: &AABB, x: i32, y: i32) {
+    fn generate_repeating_area(&self, data: &mut Texture, limited: &AABB, x: i32, y: i32) {
         let start = Point::new(x, y) * self.repeating_side;
         let limited = AABB::new(start, Size::square(self.repeating_side)).limit(limited);
         let multiplier = self.multiplier as i32;
@@ -108,7 +108,7 @@ fn calculate_repeating_side(side: u32, multiplier: u32) -> u32 {
 mod tests {
     use super::*;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::texture::RuntimeData;
+    use crate::generation::data::texture::Texture;
     use crate::math::color::{Color, BLUE, PINK, WHITE};
     use crate::math::size::Size;
 
@@ -116,7 +116,7 @@ mod tests {
     fn test_brick_wall() {
         let size = Size::square(8);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut data = Texture::new(size, WHITE);
         let horizontal = create_component("h", PINK);
         let vertical = create_component("v", BLUE);
         let pattern = HerringbonePattern::new(1, 2, horizontal, vertical);

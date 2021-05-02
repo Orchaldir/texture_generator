@@ -1,7 +1,7 @@
 use crate::generation::component::border::BorderComponent;
 use crate::generation::component::layout::LayoutComponent;
 use crate::generation::component::rendering::RenderingComponent;
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::aabb::AABB;
 
 pub mod border;
@@ -29,7 +29,7 @@ impl Component {
     }
 
     /// Generates the texture inside the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+    pub fn generate(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
         match self {
             Component::Border(component) => component.generate(data, outer, inner),
             Component::Layout(component) => component.generate(data, outer, inner),

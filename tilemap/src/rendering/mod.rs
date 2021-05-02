@@ -8,7 +8,7 @@ use crate::tilemap::node::{
 };
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use texture_generation::generation::data::texture::RuntimeData;
+use texture_generation::generation::data::texture::Texture;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
@@ -39,9 +39,9 @@ impl Renderer {
     }
 
     /// Renders a [`Tilemap2d`].
-    pub fn render(&self, tilemap: &Tilemap2d) -> RuntimeData {
+    pub fn render(&self, tilemap: &Tilemap2d) -> Texture {
         let tile_size = Size::square(self.tile_size);
-        let mut data = RuntimeData::for_tilemap(tilemap.get_size(), tile_size, BLACK);
+        let mut data = Texture::for_tilemap(tilemap.get_size(), tile_size, BLACK);
 
         self.render_tiles(tilemap, tile_size, &mut data);
         self.render_borders(tilemap, &mut data);
@@ -51,7 +51,7 @@ impl Renderer {
         data
     }
 
-    fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, data: &mut RuntimeData) {
+    fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, data: &mut Texture) {
         let tiles = tilemap.get_size();
         let mut start = Point::default();
         let mut index = 0;
@@ -77,7 +77,7 @@ impl Renderer {
         }
     }
 
-    fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut RuntimeData) {
+    fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut Texture) {
         data.set_base_depth(1);
         let nodes = calculate_node_styles(
             &self.resources.node_styles,
@@ -93,7 +93,7 @@ impl Renderer {
         &self,
         tilemap: &Tilemap2d,
         nodes: &[Option<&NodeStyle>],
-        data: &mut RuntimeData,
+        data: &mut Texture,
     ) {
         let size = get_horizontal_borders_size(tilemap.get_size());
         let borders = tilemap.get_horizontal_borders();
@@ -175,7 +175,7 @@ impl Renderer {
         &self,
         tilemap: &Tilemap2d,
         nodes: &[Option<&NodeStyle>],
-        data: &mut RuntimeData,
+        data: &mut Texture,
     ) {
         let size = get_vertical_borders_size(tilemap.get_size());
         let borders = tilemap.get_vertical_borders();
@@ -253,12 +253,7 @@ impl Renderer {
         }
     }
 
-    fn render_nodes(
-        &self,
-        tilemap: &Tilemap2d,
-        nodes: &[Option<&NodeStyle>],
-        data: &mut RuntimeData,
-    ) {
+    fn render_nodes(&self, tilemap: &Tilemap2d, nodes: &[Option<&NodeStyle>], data: &mut Texture) {
         let size = get_nodes_size(tilemap.get_size());
         let mut point = Point::default();
         let aabb = data.get_aabb();
@@ -281,7 +276,7 @@ impl Renderer {
         }
     }
 
-    fn render_texture(&self, texture_id: usize, height: u8, data: &mut RuntimeData, aabb: &AABB) {
+    fn render_texture(&self, texture_id: usize, height: u8, data: &mut Texture, aabb: &AABB) {
         let texture = self.resources.textures.get(texture_id);
         data.set_base_depth(height);
         texture.render(data, aabb);
@@ -293,7 +288,6 @@ mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
     use texture_generation::generation::component::Component;
-    use texture_generation::generation::data::texture::Data;
     use texture_generation::generation::TextureGenerator;
     use texture_generation::math::color::{Color, BLACK, BLUE, PINK, RED};
     use texture_generation::utils::resource::ResourceManager;

@@ -1,4 +1,4 @@
-use crate::generation::data::texture::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::size::Size;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -17,7 +17,7 @@ impl AmbientOcclusion {
         }
     }
 
-    pub fn process(&self, data: &mut dyn Data) {
+    pub fn process(&self, data: &mut Texture) {
         info!("Post Processing: Ambient Occlusion");
 
         let size = *data.get_size();
