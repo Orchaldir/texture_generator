@@ -57,7 +57,7 @@ impl BorderComponent {
         match self {
             BorderComponent::MinBorder(component) => {
                 let aabb = BorderComponent::calculate_aabb(data.get_inner(), size, 1, 1);
-                component.generate(texture, &data.next(aabb));
+                component.generate(texture, &data.update(aabb));
             }
             BorderComponent::UniformBorder { border, component } => {
                 let min_side = border * 2;
@@ -69,7 +69,7 @@ impl BorderComponent {
 
                 let aabb =
                     BorderComponent::calculate_aabb(data.get_inner(), size, *border, min_side);
-                component.generate(texture, &data.next(aabb));
+                component.generate(texture, &data.update(aabb));
             }
         }
     }

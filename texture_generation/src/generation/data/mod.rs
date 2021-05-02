@@ -31,6 +31,8 @@ pub struct Data {
     /// The `global_id` is 0, if the plan is to generate a simple texture and not a tilemap.
     /// Otherwise it is the id of the current tile or edge.
     global_id: usize,
+    /// Each instance of a [`Component`] used by a [`LayoutComponent`] has its own id.
+    /// Used for variations between instances.
     instance_id: usize,
     aabb_data: AabbData,
 }
@@ -48,6 +50,10 @@ impl Data {
         Self::new(global_id, 0, AabbData::TwoAabbs { outer, inner })
     }
 
+    pub fn only_instance_id(instance_id: usize) -> Self {
+        Self::new(0, instance_id, AabbData::OneAabb(AABB::default()))
+    }
+
     fn new(global_id: usize, instance_id: usize, aabb_data: AabbData) -> Self {
         Self {
             global_id,
@@ -56,8 +62,16 @@ impl Data {
         }
     }
 
-    pub fn next(&self, inner: AABB) -> Self {
+    /// Updates the inner [`AABB`] for a [`Component`] on a deeper level. Keeps `instance_id`.
+    pub fn update(&self, inner: AABB) -> Self {
         Self::new(self.global_id, self.instance_id, self.aabb_data.next(inner))
+    }
+
+    /// Replace the inner [`AABB`] for the next instance of the same [`Component`]. Increases `instance_id`.
+    pub fn next(&mut self, inner: AABB) -> Self {
+        let old_id = self.instance_id;
+        self.instance_id += 1;
+        Self::new(self.global_id, old_id, self.aabb_data.next(inner))
     }
 
     pub fn combine(&self) -> Self {
@@ -66,6 +80,10 @@ impl Data {
 
     pub fn get_global_id(&self) -> usize {
         self.global_id
+    }
+
+    pub fn get_instance_id(&self) -> usize {
+        self.instance_id
     }
 
     pub fn get_outer(&self) -> &AABB {

@@ -80,7 +80,7 @@ impl EdgeStyle {
                     *thickness,
                     *half_thickness,
                 );
-                horizontal.generate(texture, &data.next(aabb))
+                horizontal.generate(texture, &data.update(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
@@ -97,7 +97,7 @@ impl EdgeStyle {
                     *thickness,
                     *half_thickness,
                 );
-                component.render(texture, &data.next(aabb))
+                component.render(texture, &data.update(aabb))
             }
         }
     }
@@ -128,7 +128,7 @@ impl EdgeStyle {
                     *thickness,
                     *half_thickness,
                 );
-                vertical.generate(texture, &data.next(aabb))
+                vertical.generate(texture, &data.update(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
@@ -145,7 +145,7 @@ impl EdgeStyle {
                     *thickness,
                     *half_thickness,
                 );
-                component.render(texture, &data.next(aabb))
+                component.render(texture, &data.update(aabb))
             }
         }
     }

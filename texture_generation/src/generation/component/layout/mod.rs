@@ -214,7 +214,7 @@ impl LayoutComponent {
     /// Generates the layout in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
         let inner = data.get_inner();
-        let combined = data.combine();
+        let mut combined = data.combine();
 
         match self {
             LayoutComponent::BrickWall {

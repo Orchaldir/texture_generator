@@ -101,7 +101,7 @@ impl RenderingComponent {
                 ..
             } => {
                 let mut point = start;
-                let color = color_selector.select();
+                let color = color_selector.select(data);
                 let base_depth = texture.get_base_depth();
 
                 if let Ok(shape) = shape_factory.create_shape(data.get_inner()) {

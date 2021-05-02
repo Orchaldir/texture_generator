@@ -55,7 +55,7 @@ impl HerringbonePattern {
     fn generate_repeating_area(&self, texture: &mut Texture, combined: &Data, x: i32, y: i32) {
         let start = Point::new(x, y) * self.repeating_side;
         let repeating_aabb = AABB::new(start, Size::square(self.repeating_side));
-        let repeating_data = combined.next(repeating_aabb);
+        let mut repeating_data = combined.update(repeating_aabb);
         let multiplier = self.multiplier as i32;
 
         for i in 0..(multiplier * 2) {
