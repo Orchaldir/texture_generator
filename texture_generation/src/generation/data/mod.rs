@@ -3,88 +3,86 @@ use crate::math::point::Point;
 
 pub mod texture;
 
-pub enum Data {
-    OneAabb {
-        tile: usize,
-        depth: u32,
-        aabb: AABB,
-    },
-    TwoAabbs {
-        tile: usize,
-        depth: u32,
-        outer: AABB,
-        inner: AABB,
-    },
+enum AabbData {
+    OneAabb(AABB),
+    TwoAabbs { outer: AABB, inner: AABB },
 }
 
-impl Data {
-    pub fn for_texture(aabb: AABB) -> Self {
-        Self::new_one(0, 0, aabb)
-    }
-
-    pub fn for_tile(tile: usize, outer: AABB, inner: AABB) -> Self {
-        Self::new_two(tile, 0, outer, inner)
-    }
-
-    pub fn new_one(tile: usize, depth: u32, aabb: AABB) -> Self {
-        Self::OneAabb { tile, depth, aabb }
-    }
-
-    pub fn new_two(tile: usize, depth: u32, outer: AABB, inner: AABB) -> Self {
-        Self::TwoAabbs {
-            tile,
-            depth,
-            outer,
+impl AabbData {
+    pub fn next(&self, inner: AABB) -> Self {
+        AabbData::TwoAabbs {
+            outer: match self {
+                AabbData::OneAabb(aabb) => *aabb,
+                AabbData::TwoAabbs { outer, .. } => *outer,
+            },
             inner,
         }
     }
 
-    pub fn replace_inner(&self, inner: AABB) -> Self {
-        match self {
-            Data::OneAabb { tile, depth, aabb } => Self::new_two(*tile, *depth, *aabb, inner),
-            Data::TwoAabbs {
-                tile, depth, outer, ..
-            } => Self::new_two(*tile, *depth, *outer, inner),
+    pub fn combine(&self) -> Self {
+        AabbData::OneAabb(match &self.aabb_data {
+            AabbData::OneAabb(aabb) => *aabb,
+            AabbData::TwoAabbs { outer, .. } => outer.limit(inner),
+        })
+    }
+}
+
+pub struct Data {
+    tile: usize,
+    depth: u32,
+    aabb_data: AabbData,
+}
+
+impl Data {
+    pub fn for_texture(aabb: AABB) -> Self {
+        Self::new(0, 0, AabbData::OneAabb(aabb))
+    }
+
+    pub fn for_tile(tile: usize, outer: AABB, inner: AABB) -> Self {
+        Self::new(tile, 0, AabbData::TwoAabbs { outer, inner })
+    }
+
+    fn new(tile: usize, depth: u32, aabb_data: AabbData) -> Self {
+        Self {
+            tile,
+            depth,
+            aabb_data,
         }
+    }
+
+    pub fn next(&self, inner: AABB) -> Self {
+        Self::new(self.tile, self.depth, self.aabb_data.next(inner))
     }
 
     pub fn combine(&self) -> Self {
-        match self {
-            Data::OneAabb { tile, depth, aabb } => Self::new_one(*tile, *depth, *aabb),
-            Data::TwoAabbs {
-                tile,
-                depth,
-                outer,
-                inner,
-            } => Self::new_one(*tile, *depth, outer.limit(inner)),
-        }
+        Self::new(self.tile, self.depth, self.aabb_data.combine())
     }
 
     pub fn get_outer(&self) -> &AABB {
-        match self {
-            Data::OneAabb { aabb, .. } => aabb,
-            Data::TwoAabbs { outer, .. } => outer,
+        match &self.aabb_data {
+            AabbData::OneAabb(aabb) => aabb,
+            AabbData::TwoAabbs { outer, .. } => outer,
         }
     }
 
     pub fn get_inner(&self) -> &AABB {
-        match self {
-            Data::OneAabb { aabb, .. } => aabb,
-            Data::TwoAabbs { outer: inner, .. } => inner,
+        match &self.aabb_data {
+            AabbData::OneAabb(aabb) => aabb,
+            AabbData::TwoAabbs { inner, .. } => inner,
         }
     }
 
     pub fn get_start(&self) -> Point {
-        match self {
-            Data::OneAabb { aabb, .. } => aabb.start(),
-            Data::TwoAabbs { outer, inner, .. } => outer.start().max(&inner.start()),
+        match &self.aabb_data {
+            AabbData::OneAabb(aabb) => aabb.start(),
+            AabbData::TwoAabbs { outer, inner, .. } => outer.start().max(&inner.start()),
         }
     }
 
     pub fn get_end(&self) -> Point {
-        match self {
-            Data::OneAabb { aabb, .. } => aabb.end(),
-            Data::TwoAabbs { outer, inner, .. } => outer.end().min(&inner.end()),
+        match &self.aabb_data {
+            AabbData::OneAabb(aabb) => aabb.end(),
+            AabbData::TwoAabbs { outer, inner, .. } => outer.end().min(&inner.end()),
         }
     }
 }
