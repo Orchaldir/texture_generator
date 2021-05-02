@@ -20,16 +20,16 @@ impl AabbData {
     }
 
     pub fn combine(&self) -> Self {
-        AabbData::OneAabb(match &self.aabb_data {
+        AabbData::OneAabb(match self {
             AabbData::OneAabb(aabb) => *aabb,
-            AabbData::TwoAabbs { outer, .. } => outer.limit(inner),
+            AabbData::TwoAabbs { outer, inner } => outer.limit(inner),
         })
     }
 }
 
 pub struct Data {
-    tile: usize,
-    depth: u32,
+    global_id: usize,
+    instance_id: usize,
     aabb_data: AabbData,
 }
 
@@ -38,24 +38,28 @@ impl Data {
         Self::new(0, 0, AabbData::OneAabb(aabb))
     }
 
-    pub fn for_tile(tile: usize, outer: AABB, inner: AABB) -> Self {
-        Self::new(tile, 0, AabbData::TwoAabbs { outer, inner })
+    pub fn with_global_id(global_id: usize, aabb: AABB) -> Self {
+        Self::new(global_id, 0, AabbData::OneAabb(aabb))
     }
 
-    fn new(tile: usize, depth: u32, aabb_data: AabbData) -> Self {
+    pub fn for_two_aabb(global_id: usize, outer: AABB, inner: AABB) -> Self {
+        Self::new(global_id, 0, AabbData::TwoAabbs { outer, inner })
+    }
+
+    fn new(global_id: usize, instance_id: usize, aabb_data: AabbData) -> Self {
         Self {
-            tile,
-            depth,
+            global_id,
+            instance_id,
             aabb_data,
         }
     }
 
     pub fn next(&self, inner: AABB) -> Self {
-        Self::new(self.tile, self.depth, self.aabb_data.next(inner))
+        Self::new(self.global_id, self.instance_id, self.aabb_data.next(inner))
     }
 
     pub fn combine(&self) -> Self {
-        Self::new(self.tile, self.depth, self.aabb_data.combine())
+        Self::new(self.global_id, self.instance_id, self.aabb_data.combine())
     }
 
     pub fn get_outer(&self) -> &AABB {

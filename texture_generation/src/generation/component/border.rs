@@ -1,5 +1,6 @@
 use crate::generation::component::Component;
 use crate::generation::data::texture::Texture;
+use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -50,13 +51,13 @@ impl BorderComponent {
     }
 
     /// Generates the border in the area defined by the [`AABB`].
-    pub fn generate(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
-        let size = inner.size();
+    pub fn generate(&self, texture: &mut Texture, data: &Data) {
+        let size = data.get_inner().size();
 
         match self {
             BorderComponent::MinBorder(component) => {
-                let aabb = BorderComponent::calculate_aabb(inner, size, 1, 1);
-                component.generate(data, outer, &aabb);
+                let aabb = BorderComponent::calculate_aabb(data.get_inner(), size, 1, 1);
+                component.generate(texture, &data.next(aabb));
             }
             BorderComponent::UniformBorder { border, component } => {
                 let min_side = border * 2;
@@ -66,8 +67,9 @@ impl BorderComponent {
                     return;
                 }
 
-                let aabb = BorderComponent::calculate_aabb(inner, size, *border, min_side);
-                component.generate(data, outer, &aabb);
+                let aabb =
+                    BorderComponent::calculate_aabb(data.get_inner(), size, *border, min_side);
+                component.generate(texture, &data.next(aabb));
             }
         }
     }
@@ -94,13 +96,13 @@ mod tests {
         let size = Size::new(5, 5);
         let aabb = AABB::with_size(size);
 
-        let mut data = Texture::new(size, WHITE);
+        let mut texture = Texture::new(size, WHITE);
 
         let renderer = RenderingComponent::new_fill_area("red", RED, 0);
         let component = Component::Rendering(Box::new(renderer));
         let layout = BorderComponent::new_uniform(1, component);
 
-        layout.generate(&mut data, &aabb, &aabb);
+        layout.generate(&mut texture, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
             let expected_colors = vec![
@@ -111,6 +113,6 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_color_data(), &expected_colors);
+        assert_eq!(texture.get_color_data(), &expected_colors);
     }
 }

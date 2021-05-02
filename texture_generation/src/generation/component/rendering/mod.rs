@@ -1,7 +1,7 @@
 use crate::generation::component::rendering::color::ColorSelector;
 use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::data::texture::Texture;
-use crate::math::aabb::AABB;
+use crate::generation::data::Data;
 use crate::math::color::{Color, PINK};
 use crate::math::shape_factory::ShapeFactory;
 
@@ -73,19 +73,20 @@ impl RenderingComponent {
     }
 
     /// Renders the texture in the area defined by the [`AABB`].
-    pub fn render(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
+    pub fn render(&self, texture: &mut Texture, data: &Data) {
+        let start = data.get_start();
+        let end = data.get_end();
+
         match self {
             RenderingComponent::FillArea { color, depth, .. } => {
-                let start = outer.start().max(&inner.start());
-                let end = outer.end().min(&inner.end());
                 let mut point = start;
-                let depth = data.get_base_depth() + *depth;
+                let depth = texture.get_base_depth() + *depth;
 
                 while point.y < end.y {
                     point.x = start.x;
 
                     while point.x < end.x {
-                        data.set(&point, color, depth);
+                        texture.set(&point, color, depth);
 
                         point.x += 1;
                     }
@@ -99,13 +100,11 @@ impl RenderingComponent {
                 depth_calculator,
                 ..
             } => {
-                let start = outer.start().max(&inner.start());
-                let end = outer.end().min(&inner.end());
                 let mut point = start;
                 let color = color_selector.select();
-                let base_depth = data.get_base_depth();
+                let base_depth = texture.get_base_depth();
 
-                if let Ok(shape) = shape_factory.create_shape(inner) {
+                if let Ok(shape) = shape_factory.create_shape(data.get_inner()) {
                     while point.y < end.y {
                         point.x = start.x;
 
@@ -115,7 +114,7 @@ impl RenderingComponent {
                             if distance <= 1.0 {
                                 let depth = depth_calculator.calculate(distance);
                                 let depth = base_depth.saturating_add(depth);
-                                data.set(&point, &color, depth);
+                                texture.set(&point, &color, depth);
                             }
 
                             point.x += 1;
@@ -133,6 +132,7 @@ impl RenderingComponent {
 mod tests {
     use super::*;
     use crate::generation::data::texture::Texture;
+    use crate::math::aabb::AABB;
     use crate::math::color::{RED, WHITE};
     use crate::math::point::Point;
     use crate::math::size::Size;
@@ -146,10 +146,10 @@ mod tests {
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = Texture::with_depth(data_size, WHITE, 3);
+        let mut texture = Texture::with_depth(data_size, WHITE, 3);
         let renderer = RenderingComponent::new_fill_area("test", RED, 42);
 
-        renderer.render(&mut data, &outer, &aabb);
+        renderer.render(&mut texture, &Data::for_two_aabb(0, outer, aabb));
 
         #[rustfmt::skip]
         let colors = vec![
@@ -162,7 +162,7 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_color_data(), &colors);
+        assert_eq!(texture.get_color_data(), &colors);
 
         #[rustfmt::skip]
         let depth = vec![
@@ -175,7 +175,7 @@ mod tests {
             0,  0,  0,  0, 0,
         ];
 
-        assert_eq!(data.get_depth_data(), &depth);
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 
     #[test]
@@ -186,10 +186,10 @@ mod tests {
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = Texture::with_depth(data_size, WHITE, 3);
+        let mut texture = Texture::with_depth(data_size, WHITE, 3);
         let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 42);
 
-        renderer.render(&mut data, &outer, &aabb);
+        renderer.render(&mut texture, &Data::for_two_aabb(0, outer, aabb));
 
         #[rustfmt::skip]
             let colors = vec![
@@ -202,7 +202,7 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_color_data(), &colors);
+        assert_eq!(texture.get_color_data(), &colors);
 
         #[rustfmt::skip]
             let depth = vec![
@@ -215,7 +215,7 @@ mod tests {
             0,  0,  0,  0, 0,
         ];
 
-        assert_eq!(data.get_depth_data(), &depth);
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 
     #[test]
@@ -226,10 +226,10 @@ mod tests {
         let outer = AABB::with_size(data_size);
         let aabb = AABB::new(start, size);
 
-        let mut data = Texture::new(data_size, WHITE);
+        let mut texture = Texture::new(data_size, WHITE);
         let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 200);
 
-        renderer.render(&mut data, &outer, &aabb);
+        renderer.render(&mut texture, &Data::for_two_aabb(0, outer, aabb));
 
         #[rustfmt::skip]
             let colors = vec![
@@ -239,7 +239,7 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_color_data(), &colors);
+        assert_eq!(texture.get_color_data(), &colors);
 
         #[rustfmt::skip]
             let depth = vec![
@@ -249,6 +249,6 @@ mod tests {
               0,   0, 0, 0,
         ];
 
-        assert_eq!(data.get_depth_data(), &depth);
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 }

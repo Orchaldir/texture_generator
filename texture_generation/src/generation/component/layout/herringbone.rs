@@ -1,5 +1,6 @@
 use crate::generation::component::Component;
 use crate::generation::data::texture::Texture;
+use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -38,42 +39,47 @@ impl HerringbonePattern {
     }
 
     /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
-    pub fn generate(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
+    pub fn generate(&self, texture: &mut Texture, data: &Data) {
+        let inner = data.get_inner();
         let start = self.calculate_repeating_point(inner.start());
         let end = self.calculate_repeating_point(inner.end()) + 1i32;
-        let limited = outer.limit(inner);
 
         for y in start.y..end.y {
             for x in start.x..end.x {
-                self.generate_repeating_area(data, &limited, x, y);
+                self.generate_repeating_area(texture, data, x, y);
             }
         }
     }
 
     /// Generates the repeating area of the Herringbone pattern.
-    fn generate_repeating_area(&self, data: &mut Texture, limited: &AABB, x: i32, y: i32) {
+    fn generate_repeating_area(&self, texture: &mut Texture, combined: &Data, x: i32, y: i32) {
         let start = Point::new(x, y) * self.repeating_side;
-        let limited = AABB::new(start, Size::square(self.repeating_side)).limit(limited);
+        let repeating_aabb = AABB::new(start, Size::square(self.repeating_side));
+        let repeating_data = combined.next(repeating_aabb);
         let multiplier = self.multiplier as i32;
 
         for i in 0..(multiplier * 2) {
             let aabb = self.get_horizontal_aabb(start, i, i);
-            self.horizontal_component.generate(data, &limited, &aabb);
+            self.horizontal_component
+                .generate(texture, &repeating_data.next(aabb));
         }
 
         for i in 0..(multiplier - 1) {
             let aabb = self.get_horizontal_aabb(start, i - multiplier + 1, i + multiplier + 1);
-            self.horizontal_component.generate(data, &limited, &aabb);
+            self.horizontal_component
+                .generate(texture, &repeating_data.next(aabb));
         }
 
         for i in 0..(multiplier * 2 - 1) {
             let aabb = self.get_vertical_aabb(start, i, i + 1);
-            self.vertical_component.generate(data, &limited, &aabb);
+            self.vertical_component
+                .generate(texture, &repeating_data.next(aabb));
         }
 
         for i in 0..(multiplier) {
             let aabb = self.get_vertical_aabb(start, i + multiplier, i - multiplier + 1);
-            self.vertical_component.generate(data, &limited, &aabb);
+            self.vertical_component
+                .generate(texture, &repeating_data.next(aabb));
         }
     }
 
@@ -116,12 +122,12 @@ mod tests {
     fn test_brick_wall() {
         let size = Size::square(8);
         let aabb = AABB::with_size(size);
-        let mut data = Texture::new(size, WHITE);
+        let mut texture = Texture::new(size, WHITE);
         let horizontal = create_component("h", PINK);
         let vertical = create_component("v", BLUE);
         let pattern = HerringbonePattern::new(1, 2, horizontal, vertical);
 
-        pattern.generate(&mut data, &aabb, &aabb);
+        pattern.generate(&mut texture, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
         let expected_colors = vec![
@@ -135,7 +141,7 @@ mod tests {
             PINK, BLUE, BLUE, PINK, PINK, BLUE, BLUE, PINK,
         ];
 
-        assert_eq!(data.get_color_data(), &expected_colors);
+        assert_eq!(texture.get_color_data(), &expected_colors);
     }
 
     fn create_component(name: &str, color: Color) -> Component {

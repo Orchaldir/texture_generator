@@ -9,6 +9,7 @@ use crate::tilemap::node::{
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use texture_generation::generation::data::texture::Texture;
+use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
@@ -41,17 +42,17 @@ impl Renderer {
     /// Renders a [`Tilemap2d`].
     pub fn render(&self, tilemap: &Tilemap2d) -> Texture {
         let tile_size = Size::square(self.tile_size);
-        let mut data = Texture::for_tilemap(tilemap.get_size(), tile_size, BLACK);
+        let mut texture = Texture::for_tilemap(tilemap.get_size(), tile_size, BLACK);
 
-        self.render_tiles(tilemap, tile_size, &mut data);
-        self.render_borders(tilemap, &mut data);
+        self.render_tiles(tilemap, tile_size, &mut texture);
+        self.render_borders(tilemap, &mut texture);
 
-        data.apply(&self.resources.post_processes);
+        texture.apply(&self.resources.post_processes);
 
-        data
+        texture
     }
 
-    fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, data: &mut Texture) {
+    fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, texture: &mut Texture) {
         let tiles = tilemap.get_size();
         let mut start = Point::default();
         let mut index = 0;
@@ -62,11 +63,12 @@ impl Renderer {
             for _x in 0..tiles.width() {
                 let tile = tilemap.get_tile(index);
                 let aabb = AABB::new(start, tile_size);
+                let data = Data::with_global_id(index, aabb);
 
                 match tile {
                     Tile::Empty => {}
-                    Tile::Floor(id) => self.render_texture(id, 1, data, &aabb),
-                    Tile::Solid(id) => self.render_texture(id, self.wall_height, data, &aabb),
+                    Tile::Floor(id) => self.render_texture(texture, data, id, 1),
+                    Tile::Solid(id) => self.render_texture(texture, data, id, self.wall_height),
                 }
 
                 start.x += tile_size.width() as i32;
@@ -77,28 +79,27 @@ impl Renderer {
         }
     }
 
-    fn render_borders(&self, tilemap: &Tilemap2d, mut data: &mut Texture) {
-        data.set_base_depth(1);
+    fn render_borders(&self, tilemap: &Tilemap2d, mut texture: &mut Texture) {
+        texture.set_base_depth(1);
         let nodes = calculate_node_styles(
             &self.resources.node_styles,
             &self.resources.wall_styles,
             tilemap,
         );
-        self.render_horizontal_borders(tilemap, &nodes, &mut data);
-        self.render_vertical_borders(tilemap, &nodes, &mut data);
-        self.render_nodes(tilemap, &nodes, &mut data);
+        self.render_horizontal_borders(tilemap, &nodes, &mut texture);
+        self.render_vertical_borders(tilemap, &nodes, &mut texture);
+        self.render_nodes(tilemap, &nodes, &mut texture);
     }
 
     fn render_horizontal_borders(
         &self,
         tilemap: &Tilemap2d,
         nodes: &[Option<&NodeStyle>],
-        data: &mut Texture,
+        texture: &mut Texture,
     ) {
         let size = get_horizontal_borders_size(tilemap.get_size());
         let borders = tilemap.get_horizontal_borders();
         let mut start = Point::default();
-        let aabb = data.get_aabb();
         let step = self.tile_size as i32;
         let mut index = 0;
 
@@ -106,6 +107,7 @@ impl Renderer {
             start.x = 0;
 
             for _x in 0..size.width() {
+                let data = Data::with_global_id(index, texture.get_aabb());
                 let border = borders[index];
 
                 match border {
@@ -116,13 +118,13 @@ impl Renderer {
                         let end_index = get_end_of_horizontal_border(index, y);
 
                         wall_style.get_edge_style().render_horizontal(
-                            &aabb,
+                            &data,
                             start,
                             self.tile_size,
                             0,
                             nodes[start_index],
                             nodes[end_index],
-                            data,
+                            texture,
                         );
                     }
                     Border::Door {
@@ -138,13 +140,13 @@ impl Renderer {
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
 
                         door_style.get_edge_style().render_horizontal(
-                            &aabb,
+                            &data,
                             start,
                             self.tile_size,
                             offset,
                             nodes[start_index],
                             nodes[end_index],
-                            data,
+                            texture,
                         );
                     }
                     Border::Window { window_id, .. } => {
@@ -153,12 +155,12 @@ impl Renderer {
                         let end_index = get_end_of_horizontal_border(index, y);
 
                         window_style.render_horizontal(
-                            &aabb,
+                            &data,
                             start,
                             self.tile_size,
                             nodes[start_index],
                             nodes[end_index],
-                            data,
+                            texture,
                         );
                     }
                 }
@@ -175,12 +177,11 @@ impl Renderer {
         &self,
         tilemap: &Tilemap2d,
         nodes: &[Option<&NodeStyle>],
-        data: &mut Texture,
+        texture: &mut Texture,
     ) {
         let size = get_vertical_borders_size(tilemap.get_size());
         let borders = tilemap.get_vertical_borders();
         let mut start = Point::default();
-        let aabb = data.get_aabb();
         let step = self.tile_size as i32;
         let mut index = 0;
 
@@ -188,6 +189,7 @@ impl Renderer {
             start.x = 0;
 
             for _x in 0..size.width() {
+                let data = Data::with_global_id(index, texture.get_aabb());
                 let border = borders[index];
 
                 match border {
@@ -198,13 +200,13 @@ impl Renderer {
                         let end_index = get_end_of_vertical_border(size, index);
 
                         wall_style.get_edge_style().render_vertical(
-                            &aabb,
+                            &data,
                             start,
                             self.tile_size,
                             0,
                             nodes[start_index],
                             nodes[end_index],
-                            data,
+                            texture,
                         );
                     }
                     Border::Door {
@@ -220,13 +222,13 @@ impl Renderer {
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
 
                         door_style.get_edge_style().render_vertical(
-                            &aabb,
+                            &data,
                             start,
                             self.tile_size,
                             offset,
                             nodes[start_index],
                             nodes[end_index],
-                            data,
+                            texture,
                         );
                     }
                     Border::Window { window_id, .. } => {
@@ -235,12 +237,12 @@ impl Renderer {
                         let end_index = get_end_of_vertical_border(size, index);
 
                         window_style.render_vertical(
-                            &aabb,
+                            &data,
                             start,
                             self.tile_size,
                             nodes[start_index],
                             nodes[end_index],
-                            data,
+                            texture,
                         );
                     }
                 }
@@ -253,10 +255,15 @@ impl Renderer {
         }
     }
 
-    fn render_nodes(&self, tilemap: &Tilemap2d, nodes: &[Option<&NodeStyle>], data: &mut Texture) {
+    fn render_nodes(
+        &self,
+        tilemap: &Tilemap2d,
+        nodes: &[Option<&NodeStyle>],
+        texture: &mut Texture,
+    ) {
         let size = get_nodes_size(tilemap.get_size());
         let mut point = Point::default();
-        let aabb = data.get_aabb();
+        let data = Data::for_texture(texture.get_aabb());
         let step = self.tile_size as i32;
         let mut index = 0;
 
@@ -265,7 +272,7 @@ impl Renderer {
 
             for _x in 0..size.width() {
                 if let Some(generator) = nodes[index] {
-                    generator.render(&aabb, point, data);
+                    generator.render(&data, point, texture);
                 }
 
                 point.x += step;
@@ -276,10 +283,10 @@ impl Renderer {
         }
     }
 
-    fn render_texture(&self, texture_id: usize, height: u8, data: &mut Texture, aabb: &AABB) {
-        let texture = self.resources.textures.get(texture_id);
-        data.set_base_depth(height);
-        texture.render(data, aabb);
+    fn render_texture(&self, texture: &mut Texture, data: Data, generator_id: usize, height: u8) {
+        let generator = self.resources.textures.get(generator_id);
+        texture.set_base_depth(height);
+        generator.render(texture, &data);
     }
 }
 

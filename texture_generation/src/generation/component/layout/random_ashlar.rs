@@ -1,5 +1,6 @@
 use crate::generation::component::Component;
 use crate::generation::data::texture::Texture;
+use crate::generation::data::Data;
 use crate::math::aabb::{AxisAlignedBoundingBox, AABB};
 use crate::math::occupancy::tile::{check_column, check_row, fill_area, OccupancyTile, START};
 use crate::math::point::Point;
@@ -31,18 +32,13 @@ impl RandomAshlarPattern {
     }
 
     /// Generates the pattern in the area defined by the [`AABB`].
-    pub fn generate(&self, data: &mut Texture, outer: &AABB, inner: &AABB) {
-        let mut creator = RandomAshlarCreator::new(
-            self.cells_per_side,
-            self.min_size,
-            self.max_size,
-            outer,
-            inner,
-        );
+    pub fn generate(&self, texture: &mut Texture, data: Data) {
+        let mut creator =
+            RandomAshlarCreator::new(self.cells_per_side, self.min_size, self.max_size, data);
 
         for y in 0..self.cells_per_side {
             for x in 0..self.cells_per_side {
-                creator.try_generate(data, &self.component, x, y);
+                creator.try_generate(texture, &self.component, x, y);
             }
         }
     }
@@ -56,18 +52,13 @@ struct RandomAshlarCreator {
     tile_size: Size,
     cell_size: Size,
     start: Point,
-    limited: AABB,
+    data: Data,
     ashlar_index: usize,
 }
 
 impl RandomAshlarCreator {
-    pub fn new(
-        cells_per_side: u32,
-        min_size: u32,
-        max_size: u32,
-        outer: &AABB,
-        inner: &AABB,
-    ) -> Self {
+    pub fn new(cells_per_side: u32, min_size: u32, max_size: u32, data: Data) -> Self {
+        let inner = data.get_inner();
         Self {
             cells_per_side,
             occupancy_tile: OccupancyTile::new_active(cells_per_side as usize),
@@ -76,12 +67,12 @@ impl RandomAshlarCreator {
             tile_size: Size::square(cells_per_side),
             cell_size: inner.size().divide(cells_per_side),
             start: inner.start(),
-            limited: outer.limit(inner),
+            data,
             ashlar_index: START,
         }
     }
 
-    pub fn try_generate(&mut self, data: &mut Texture, component: &Component, x: u32, y: u32) {
+    pub fn try_generate(&mut self, texture: &mut Texture, component: &Component, x: u32, y: u32) {
         let cell_index = self.tile_size.convert_x_y(x, y);
 
         if self.occupancy_tile.is_free(cell_index) {
@@ -98,7 +89,7 @@ impl RandomAshlarCreator {
             self.ashlar_index += 1;
 
             let aabb = create_aabb(self.start, ashlar_size, self.cell_size, x, y);
-            component.generate(data, &self.limited, &aabb);
+            component.generate(texture, &self.data.next(aabb));
         }
     }
 
