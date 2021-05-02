@@ -8,6 +8,7 @@ use crate::math::size::Size;
 
 pub mod component;
 pub mod data;
+pub mod io;
 pub mod process;
 
 #[derive(Clone, Debug, PartialEq)]

@@ -15,6 +15,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::generation::data::texture::Data;
+use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
@@ -219,8 +220,8 @@ impl App for TilemapEditor {
         if key == KeyCode::Space {
             info!("Generate tilemap images");
             let data = self.renderer.render(&self.tilemap);
-            data.save_color_image("tilemap-color.png");
-            data.save_depth_image("tilemap-depth.png");
+            save_color_image(&data, "tilemap-color.png");
+            save_depth_image(&data, "tilemap-depth.png");
             info!("Finished saving tilemap images");
         } else if let Some(number) = get_number(key) {
             self.set_resource_id(self.mode, number);

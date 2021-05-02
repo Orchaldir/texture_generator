@@ -7,6 +7,7 @@ use structopt::StructOpt;
 use texture_generation::definition::generation::process::PostProcessDefinition;
 use texture_generation::definition::generation::TextureDefinition;
 use texture_generation::definition::read;
+use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
 use texture_generation::utils::error::DefinitionError;
@@ -72,8 +73,8 @@ fn main() -> Result<()> {
 
     data.apply(&post_processes);
 
-    data.save_color_image(&color_path);
-    data.save_depth_image(&depth_path);
+    save_color_image(&data, &color_path);
+    save_depth_image(&data, &depth_path);
 
     info!("Finished");
 
