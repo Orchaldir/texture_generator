@@ -1,4 +1,5 @@
 use texture_generation::generation::component::rendering::RenderingComponent;
+use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
@@ -28,10 +29,10 @@ impl NodeStyle {
         self.half
     }
 
-    pub fn render(&self, outer: &AABB, node: Point, data: &mut dyn Data) {
+    pub fn render(&self, data: &Data, node: Point, texture: &mut Texture) {
         let start = node - self.half;
         let aabb = AABB::new(start, self.size);
-        self.component.render(data, outer, &aabb)
+        self.component.render(texture, &data.update(aabb))
     }
 }
 
@@ -45,16 +46,20 @@ impl Default for NodeStyle {
 mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
-    use texture_generation::generation::data::{Data, RuntimeData};
+    use texture_generation::generation::data::texture::Texture;
     use texture_generation::math::color::{BLACK, RED};
 
     #[test]
     fn test_render_node() {
         let component = RenderingComponent::new_fill_area("corner", RED, 9);
         let node_style = NodeStyle::new(2, component);
-        let mut data = RuntimeData::new(Size::new(6, 5), BLACK);
+        let mut texture = Texture::new(Size::new(6, 5), BLACK);
 
-        node_style.render(&data.get_aabb(), Point::new(3, 2), &mut data);
+        node_style.render(
+            &Data::for_texture(texture.get_aabb()),
+            Point::new(3, 2),
+            &mut texture,
+        );
 
         #[rustfmt::skip]
         let result = vec![
@@ -65,7 +70,7 @@ mod tests {
             BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
         ];
 
-        assert_eq!(data.get_color_data(), &result);
+        assert_eq!(texture.get_color_data(), &result);
 
         #[rustfmt::skip]
         let depth = vec![
@@ -76,6 +81,6 @@ mod tests {
             0, 0, 0, 0, 0, 0,
         ];
 
-        assert_eq!(data.get_depth_data(), &depth);
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 }

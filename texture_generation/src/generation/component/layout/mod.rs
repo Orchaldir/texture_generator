@@ -1,11 +1,14 @@
 use crate::generation::component::layout::herringbone::HerringbonePattern;
+use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::Component;
+use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use crate::utils::error::ValueError;
 
 pub mod herringbone;
+pub mod random_ashlar;
 
 #[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
@@ -51,6 +54,7 @@ pub enum LayoutComponent {
     /// ```
     Herringbone(HerringbonePattern),
     Mock(u32),
+    RandomAshlar(RandomAshlarPattern),
     /// Repeats a component along the x-axis.
     ///
     /// # Diagram
@@ -184,9 +188,9 @@ impl LayoutComponent {
                 offset,
                 component: component.flip(),
             },
-
             LayoutComponent::Herringbone(..) => self.clone(),
             LayoutComponent::Mock(_id) => self.clone(),
+            LayoutComponent::RandomAshlar(..) => self.clone(),
             LayoutComponent::RepeatX { size, component } => LayoutComponent::RepeatY {
                 size,
                 component: component.flip(),
@@ -208,8 +212,9 @@ impl LayoutComponent {
     }
 
     /// Generates the layout in the area defined by the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
-        let limited = outer.limit(inner);
+    pub fn generate(&self, texture: &mut Texture, data: &Data) {
+        let inner = data.get_inner();
+        let mut combined = data.combine();
 
         match self {
             LayoutComponent::BrickWall {
@@ -227,7 +232,7 @@ impl LayoutComponent {
                     while point.x < inner.end().x {
                         let aabb = AABB::new(point, *brick);
 
-                        component.generate(data, &limited, &aabb);
+                        component.generate(texture, &combined.next(aabb));
 
                         point.x += brick.width() as i32;
                     }
@@ -236,8 +241,9 @@ impl LayoutComponent {
                     is_offset_row = !is_offset_row;
                 }
             }
-            LayoutComponent::Herringbone(pattern) => pattern.generate(data, outer, inner),
+            LayoutComponent::Herringbone(pattern) => pattern.generate(texture, &combined),
             LayoutComponent::Mock(id) => info!("Generate layout mock {}", *id),
+            LayoutComponent::RandomAshlar(pattern) => pattern.generate(texture, combined),
             LayoutComponent::RepeatX { size, component } => {
                 let mut point = inner.start();
                 let mut i = 0;
@@ -255,7 +261,7 @@ impl LayoutComponent {
                     };
                     let aabb = AABB::new(point, size);
 
-                    component.generate(data, &limited, &aabb);
+                    component.generate(texture, &combined.next(aabb));
 
                     point.x += step;
                     i += 1;
@@ -278,7 +284,7 @@ impl LayoutComponent {
                     };
                     let aabb = AABB::new(point, size);
 
-                    component.generate(data, &limited, &aabb);
+                    component.generate(texture, &combined.next(aabb));
 
                     point.y += step;
                     i += 1;
@@ -298,7 +304,7 @@ impl LayoutComponent {
                     while point.x <= end.x {
                         let aabb = AABB::new(point, square_size);
 
-                        component.generate(data, &limited, &aabb);
+                        component.generate(texture, &combined.next(aabb));
 
                         point.x += step;
                     }
@@ -325,7 +331,7 @@ mod tests {
     use super::*;
     use crate::generation::component::border::BorderComponent;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::RuntimeData;
+    use crate::generation::data::texture::Texture;
     use crate::math::color::{RED, WHITE};
     use crate::math::shape_factory::ShapeFactory::Rectangle;
     use crate::math::size::Size;
@@ -334,12 +340,12 @@ mod tests {
     fn test_brick_wall() {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut texture = Texture::new(size, WHITE);
         let layout =
             LayoutComponent::new_brick_wall("test", Size::square(5), 2, create_component())
                 .unwrap();
 
-        layout.generate(&mut data, &aabb, &aabb);
+        layout.generate(&mut texture, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
         let expected_colors = vec![
@@ -362,17 +368,17 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_color_data(), &expected_colors);
+        assert_eq!(texture.get_color_data(), &expected_colors);
     }
 
     #[test]
     fn test_repeat_x() {
         let size = Size::new(15, 5);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut texture = Texture::new(size, WHITE);
         let layout = LayoutComponent::new_repeat_x(5, create_component()).unwrap();
 
-        layout.generate(&mut data, &aabb, &aabb);
+        layout.generate(&mut texture, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
             let expected_colors = vec![
@@ -383,19 +389,19 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_color_data(), &expected_colors);
+        assert_eq!(texture.get_color_data(), &expected_colors);
     }
 
     #[test]
     fn test_repeat_y() {
         let size = Size::new(5, 15);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut textzre = Texture::new(size, WHITE);
         let layout = LayoutComponent::new_repeat_x(5, create_component())
             .unwrap()
             .flip();
 
-        layout.generate(&mut data, &aabb, &aabb);
+        layout.generate(&mut textzre, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
             let expected_colors = vec![
@@ -418,17 +424,17 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_color_data(), &expected_colors);
+        assert_eq!(textzre.get_color_data(), &expected_colors);
     }
 
     #[test]
     fn test_square_layout() {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut texture = Texture::new(size, WHITE);
         let layout = LayoutComponent::new_square("test", 5, create_component()).unwrap();
 
-        layout.generate(&mut data, &aabb, &aabb);
+        layout.generate(&mut texture, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
         let expected_colors = vec![
@@ -451,7 +457,7 @@ mod tests {
             WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
         ];
 
-        assert_eq!(data.get_color_data(), &expected_colors);
+        assert_eq!(texture.get_color_data(), &expected_colors);
     }
 
     fn create_component() -> Component {

@@ -1,4 +1,5 @@
 use crate::generation::component::Component;
+use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
@@ -37,42 +38,48 @@ impl HerringbonePattern {
         }
     }
 
-    /// Generates the pattern in the area defined by the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+    /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
+    pub fn generate(&self, texture: &mut Texture, data: &Data) {
+        let inner = data.get_inner();
         let start = self.calculate_repeating_point(inner.start());
         let end = self.calculate_repeating_point(inner.end()) + 1i32;
-        let limited = outer.limit(inner);
 
         for y in start.y..end.y {
             for x in start.x..end.x {
-                self.generate_repeatable(data, &limited, x, y);
+                self.generate_repeating_area(texture, data, x, y);
             }
         }
     }
 
-    fn generate_repeatable(&self, data: &mut dyn Data, limited: &AABB, x: i32, y: i32) {
+    /// Generates the repeating area of the Herringbone pattern.
+    fn generate_repeating_area(&self, texture: &mut Texture, combined: &Data, x: i32, y: i32) {
         let start = Point::new(x, y) * self.repeating_side;
-        let limited = AABB::new(start, Size::square(self.repeating_side)).limit(limited);
+        let repeating_aabb = AABB::new(start, Size::square(self.repeating_side));
+        let mut repeating_data = combined.update(repeating_aabb);
         let multiplier = self.multiplier as i32;
 
         for i in 0..(multiplier * 2) {
             let aabb = self.get_horizontal_aabb(start, i, i);
-            self.horizontal_component.generate(data, &limited, &aabb);
+            self.horizontal_component
+                .generate(texture, &repeating_data.next(aabb));
         }
 
         for i in 0..(multiplier - 1) {
             let aabb = self.get_horizontal_aabb(start, i - multiplier + 1, i + multiplier + 1);
-            self.horizontal_component.generate(data, &limited, &aabb);
+            self.horizontal_component
+                .generate(texture, &repeating_data.next(aabb));
         }
 
         for i in 0..(multiplier * 2 - 1) {
             let aabb = self.get_vertical_aabb(start, i, i + 1);
-            self.vertical_component.generate(data, &limited, &aabb);
+            self.vertical_component
+                .generate(texture, &repeating_data.next(aabb));
         }
 
         for i in 0..(multiplier) {
             let aabb = self.get_vertical_aabb(start, i + multiplier, i - multiplier + 1);
-            self.vertical_component.generate(data, &limited, &aabb);
+            self.vertical_component
+                .generate(texture, &repeating_data.next(aabb));
         }
     }
 
@@ -107,20 +114,20 @@ fn calculate_repeating_side(side: u32, multiplier: u32) -> u32 {
 mod tests {
     use super::*;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::RuntimeData;
+    use crate::generation::data::texture::Texture;
     use crate::math::color::{Color, BLUE, PINK, WHITE};
     use crate::math::size::Size;
 
     #[test]
-    fn test_brick_wall() {
+    fn test_herringbone_pattern() {
         let size = Size::square(8);
         let aabb = AABB::with_size(size);
-        let mut data = RuntimeData::new(size, WHITE);
+        let mut texture = Texture::new(size, WHITE);
         let horizontal = create_component("h", PINK);
         let vertical = create_component("v", BLUE);
         let pattern = HerringbonePattern::new(1, 2, horizontal, vertical);
 
-        pattern.generate(&mut data, &aabb, &aabb);
+        pattern.generate(&mut texture, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
         let expected_colors = vec![
@@ -134,7 +141,7 @@ mod tests {
             PINK, BLUE, BLUE, PINK, PINK, BLUE, BLUE, PINK,
         ];
 
-        assert_eq!(data.get_color_data(), &expected_colors);
+        assert_eq!(texture.get_color_data(), &expected_colors);
     }
 
     fn create_component(name: &str, color: Color) -> Component {

@@ -1,6 +1,7 @@
 use crate::definition::generation::component::ComponentDefinition;
 use crate::definition::{convert, convert_size};
 use crate::generation::component::layout::herringbone::HerringbonePattern;
+use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::layout::LayoutComponent;
 use crate::math::size::Size;
 use crate::utils::error::DefinitionError;
@@ -21,6 +22,12 @@ pub enum LayoutDefinition {
         vertical_component: ComponentDefinition,
     },
     Mock(u32),
+    RandomAshlar {
+        cells_per_side: u32,
+        min_size: u32,
+        max_size: u32,
+        component: ComponentDefinition,
+    },
     RepeatX {
         size: u32,
         component: ComponentDefinition,
@@ -69,6 +76,20 @@ impl LayoutDefinition {
                 Ok(LayoutComponent::Herringbone(pattern))
             }
             LayoutDefinition::Mock(id) => Ok(LayoutComponent::Mock(*id)),
+            LayoutDefinition::RandomAshlar {
+                cells_per_side,
+                min_size,
+                max_size,
+                component,
+            } => {
+                let pattern = RandomAshlarPattern::new(
+                    *cells_per_side,
+                    *min_size,
+                    *max_size,
+                    component.convert(factor)?,
+                );
+                Ok(LayoutComponent::RandomAshlar(pattern))
+            }
             LayoutDefinition::RepeatX { size, component } => {
                 let component = component.convert(factor)?;
                 let layout = LayoutComponent::new_repeat_x(convert(*size, factor), component)?;

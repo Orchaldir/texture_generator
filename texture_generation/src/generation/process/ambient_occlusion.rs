@@ -1,4 +1,4 @@
-use crate::generation::data::Data;
+use crate::generation::data::texture::Texture;
 use crate::math::size::Size;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -17,13 +17,13 @@ impl AmbientOcclusion {
         }
     }
 
-    pub fn process(&self, data: &mut dyn Data) {
+    pub fn process(&self, data: &mut Texture) {
         info!("Post Processing: Ambient Occlusion");
 
         let size = *data.get_size();
         let mut depth = data.get_depth_data().to_owned();
 
-        info!("Star blurring");
+        info!("Start blurring");
 
         blur_right_down(size, &mut depth, self.step);
         blur_left_up(size, &mut depth, self.step);

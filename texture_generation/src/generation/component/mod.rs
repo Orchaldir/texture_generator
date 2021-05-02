@@ -1,8 +1,8 @@
 use crate::generation::component::border::BorderComponent;
 use crate::generation::component::layout::LayoutComponent;
 use crate::generation::component::rendering::RenderingComponent;
+use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
-use crate::math::aabb::AABB;
 
 pub mod border;
 pub mod layout;
@@ -29,12 +29,12 @@ impl Component {
     }
 
     /// Generates the texture inside the [`AABB`].
-    pub fn generate(&self, data: &mut dyn Data, outer: &AABB, inner: &AABB) {
+    pub fn generate(&self, texture: &mut Texture, data: &Data) {
         match self {
-            Component::Border(component) => component.generate(data, outer, inner),
-            Component::Layout(component) => component.generate(data, outer, inner),
+            Component::Border(component) => component.generate(texture, data),
+            Component::Layout(component) => component.generate(texture, data),
             Component::Mock(id) => info!("Generate mock {}", *id),
-            Component::Rendering(component) => component.render(data, outer, inner),
+            Component::Rendering(component) => component.render(texture, data),
         }
     }
 }

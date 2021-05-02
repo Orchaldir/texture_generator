@@ -1,12 +1,14 @@
 use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::component::Component;
-use crate::generation::data::{Data, RuntimeData};
 use crate::math::aabb::AABB;
 use crate::math::color::{Color, PINK};
 use crate::math::size::Size;
+use data::texture::Texture;
+use data::Data;
 
 pub mod component;
 pub mod data;
+pub mod io;
 pub mod process;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -33,21 +35,22 @@ impl TextureGenerator {
     }
 
     /// Generates the texture with a specific size.
-    pub fn generate(&self) -> RuntimeData {
+    pub fn generate(&self) -> Texture {
         let aabb = AABB::with_size(self.size);
-        let mut data = RuntimeData::new(self.size, self.background);
+        let mut texture = Texture::new(self.size, self.background);
+        let data = Data::for_texture(aabb);
 
-        self.component.generate(&mut data, &aabb, &aabb);
+        self.component.generate(&mut texture, &data);
 
-        data
+        texture
     }
 
     /// Generates the texture to a specific part of [`Data`].
-    pub fn render(&self, data: &mut dyn Data, aabb: &AABB) {
+    pub fn render(&self, texture: &mut Texture, data: &Data) {
         let background = RenderingComponent::new_fill_area("background", self.background, 0);
 
-        background.render(data, aabb, aabb);
-        self.component.generate(data, aabb, aabb);
+        background.render(texture, data);
+        self.component.generate(texture, data);
     }
 }
 
@@ -59,12 +62,11 @@ impl Default for TextureGenerator {
 
 #[cfg(test)]
 mod tests {
+    use crate::generation::component::border::BorderComponent;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::Data;
     use crate::math::color::{GREEN, RED};
 
     use super::*;
-    use crate::generation::component::border::BorderComponent;
 
     #[test]
     fn test_generate() {

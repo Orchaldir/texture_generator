@@ -1,7 +1,7 @@
 use crate::rendering::style::edge::EdgeStyle;
 use crate::rendering::style::node::NodeStyle;
+use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::Data;
-use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -37,32 +37,32 @@ impl WindowStyle {
 
     pub fn render_horizontal(
         &self,
-        outer: &AABB,
+        data: &Data,
         node: Point,
         tile_size: u32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
+        texture: &mut Texture,
     ) {
         self.stool_style
-            .render_horizontal(outer, node, tile_size, 0, start_node, end_node, data);
+            .render_horizontal(data, node, tile_size, 0, start_node, end_node, texture);
         self.pane_style
-            .render_horizontal(outer, node, tile_size, 0, start_node, end_node, data);
+            .render_horizontal(data, node, tile_size, 0, start_node, end_node, texture);
     }
 
     pub fn render_vertical(
         &self,
-        outer: &AABB,
+        data: &Data,
         node: Point,
         tile_size: u32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
+        texture: &mut Texture,
     ) {
         self.stool_style
-            .render_vertical(outer, node, tile_size, 0, start_node, end_node, data);
+            .render_vertical(data, node, tile_size, 0, start_node, end_node, texture);
         self.pane_style
-            .render_vertical(outer, node, tile_size, 0, start_node, end_node, data);
+            .render_vertical(data, node, tile_size, 0, start_node, end_node, texture);
     }
 }
 

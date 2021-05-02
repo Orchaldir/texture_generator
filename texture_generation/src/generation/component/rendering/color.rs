@@ -1,27 +1,25 @@
+use crate::generation::data::Data;
 use crate::math::color::Color;
-use std::cell::RefCell;
-use std::ops::AddAssign;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ColorSelector {
     /// Everything has the same color.
     ConstantColor(Color),
     /// A sequence of colors that repeats.
-    Sequence(Vec<Color>, RefCell<usize>),
+    Sequence(Vec<Color>),
 }
 
 impl ColorSelector {
     pub fn new_sequence(colors: Vec<Color>) -> ColorSelector {
-        ColorSelector::Sequence(colors, RefCell::new(0))
+        ColorSelector::Sequence(colors)
     }
 
-    pub fn select(&self) -> Color {
+    pub fn select(&self, data: &Data) -> Color {
         match self {
             ColorSelector::ConstantColor(color) => *color,
-            ColorSelector::Sequence(colors, index) => {
-                let current_index = *index.borrow() % colors.len();
-                index.borrow_mut().add_assign(1);
-                colors[current_index]
+            ColorSelector::Sequence(colors) => {
+                let index = data.get_instance_id() % colors.len();
+                colors[index]
             }
         }
     }
@@ -36,20 +34,20 @@ mod tests {
     fn test_constant() {
         let selector = ColorSelector::ConstantColor(RED);
 
-        assert_eq!(selector.select(), RED);
-        assert_eq!(selector.select(), RED);
-        assert_eq!(selector.select(), RED);
+        assert_eq!(selector.select(&Data::only_instance_id(0)), RED);
+        assert_eq!(selector.select(&Data::only_instance_id(1)), RED);
+        assert_eq!(selector.select(&Data::only_instance_id(2)), RED);
     }
 
     #[test]
     fn test_uniform() {
         let selector = ColorSelector::new_sequence(vec![RED, GREEN, BLUE]);
 
-        assert_eq!(selector.select(), RED);
-        assert_eq!(selector.select(), GREEN);
-        assert_eq!(selector.select(), BLUE);
-        assert_eq!(selector.select(), RED);
-        assert_eq!(selector.select(), GREEN);
-        assert_eq!(selector.select(), BLUE);
+        assert_eq!(selector.select(&Data::only_instance_id(0)), RED);
+        assert_eq!(selector.select(&Data::only_instance_id(1)), GREEN);
+        assert_eq!(selector.select(&Data::only_instance_id(2)), BLUE);
+        assert_eq!(selector.select(&Data::only_instance_id(3)), RED);
+        assert_eq!(selector.select(&Data::only_instance_id(4)), GREEN);
+        assert_eq!(selector.select(&Data::only_instance_id(5)), BLUE);
     }
 }

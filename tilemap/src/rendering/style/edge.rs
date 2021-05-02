@@ -1,6 +1,7 @@
 use crate::rendering::style::node::NodeStyle;
 use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
+use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
@@ -55,13 +56,13 @@ impl EdgeStyle {
 
     pub fn render_horizontal(
         &self,
-        outer: &AABB,
+        data: &Data,
         node: Point,
         tile_size: u32,
         offset: i32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
+        texture: &mut Texture,
     ) {
         match self {
             EdgeStyle::Layout {
@@ -79,7 +80,7 @@ impl EdgeStyle {
                     *thickness,
                     *half_thickness,
                 );
-                horizontal.generate(data, outer, &aabb)
+                horizontal.generate(texture, &data.update(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
@@ -96,20 +97,20 @@ impl EdgeStyle {
                     *thickness,
                     *half_thickness,
                 );
-                component.render(data, outer, &aabb)
+                component.render(texture, &data.update(aabb))
             }
         }
     }
 
     pub fn render_vertical(
         &self,
-        outer: &AABB,
+        data: &Data,
         node: Point,
         tile_size: u32,
         offset: i32,
         start_node: Option<&NodeStyle>,
         end_node: Option<&NodeStyle>,
-        data: &mut dyn Data,
+        texture: &mut Texture,
     ) {
         match self {
             EdgeStyle::Layout {
@@ -127,7 +128,7 @@ impl EdgeStyle {
                     *thickness,
                     *half_thickness,
                 );
-                vertical.generate(data, outer, &aabb)
+                vertical.generate(texture, &data.update(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
@@ -144,7 +145,7 @@ impl EdgeStyle {
                     *thickness,
                     *half_thickness,
                 );
-                component.render(data, outer, &aabb)
+                component.render(texture, &data.update(aabb))
             }
         }
     }
@@ -192,7 +193,7 @@ impl Default for EdgeStyle {
 mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
-    use texture_generation::generation::data::{Data, RuntimeData};
+    use texture_generation::generation::data::texture::Texture;
     use texture_generation::math::color::{BLACK, GREEN, RED};
 
     #[test]
@@ -202,16 +203,16 @@ mod tests {
         let node_style0 = NodeStyle::new(4, component.clone());
         let node_style1 = NodeStyle::new(2, component);
         let edge_style = EdgeStyle::new_solid(2, edge_component);
-        let mut data = RuntimeData::new(Size::new(11, 6), BLACK);
+        let mut texture = Texture::new(Size::new(11, 6), BLACK);
 
         edge_style.render_horizontal(
-            &data.get_aabb(),
+            &Data::for_texture(texture.get_aabb()),
             Point::new(3, 3),
             7,
             0,
             Some(&node_style0),
             Some(&node_style1),
-            &mut data,
+            &mut texture,
         );
 
         #[rustfmt::skip]
@@ -224,7 +225,7 @@ mod tests {
             BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
         ];
 
-        assert_eq!(data.get_color_data(), &result);
+        assert_eq!(texture.get_color_data(), &result);
 
         #[rustfmt::skip]
         let depth = vec![
@@ -236,6 +237,6 @@ mod tests {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ];
 
-        assert_eq!(data.get_depth_data(), &depth);
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 }
