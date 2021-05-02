@@ -8,7 +8,7 @@ use crate::tilemap::node::{
 };
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use texture_generation::generation::data::RuntimeData;
+use texture_generation::generation::data::texture::RuntimeData;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
@@ -293,7 +293,7 @@ mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
     use texture_generation::generation::component::Component;
-    use texture_generation::generation::data::Data;
+    use texture_generation::generation::data::texture::Data;
     use texture_generation::generation::TextureGenerator;
     use texture_generation::math::color::{Color, BLACK, BLUE, PINK, RED};
     use texture_generation::utils::resource::ResourceManager;

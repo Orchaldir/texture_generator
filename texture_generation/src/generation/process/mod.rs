@@ -1,4 +1,4 @@
-use crate::generation::data::Data;
+use crate::generation::data::texture::Data;
 use crate::generation::process::ambient_occlusion::AmbientOcclusion;
 use crate::generation::process::lighting::Lighting;
 

@@ -1,4 +1,4 @@
-use crate::generation::data::Data;
+use crate::generation::data::texture::Data;
 use crate::math::size::Size;
 use crate::math::vector3::Vector3;
 

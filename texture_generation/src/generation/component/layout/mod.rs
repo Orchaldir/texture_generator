@@ -1,7 +1,7 @@
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::Component;
-use crate::generation::data::Data;
+use crate::generation::data::texture::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use crate::utils::error::ValueError;
@@ -329,7 +329,7 @@ mod tests {
     use super::*;
     use crate::generation::component::border::BorderComponent;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::RuntimeData;
+    use crate::generation::data::texture::RuntimeData;
     use crate::math::color::{RED, WHITE};
     use crate::math::shape_factory::ShapeFactory::Rectangle;
     use crate::math::size::Size;

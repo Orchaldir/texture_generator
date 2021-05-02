@@ -1,6 +1,6 @@
 use crate::generation::component::rendering::color::ColorSelector;
 use crate::generation::component::rendering::depth::DepthCalculator;
-use crate::generation::data::Data;
+use crate::generation::data::texture::Data;
 use crate::math::aabb::AABB;
 use crate::math::color::{Color, PINK};
 use crate::math::shape_factory::ShapeFactory;
@@ -132,7 +132,7 @@ impl RenderingComponent {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::data::RuntimeData;
+    use crate::generation::data::texture::RuntimeData;
     use crate::math::color::{RED, WHITE};
     use crate::math::point::Point;
     use crate::math::size::Size;

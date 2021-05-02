@@ -1,6 +1,7 @@
+use data::texture::{Data, RuntimeData};
+
 use crate::generation::component::rendering::RenderingComponent;
 use crate::generation::component::Component;
-use crate::generation::data::{Data, RuntimeData};
 use crate::math::aabb::AABB;
 use crate::math::color::{Color, PINK};
 use crate::math::size::Size;
@@ -61,7 +62,7 @@ impl Default for TextureGenerator {
 mod tests {
     use crate::generation::component::border::BorderComponent;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::Data;
+    use crate::generation::data::texture::Data;
     use crate::math::color::{GREEN, RED};
 
     use super::*;

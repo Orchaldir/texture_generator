@@ -1,7 +1,7 @@
 use crate::rendering::style::node::NodeStyle;
 use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
-use texture_generation::generation::data::Data;
+use texture_generation::generation::data::texture::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
@@ -192,7 +192,7 @@ impl Default for EdgeStyle {
 mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
-    use texture_generation::generation::data::{Data, RuntimeData};
+    use texture_generation::generation::data::texture::{Data, RuntimeData};
     use texture_generation::math::color::{BLACK, GREEN, RED};
 
     #[test]

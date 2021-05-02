@@ -1,5 +1,5 @@
 use crate::generation::component::Component;
-use crate::generation::data::Data;
+use crate::generation::data::texture::Data;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -108,7 +108,7 @@ fn calculate_repeating_side(side: u32, multiplier: u32) -> u32 {
 mod tests {
     use super::*;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::RuntimeData;
+    use crate::generation::data::texture::RuntimeData;
     use crate::math::color::{Color, BLUE, PINK, WHITE};
     use crate::math::size::Size;
 

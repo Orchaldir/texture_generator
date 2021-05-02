@@ -1,5 +1,5 @@
 use crate::generation::component::Component;
-use crate::generation::data::Data;
+use crate::generation::data::texture::Data;
 use crate::math::aabb::{AxisAlignedBoundingBox, AABB};
 use crate::math::occupancy::tile::{check_column, check_row, fill_area, OccupancyTile, START};
 use crate::math::point::Point;

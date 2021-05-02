@@ -1,5 +1,5 @@
 use crate::generation::component::Component;
-use crate::generation::data::Data;
+use crate::generation::data::texture::Data;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
@@ -85,7 +85,7 @@ impl BorderComponent {
 mod tests {
     use super::*;
     use crate::generation::component::rendering::RenderingComponent;
-    use crate::generation::data::RuntimeData;
+    use crate::generation::data::texture::RuntimeData;
     use crate::math::color::{RED, WHITE};
     use crate::math::size::Size;
 
