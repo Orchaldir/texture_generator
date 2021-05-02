@@ -28,6 +28,8 @@ impl AabbData {
 }
 
 pub struct Data {
+    /// The `global_id` is 0, if the plan is to generate a simple texture and not a tilemap.
+    /// Otherwise it is the id of the current tile or edge.
     global_id: usize,
     instance_id: usize,
     aabb_data: AabbData,
@@ -60,6 +62,10 @@ impl Data {
 
     pub fn combine(&self) -> Self {
         Self::new(self.global_id, self.instance_id, self.aabb_data.combine())
+    }
+
+    pub fn get_global_id(&self) -> usize {
+        self.global_id
     }
 
     pub fn get_outer(&self) -> &AABB {

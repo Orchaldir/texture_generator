@@ -23,7 +23,7 @@ impl AmbientOcclusion {
         let size = *data.get_size();
         let mut depth = data.get_depth_data().to_owned();
 
-        info!("Star blurring");
+        info!("Start blurring");
 
         blur_right_down(size, &mut depth, self.step);
         blur_left_up(size, &mut depth, self.step);

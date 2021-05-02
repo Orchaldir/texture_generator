@@ -6,7 +6,8 @@ use crate::math::occupancy::tile::{check_column, check_row, fill_area, Occupancy
 use crate::math::point::Point;
 use crate::math::size::Size;
 use rand::distributions::{Distribution, Uniform};
-use rand::prelude::ThreadRng;
+use rand::SeedableRng;
+use rand_pcg::Pcg64;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RandomAshlarPattern {
@@ -47,7 +48,7 @@ impl RandomAshlarPattern {
 struct RandomAshlarCreator {
     cells_per_side: u32,
     occupancy_tile: OccupancyTile,
-    rng: ThreadRng,
+    rng: Pcg64,
     size_distribution: Uniform<u32>,
     tile_size: Size,
     cell_size: Size,
@@ -59,10 +60,12 @@ struct RandomAshlarCreator {
 impl RandomAshlarCreator {
     pub fn new(cells_per_side: u32, min_size: u32, max_size: u32, data: Data) -> Self {
         let inner = data.get_inner();
+        let seed = data.get_global_id() as u64;
+
         Self {
             cells_per_side,
             occupancy_tile: OccupancyTile::new_active(cells_per_side as usize),
-            rng: rand::thread_rng(),
+            rng: Pcg64::seed_from_u64(seed),
             size_distribution: Uniform::from(min_size..(max_size + 1)),
             tile_size: Size::square(cells_per_side),
             cell_size: inner.size().divide(cells_per_side),
