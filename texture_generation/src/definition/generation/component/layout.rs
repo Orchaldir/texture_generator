@@ -1,5 +1,6 @@
 use crate::definition::generation::component::ComponentDefinition;
 use crate::definition::{convert, convert_size};
+use crate::generation::component::layout::brick::BrickPattern;
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::layout::LayoutComponent;
@@ -53,13 +54,13 @@ impl LayoutDefinition {
                 component,
             } => {
                 let component = component.convert(factor)?;
-                let layout = LayoutComponent::new_brick_wall(
+                let pattern = BrickPattern::new(
                     name,
                     convert_size(brick, factor),
                     convert(*offset, factor),
                     component,
                 )?;
-                Ok(layout)
+                Ok(LayoutComponent::BrickWall(pattern))
             }
             LayoutDefinition::Herringbone {
                 side,

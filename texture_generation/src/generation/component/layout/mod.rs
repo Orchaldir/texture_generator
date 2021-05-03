@@ -1,3 +1,4 @@
+use crate::generation::component::layout::brick::BrickPattern;
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::Component;
@@ -7,6 +8,7 @@ use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use crate::utils::error::ValueError;
 
+pub mod brick;
 pub mod herringbone;
 pub mod random_ashlar;
 
@@ -14,25 +16,7 @@ pub mod random_ashlar;
 #[derive(Clone, Debug, PartialEq)]
 /// Generates a layout,
 pub enum LayoutComponent {
-    /// A simple brick wall.
-    ///
-    /// # Diagram
-    ///
-    /// ```svgbob
-    ///   +-----*-----*-----*-----*
-    ///   |     |     |     |     |
-    ///   *--*--*--*--*--*--*--*--*--*
-    ///      |     |     |     |     |
-    ///   *--*--*--*--*--*--*--*--*--*
-    ///   |     |     |     |     |
-    ///   *--*--*--*--*--*--*--*--*
-    /// ```
-    BrickWall {
-        name: String,
-        brick: Size,
-        offset: i32,
-        component: Component,
-    },
+    BrickWall(BrickPattern),
     Herringbone(HerringbonePattern),
     Mock(u32),
     RandomAshlar(RandomAshlarPattern),
@@ -91,38 +75,6 @@ pub enum LayoutComponent {
 }
 
 impl LayoutComponent {
-    pub fn new_brick_wall<S: Into<String>>(
-        name: S,
-        brick: Size,
-        offset: u32,
-        component: Component,
-    ) -> Result<LayoutComponent, ValueError> {
-        if brick.width() < 1 {
-            return Err(ValueError::value_too_small(
-                name,
-                "brick.width",
-                brick.width(),
-            ));
-        } else if brick.height() < 1 {
-            return Err(ValueError::value_too_small(
-                name,
-                "brick.height",
-                brick.height(),
-            ));
-        } else if offset >= brick.width() {
-            return Err(ValueError::value_too_big(name, "offset", brick.height()));
-        }
-
-        let offset = offset as i32 - brick.width() as i32;
-
-        Ok(LayoutComponent::BrickWall {
-            name: name.into(),
-            brick,
-            offset,
-            component,
-        })
-    }
-
     pub fn new_repeat_x(size: u32, component: Component) -> Result<LayoutComponent, ValueError> {
         if size < 1 {
             return Err(ValueError::value_too_small("repeat_x", "size", size));
@@ -158,17 +110,7 @@ impl LayoutComponent {
     /// Flips between horizontal & vertical mode.
     pub fn flip(&self) -> LayoutComponent {
         match self.clone() {
-            LayoutComponent::BrickWall {
-                name,
-                brick,
-                offset,
-                component,
-            } => LayoutComponent::BrickWall {
-                name,
-                brick,
-                offset,
-                component: component.flip(),
-            },
+            LayoutComponent::BrickWall(..) => self.clone(),
             LayoutComponent::Herringbone(..) => self.clone(),
             LayoutComponent::Mock(_id) => self.clone(),
             LayoutComponent::RandomAshlar(..) => self.clone(),
@@ -198,30 +140,7 @@ impl LayoutComponent {
         let mut combined = data.combine();
 
         match self {
-            LayoutComponent::BrickWall {
-                brick,
-                offset,
-                component,
-                ..
-            } => {
-                let mut point = inner.start();
-                let mut is_offset_row = false;
-
-                while point.y < inner.end().y {
-                    point.x = inner.start().x + if is_offset_row { *offset } else { 0 };
-
-                    while point.x < inner.end().x {
-                        let aabb = AABB::new(point, *brick);
-
-                        component.generate(texture, &combined.next(aabb));
-
-                        point.x += brick.width() as i32;
-                    }
-
-                    point.y += brick.height() as i32;
-                    is_offset_row = !is_offset_row;
-                }
-            }
+            LayoutComponent::BrickWall(pattern) => pattern.generate(texture, combined),
             LayoutComponent::Herringbone(pattern) => pattern.generate(texture, &combined),
             LayoutComponent::Mock(id) => info!("Generate layout mock {}", *id),
             LayoutComponent::RandomAshlar(pattern) => pattern.generate(texture, combined),
