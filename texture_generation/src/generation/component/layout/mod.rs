@@ -33,25 +33,6 @@ pub enum LayoutComponent {
         offset: i32,
         component: Component,
     },
-    /// A herringbone pattern.
-    ///
-    /// # Diagram
-    ///
-    /// ```svgbob
-    ///               *-----*
-    ///               |     |
-    ///   +-----*-----*     *-----*
-    ///   |           |     |     |
-    ///   *-----*-----*-----*     *-----*
-    ///   |     |           |     |     |
-    ///   |     *-----*-----*-----*     |
-    ///   |     |     |           |     |
-    ///   *-----*     *-----*-----*-----*
-    ///         |     |     |           |
-    ///         *-----*     *-----------*
-    ///               |     |
-    ///               *-----*
-    /// ```
     Herringbone(HerringbonePattern),
     Mock(u32),
     RandomAshlar(RandomAshlarPattern),

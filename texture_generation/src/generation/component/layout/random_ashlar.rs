@@ -9,6 +9,26 @@ use rand::distributions::{Distribution, Uniform};
 use rand::SeedableRng;
 use rand_pcg::Pcg64;
 
+#[svgbobdoc::transform]
+/// The Random Ashlar pattern places rectangles of different sizes randomly together.
+///
+/// # Diagram
+///
+/// ```svgbob
+///   *-----------*-----*-----------*-----*
+///   |           |     |           |     |
+///   |           *     *-----*-----*-----*
+///   |           |     |                 |
+///   *-----------*-----*                 |
+///   |                 |                 |
+///   *-----*-----------*                 *
+///   |     |           |                 |
+///   *     |           *-----*-----------|
+///   |     |           |     |           |
+///   *-----*-----*-----*     |           |
+///   |           |     |     |           |
+///   *-----------*-----*-----*-----------*
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct RandomAshlarPattern {
     cells_per_side: u32,

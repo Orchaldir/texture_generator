@@ -5,7 +5,26 @@ use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
 
-/// The [Herringbone Pattern](https://en.wikipedia.org/wiki/RGB_color_model).
+#[svgbobdoc::transform]
+/// The [Herringbone Pattern](https://en.wikipedia.org/wiki/Herringbone_pattern) alternates horizontal & vertical [`Component`]s.
+///
+/// # Diagram
+///
+/// ```svgbob
+///               *-----*-----------*
+///               |     |           |
+///   *-----*-----*     *-----*-----*-----*
+///   |           |     |     |           |
+///   *-----*-----*-----*     *-----*-----*
+///   |     |           |     |     |
+///   |     *-----*-----*-----*     *-----*
+///   |     |     |           |     |     |
+///   *-----*     *-----*-----*-----*     |
+///         |     |     |           |     |
+///   *-----*-----*     *-----*-----*-----*
+///   |           |     |     |           |
+///   *-----------*-----*     *-----------*
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct HerringbonePattern {
     side: i32,
