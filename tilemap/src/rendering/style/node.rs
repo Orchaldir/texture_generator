@@ -32,7 +32,7 @@ impl NodeStyle {
     pub fn render(&self, data: &Data, node: Point, texture: &mut Texture) {
         let start = node - self.half;
         let aabb = AABB::new(start, self.size);
-        self.component.render(texture, &data.update(aabb))
+        self.component.render(texture, &data.transform(aabb))
     }
 }
 

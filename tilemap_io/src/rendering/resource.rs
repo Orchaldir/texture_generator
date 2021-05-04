@@ -2,7 +2,7 @@ use crate::rendering::style::door::DoorDefinition;
 use crate::rendering::style::node::NodeDefinition;
 use crate::rendering::style::wall::WallDefinition;
 use crate::rendering::style::window::WindowDefinition;
-use std::path::PathBuf;
+use std::path::Path;
 use texture_generation::definition::generation::TextureDefinition;
 use texture_generation::definition::read_dir;
 use texture_generation::generation::process::PostProcess;
@@ -18,7 +18,7 @@ pub struct ResourceDefinitions {
 }
 
 impl ResourceDefinitions {
-    pub fn load(path: &PathBuf) -> Self {
+    pub fn load(path: &Path) -> Self {
         let textures: Vec<TextureDefinition> = read_dir(&path.join("textures"));
 
         info!("Loaded {} texture definitions", textures.len());

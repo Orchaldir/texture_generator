@@ -5,7 +5,26 @@ use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
 
-/// The [Herringbone Pattern](https://en.wikipedia.org/wiki/RGB_color_model).
+#[svgbobdoc::transform]
+/// The [Herringbone Pattern](https://en.wikipedia.org/wiki/Herringbone_pattern) alternates horizontal & vertical [`Component`]s.
+///
+/// # Diagram
+///
+/// ```svgbob
+///               *-----*-----------*
+///               |     |           |
+///   *-----*-----*     *-----*-----*-----*
+///   |           |     |     |           |
+///   *-----*-----*-----*     *-----*-----*
+///   |     |           |     |     |
+///   |     *-----*-----*-----*     *-----*
+///   |     |     |           |     |     |
+///   *-----*     *-----*-----*-----*     |
+///         |     |     |           |     |
+///   *-----*-----*     *-----*-----*-----*
+///   |           |     |     |           |
+///   *-----------*-----*     *-----------*
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct HerringbonePattern {
     side: i32,
@@ -55,7 +74,7 @@ impl HerringbonePattern {
     fn generate_repeating_area(&self, texture: &mut Texture, combined: &Data, x: i32, y: i32) {
         let start = Point::new(x, y) * self.repeating_side;
         let repeating_aabb = AABB::new(start, Size::square(self.repeating_side));
-        let mut repeating_data = combined.update(repeating_aabb);
+        let mut repeating_data = combined.transform(repeating_aabb);
         let multiplier = self.multiplier as i32;
 
         for i in 0..(multiplier * 2) {

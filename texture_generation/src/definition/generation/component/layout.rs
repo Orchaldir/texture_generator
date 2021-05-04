@@ -1,5 +1,6 @@
 use crate::definition::generation::component::ComponentDefinition;
 use crate::definition::{convert, convert_size};
+use crate::generation::component::layout::brick::BrickPattern;
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::layout::LayoutComponent;
@@ -53,13 +54,13 @@ impl LayoutDefinition {
                 component,
             } => {
                 let component = component.convert(factor)?;
-                let layout = LayoutComponent::new_brick_wall(
+                let pattern = BrickPattern::new(
                     name,
                     convert_size(brick, factor),
                     convert(*offset, factor),
                     component,
                 )?;
-                Ok(layout)
+                Ok(LayoutComponent::BrickWall(pattern))
             }
             LayoutDefinition::Herringbone {
                 side,
@@ -106,8 +107,8 @@ impl LayoutDefinition {
                 component,
             } => {
                 let component = component.convert(factor)?;
-                let layout = LayoutComponent::new_square(name, convert(*side, factor), component)?;
-                Ok(layout)
+                let pattern = BrickPattern::new_square(name, convert(*side, factor), component)?;
+                Ok(LayoutComponent::BrickWall(pattern))
             }
         }
     }
@@ -126,9 +127,9 @@ mod tests {
             offset: 10,
             component: ComponentDefinition::Mock(66),
         };
-        let component =
-            LayoutComponent::new_brick_wall("test", Size::new(40, 20), 20, Component::Mock(66))
-                .unwrap();
+        let component = LayoutComponent::BrickWall(
+            BrickPattern::new("test", Size::new(40, 20), 20, Component::Mock(66)).unwrap(),
+        );
 
         assert_eq!(component, definition.convert(2.0).unwrap())
     }
@@ -158,11 +159,13 @@ mod tests {
     #[test]
     fn test_convert_square() {
         let definition = LayoutDefinition::Square {
-            name: "test".to_string(),
+            name: "square".to_string(),
             side: 10,
             component: ComponentDefinition::Mock(66),
         };
-        let component = LayoutComponent::new_square("test", 25, Component::Mock(66)).unwrap();
+        let component = LayoutComponent::BrickWall(
+            BrickPattern::new("square", Size::square(25), 0, Component::Mock(66)).unwrap(),
+        );
 
         assert_eq!(component, definition.convert(2.5).unwrap())
     }

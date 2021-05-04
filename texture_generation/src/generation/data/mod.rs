@@ -62,8 +62,8 @@ impl Data {
         }
     }
 
-    /// Updates the inner [`AABB`] for a [`Component`] on a deeper level. Keeps `instance_id`.
-    pub fn update(&self, inner: AABB) -> Self {
+    /// Updates the inner [`AABB`] for a [`Component`]. Keeps `instance_id`.
+    pub fn transform(&self, inner: AABB) -> Self {
         Self::new(self.global_id, self.instance_id, self.aabb_data.next(inner))
     }
 
@@ -72,6 +72,11 @@ impl Data {
         let old_id = self.instance_id;
         self.instance_id += 1;
         Self::new(self.global_id, old_id, self.aabb_data.next(inner))
+    }
+
+    /// Replaces the inner [`AABB`] for the next instance of the same [`Component`]. Overwrites `instance_id`.
+    pub fn set(&self, instance_id: usize, inner: AABB) -> Self {
+        Self::new(self.global_id, instance_id, self.aabb_data.next(inner))
     }
 
     pub fn combine(&self) -> Self {
