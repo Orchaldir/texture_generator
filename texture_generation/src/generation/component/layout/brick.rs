@@ -61,18 +61,18 @@ impl BrickPattern {
 
     /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
-        let inner = data.get_inner();
-        let start = self.calculate_column_row(inner.start());
-        let end = self.calculate_column_row(inner.end()) + 1i32;
+        let aabb = data.get_inner();
+        let (start_column, start_row) = self.calculate_column_row(aabb.start(), 0);
+        let (end_column, end_row) = self.calculate_column_row(aabb.end(), 1);
         let total_bricks = self.calculate_total_bricks(texture);
 
-        for y in start.y..end.y {
-            let mut point = self.calculate_brick_start(start, y);
-            let mut index = total_bricks.convert_x_y(start.x as u32, y as u32); // + (y as f32 / 2.0).ceil() as usize;
+        for row in start_row..end_row {
+            let mut point = self.calculate_brick_start(start_column, row);
+            let mut index = calculate_brick_index(total_bricks, start_column, row);
 
-            for _x in start.x..end.x {
-                let aabb = AABB::new(point, self.brick);
-                let brick_data = data.set(index, aabb);
+            for _column in start_column..end_column {
+                let brick_aabb = AABB::new(point, self.brick);
+                let brick_data = data.set(index, brick_aabb);
 
                 self.component.generate(texture, &brick_data);
 
@@ -82,16 +82,18 @@ impl BrickPattern {
         }
     }
 
-    fn calculate_brick_start(&self, start: Point, y: i32) -> Point {
-        let mut x = start.x * self.brick.width() as i32;
+    /// Calculates the starting point of a brick.
+    fn calculate_brick_start(&self, column: i32, row: i32) -> Point {
+        let mut x = column * self.brick.width() as i32;
 
-        if is_offset_row(y) {
+        if is_offset_row(row) {
             x -= self.offset as i32;
         }
 
-        Point::new(x, y * self.brick.height() as i32)
+        Point::new(x, row * self.brick.height() as i32)
     }
 
+    /// Calculates the number of columns & rows of bricks in the whole texture.
     fn calculate_total_bricks(&self, texture: &mut Texture) -> Size {
         Size::new(
             (texture.get_size().width() as f32 / self.brick.width() as f32).ceil() as u32,
@@ -99,8 +101,8 @@ impl BrickPattern {
         )
     }
 
-    /// In which row of bricks is this point?
-    fn calculate_column_row(&self, point: Point) -> Point {
+    /// In which column & row of bricks is this point?
+    fn calculate_column_row(&self, point: Point, bonus: i32) -> (i32, i32) {
         let row = point.y / self.brick.height() as i32;
         let mut x = point.x;
 
@@ -109,11 +111,17 @@ impl BrickPattern {
         }
 
         let column = x / self.brick.width() as i32;
-        Point::new(column, row)
+        (column + bonus, row + bonus)
     }
 }
 
 /// Is the offset applied to this row?
 fn is_offset_row(row: i32) -> bool {
     row % 2 == 1
+}
+
+/// Calculates the global index of this brick.
+fn calculate_brick_index(total_bricks: Size, column: i32, row: i32) -> usize {
+    let off_by_1_for_every_two_rows = ((row - 1).max(0) as f32 / 2.0).ceil() as usize;
+    total_bricks.convert_x_y(column as u32, row as u32) + off_by_1_for_every_two_rows
 }
