@@ -127,9 +127,9 @@ mod tests {
             offset: 10,
             component: ComponentDefinition::Mock(66),
         };
-        let component =
-            LayoutComponent::new_brick_wall("test", Size::new(40, 20), 20, Component::Mock(66))
-                .unwrap();
+        let component = LayoutComponent::BrickWall(
+            BrickPattern::new("test", Size::new(40, 20), 20, Component::Mock(66)).unwrap(),
+        );
 
         assert_eq!(component, definition.convert(2.0).unwrap())
     }

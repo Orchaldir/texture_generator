@@ -237,41 +237,6 @@ mod tests {
     use crate::math::size::Size;
 
     #[test]
-    fn test_brick_wall() {
-        let size = Size::new(10, 15);
-        let aabb = AABB::with_size(size);
-        let mut texture = Texture::new(size, WHITE);
-        let layout =
-            LayoutComponent::new_brick_wall("test", Size::square(5), 2, create_component())
-                .unwrap();
-
-        layout.generate(&mut texture, &Data::for_texture(aabb));
-
-        #[rustfmt::skip]
-        let expected_colors = vec![
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-
-            WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE,
-              RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,
-              RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,
-              RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,
-            WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE,
-
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-        ];
-
-        assert_eq!(texture.get_color_data(), &expected_colors);
-    }
-
-    #[test]
     fn test_repeat_x() {
         let size = Size::new(15, 5);
         let aabb = AABB::with_size(size);
@@ -360,7 +325,7 @@ mod tests {
         assert_eq!(texture.get_color_data(), &expected_colors);
     }
 
-    fn create_component() -> Component {
+    pub fn create_component() -> Component {
         let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
         let rendering_component = Component::Rendering(Box::new(renderer));
         let border = BorderComponent::new_uniform(1, rendering_component);

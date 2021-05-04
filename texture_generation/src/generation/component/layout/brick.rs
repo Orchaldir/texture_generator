@@ -125,3 +125,45 @@ fn calculate_brick_index(total_bricks: Size, column: i32, row: i32) -> usize {
     let off_by_1_for_every_two_rows = ((row - 1).max(0) as f32 / 2.0).ceil() as usize;
     total_bricks.convert_x_y(column as u32, row as u32) + off_by_1_for_every_two_rows
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::generation::component::layout::tests::create_component;
+    use crate::generation::data::texture::Texture;
+    use crate::math::color::{RED, WHITE};
+    use crate::math::size::Size;
+
+    #[test]
+    fn test_brick_wall() {
+        let size = Size::new(10, 15);
+        let aabb = AABB::with_size(size);
+        let mut texture = Texture::new(size, WHITE);
+        let layout = BrickPattern::new("test", Size::square(5), 2, create_component()).unwrap();
+
+        layout.generate(&mut texture, Data::for_texture(aabb));
+
+        #[rustfmt::skip]
+        let expected_colors = vec![
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+
+            WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE,
+              RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,
+              RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,
+              RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,
+            WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE,
+
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+        ];
+
+        assert_eq!(texture.get_color_data(), &expected_colors);
+    }
+}
