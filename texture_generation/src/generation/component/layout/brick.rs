@@ -7,9 +7,7 @@ use crate::math::size::Size;
 use crate::utils::error::ValueError;
 
 #[svgbobdoc::transform]
-/// A simple brick wall.
-///
-/// # Diagram
+/// A simple brick wall:
 ///
 /// ```svgbob
 ///   +-----*-----*-----*-----*
@@ -19,6 +17,18 @@ use crate::utils::error::ValueError;
 ///   *--*--*--*--*--*--*--*--*--*
 ///   |     |     |     |     |
 ///   *--*--*--*--*--*--*--*--*
+/// ```
+///
+/// Use an offset of 0 and a square size for a square pattern.
+///
+/// ```svgbob
+///   +--*--*--*
+///   |  |  |  |
+///   *--*--*--*
+///   |  |  |  |
+///   *--*--*--*
+///   |  |  |  |
+///   *--*--*--*
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct BrickPattern {
@@ -55,6 +65,23 @@ impl BrickPattern {
             name: name.into(),
             brick,
             offset,
+            component,
+        })
+    }
+
+    pub fn new_square<S: Into<String>>(
+        name: S,
+        side: u32,
+        component: Component,
+    ) -> Result<BrickPattern, ValueError> {
+        if side < 1 {
+            return Err(ValueError::value_too_small(name, "side", side));
+        }
+
+        Ok(BrickPattern {
+            name: name.into(),
+            brick: Size::square(side),
+            offset: 0,
             component,
         })
     }
@@ -156,6 +183,39 @@ mod tests {
               RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,
               RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,
             WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE,
+
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+        ];
+
+        assert_eq!(texture.get_color_data(), &expected_colors);
+    }
+
+    #[test]
+    fn test_square_pattern() {
+        let size = Size::new(10, 15);
+        let aabb = AABB::with_size(size);
+        let mut texture = Texture::new(size, WHITE);
+        let layout = BrickPattern::new_square("test", 5, create_component()).unwrap();
+
+        layout.generate(&mut texture, Data::for_texture(aabb));
+
+        #[rustfmt::skip]
+        let expected_colors = vec![
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
+            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
 
             WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
             WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,

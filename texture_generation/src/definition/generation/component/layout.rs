@@ -107,8 +107,8 @@ impl LayoutDefinition {
                 component,
             } => {
                 let component = component.convert(factor)?;
-                let layout = LayoutComponent::new_square(name, convert(*side, factor), component)?;
-                Ok(layout)
+                let pattern = BrickPattern::new_square(name, convert(*side, factor), component)?;
+                Ok(LayoutComponent::BrickWall(pattern))
             }
         }
     }
@@ -159,11 +159,13 @@ mod tests {
     #[test]
     fn test_convert_square() {
         let definition = LayoutDefinition::Square {
-            name: "test".to_string(),
+            name: "square".to_string(),
             side: 10,
             component: ComponentDefinition::Mock(66),
         };
-        let component = LayoutComponent::new_square("test", 25, Component::Mock(66)).unwrap();
+        let component = LayoutComponent::BrickWall(
+            BrickPattern::new("square", Size::square(25), 0, Component::Mock(66)).unwrap(),
+        );
 
         assert_eq!(component, definition.convert(2.5).unwrap())
     }

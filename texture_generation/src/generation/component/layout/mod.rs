@@ -54,24 +54,6 @@ pub enum LayoutComponent {
         size: u32,
         component: Component,
     },
-    /// A grid of squares that have the same size.
-    ///
-    /// # Diagram
-    ///
-    /// ```svgbob
-    ///   +--*--*--*
-    ///   |  |  |  |
-    ///   *--*--*--*
-    ///   |  |  |  |
-    ///   *--*--*--*
-    ///   |  |  |  |
-    ///   *--*--*--*
-    /// ```
-    Square {
-        name: String,
-        side: u32,
-        component: Component,
-    },
 }
 
 impl LayoutComponent {
@@ -91,22 +73,6 @@ impl LayoutComponent {
         Ok(LayoutComponent::RepeatY { size, component })
     }
 
-    pub fn new_square<S: Into<String>>(
-        name: S,
-        side: u32,
-        component: Component,
-    ) -> Result<LayoutComponent, ValueError> {
-        if side < 1 {
-            return Err(ValueError::value_too_small(name, "side", side));
-        }
-
-        Ok(LayoutComponent::Square {
-            name: name.into(),
-            side,
-            component,
-        })
-    }
-
     /// Flips between horizontal & vertical mode.
     pub fn flip(&self) -> LayoutComponent {
         match self.clone() {
@@ -120,15 +86,6 @@ impl LayoutComponent {
             },
             LayoutComponent::RepeatY { size, component } => LayoutComponent::RepeatX {
                 size,
-                component: component.flip(),
-            },
-            LayoutComponent::Square {
-                name,
-                side,
-                component,
-            } => LayoutComponent::Square {
-                name,
-                side,
                 component: component.flip(),
             },
         }
@@ -188,28 +145,6 @@ impl LayoutComponent {
 
                     point.y += step;
                     i += 1;
-                }
-            }
-            LayoutComponent::Square {
-                side, component, ..
-            } => {
-                let mut point = inner.start();
-                let square_size = Size::square(*side);
-                let end = inner.end() - square_size;
-                let step = *side as i32;
-
-                while point.y <= end.y {
-                    point.x = inner.start().x;
-
-                    while point.x <= end.x {
-                        let aabb = AABB::new(point, square_size);
-
-                        component.generate(texture, &combined.next(aabb));
-
-                        point.x += step;
-                    }
-
-                    point.y += step;
                 }
             }
         }
@@ -290,39 +225,6 @@ mod tests {
         ];
 
         assert_eq!(textzre.get_color_data(), &expected_colors);
-    }
-
-    #[test]
-    fn test_square_layout() {
-        let size = Size::new(10, 15);
-        let aabb = AABB::with_size(size);
-        let mut texture = Texture::new(size, WHITE);
-        let layout = LayoutComponent::new_square("test", 5, create_component()).unwrap();
-
-        layout.generate(&mut texture, &Data::for_texture(aabb));
-
-        #[rustfmt::skip]
-        let expected_colors = vec![
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE,   RED,   RED,   RED, WHITE,   WHITE,   RED,   RED,   RED, WHITE,
-            WHITE, WHITE, WHITE, WHITE, WHITE,   WHITE, WHITE, WHITE, WHITE, WHITE,
-        ];
-
-        assert_eq!(texture.get_color_data(), &expected_colors);
     }
 
     pub fn create_component() -> Component {
