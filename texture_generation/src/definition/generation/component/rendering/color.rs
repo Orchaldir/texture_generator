@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub enum ColorSelectorDefinition {
     ConstantColor(String),
     Sequence(Vec<String>),
+    Random(Vec<String>),
 }
 
 impl ColorSelectorDefinition {
@@ -18,18 +19,25 @@ impl ColorSelectorDefinition {
                 Ok(ColorSelector::ConstantColor(color))
             }
             ColorSelectorDefinition::Sequence(colors) => {
-                let mut converted_colors = Vec::with_capacity(colors.len());
-
-                for color in colors {
-                    let color = Color::convert(&color)
-                        .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
-                    converted_colors.push(color);
-                }
-
-                Ok(ColorSelector::new_sequence(converted_colors))
+                Ok(ColorSelector::new_sequence(convert_colors(name, colors)?))
+            }
+            ColorSelectorDefinition::Random(colors) => {
+                Ok(ColorSelector::Random(convert_colors(name, colors)?))
             }
         }
     }
+}
+
+fn convert_colors(name: &str, colors: &[String]) -> Result<Vec<Color>, DefinitionError> {
+    let mut converted_colors = Vec::with_capacity(colors.len());
+
+    for color in colors {
+        let color =
+            Color::convert(&color).ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
+        converted_colors.push(color);
+    }
+
+    Ok(converted_colors)
 }
 
 #[cfg(test)]
@@ -50,6 +58,15 @@ mod tests {
         let definition =
             ColorSelectorDefinition::Sequence(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
         let selector = ColorSelector::new_sequence(vec![ORANGE, PINK]);
+
+        assert_eq!(selector, definition.convert("test").unwrap())
+    }
+
+    #[test]
+    fn test_convert_random() {
+        let definition =
+            ColorSelectorDefinition::Random(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
+        let selector = ColorSelector::Random(vec![ORANGE, PINK]);
 
         assert_eq!(selector, definition.convert("test").unwrap())
     }

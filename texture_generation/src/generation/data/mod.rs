@@ -1,5 +1,7 @@
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hasher;
 
 pub mod texture;
 
@@ -79,6 +81,7 @@ impl Data {
         Self::new(self.global_id, instance_id, self.aabb_data.next(inner))
     }
 
+    /// Combines the inner & outer [`AABB`]s into the inner one,
     pub fn combine(&self) -> Self {
         Self::new(self.global_id, self.instance_id, self.aabb_data.combine())
     }
@@ -105,6 +108,7 @@ impl Data {
         }
     }
 
+    /// Get the start point fo the combined [`AABB`]s.
     pub fn get_start(&self) -> Point {
         match &self.aabb_data {
             AabbData::OneAabb(aabb) => aabb.start(),
@@ -112,10 +116,19 @@ impl Data {
         }
     }
 
+    /// Get the end point fo the combined [`AABB`]s.
     pub fn get_end(&self) -> Point {
         match &self.aabb_data {
             AabbData::OneAabb(aabb) => aabb.end(),
             AabbData::TwoAabbs { outer, inner, .. } => outer.end().min(&inner.end()),
         }
+    }
+
+    /// Returns a reproducible random number of type usize based on `instance_id` & `index`.
+    pub fn get_instance_usize(&self, index: u32) -> usize {
+        let mut hasher = DefaultHasher::new();
+        hasher.write_usize(self.instance_id);
+        hasher.write_u32(index);
+        (hasher.finish() % (usize::max_value() as u64)) as usize
     }
 }

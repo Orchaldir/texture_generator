@@ -21,7 +21,7 @@ component:
             shape_factory:
               RoundedRectangle: 0.7
             color:
-              Sequence:
+              Random:
                 - "#4E0707"
                 - "#A91B0D"
                 - "#E3242B"

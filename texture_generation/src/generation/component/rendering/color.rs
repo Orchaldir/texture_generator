@@ -7,6 +7,8 @@ pub enum ColorSelector {
     ConstantColor(Color),
     /// A sequence of colors that repeats.
     Sequence(Vec<Color>),
+    /// Randomly select a color from a list with equal probability.
+    Random(Vec<Color>),
 }
 
 impl ColorSelector {
@@ -19,6 +21,10 @@ impl ColorSelector {
             ColorSelector::ConstantColor(color) => *color,
             ColorSelector::Sequence(colors) => {
                 let index = data.get_instance_id() % colors.len();
+                colors[index]
+            }
+            ColorSelector::Random(colors) => {
+                let index = data.get_instance_usize(0) % colors.len();
                 colors[index]
             }
         }
