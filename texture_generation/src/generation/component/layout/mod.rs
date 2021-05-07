@@ -11,6 +11,7 @@ use crate::utils::error::ValueError;
 pub mod brick;
 pub mod herringbone;
 pub mod random_ashlar;
+pub mod split;
 
 #[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
