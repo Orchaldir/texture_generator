@@ -46,18 +46,18 @@ impl SplitLayout {
 
     fn generate_horizontal(&self, texture: &mut Texture, mut data: Data) {
         let total_aabb = data.get_inner();
-        let total_side = total_aabb.size().width();
-        let other_side = total_aabb.size().height();
+        let total_width = total_aabb.size().width();
+        let height = total_aabb.size().height();
         let mut start = total_aabb.start();
 
         for (factor, component) in self.components.iter() {
-            let side = (total_side as f32 * *factor) as u32;
-            let size = Size::new(side, other_side);
+            let width = (total_width as f32 * *factor) as u32;
+            let size = Size::new(width, height);
             let aabb = AABB::new(start, size);
 
             component.generate(texture, &data.next(aabb));
 
-            start.x += side as i32;
+            start.x += width as i32;
         }
     }
 }
