@@ -1,4 +1,5 @@
 use crate::generation::data::Data;
+use crate::generation::random::get_random_instance_usize;
 use crate::math::color::Color;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -24,7 +25,7 @@ impl ColorSelector {
                 colors[index]
             }
             ColorSelector::Random(colors) => {
-                let index = data.get_instance_usize(0) % colors.len();
+                let index = get_random_instance_usize(data, colors.len(), 0);
                 colors[index]
             }
         }

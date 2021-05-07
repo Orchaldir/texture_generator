@@ -1,7 +1,5 @@
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::Hasher;
 
 pub mod texture;
 
@@ -122,13 +120,5 @@ impl Data {
             AabbData::OneAabb(aabb) => aabb.end(),
             AabbData::TwoAabbs { outer, inner, .. } => outer.end().min(&inner.end()),
         }
-    }
-
-    /// Returns a reproducible random number of type usize based on `instance_id` & `index`.
-    pub fn get_instance_usize(&self, index: u32) -> usize {
-        let mut hasher = DefaultHasher::new();
-        hasher.write_usize(self.instance_id);
-        hasher.write_u32(index);
-        (hasher.finish() % (usize::max_value() as u64)) as usize
     }
 }
