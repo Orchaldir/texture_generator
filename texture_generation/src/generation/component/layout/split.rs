@@ -41,6 +41,8 @@ impl SplitLayout {
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         if self.is_horizontal {
             self.generate_horizontal(texture, data)
+        } else {
+            self.generate_vertical(texture, data)
         }
     }
 
@@ -58,6 +60,23 @@ impl SplitLayout {
             component.generate(texture, &data.next(aabb));
 
             start.x += width as i32;
+        }
+    }
+
+    fn generate_vertical(&self, texture: &mut Texture, mut data: Data) {
+        let total_aabb = data.get_inner();
+        let width = total_aabb.size().width();
+        let total_height = total_aabb.size().height();
+        let mut start = total_aabb.start();
+
+        for (factor, component) in self.components.iter() {
+            let height = (total_height as f32 * *factor) as u32;
+            let size = Size::new(width, height);
+            let aabb = AABB::new(start, size);
+
+            component.generate(texture, &data.next(aabb));
+
+            start.y += height as i32;
         }
     }
 }
@@ -86,6 +105,31 @@ mod tests {
         let expected_colors = vec![
             RED, GREEN, GREEN, GREEN, BLUE, BLUE,
             RED, GREEN, GREEN, GREEN, BLUE, BLUE,
+        ];
+
+        assert_eq!(texture.get_color_data(), &expected_colors);
+    }
+
+    #[test]
+    fn test_split_y() {
+        let size = Size::new(2, 6);
+        let aabb = AABB::with_size(size);
+        let mut texture = Texture::new(size, WHITE);
+        let layout = SplitLayout::new(
+            false,
+            vec![create(3, RED), create(2, GREEN), create(1, BLUE)],
+        );
+
+        layout.generate(&mut texture, Data::for_texture(aabb));
+
+        #[rustfmt::skip]
+        let expected_colors = vec![
+            RED, RED,
+            RED, RED,
+            RED, RED,
+            GREEN, GREEN,
+            GREEN, GREEN,
+            BLUE, BLUE,
         ];
 
         assert_eq!(texture.get_color_data(), &expected_colors);
