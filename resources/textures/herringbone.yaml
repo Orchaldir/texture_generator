@@ -3,27 +3,27 @@ name: "herringbone black & gold"
 size: 1024
 background: "#FFFFFF"
 component:
-  type: Layout
-  Herringbone:
-    side: 64
-    multiplier: 3
-    horizontal_component:
-      type: Border
-      UniformBorder:
-        border: 2
-        component:
-          type: Rendering
-          FillArea:
-            name: "black"
-            color: "#000000"
-            depth: 25
-    vertical_component:
-      type: Border
-      UniformBorder:
-        border: 2
-        component:
-          type: Rendering
-          FillArea:
-            name: "gold"
-            color: "#FFD700"
-            depth: 25
+  Layout:
+    Herringbone:
+      side: 64
+      multiplier: 3
+      horizontal_component:
+        Border:
+          UniformBorder:
+            border: 2
+            component:
+              Rendering:
+                FillArea:
+                  name: "black"
+                  color: "#000000"
+                  depth: 25
+      vertical_component:
+        Border:
+          UniformBorder:
+            border: 2
+            component:
+              Rendering:
+                FillArea:
+                  name: "gold"
+                  color: "#FFD700"
+                  depth: 25

@@ -3,20 +3,20 @@ name: test
 size: 1024
 background: "#8B4513"
 component:
-  type: Layout
-  Square:
-    name: layout
-    side: 128
-    component:
-      type: Border
-      UniformBorder:
-        border: 4
-        component:
-          type: Rendering
-          Shape:
-            name: circle
-            shape_factory: Rectangle
-            color:
-              ConstantColor: "#808080"
-            depth:
-              Uniform: 25
+  Layout:
+    Square:
+      name: layout
+      side: 128
+      component:
+        Border:
+          UniformBorder:
+            border: 4
+            component:
+              Rendering:
+                Shape:
+                  name: circle
+                  shape_factory: Rectangle
+                  color:
+                    ConstantColor: "#808080"
+                  depth:
+                    Uniform: 25
