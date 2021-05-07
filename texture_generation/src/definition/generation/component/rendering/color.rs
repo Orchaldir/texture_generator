@@ -8,6 +8,7 @@ pub enum ColorSelectorDefinition {
     ConstantColor(String),
     Sequence(Vec<String>),
     Random(Vec<String>),
+    Probability(Vec<(usize, String)>),
 }
 
 impl ColorSelectorDefinition {
@@ -23,6 +24,22 @@ impl ColorSelectorDefinition {
             }
             ColorSelectorDefinition::Random(colors) => {
                 Ok(ColorSelector::Random(convert_colors(name, colors)?))
+            }
+            ColorSelectorDefinition::Probability(colors) => {
+                let mut converted_colors = Vec::with_capacity(colors.len());
+                let mut threshold = 0;
+
+                for (probability, color) in colors {
+                    threshold += *probability;
+                    let color = Color::convert(&color)
+                        .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
+                    converted_colors.push((threshold, color));
+                }
+
+                Ok(ColorSelector::Probability {
+                    colors: converted_colors,
+                    max_number: threshold,
+                })
             }
         }
     }
@@ -67,6 +84,20 @@ mod tests {
         let definition =
             ColorSelectorDefinition::Random(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
         let selector = ColorSelector::Random(vec![ORANGE, PINK]);
+
+        assert_eq!(selector, definition.convert("test").unwrap())
+    }
+
+    #[test]
+    fn test_convert_probability() {
+        let definition = ColorSelectorDefinition::Probability(vec![
+            (10, "#FFA500".to_string()),
+            (5, "#FF0080".to_string()),
+        ]);
+        let selector = ColorSelector::Probability {
+            colors: vec![(10, ORANGE), (15, PINK)],
+            max_number: 15,
+        };
 
         assert_eq!(selector, definition.convert("test").unwrap())
     }

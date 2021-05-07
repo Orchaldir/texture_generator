@@ -10,6 +10,11 @@ pub enum ColorSelector {
     Sequence(Vec<Color>),
     /// Randomly select a color from a list with equal probability.
     Random(Vec<Color>),
+    /// Randomly select a color from a list based on probability.
+    Probability {
+        colors: Vec<(usize, Color)>,
+        max_number: usize,
+    },
 }
 
 impl ColorSelector {
@@ -27,6 +32,17 @@ impl ColorSelector {
             ColorSelector::Random(colors) => {
                 let index = get_random_instance_usize(data, colors.len(), 0);
                 colors[index]
+            }
+            ColorSelector::Probability { colors, max_number } => {
+                let index = get_random_instance_usize(data, *max_number, 0);
+
+                for (threshold, color) in colors {
+                    if index < *threshold {
+                        return *color;
+                    }
+                }
+
+                colors[0].1
             }
         }
     }
