@@ -10,6 +10,7 @@ pub mod component;
 pub mod data;
 pub mod io;
 pub mod process;
+pub mod random;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TextureGenerator {

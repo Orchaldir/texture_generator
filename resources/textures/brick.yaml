@@ -21,11 +21,12 @@ component:
             shape_factory:
               RoundedRectangle: 0.7
             color:
-              Sequence:
-                - "#4E0707"
-                - "#A91B0D"
-                - "#E3242B"
-                - "#990F02"
+              Probability:
+                - [20,"#8B0000"]
+                - [1,"#4E0707"]
+                - [1,"#A91B0D"]
+                - [1,"#E3242B"]
+                - [1,"#990F02"]
             depth:
               Dome:
                 center: 25
