@@ -22,6 +22,21 @@ impl ColorSelector {
         ColorSelector::Sequence(colors)
     }
 
+    pub fn new_probability(colors: Vec<(usize, Color)>) -> ColorSelector {
+        let mut converted_colors = Vec::with_capacity(colors.len());
+        let mut threshold = 0;
+
+        for (probability, color) in colors {
+            threshold += probability;
+            converted_colors.push((threshold, color));
+        }
+
+        ColorSelector::Probability {
+            colors: converted_colors,
+            max_number: threshold,
+        }
+    }
+
     pub fn select(&self, data: &Data) -> Color {
         match self {
             ColorSelector::ConstantColor(color) => *color,

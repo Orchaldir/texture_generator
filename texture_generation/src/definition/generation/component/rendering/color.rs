@@ -27,19 +27,14 @@ impl ColorSelectorDefinition {
             }
             ColorSelectorDefinition::Probability(colors) => {
                 let mut converted_colors = Vec::with_capacity(colors.len());
-                let mut threshold = 0;
 
                 for (probability, color) in colors {
-                    threshold += *probability;
                     let color = Color::convert(&color)
                         .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
-                    converted_colors.push((threshold, color));
+                    converted_colors.push((*probability, color));
                 }
 
-                Ok(ColorSelector::Probability {
-                    colors: converted_colors,
-                    max_number: threshold,
-                })
+                Ok(ColorSelector::new_probability(converted_colors))
             }
         }
     }
