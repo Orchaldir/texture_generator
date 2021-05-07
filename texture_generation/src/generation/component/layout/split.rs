@@ -20,14 +20,16 @@ use crate::math::size::Size;
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct SplitLayout {
+    is_horizontal: bool,
     components: Vec<(f32, Component)>,
 }
 
 impl SplitLayout {
-    pub fn new(components: Vec<(u32, Component)>) -> SplitLayout {
+    pub fn new(is_horizontal: bool, components: Vec<(u32, Component)>) -> SplitLayout {
         let total = components.iter().map(|(value, _c)| *value).sum::<u32>() as f32;
 
         SplitLayout {
+            is_horizontal,
             components: components
                 .into_iter()
                 .map(|(v, c)| (v as f32 / total, c))
@@ -36,7 +38,13 @@ impl SplitLayout {
     }
 
     /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
-    pub fn generate(&self, texture: &mut Texture, mut data: Data) {
+    pub fn generate(&self, texture: &mut Texture, data: Data) {
+        if self.is_horizontal {
+            self.generate_horizontal(texture, data)
+        }
+    }
+
+    fn generate_horizontal(&self, texture: &mut Texture, mut data: Data) {
         let total_aabb = data.get_inner();
         let total_side = total_aabb.size().width();
         let other_side = total_aabb.size().height();
@@ -67,7 +75,10 @@ mod tests {
         let size = Size::new(6, 2);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = SplitLayout::new(vec![create(1, RED), create(3, GREEN), create(2, BLUE)]);
+        let layout = SplitLayout::new(
+            true,
+            vec![create(1, RED), create(3, GREEN), create(2, BLUE)],
+        );
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 
