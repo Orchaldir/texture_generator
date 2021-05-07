@@ -9,6 +9,8 @@ use crate::math::size::Size;
 ///
 /// # Diagram
 ///
+/// If `is_horizontal` is true:
+///
 /// ```svgbob
 ///   +--*-----*---*
 ///   |  |     |   |
@@ -17,6 +19,21 @@ use crate::math::size::Size;
 ///   |  |     |   |
 ///   |  |     |   |
 ///   *--*-----*---*
+/// ```
+///
+/// else:
+///
+/// ```svgbob
+///   +--------*
+///   |        |
+///   |        |
+///   *--------*
+///   |        |
+///   *--------*
+///   |        |
+///   |        |
+///   |        |
+///   *--------*
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct SplitLayout {
@@ -33,6 +50,18 @@ impl SplitLayout {
             components: components
                 .into_iter()
                 .map(|(v, c)| (v as f32 / total, c))
+                .collect(),
+        }
+    }
+
+    // Flips between horizontal & vertical mode.
+    pub fn flip(&self) -> SplitLayout {
+        SplitLayout {
+            is_horizontal: !self.is_horizontal,
+            components: self
+                .components
+                .iter()
+                .map(|(v, c)| (*v, c.flip()))
                 .collect(),
         }
     }

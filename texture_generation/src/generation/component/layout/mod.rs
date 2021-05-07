@@ -1,6 +1,7 @@
 use crate::generation::component::layout::brick::BrickPattern;
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
+use crate::generation::component::layout::split::SplitLayout;
 use crate::generation::component::Component;
 use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
@@ -55,6 +56,7 @@ pub enum LayoutComponent {
         size: u32,
         component: Component,
     },
+    Split(SplitLayout),
 }
 
 impl LayoutComponent {
@@ -76,19 +78,20 @@ impl LayoutComponent {
 
     /// Flips between horizontal & vertical mode.
     pub fn flip(&self) -> LayoutComponent {
-        match self.clone() {
+        match self {
             LayoutComponent::BrickWall(..) => self.clone(),
             LayoutComponent::Herringbone(..) => self.clone(),
             LayoutComponent::Mock(_id) => self.clone(),
             LayoutComponent::RandomAshlar(..) => self.clone(),
             LayoutComponent::RepeatX { size, component } => LayoutComponent::RepeatY {
-                size,
+                size: *size,
                 component: component.flip(),
             },
             LayoutComponent::RepeatY { size, component } => LayoutComponent::RepeatX {
-                size,
+                size: *size,
                 component: component.flip(),
             },
+            LayoutComponent::Split(split) => LayoutComponent::Split(split.flip()),
         }
     }
 
@@ -148,6 +151,7 @@ impl LayoutComponent {
                     i += 1;
                 }
             }
+            LayoutComponent::Split(split) => split.generate(texture, combined),
         }
     }
 }
