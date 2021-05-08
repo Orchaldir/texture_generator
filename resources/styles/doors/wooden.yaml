@@ -1,7 +1,7 @@
 ---
 name: "Wooden Door"
 tile_size: 512
-is_centered: false
+is_centered: true
 edge_style:
   Layout:
     thickness: 48
@@ -16,11 +16,20 @@ edge_style:
                   color: "#696969"
                   depth: 200
           - - 32
-            - Rendering:
-                FillArea:
-                  name: "Wood"
-                  color: "#B8860B"
-                  depth: 220
+            - Layout:
+                RepeatX:
+                  size: 32
+                  component:
+                    Rendering:
+                      Shape:
+                        name: "plank"
+                        shape_factory: Rectangle
+                        color:
+                          ConstantColor: "#432711"
+                        depth:
+                          Dome:
+                            center: 250
+                            border: 220
           - - 8
             - Rendering:
                 FillArea:
