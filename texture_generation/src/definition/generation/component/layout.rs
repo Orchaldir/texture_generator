@@ -3,6 +3,7 @@ use crate::definition::{convert, convert_size};
 use crate::generation::component::layout::brick::BrickPattern;
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
+use crate::generation::component::layout::repeat::RepeatLayout;
 use crate::generation::component::layout::split::SplitLayout;
 use crate::generation::component::layout::LayoutComponent;
 use crate::math::size::Size;
@@ -98,13 +99,13 @@ impl LayoutDefinition {
             }
             LayoutDefinition::RepeatX { size, component } => {
                 let component = component.convert(factor)?;
-                let layout = LayoutComponent::new_repeat_x(convert(*size, factor), component)?;
-                Ok(layout)
+                let layout = RepeatLayout::new(true, convert(*size, factor), component);
+                Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatY { size, component } => {
                 let component = component.convert(factor)?;
-                let layout = LayoutComponent::new_repeat_y(convert(*size, factor), component)?;
-                Ok(layout)
+                let layout = RepeatLayout::new(false, convert(*size, factor), component);
+                Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::Square {
                 name,
