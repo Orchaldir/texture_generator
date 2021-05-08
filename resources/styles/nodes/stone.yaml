@@ -1,0 +1,15 @@
+---
+name: "Stone Node"
+tile_size: 512
+size: 128
+component:
+  Shape:
+    name: "node"
+    shape_factory:
+      RoundedRectangle: 0.5
+    color:
+      ConstantColor: "#646464"
+    depth:
+      Dome:
+        center: 250
+        border: 220
