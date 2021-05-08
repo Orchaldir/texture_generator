@@ -51,3 +51,19 @@ impl LayoutComponent {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::generation::component::border::BorderComponent;
+    use crate::generation::component::rendering::RenderingComponent;
+    use crate::generation::component::Component;
+    use crate::math::color::RED;
+    use crate::math::shape_factory::ShapeFactory::Rectangle;
+
+    pub fn create_component() -> Component {
+        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
+        let rendering_component = Component::Rendering(Box::new(renderer));
+        let border = BorderComponent::new_uniform(1, rendering_component);
+        Component::Border(Box::new(border))
+    }
+}

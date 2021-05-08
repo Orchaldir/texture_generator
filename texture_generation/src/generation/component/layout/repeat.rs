@@ -115,11 +115,9 @@ impl RepeatLayout {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::component::border::BorderComponent;
-    use crate::generation::component::rendering::RenderingComponent;
+    use crate::generation::component::layout::tests::create_component;
     use crate::generation::data::texture::Texture;
     use crate::math::color::{RED, WHITE};
-    use crate::math::shape_factory::ShapeFactory::Rectangle;
     use crate::math::size::Size;
 
     #[test]
@@ -174,12 +172,5 @@ mod tests {
         ];
 
         assert_eq!(textzre.get_color_data(), &expected_colors);
-    }
-
-    pub fn create_component() -> Component {
-        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
-        let rendering_component = Component::Rendering(Box::new(renderer));
-        let border = BorderComponent::new_uniform(1, rendering_component);
-        Component::Border(Box::new(border))
     }
 }

@@ -160,7 +160,7 @@ mod tests {
             size: 20,
             component: ComponentDefinition::Mock(88),
         };
-        let component = LayoutComponent::new_repeat_x(30, Component::Mock(88)).unwrap();
+        let component = LayoutComponent::Repeat(RepeatLayout::new(true, 30, Component::Mock(88)));
 
         assert_eq!(component, definition.convert(1.5).unwrap())
     }
@@ -171,7 +171,7 @@ mod tests {
             size: 50,
             component: ComponentDefinition::Mock(11),
         };
-        let component = LayoutComponent::new_repeat_y(75, Component::Mock(11)).unwrap();
+        let component = LayoutComponent::Repeat(RepeatLayout::new(false, 75, Component::Mock(11)));
 
         assert_eq!(component, definition.convert(1.5).unwrap())
     }
