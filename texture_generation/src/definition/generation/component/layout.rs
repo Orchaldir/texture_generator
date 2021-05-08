@@ -3,6 +3,7 @@ use crate::definition::{convert, convert_size};
 use crate::generation::component::layout::brick::BrickPattern;
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
+use crate::generation::component::layout::split::SplitLayout;
 use crate::generation::component::layout::LayoutComponent;
 use crate::math::size::Size;
 use crate::utils::error::DefinitionError;
@@ -41,6 +42,10 @@ pub enum LayoutDefinition {
         name: String,
         side: u32,
         component: ComponentDefinition,
+    },
+    Split {
+        is_horizontal: bool,
+        components: Vec<(u32, ComponentDefinition)>,
     },
 }
 
@@ -110,6 +115,20 @@ impl LayoutDefinition {
                 let pattern = BrickPattern::new_square(name, convert(*side, factor), component)?;
                 Ok(LayoutComponent::BrickWall(pattern))
             }
+            LayoutDefinition::Split {
+                is_horizontal,
+                components,
+            } => {
+                let mut converted_components = Vec::with_capacity(components.len());
+
+                for (value, component) in components {
+                    let component = component.convert(factor)?;
+                    converted_components.push((*value, component));
+                }
+
+                let pattern = SplitLayout::new(*is_horizontal, converted_components);
+                Ok(LayoutComponent::Split(pattern))
+            }
         }
     }
 }
@@ -168,5 +187,22 @@ mod tests {
         );
 
         assert_eq!(component, definition.convert(2.5).unwrap())
+    }
+
+    #[test]
+    fn test_convert_split() {
+        let definition = LayoutDefinition::Split {
+            is_horizontal: true,
+            components: vec![
+                (4, ComponentDefinition::Mock(11)),
+                (6, ComponentDefinition::Mock(45)),
+            ],
+        };
+        let component = LayoutComponent::Split(SplitLayout::new(
+            true,
+            vec![(4, Component::Mock(11)), (6, Component::Mock(45))],
+        ));
+
+        assert_eq!(component, definition.convert(2.0).unwrap())
     }
 }

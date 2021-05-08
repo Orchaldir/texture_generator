@@ -8,15 +8,15 @@ edge_style:
       RepeatX:
         size: 96
         component:
-          type: Rendering
-          Shape:
-            name: "plank"
-            shape_factory:
-              RoundedRectangle: 0.5
-            color:
-              ConstantColor: "#432711"
-            depth:
-              InterpolateTwo:
-                center: 250
-                border: 220
+          Rendering:
+            Shape:
+              name: "plank"
+              shape_factory:
+                RoundedRectangle: 0.5
+              color:
+                ConstantColor: "#432711"
+              depth:
+                InterpolateTwo:
+                  center: 250
+                  border: 220
 corner_style: 1

@@ -33,6 +33,7 @@ enum Mode {
     Tile,
     Wall,
     Door,
+    Window,
 }
 
 impl Mode {
@@ -41,6 +42,7 @@ impl Mode {
             Mode::Tile => 0,
             Mode::Wall => 1,
             Mode::Door => 2,
+            Mode::Window => 3,
         }
     }
 }
@@ -107,7 +109,7 @@ impl TilemapEditor {
             selector,
             has_changed: true,
             mode: Mode::Tile,
-            resource_ids: vec![0; 3],
+            resource_ids: vec![0; 4],
         }
     }
 
@@ -193,6 +195,30 @@ impl TilemapEditor {
             }
         }
     }
+
+    fn paint_window(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
+        if let Some(side) = self
+            .selector
+            .get_side(&self.tilemap, point.0, point.1, index)
+        {
+            let old_border = self.tilemap.get_border(index, side);
+
+            let border = match button {
+                MouseButton::Left => Border::new_window(
+                    self.get_resource_id(Mode::Wall),
+                    self.get_resource_id(Mode::Window),
+                ),
+                _ => old_border.reduce(),
+            };
+
+            if old_border != border {
+                info!("Set {:?} border of tile {} to {:?}", side, index, border);
+
+                self.tilemap.set_border(index, side, border);
+                self.has_changed = true;
+            }
+        }
+    }
 }
 
 impl App for TilemapEditor {
@@ -230,6 +256,8 @@ impl App for TilemapEditor {
             self.mode = Mode::Wall;
         } else if key == KeyCode::F3 {
             self.mode = Mode::Door;
+        } else if key == KeyCode::F4 {
+            self.mode = Mode::Window;
         } else if key == KeyCode::S {
             save(&self.tilemap, "tilemap.tm").unwrap();
         } else if key == KeyCode::L {
@@ -252,6 +280,7 @@ impl App for TilemapEditor {
             Mode::Tile => self.paint_tile(button, index),
             Mode::Wall => self.paint_wall(button, point, index),
             Mode::Door => self.paint_door(button, point, index),
+            Mode::Window => self.paint_window(button, point, index),
         }
     }
 }
@@ -278,7 +307,7 @@ fn main() {
         args.tile_size, args.wall_height
     );
 
-    let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.5);
+    let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.75);
     let resources = definitions.convert(
         vec![
             PostProcess::AmbientOcclusion(ambient_occlusion),

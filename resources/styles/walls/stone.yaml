@@ -8,15 +8,15 @@ edge_style:
       RepeatX:
         size: 160
         component:
-          type: Rendering
-          Shape:
-            name: "block"
-            shape_factory:
-              RoundedRectangle: 0.5
-            color:
-              ConstantColor: "#646464"
-            depth:
-              InterpolateTwo:
-                center: 250
-                border: 220
+          Rendering:
+            Shape:
+              name: "block"
+              shape_factory:
+                RoundedRectangle: 0.5
+              color:
+                ConstantColor: "#646464"
+              depth:
+                InterpolateTwo:
+                  center: 250
+                  border: 220
 corner_style: 0

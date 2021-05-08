@@ -3,27 +3,27 @@ name: "random ashlar"
 size: 1024
 background: "#432711"
 component:
-  type: Layout
-  RandomAshlar:
-    cells_per_side: 16
-    min_size: 3
-    max_size: 6
-    component:
-      type: Border
-      UniformBorder:
-        border: 4
-        component:
-          type: Rendering
-          Shape:
-            name: grey stone
-            shape_factory: Rectangle
-            color:
-              Sequence:
-                - "#696969"
-                - "#808080"
-                - "#C0C0C0"
-                - "#A9A9A9"
-            depth:
-              InterpolateMany:
-                - [ 0.9,25 ]
-                - [ 1.0,10 ]
+  Layout:
+    RandomAshlar:
+      cells_per_side: 16
+      min_size: 3
+      max_size: 6
+      component:
+        Border:
+          UniformBorder:
+            border: 4
+            component:
+              Rendering:
+                Shape:
+                  name: grey stone
+                  shape_factory: Rectangle
+                  color:
+                    Sequence:
+                      - "#696969"
+                      - "#808080"
+                      - "#C0C0C0"
+                      - "#A9A9A9"
+                  depth:
+                    InterpolateMany:
+                      - [ 0.9,25 ]
+                      - [ 1.0,10 ]

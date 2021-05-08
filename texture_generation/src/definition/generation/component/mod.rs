@@ -10,7 +10,6 @@ pub mod layout;
 pub mod rendering;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type")]
 pub enum ComponentDefinition {
     Border(Box<BorderDefinition>),
     Layout(Box<LayoutDefinition>),
