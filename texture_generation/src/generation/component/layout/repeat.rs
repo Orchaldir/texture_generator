@@ -1,6 +1,7 @@
 use crate::generation::component::Component;
 use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
+use crate::generation::random::get_random_instance_u32;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
 
@@ -37,7 +38,8 @@ use crate::math::size::Size;
 #[derive(Clone, Debug, PartialEq)]
 pub struct RepeatLayout {
     is_horizontal: bool,
-    desired_step: u32,
+    min_step: u32,
+    max_step: u32,
     component: Component,
 }
 
@@ -45,7 +47,22 @@ impl RepeatLayout {
     pub fn new(is_horizontal: bool, desired_step: u32, component: Component) -> RepeatLayout {
         RepeatLayout {
             is_horizontal,
-            desired_step,
+            min_step: desired_step,
+            max_step: desired_step,
+            component,
+        }
+    }
+
+    pub fn new_random(
+        is_horizontal: bool,
+        min_step: u32,
+        max_step: u32,
+        component: Component,
+    ) -> RepeatLayout {
+        RepeatLayout {
+            is_horizontal,
+            min_step,
+            max_step,
             component,
         }
     }
@@ -54,7 +71,8 @@ impl RepeatLayout {
     pub fn flip(&self) -> RepeatLayout {
         RepeatLayout {
             is_horizontal: !self.is_horizontal,
-            desired_step: self.desired_step,
+            min_step: self.min_step,
+            max_step: self.max_step,
             component: self.component.flip(),
         }
     }
@@ -73,7 +91,7 @@ impl RepeatLayout {
         let height = inner.size().height();
         let mut point = inner.start();
 
-        for step in self.calculate_steps(inner.size().width()) {
+        for step in self.calculate_steps(&data, inner.size().width()) {
             let size = Size::new(step, height);
             let aabb = AABB::new(point, size);
 
@@ -88,7 +106,7 @@ impl RepeatLayout {
         let width = inner.size().width();
         let mut point = inner.start();
 
-        for step in self.calculate_steps(inner.size().height()) {
+        for step in self.calculate_steps(&data, inner.size().height()) {
             let size = Size::new(width, step);
             let aabb = AABB::new(point, size);
 
@@ -98,17 +116,42 @@ impl RepeatLayout {
         }
     }
 
-    fn calculate_steps(&self, distance: u32) -> Vec<u32> {
-        let factor = (distance % self.desired_step) as f32 / self.desired_step as f32;
-        let n = distance / self.desired_step;
-        let n = if factor < 0.5 { n } else { n + 1 };
-        let step = distance / n;
-        let n_big = distance - n * step;
+    fn calculate_steps(&self, data: &Data, distance: u32) -> Vec<u32> {
+        if self.min_step == self.max_step {
+            let desired_step = self.min_step;
+            let factor = (distance % desired_step) as f32 / desired_step as f32;
+            let n = distance / desired_step;
+            let n = if factor < 0.5 { n } else { n + 1 };
+            let step = distance / n;
+            let n_big = distance - n * step;
 
-        let mut big_steps = vec![step + 1; n_big as usize];
-        let mut steps = vec![step; (n - n_big) as usize];
-        big_steps.append(&mut steps);
-        big_steps
+            let mut big_steps = vec![step + 1; n_big as usize];
+            let mut steps = vec![step; (n - n_big) as usize];
+            big_steps.append(&mut steps);
+            big_steps
+        } else {
+            let step_diff = self.max_step - self.min_step;
+            let mut pos = 0;
+            let mut index = 0;
+            let mut steps = Vec::new();
+
+            while pos < distance {
+                let diff = distance - pos;
+
+                if diff < self.max_step {
+                    steps.push(diff);
+                    break;
+                }
+
+                let step = self.min_step + get_random_instance_u32(data, step_diff, index);
+                steps.push(step);
+
+                pos += step;
+                index += 1;
+            }
+
+            steps
+        }
     }
 }
 

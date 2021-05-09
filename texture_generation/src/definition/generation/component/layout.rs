@@ -31,6 +31,16 @@ pub enum LayoutDefinition {
         max_size: u32,
         component: ComponentDefinition,
     },
+    RandomRepeatX {
+        min_size: u32,
+        max_size: u32,
+        component: ComponentDefinition,
+    },
+    RandomRepeatY {
+        min_size: u32,
+        max_size: u32,
+        component: ComponentDefinition,
+    },
     RepeatX {
         size: u32,
         component: ComponentDefinition,
@@ -96,6 +106,34 @@ impl LayoutDefinition {
                     component.convert(factor)?,
                 );
                 Ok(LayoutComponent::RandomAshlar(pattern))
+            }
+            LayoutDefinition::RandomRepeatX {
+                min_size,
+                max_size,
+                component,
+            } => {
+                let component = component.convert(factor)?;
+                let layout = RepeatLayout::new_random(
+                    true,
+                    convert(*min_size, factor),
+                    convert(*max_size, factor),
+                    component,
+                );
+                Ok(LayoutComponent::Repeat(layout))
+            }
+            LayoutDefinition::RandomRepeatY {
+                min_size,
+                max_size,
+                component,
+            } => {
+                let component = component.convert(factor)?;
+                let layout = RepeatLayout::new_random(
+                    false,
+                    convert(*min_size, factor),
+                    convert(*max_size, factor),
+                    component,
+                );
+                Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatX { size, component } => {
                 let component = component.convert(factor)?;
