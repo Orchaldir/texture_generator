@@ -138,7 +138,17 @@ impl RepeatLayout {
             while pos < distance {
                 let diff = distance - pos;
 
-                if diff < self.max_step {
+                if diff < self.min_step {
+                    let n = steps.len() as u32;
+                    let bonus = diff / n;
+                    let n_big = diff - n * bonus;
+
+                    return steps
+                        .into_iter()
+                        .enumerate()
+                        .map(|(i, step)| step + if (i as u32) < n_big { bonus + 1 } else { bonus })
+                        .collect();
+                } else if diff < self.max_step {
                     steps.push(diff);
                     break;
                 }

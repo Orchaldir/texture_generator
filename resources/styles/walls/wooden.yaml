@@ -6,7 +6,7 @@ edge_style:
     thickness: 48
     layout:
       RandomRepeatX:
-        min_size: 80
+        min_size: 60
         max_size: 120
         component:
           Rendering:
