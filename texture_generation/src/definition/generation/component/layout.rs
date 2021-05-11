@@ -6,6 +6,7 @@ use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::layout::repeat::RepeatLayout;
 use crate::generation::component::layout::split::SplitLayout;
 use crate::generation::component::layout::LayoutComponent;
+use crate::generation::random::Random;
 use crate::math::size::Size;
 use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
@@ -118,6 +119,7 @@ impl LayoutDefinition {
                     convert(*min_size, factor),
                     convert(*max_size, factor),
                     component,
+                    Random::Hash,
                 );
                 Ok(LayoutComponent::Repeat(layout))
             }
@@ -132,6 +134,7 @@ impl LayoutDefinition {
                     convert(*min_size, factor),
                     convert(*max_size, factor),
                     component,
+                    Random::Hash,
                 );
                 Ok(LayoutComponent::Repeat(layout))
             }
