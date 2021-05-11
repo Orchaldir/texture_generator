@@ -55,6 +55,7 @@ fn convert_colors(name: &str, colors: &[String]) -> Result<Vec<Color>, Definitio
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generation::random::Random;
     use crate::math::color::{ORANGE, PINK};
 
     #[test]
@@ -90,6 +91,7 @@ mod tests {
             (5, "#FF0080".to_string()),
         ]);
         let selector = ColorSelector::Probability {
+            random: Random::Hash,
             colors: vec![(10, ORANGE), (15, PINK)],
             max_number: 15,
         };

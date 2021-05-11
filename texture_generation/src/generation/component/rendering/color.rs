@@ -1,5 +1,5 @@
 use crate::generation::data::Data;
-use crate::generation::random::get_random_instance_usize;
+use crate::generation::random::{get_random_instance_usize, Random};
 use crate::math::color::Color;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -12,6 +12,7 @@ pub enum ColorSelector {
     Random(Vec<Color>),
     /// Randomly select a color from a list based on probability.
     Probability {
+        random: Random,
         colors: Vec<(usize, Color)>,
         max_number: usize,
     },
@@ -23,6 +24,10 @@ impl ColorSelector {
     }
 
     pub fn new_probability(colors: Vec<(usize, Color)>) -> ColorSelector {
+        Self::probability_width_random(Random::Hash, colors)
+    }
+
+    pub fn probability_width_random(random: Random, colors: Vec<(usize, Color)>) -> ColorSelector {
         let mut converted_colors = Vec::with_capacity(colors.len());
         let mut threshold = 0;
 
@@ -32,6 +37,7 @@ impl ColorSelector {
         }
 
         ColorSelector::Probability {
+            random,
             colors: converted_colors,
             max_number: threshold,
         }
@@ -48,8 +54,12 @@ impl ColorSelector {
                 let index = get_random_instance_usize(data, colors.len(), 0);
                 colors[index]
             }
-            ColorSelector::Probability { colors, max_number } => {
-                let index = get_random_instance_usize(data, *max_number, 0);
+            ColorSelector::Probability {
+                random,
+                colors,
+                max_number,
+            } => {
+                let index = random.get_random_instance_usize(data, *max_number, 0);
 
                 for (threshold, color) in colors {
                     if index < *threshold {
@@ -87,5 +97,22 @@ mod tests {
         assert_eq!(selector.select(&Data::only_instance_id(3)), RED);
         assert_eq!(selector.select(&Data::only_instance_id(4)), GREEN);
         assert_eq!(selector.select(&Data::only_instance_id(5)), BLUE);
+    }
+
+    #[test]
+    fn test_probability() {
+        let random = Random::Mock(vec![3, 4, 5, 6, 7, 8, 9, 10, 11]);
+        let colors = vec![(1, RED), (2, GREEN), (3, BLUE)];
+        let selector = ColorSelector::probability_width_random(random, colors);
+
+        assert_eq!(selector.select(&Data::only_instance_id(0)), BLUE);
+        assert_eq!(selector.select(&Data::only_instance_id(1)), BLUE);
+        assert_eq!(selector.select(&Data::only_instance_id(2)), BLUE);
+        assert_eq!(selector.select(&Data::only_instance_id(3)), RED);
+        assert_eq!(selector.select(&Data::only_instance_id(4)), GREEN);
+        assert_eq!(selector.select(&Data::only_instance_id(5)), GREEN);
+        assert_eq!(selector.select(&Data::only_instance_id(6)), BLUE);
+        assert_eq!(selector.select(&Data::only_instance_id(7)), BLUE);
+        assert_eq!(selector.select(&Data::only_instance_id(8)), BLUE);
     }
 }
