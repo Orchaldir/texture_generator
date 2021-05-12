@@ -6,6 +6,8 @@ use crate::math::point::Point;
 use crate::math::size::Size;
 use std::ops::Sub;
 
+pub mod shrink;
+
 #[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
 /// Generates a border around an inner [`Component`].
