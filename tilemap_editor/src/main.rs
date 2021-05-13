@@ -216,6 +216,13 @@ impl TilemapEditor {
             }
         }
     }
+
+    fn reload_resources(&mut self) {
+        let (renderer, preview_renderer) = self.resource_info.load();
+        self.renderer = renderer;
+        self.preview_renderer = preview_renderer;
+        self.has_changed = true;
+    }
 }
 
 impl App for TilemapEditor {
@@ -255,6 +262,8 @@ impl App for TilemapEditor {
             self.mode = Mode::Door;
         } else if key == KeyCode::F4 {
             self.mode = Mode::Window;
+        } else if key == KeyCode::R {
+            self.reload_resources();
         } else if key == KeyCode::S {
             save(&self.tilemap, "tilemap.tm").unwrap();
         } else if key == KeyCode::L {
