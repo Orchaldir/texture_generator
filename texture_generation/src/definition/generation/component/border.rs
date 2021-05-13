@@ -63,7 +63,7 @@ mod tests {
         };
         let component = BorderComponent::new_uniform(20, Component::Mock(66));
 
-        assert_eq!(component, definition.convert(2.0).unwrap())
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 
     #[test]
@@ -77,6 +77,6 @@ mod tests {
         let shrink = ShrinkAxis::new_random(false, 10, 40, Component::Mock(42), Random::Hash);
         let component = BorderComponent::ShrinkAxis(shrink);
 
-        assert_eq!(component, definition.convert(2.0).unwrap())
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 }

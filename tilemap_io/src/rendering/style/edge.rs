@@ -51,6 +51,6 @@ mod tests {
         };
         let style = EdgeStyle::new_layout(30, LayoutComponent::Mock(42));
 
-        assert_eq!(style, definition.convert(3.0).unwrap())
+        assert_eq!(style, definition.convert("test", 3.0).unwrap())
     }
 }

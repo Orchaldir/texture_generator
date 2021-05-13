@@ -22,7 +22,7 @@ impl Color {
     ///
     /// ```
     /// use texture_generation::math::color::{Color, ORANGE};
-    /// assert_eq!(Color::convert("#FFA500"), Some(ORANGE));
+    /// assert_eq!(Color::convert("#FFA500").unwrap(), ORANGE);
     /// ```
     pub fn convert(hex_code: &str) -> Result<Color> {
         if !hex_code.starts_with('#') {
@@ -186,25 +186,25 @@ mod tests {
 
     #[test]
     fn test_from_empty_string() {
-        assert_eq!(Color::convert(""), None);
+        assert!(Color::convert("").is_err());
     }
 
     #[test]
     fn test_from_string_invalid_start() {
-        assert_eq!(Color::convert("FFA500"), None);
+        assert!(Color::convert("FFA500").is_err());
     }
 
     #[test]
     fn test_from_string_part() {
-        assert_eq!(Color::convert("#"), None);
-        assert_eq!(Color::convert("#FF"), None);
-        assert_eq!(Color::convert("#FFA5"), None);
-        assert_eq!(Color::convert("#FFA50"), None);
+        assert!(Color::convert("#").is_err());
+        assert!(Color::convert("#FF").is_err());
+        assert!(Color::convert("#FFA5").is_err());
+        assert!(Color::convert("#FFA50").is_err());
     }
 
     #[test]
     fn test_from_string_ignore_case() {
-        assert_eq!(Color::convert("#FFA500"), Some(ORANGE));
-        assert_eq!(Color::convert("#ffa500"), Some(ORANGE));
+        assert_eq!(Color::convert("#FFA500").unwrap(), ORANGE);
+        assert_eq!(Color::convert("#ffa500").unwrap(), ORANGE);
     }
 }

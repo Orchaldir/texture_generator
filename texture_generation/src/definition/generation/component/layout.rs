@@ -209,7 +209,7 @@ mod tests {
             BrickPattern::new("test", Size::new(40, 20), 20, Component::Mock(66)).unwrap(),
         );
 
-        assert_eq!(component, definition.convert(2.0).unwrap())
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 
     #[test]
@@ -220,7 +220,7 @@ mod tests {
         };
         let component = LayoutComponent::Repeat(RepeatLayout::new(true, 30, Component::Mock(88)));
 
-        assert_eq!(component, definition.convert(1.5).unwrap())
+        assert_eq!(component, definition.convert("test", 1.5).unwrap())
     }
 
     #[test]
@@ -231,7 +231,7 @@ mod tests {
         };
         let component = LayoutComponent::Repeat(RepeatLayout::new(false, 75, Component::Mock(11)));
 
-        assert_eq!(component, definition.convert(1.5).unwrap())
+        assert_eq!(component, definition.convert("test", 1.5).unwrap())
     }
 
     #[test]
@@ -245,7 +245,7 @@ mod tests {
             BrickPattern::new("square", Size::square(25), 0, Component::Mock(66)).unwrap(),
         );
 
-        assert_eq!(component, definition.convert(2.5).unwrap())
+        assert_eq!(component, definition.convert("test", 2.5).unwrap())
     }
 
     #[test]
@@ -262,6 +262,6 @@ mod tests {
             vec![(4, Component::Mock(11)), (6, Component::Mock(45))],
         ));
 
-        assert_eq!(component, definition.convert(2.0).unwrap())
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 }
