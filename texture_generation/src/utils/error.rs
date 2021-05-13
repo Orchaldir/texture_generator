@@ -1,10 +1,17 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-/// The different errors for reading & converting definitions.
-pub enum DefinitionError {
+/// The different errors for loading resources.
+pub enum ResourceError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
+    #[error(transparent)]
+    SerdeError(#[from] serde_yaml::Error),
+}
+
+#[derive(Error, Debug)]
+/// The different errors for reading & converting definitions.
+pub enum DefinitionError {
     #[error("Color {name:?} has an invalid value {value:?}")]
     InvalidColor { name: String, value: String },
     #[error("Component {component:?} has an invalid shape")]
@@ -12,8 +19,7 @@ pub enum DefinitionError {
         component: String,
         source: ShapeError,
     },
-    #[error(transparent)]
-    SerdeError(#[from] serde_yaml::Error),
+
     #[error(transparent)]
     ValueError(#[from] ValueError),
 }

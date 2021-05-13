@@ -2,7 +2,7 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::math::size::Size;
-use crate::utils::error::DefinitionError;
+use crate::utils::error::{DefinitionError, ResourceError};
 use crate::utils::resource::ResourceDefinition;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -34,7 +34,7 @@ impl TextureDefinition {
         }
     }
 
-    pub fn write(&self, path: &str) -> Result<(), DefinitionError> {
+    pub fn write(&self, path: &str) -> Result<(), ResourceError> {
         let mut file = File::create(path)?;
 
         let s = serde_yaml::to_string(self)?;
