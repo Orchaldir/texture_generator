@@ -56,7 +56,7 @@ impl ShrinkAxis {
     }
 
     /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
-    pub fn generate(&self, texture: &mut Texture, data: Data) {
+    pub fn generate(&self, texture: &mut Texture, data: &Data) {
         let border = self.calculate_random_border(&data);
         let old_start = data.get_inner().start();
         let old_size = data.get_inner().size();
@@ -82,10 +82,16 @@ impl ShrinkAxis {
             return self.min_border;
         }
 
-        self.min_border
-            + self
-                .random
-                .get_random_instance_u32(&data, self.border_diff, 0)
+        let diff = self
+            .random
+            .get_random_instance_u32(&data, self.border_diff, 42);
+
+        info!(
+            "calculate_random_border(): diff={} data={:?}",
+            diff,
+            data.get_instance_id()
+        );
+        self.min_border + diff
     }
 }
 
@@ -108,7 +114,7 @@ mod tests {
         let component = Component::Rendering(Box::new(renderer));
         let layout = ShrinkAxis::new_random(true, 1, 3, component, random);
 
-        layout.generate(&mut texture, Data::for_texture(aabb));
+        layout.generate(&mut texture, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
         let expected_colors = vec![
@@ -130,7 +136,7 @@ mod tests {
         let component = Component::Rendering(Box::new(renderer));
         let layout = ShrinkAxis::new_random(false, 1, 3, component, random);
 
-        layout.generate(&mut texture, Data::for_texture(aabb));
+        layout.generate(&mut texture, &Data::for_texture(aabb));
 
         #[rustfmt::skip]
         let expected_colors = vec![
