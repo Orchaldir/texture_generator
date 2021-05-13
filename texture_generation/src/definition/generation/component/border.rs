@@ -63,4 +63,18 @@ mod tests {
 
         assert_eq!(component, definition.convert(2.0).unwrap())
     }
+
+    #[test]
+    fn test_shrink_axis() {
+        let definition = BorderDefinition::ShrinkAxis {
+            is_horizontal: false,
+            min_border: 5,
+            max_border: 20,
+            component: ComponentDefinition::Mock(42),
+        };
+        let shrink = ShrinkAxis::new_random(false, 10, 40, Component::Mock(42), Random::Hash);
+        let component = BorderComponent::ShrinkAxis(shrink);
+
+        assert_eq!(component, definition.convert(2.0).unwrap())
+    }
 }
