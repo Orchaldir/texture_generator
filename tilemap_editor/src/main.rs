@@ -4,6 +4,7 @@ extern crate rendering;
 extern crate texture_generation;
 extern crate tilemap;
 
+use crate::resources::ResourceInfo;
 use rendering::implementation::window::GliumWindow;
 use rendering::interface::app::App;
 use rendering::interface::input::{get_number, KeyCode, MouseButton};
@@ -15,18 +16,15 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::generation::io::{save_color_image, save_depth_image};
-use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
-use texture_generation::generation::process::lighting::Lighting;
-use texture_generation::generation::process::PostProcess;
 use texture_generation::math::color::convert;
-use texture_generation::math::vector3::Vector3;
 use texture_generation::utils::logging::init_logging;
 use tilemap::tilemap::border::Border;
 use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
-use tilemap_io::rendering::resource::ResourceDefinitions;
 use tilemap_io::tilemap::{load, save};
+
+mod resources;
 
 #[derive(Copy, Clone)]
 enum Mode {
@@ -83,6 +81,7 @@ struct Cli {
 pub struct TilemapEditor {
     font_id: TextureId,
     preview_id: TextureId,
+    resource_info: ResourceInfo,
     renderer: tilemap::rendering::Renderer,
     preview_renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
@@ -93,16 +92,14 @@ pub struct TilemapEditor {
 }
 
 impl TilemapEditor {
-    pub fn new(
-        renderer: tilemap::rendering::Renderer,
-        preview_renderer: tilemap::rendering::Renderer,
-        tilemap: Tilemap2d,
-    ) -> TilemapEditor {
+    pub fn new(resource_info: ResourceInfo, tilemap: Tilemap2d) -> TilemapEditor {
+        let (renderer, preview_renderer) = resource_info.load();
         let selector = Selector::new(preview_renderer.get_tile_size());
 
         TilemapEditor {
             font_id: 0,
             preview_id: 0,
+            resource_info,
             renderer,
             preview_renderer,
             tilemap,
@@ -219,6 +216,13 @@ impl TilemapEditor {
             }
         }
     }
+
+    fn reload_resources(&mut self) {
+        let (renderer, preview_renderer) = self.resource_info.load();
+        self.renderer = renderer;
+        self.preview_renderer = preview_renderer;
+        self.has_changed = true;
+    }
 }
 
 impl App for TilemapEditor {
@@ -258,6 +262,8 @@ impl App for TilemapEditor {
             self.mode = Mode::Door;
         } else if key == KeyCode::F4 {
             self.mode = Mode::Window;
+        } else if key == KeyCode::R {
+            self.reload_resources();
         } else if key == KeyCode::S {
             save(&self.tilemap, "tilemap.tm").unwrap();
         } else if key == KeyCode::L {
@@ -289,46 +295,26 @@ fn main() {
     init_logging();
 
     let args = Cli::from_args();
-
-    info!("Load definitions from {:?}", args.resource_path);
-
-    let definitions = ResourceDefinitions::load(&args.resource_path);
-
+    let resource_info = ResourceInfo::new(
+        args.resource_path,
+        args.preview_size,
+        args.tile_size,
+        args.wall_height,
+    );
     let tilemap2d = load(&args.tilemap_path).unwrap();
 
     info!(
-        "Load tilemap: width={} height={}",
+        "Loaded tilemap: width={} height={}",
         tilemap2d.get_size().width(),
         tilemap2d.get_size().height()
     );
-
-    info!(
-        "Init renderer: tile_size={} wall_height={}",
-        args.tile_size, args.wall_height
-    );
-
-    let ambient_occlusion = AmbientOcclusion::new(3, -150.0, -0.75);
-    let resources = definitions.convert(
-        vec![
-            PostProcess::AmbientOcclusion(ambient_occlusion),
-            PostProcess::Lighting(Lighting::new(Vector3::new(1.0, 0.0, 2.0), 10, 32)),
-        ],
-        args.tile_size,
-    );
-    let renderer = tilemap::rendering::Renderer::new(args.tile_size, args.wall_height, resources);
-
-    info!("Init preview renderer: tile_size={}", args.preview_size);
-
-    let preview_resources = definitions.convert(Vec::default(), args.preview_size);
-    let preview_renderer =
-        tilemap::rendering::Renderer::new(args.preview_size, args.wall_height, preview_resources);
 
     let window_size = (
         args.width * args.preview_size,
         args.height * args.preview_size,
     );
     let mut window = GliumWindow::new("Tilemap Editor", window_size);
-    let editor = TilemapEditor::new(renderer, preview_renderer, tilemap2d);
+    let editor = TilemapEditor::new(resource_info, tilemap2d);
     let app = Rc::new(RefCell::new(editor));
 
     window.run(app);
