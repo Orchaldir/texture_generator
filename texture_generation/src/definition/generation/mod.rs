@@ -51,10 +51,13 @@ impl ResourceDefinition for TextureDefinition {
 
     fn convert(&self, size: u32) -> Result<TextureGenerator> {
         let factor = size as f32 / self.size as f32;
-        let component = self.component.convert(&self.name, factor).context(format!(
-            "Failed to convert 'component' of the texture '{}'",
-            self.name
-        ))?;
+        let component = self
+            .component
+            .convert(&"component", factor)
+            .context(format!(
+                "Failed to convert 'component' of the texture '{}'",
+                self.name
+            ))?;
         let color = Color::convert(&self.background).context(format!(
             "Failed to convert 'background' of the texture '{}'",
             self.name

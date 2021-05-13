@@ -31,7 +31,7 @@ impl RenderingDefinition {
         match self {
             RenderingDefinition::FillArea { name, color, depth } => {
                 let color = Color::convert(&color).context(format!(
-                    "Failed to convert 'color' of '{}.FillArea''",
+                    "Failed to convert 'color' of '{}.FillArea'",
                     parent
                 ))?;
                 Ok(RenderingComponent::new_fill_area(name, color, *depth))
@@ -44,14 +44,14 @@ impl RenderingDefinition {
             } => {
                 let shape_factory = shape_factory
                     .convert()
-                    .context(format!("Failed to convert 'shape' of '{}.Shape''", parent))?;
+                    .context(format!("Failed to convert 'shape' of '{}.Shape'", parent))?;
                 let color = color
                     .convert()
-                    .context(format!("Failed to convert 'color' of '{}.Shape''", parent))?;
+                    .context(format!("Failed to convert 'color' of '{}.Shape'", parent))?;
                 let depth: DepthCalculator = depth
                     .clone()
                     .try_into()
-                    .context(format!("Failed to convert 'depth' of '{}.Shape''", parent))?;
+                    .context(format!("Failed to convert 'depth' of '{}.Shape'", parent))?;
 
                 Ok(RenderingComponent::new_shape_with_depth(
                     name,
