@@ -1,3 +1,4 @@
+use crate::generation::component::border::shrink::ShrinkAxis;
 use crate::generation::component::Component;
 use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
@@ -5,6 +6,8 @@ use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
 use std::ops::Sub;
+
+pub mod shrink;
 
 #[svgbobdoc::transform]
 #[derive(Clone, Debug, PartialEq)]
@@ -25,7 +28,11 @@ pub enum BorderComponent {
     ///   |        |
     ///   *--*--*--*
     /// ```
-    UniformBorder { border: u32, component: Component },
+    UniformBorder {
+        border: u32,
+        component: Component,
+    },
+    ShrinkAxis(ShrinkAxis),
 }
 
 impl BorderComponent {
@@ -47,6 +54,7 @@ impl BorderComponent {
                     component: component.flip(),
                 }
             }
+            BorderComponent::ShrinkAxis(border) => BorderComponent::ShrinkAxis(border.flip()),
         }
     }
 
@@ -71,6 +79,7 @@ impl BorderComponent {
                     BorderComponent::calculate_aabb(data.get_inner(), size, *border, min_side);
                 component.generate(texture, &data.transform(aabb));
             }
+            BorderComponent::ShrinkAxis(border) => border.generate(texture, data),
         }
     }
 

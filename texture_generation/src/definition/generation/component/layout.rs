@@ -3,8 +3,10 @@ use crate::definition::{convert, convert_size};
 use crate::generation::component::layout::brick::BrickPattern;
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
+use crate::generation::component::layout::repeat::RepeatLayout;
 use crate::generation::component::layout::split::SplitLayout;
 use crate::generation::component::layout::LayoutComponent;
+use crate::generation::random::Random;
 use crate::math::size::Size;
 use crate::utils::error::DefinitionError;
 use serde::{Deserialize, Serialize};
@@ -26,6 +28,16 @@ pub enum LayoutDefinition {
     Mock(u32),
     RandomAshlar {
         cells_per_side: u32,
+        min_size: u32,
+        max_size: u32,
+        component: ComponentDefinition,
+    },
+    RandomRepeatX {
+        min_size: u32,
+        max_size: u32,
+        component: ComponentDefinition,
+    },
+    RandomRepeatY {
         min_size: u32,
         max_size: u32,
         component: ComponentDefinition,
@@ -96,15 +108,45 @@ impl LayoutDefinition {
                 );
                 Ok(LayoutComponent::RandomAshlar(pattern))
             }
+            LayoutDefinition::RandomRepeatX {
+                min_size,
+                max_size,
+                component,
+            } => {
+                let component = component.convert(factor)?;
+                let layout = RepeatLayout::new_random(
+                    true,
+                    convert(*min_size, factor),
+                    convert(*max_size, factor),
+                    component,
+                    Random::Hash,
+                );
+                Ok(LayoutComponent::Repeat(layout))
+            }
+            LayoutDefinition::RandomRepeatY {
+                min_size,
+                max_size,
+                component,
+            } => {
+                let component = component.convert(factor)?;
+                let layout = RepeatLayout::new_random(
+                    false,
+                    convert(*min_size, factor),
+                    convert(*max_size, factor),
+                    component,
+                    Random::Hash,
+                );
+                Ok(LayoutComponent::Repeat(layout))
+            }
             LayoutDefinition::RepeatX { size, component } => {
                 let component = component.convert(factor)?;
-                let layout = LayoutComponent::new_repeat_x(convert(*size, factor), component)?;
-                Ok(layout)
+                let layout = RepeatLayout::new(true, convert(*size, factor), component);
+                Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatY { size, component } => {
                 let component = component.convert(factor)?;
-                let layout = LayoutComponent::new_repeat_y(convert(*size, factor), component)?;
-                Ok(layout)
+                let layout = RepeatLayout::new(false, convert(*size, factor), component);
+                Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::Square {
                 name,
@@ -159,7 +201,7 @@ mod tests {
             size: 20,
             component: ComponentDefinition::Mock(88),
         };
-        let component = LayoutComponent::new_repeat_x(30, Component::Mock(88)).unwrap();
+        let component = LayoutComponent::Repeat(RepeatLayout::new(true, 30, Component::Mock(88)));
 
         assert_eq!(component, definition.convert(1.5).unwrap())
     }
@@ -170,7 +212,7 @@ mod tests {
             size: 50,
             component: ComponentDefinition::Mock(11),
         };
-        let component = LayoutComponent::new_repeat_y(75, Component::Mock(11)).unwrap();
+        let component = LayoutComponent::Repeat(RepeatLayout::new(false, 75, Component::Mock(11)));
 
         assert_eq!(component, definition.convert(1.5).unwrap())
     }

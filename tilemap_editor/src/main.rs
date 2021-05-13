@@ -52,7 +52,7 @@ impl Mode {
 /// The arguments of the application.
 struct Cli {
     /// The path of the resource definitions.
-    #[structopt(parse(from_os_str), default_value = "resources/")]
+    #[structopt(parse(from_os_str), default_value = "resources")]
     resource_path: PathBuf,
 
     /// The path of the resource definitions.

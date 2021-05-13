@@ -1,0 +1,32 @@
+---
+name: "Stone Wall - Random"
+tile_size: 512
+edge_style:
+  Layout:
+    thickness: 80
+    layout:
+      RandomRepeatX:
+        min_size: 60
+        max_size: 100
+        component:
+          Border:
+            ShrinkAxis:
+              is_horizontal: false
+              min_border: 0
+              max_border: 10
+              component:
+                Rendering:
+                  Shape:
+                    name: "block"
+                    shape_factory:
+                      RoundedRectangle: 0.5
+                    color:
+                      Probability:
+                        - [10,"#696969"]
+                        - [10,"#808080"]
+                        - [1,"#A9A9A9"]
+                    depth:
+                      InterpolateTwo:
+                        center: 250
+                        border: 220
+corner_style: 1

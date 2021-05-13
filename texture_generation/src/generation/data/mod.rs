@@ -3,7 +3,7 @@ use crate::math::point::Point;
 
 pub mod texture;
 
-enum AabbData {
+pub enum AabbData {
     OneAabb(AABB),
     TwoAabbs { outer: AABB, inner: AABB },
 }
@@ -54,7 +54,7 @@ impl Data {
         Self::new(0, instance_id, AabbData::OneAabb(AABB::default()))
     }
 
-    fn new(global_id: usize, instance_id: usize, aabb_data: AabbData) -> Self {
+    pub fn new(global_id: usize, instance_id: usize, aabb_data: AabbData) -> Self {
         Self {
             global_id,
             instance_id,

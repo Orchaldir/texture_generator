@@ -5,8 +5,9 @@ edge_style:
   Layout:
     thickness: 48
     layout:
-      RepeatX:
-        size: 96
+      RandomRepeatX:
+        min_size: 60
+        max_size: 120
         component:
           Rendering:
             Shape:
@@ -19,4 +20,4 @@ edge_style:
                 InterpolateTwo:
                   center: 250
                   border: 220
-corner_style: 1
+corner_style: 2
