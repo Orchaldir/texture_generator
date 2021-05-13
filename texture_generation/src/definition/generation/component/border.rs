@@ -3,7 +3,7 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::component::border::shrink::ShrinkAxis;
 use crate::generation::component::border::BorderComponent;
 use crate::generation::random::Random;
-use crate::utils::error::DefinitionError;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -21,10 +21,11 @@ pub enum BorderDefinition {
 }
 
 impl BorderDefinition {
-    pub fn convert(&self, factor: f32) -> Result<BorderComponent, DefinitionError> {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<BorderComponent> {
         match self {
             BorderDefinition::UniformBorder { border, component } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.UniformBorder.component", parent), factor)?;
                 let border = BorderComponent::new_uniform(convert(*border, factor), component);
                 Ok(border)
             }
@@ -34,7 +35,8 @@ impl BorderDefinition {
                 max_border,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.ShrinkAxis.component", parent), factor)?;
                 let border = ShrinkAxis::new_random(
                     *is_horizontal,
                     convert(*min_border, factor),

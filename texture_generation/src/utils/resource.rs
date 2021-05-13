@@ -1,9 +1,9 @@
-use crate::utils::error::DefinitionError;
+use anyhow::Result;
 
 pub trait ResourceDefinition {
     type R: Default;
 
-    fn convert(&self, size: u32) -> Result<Self::R, DefinitionError>;
+    fn convert(&self, size: u32) -> Result<Self::R>;
 }
 
 pub struct ResourceManager<T> {

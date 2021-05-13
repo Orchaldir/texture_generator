@@ -1,8 +1,8 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use texture_generation::definition::convert;
 use texture_generation::definition::generation::component::layout::LayoutDefinition;
 use texture_generation::definition::generation::component::rendering::RenderingDefinition;
-use texture_generation::utils::error::DefinitionError;
 use tilemap::rendering::style::edge::EdgeStyle;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -19,20 +19,21 @@ pub enum EdgeDefinition {
 }
 
 impl EdgeDefinition {
-    pub fn convert(&self, factor: f32) -> Result<EdgeStyle, DefinitionError> {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<EdgeStyle> {
         match self {
-            EdgeDefinition::Layout { thickness, layout } => Ok(EdgeStyle::new_layout(
-                convert(*thickness, factor),
-                layout.convert(factor)?,
-            )),
+            EdgeDefinition::Layout { thickness, layout } => {
+                let layout = layout.convert(&format!("{}.Layout.layout", parent), factor)?;
+                Ok(EdgeStyle::new_layout(convert(*thickness, factor), layout))
+            }
             EdgeDefinition::Mock(value) => Ok(EdgeStyle::Mock(convert(*value, factor))),
             EdgeDefinition::Solid {
                 thickness,
                 component,
-            } => Ok(EdgeStyle::new_solid(
-                convert(*thickness, factor),
-                component.convert(factor)?,
-            )),
+            } => {
+                let component =
+                    component.convert(&format!("{}.Solid.component", parent), factor)?;
+                Ok(EdgeStyle::new_solid(convert(*thickness, factor), component))
+            }
         }
     }
 }

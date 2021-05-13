@@ -8,7 +8,7 @@ use crate::generation::component::layout::split::SplitLayout;
 use crate::generation::component::layout::LayoutComponent;
 use crate::generation::random::Random;
 use crate::math::size::Size;
-use crate::utils::error::DefinitionError;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -62,7 +62,7 @@ pub enum LayoutDefinition {
 }
 
 impl LayoutDefinition {
-    pub fn convert(&self, factor: f32) -> Result<LayoutComponent, DefinitionError> {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<LayoutComponent> {
         match self {
             LayoutDefinition::BrickWall {
                 name,
@@ -70,7 +70,8 @@ impl LayoutDefinition {
                 offset,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.BrickWall.component", parent), factor)?;
                 let pattern = BrickPattern::new(
                     name,
                     convert_size(brick, factor),
@@ -85,11 +86,19 @@ impl LayoutDefinition {
                 horizontal_component,
                 vertical_component,
             } => {
+                let horizontal_component = horizontal_component.convert(
+                    &format!("{}.Herringbone.horizontal_component", parent),
+                    factor,
+                )?;
+                let vertical_component = vertical_component.convert(
+                    &format!("{}.Herringbone.vertical_component", parent),
+                    factor,
+                )?;
                 let pattern = HerringbonePattern::new(
                     convert(*side, factor),
                     *multiplier,
-                    horizontal_component.convert(factor)?,
-                    vertical_component.convert(factor)?,
+                    horizontal_component,
+                    vertical_component,
                 );
                 Ok(LayoutComponent::Herringbone(pattern))
             }
@@ -104,7 +113,7 @@ impl LayoutDefinition {
                     *cells_per_side,
                     *min_size,
                     *max_size,
-                    component.convert(factor)?,
+                    component.convert(&format!("{}.RandomAshlar.component", parent), factor)?,
                 );
                 Ok(LayoutComponent::RandomAshlar(pattern))
             }
@@ -113,7 +122,8 @@ impl LayoutDefinition {
                 max_size,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.RandomRepeatX.component", parent), factor)?;
                 let layout = RepeatLayout::new_random(
                     true,
                     convert(*min_size, factor),
@@ -128,7 +138,8 @@ impl LayoutDefinition {
                 max_size,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.RandomRepeatY.component", parent), factor)?;
                 let layout = RepeatLayout::new_random(
                     false,
                     convert(*min_size, factor),
@@ -139,12 +150,14 @@ impl LayoutDefinition {
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatX { size, component } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.RepeatX.component", parent), factor)?;
                 let layout = RepeatLayout::new(true, convert(*size, factor), component);
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatY { size, component } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.RepeatY.component", parent), factor)?;
                 let layout = RepeatLayout::new(false, convert(*size, factor), component);
                 Ok(LayoutComponent::Repeat(layout))
             }
@@ -153,7 +166,8 @@ impl LayoutDefinition {
                 side,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.Square.component", parent), factor)?;
                 let pattern = BrickPattern::new_square(name, convert(*side, factor), component)?;
                 Ok(LayoutComponent::BrickWall(pattern))
             }
@@ -163,8 +177,11 @@ impl LayoutDefinition {
             } => {
                 let mut converted_components = Vec::with_capacity(components.len());
 
-                for (value, component) in components {
-                    let component = component.convert(factor)?;
+                for (i, (value, component)) in components.iter().enumerate() {
+                    let component = component.convert(
+                        &format!("{}.Split.component.{}|{}.", parent, i + 1, components.len()),
+                        factor,
+                    )?;
                     converted_components.push((*value, component));
                 }
 

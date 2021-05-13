@@ -1,7 +1,7 @@
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use texture_generation::definition::convert;
 use texture_generation::definition::generation::component::rendering::RenderingDefinition;
-use texture_generation::utils::error::DefinitionError;
 use texture_generation::utils::resource::ResourceDefinition;
 use tilemap::rendering::style::node::NodeStyle;
 
@@ -16,10 +16,16 @@ pub struct NodeDefinition {
 impl ResourceDefinition for NodeDefinition {
     type R = NodeStyle;
 
-    fn convert(&self, size: u32) -> Result<NodeStyle, DefinitionError> {
+    fn convert(&self, size: u32) -> Result<NodeStyle> {
         let factor = size as f32 / self.tile_size as f32;
         let size = convert(self.size, factor);
-        let component = self.component.convert(factor)?;
+        let component = self
+            .component
+            .convert("component", factor)
+            .context(format!(
+                "Failed to convert 'component' of the node '{}'",
+                self.name
+            ))?;
         Ok(NodeStyle::new(size, component))
     }
 }

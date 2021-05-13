@@ -1,7 +1,7 @@
 use crate::definition::generation::component::border::BorderDefinition;
 use crate::definition::generation::component::rendering::RenderingDefinition;
 use crate::generation::component::Component;
-use crate::utils::error::DefinitionError;
+use anyhow::Result;
 use layout::LayoutDefinition;
 use serde::{Deserialize, Serialize};
 
@@ -18,18 +18,18 @@ pub enum ComponentDefinition {
 }
 
 impl ComponentDefinition {
-    pub fn convert(&self, factor: f32) -> Result<Component, DefinitionError> {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<Component> {
         match self {
-            ComponentDefinition::Border(definition) => {
-                Ok(Component::Border(Box::new(definition.convert(factor)?)))
-            }
-            ComponentDefinition::Layout(definition) => {
-                Ok(Component::Layout(Box::new(definition.convert(factor)?)))
-            }
+            ComponentDefinition::Border(definition) => Ok(Component::Border(Box::new(
+                definition.convert(parent, factor)?,
+            ))),
+            ComponentDefinition::Layout(definition) => Ok(Component::Layout(Box::new(
+                definition.convert(parent, factor)?,
+            ))),
             ComponentDefinition::Mock(id) => Ok(Component::Mock(*id)),
-            ComponentDefinition::Rendering(definition) => {
-                Ok(Component::Rendering(Box::new(definition.convert(factor)?)))
-            }
+            ComponentDefinition::Rendering(definition) => Ok(Component::Rendering(Box::new(
+                definition.convert(parent, factor)?,
+            ))),
         }
     }
 }

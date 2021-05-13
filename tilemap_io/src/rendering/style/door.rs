@@ -1,6 +1,6 @@
 use crate::rendering::style::edge::EdgeDefinition;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
-use texture_generation::utils::error::DefinitionError;
 use texture_generation::utils::resource::ResourceDefinition;
 use tilemap::rendering::style::door::DoorStyle;
 
@@ -15,9 +15,15 @@ pub struct DoorDefinition {
 impl ResourceDefinition for DoorDefinition {
     type R = DoorStyle;
 
-    fn convert(&self, size: u32) -> Result<DoorStyle, DefinitionError> {
+    fn convert(&self, size: u32) -> Result<DoorStyle> {
         let factor = size as f32 / self.tile_size as f32;
-        let edge_style = self.edge_style.convert(factor)?;
+        let edge_style = self
+            .edge_style
+            .convert("edge_style", factor)
+            .context(format!(
+                "Failed to convert 'edge_style' of the door '{}'",
+                self.name
+            ))?;
         Ok(DoorStyle::new(
             self.name.clone(),
             edge_style,

@@ -1,9 +1,10 @@
 use crate::definition::generation::component::rendering::color::ColorSelectorDefinition;
 use crate::definition::generation::component::rendering::depth::DepthDefinition;
 use crate::definition::math::shape_factor::ShapeFactorDefinition;
+use crate::generation::component::rendering::depth::DepthCalculator;
 use crate::generation::component::rendering::RenderingComponent;
 use crate::math::color::Color;
-use crate::utils::error::DefinitionError;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
 
@@ -26,11 +27,13 @@ pub enum RenderingDefinition {
 }
 
 impl RenderingDefinition {
-    pub fn convert(&self, _factor: f32) -> Result<RenderingComponent, DefinitionError> {
+    pub fn convert(&self, parent: &str, _factor: f32) -> Result<RenderingComponent> {
         match self {
             RenderingDefinition::FillArea { name, color, depth } => {
-                let color = Color::convert(&color)
-                    .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
+                let color = Color::convert(&color).context(format!(
+                    "Failed to convert 'color' of '{}.FillArea''",
+                    parent
+                ))?;
                 Ok(RenderingComponent::new_fill_area(name, color, *depth))
             }
             RenderingDefinition::Shape {
@@ -38,15 +41,25 @@ impl RenderingDefinition {
                 shape_factory,
                 color,
                 depth,
-            } => match shape_factory.convert() {
-                Ok(shape) => Ok(RenderingComponent::new_shape_with_depth(
+            } => {
+                let shape_factory = shape_factory
+                    .convert()
+                    .context(format!("Failed to convert 'shape' of '{}.Shape''", parent))?;
+                let color = color
+                    .convert()
+                    .context(format!("Failed to convert 'color' of '{}.Shape''", parent))?;
+                let depth: DepthCalculator = depth
+                    .clone()
+                    .try_into()
+                    .context(format!("Failed to convert 'depth' of '{}.Shape''", parent))?;
+
+                Ok(RenderingComponent::new_shape_with_depth(
                     name,
-                    shape,
-                    color.convert(name)?,
-                    depth.clone().try_into()?,
-                )),
-                Err(error) => Err(DefinitionError::invalid_shape(name, error)),
-            },
+                    shape_factory,
+                    color,
+                    depth,
+                ))
+            }
         }
     }
 }
@@ -68,7 +81,7 @@ mod tests {
         };
         let component = RenderingComponent::new_fill_area("fill", ORANGE, 111);
 
-        assert_eq!(component, definition.convert(3.0).unwrap())
+        assert_eq!(component, definition.convert("test", 3.0).unwrap())
     }
 
     #[test]
@@ -89,7 +102,7 @@ mod tests {
             DepthCalculator::Uniform(111),
         );
 
-        assert_eq!(component, definition.convert(3.0).unwrap())
+        assert_eq!(component, definition.convert("test", 3.0).unwrap())
     }
 
     #[test]
@@ -104,6 +117,6 @@ mod tests {
             depth,
         };
 
-        assert!(definition.convert(2.0).is_err());
+        assert!(definition.convert("test", 2.0).is_err());
     }
 }

@@ -1,3 +1,4 @@
+use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul, MulAssign};
 
@@ -23,16 +24,27 @@ impl Color {
     /// use texture_generation::math::color::{Color, ORANGE};
     /// assert_eq!(Color::convert("#FFA500"), Some(ORANGE));
     /// ```
-    pub fn convert(hex_code: &str) -> Option<Color> {
-        if !hex_code.starts_with('#') || hex_code.len() < 7 {
-            return None;
+    pub fn convert(hex_code: &str) -> Result<Color> {
+        if !hex_code.starts_with('#') {
+            bail!("'{}' needs to start with # to be a color", hex_code);
+        } else if hex_code.len() != 7 {
+            bail!("'{}' needs to be 7 characters long to be a color", hex_code);
         }
 
-        let r: u8 = u8::from_str_radix(&hex_code[1..3], 16).ok()?;
-        let g: u8 = u8::from_str_radix(&hex_code[3..5], 16).ok()?;
-        let b: u8 = u8::from_str_radix(&hex_code[5..7], 16).ok()?;
+        let r: u8 = u8::from_str_radix(&hex_code[1..3], 16).context(format!(
+            "Failed to parse the value of red from '{}'",
+            hex_code
+        ))?;
+        let g: u8 = u8::from_str_radix(&hex_code[3..5], 16).context(format!(
+            "Failed to parse the value of green from '{}'",
+            hex_code
+        ))?;
+        let b: u8 = u8::from_str_radix(&hex_code[5..7], 16).context(format!(
+            "Failed to parse the value of blue from '{}'",
+            hex_code
+        ))?;
 
-        Some(Color::from_rgb(r, g, b))
+        Ok(Color::from_rgb(r, g, b))
     }
 
     /// Returns a new gray color.

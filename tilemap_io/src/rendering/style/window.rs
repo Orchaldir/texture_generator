@@ -1,6 +1,6 @@
 use crate::rendering::style::edge::EdgeDefinition;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
-use texture_generation::utils::error::DefinitionError;
 use texture_generation::utils::resource::ResourceDefinition;
 use tilemap::rendering::style::window::WindowStyle;
 
@@ -15,10 +15,22 @@ pub struct WindowDefinition {
 impl ResourceDefinition for WindowDefinition {
     type R = WindowStyle;
 
-    fn convert(&self, size: u32) -> Result<WindowStyle, DefinitionError> {
+    fn convert(&self, size: u32) -> Result<WindowStyle> {
         let factor = size as f32 / self.tile_size as f32;
-        let pane_style = self.pane_style.convert(factor)?;
-        let stool_style = self.stool_style.convert(factor)?;
+        let pane_style = self
+            .pane_style
+            .convert("pane_style", factor)
+            .context(format!(
+                "Failed to convert 'pane_style' of the window '{}'",
+                self.name
+            ))?;
+        let stool_style = self
+            .stool_style
+            .convert("stool_style", factor)
+            .context(format!(
+                "Failed to convert 'stool_style' of the window '{}'",
+                self.name
+            ))?;
         Ok(WindowStyle::new(self.name.clone(), pane_style, stool_style))
     }
 }

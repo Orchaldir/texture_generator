@@ -19,7 +19,6 @@ pub enum DefinitionError {
         component: String,
         source: ShapeError,
     },
-
     #[error(transparent)]
     ValueError(#[from] ValueError),
 }
