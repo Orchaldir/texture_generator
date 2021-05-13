@@ -9,20 +9,6 @@ pub enum ResourceError {
     SerdeError(#[from] serde_yaml::Error),
 }
 
-#[derive(Error, Debug)]
-/// The different errors for reading & converting definitions.
-pub enum DefinitionError {
-    #[error("Color {name:?} has an invalid value {value:?}")]
-    InvalidColor { name: String, value: String },
-    #[error("Component {component:?} has an invalid shape")]
-    InvalidShape {
-        component: String,
-        source: ShapeError,
-    },
-    #[error(transparent)]
-    ValueError(#[from] ValueError),
-}
-
 #[derive(Error, Debug, Eq, PartialEq)]
 /// The different errors for creating new objects.
 pub enum ValueError {
@@ -40,22 +26,6 @@ pub enum ValueError {
         name: String,
         value: u32,
     },
-}
-
-impl DefinitionError {
-    pub fn invalid_color<S: Into<String>>(name: S, value: S) -> DefinitionError {
-        DefinitionError::InvalidColor {
-            name: name.into(),
-            value: value.into(),
-        }
-    }
-
-    pub fn invalid_shape<S: Into<String>>(component: S, source: ShapeError) -> DefinitionError {
-        DefinitionError::InvalidShape {
-            component: component.into(),
-            source,
-        }
-    }
 }
 
 impl ValueError {
