@@ -9,7 +9,7 @@ use crate::tilemap::node::{
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use texture_generation::generation::data::texture::Texture;
-use texture_generation::generation::data::Data;
+use texture_generation::generation::data::{AabbData, Data};
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
@@ -102,12 +102,17 @@ impl Renderer {
         let mut start = Point::default();
         let step = self.tile_size as i32;
         let mut index = 0;
+        let mut start_instance_id = 222;
 
         for y in 0..size.height() {
             start.x = 0;
 
             for _x in 0..size.width() {
-                let data = Data::with_global_id(index, texture.get_aabb());
+                let data = Data::new(
+                    index,
+                    start_instance_id,
+                    AabbData::OneAabb(texture.get_aabb()),
+                );
                 let border = borders[index];
 
                 match border {
@@ -167,6 +172,7 @@ impl Renderer {
 
                 start.x += step;
                 index += 1;
+                start_instance_id += 1000;
             }
 
             start.y += step;
@@ -184,12 +190,17 @@ impl Renderer {
         let mut start = Point::default();
         let step = self.tile_size as i32;
         let mut index = 0;
+        let mut start_instance_id = 111;
 
         for _y in 0..size.height() {
             start.x = 0;
 
             for _x in 0..size.width() {
-                let data = Data::with_global_id(index, texture.get_aabb());
+                let data = Data::new(
+                    index,
+                    start_instance_id,
+                    AabbData::OneAabb(texture.get_aabb()),
+                );
                 let border = borders[index];
 
                 match border {
@@ -249,6 +260,7 @@ impl Renderer {
 
                 start.x += step;
                 index += 1;
+                start_instance_id += 1000;
             }
 
             start.y += step;

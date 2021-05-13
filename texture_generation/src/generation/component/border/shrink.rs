@@ -82,16 +82,10 @@ impl ShrinkAxis {
             return self.min_border;
         }
 
-        let diff = self
-            .random
-            .get_random_instance_u32(&data, self.border_diff, 42);
-
-        info!(
-            "calculate_random_border(): diff={} data={:?}",
-            diff,
-            data.get_instance_id()
-        );
-        self.min_border + diff
+        self.min_border
+            + self
+                .random
+                .get_random_instance_u32(&data, self.border_diff, 42)
     }
 }
 
