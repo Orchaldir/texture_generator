@@ -112,7 +112,8 @@ impl LayoutDefinition {
                     *min_size,
                     *max_size,
                     component.convert(&format!("{}.RandomAshlar.component", parent), factor)?,
-                );
+                )
+                .context(format!("Failed to create '{}.RandomAshlar'", parent))?;
                 Ok(LayoutComponent::RandomAshlar(pattern))
             }
             LayoutDefinition::RandomRepeatX {
