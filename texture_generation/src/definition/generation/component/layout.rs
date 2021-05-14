@@ -185,7 +185,8 @@ impl LayoutDefinition {
                     converted_components.push((*value, component));
                 }
 
-                let pattern = SplitLayout::new(*is_horizontal, converted_components);
+                let pattern = SplitLayout::new(*is_horizontal, converted_components)
+                    .context(format!("Failed to create '{}.Split'", parent))?;
                 Ok(LayoutComponent::Split(pattern))
             }
         }
@@ -257,10 +258,11 @@ mod tests {
                 (6, ComponentDefinition::Mock(45)),
             ],
         };
-        let component = LayoutComponent::Split(SplitLayout::new(
+        let layout = SplitLayout::new(
             true,
             vec![(4, Component::Mock(11)), (6, Component::Mock(45))],
-        ));
+        );
+        let component = LayoutComponent::Split(layout.unwrap());
 
         assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
