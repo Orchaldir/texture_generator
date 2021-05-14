@@ -61,7 +61,7 @@ mod tests {
     use crate::math::shape_factory::ShapeFactory::Rectangle;
 
     pub fn create_component() -> Component {
-        let renderer = RenderingComponent::new_shape("tile", Rectangle, RED, 200);
+        let renderer = RenderingComponent::new_shape(Rectangle, RED, 200);
         let rendering_component = Component::Rendering(Box::new(renderer));
         let border = BorderComponent::new_uniform(1, rendering_component);
         Component::Border(Box::new(border))

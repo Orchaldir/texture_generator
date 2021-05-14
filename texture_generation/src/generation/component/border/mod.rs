@@ -107,7 +107,7 @@ mod tests {
 
         let mut texture = Texture::new(size, WHITE);
 
-        let renderer = RenderingComponent::new_fill_area("red", RED, 0);
+        let renderer = RenderingComponent::new_fill_area(RED, 0);
         let component = Component::Rendering(Box::new(renderer));
         let layout = BorderComponent::new_uniform(1, component);
 

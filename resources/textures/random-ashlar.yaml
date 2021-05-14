@@ -15,7 +15,6 @@ component:
             component:
               Rendering:
                 Shape:
-                  name: grey stone
                   shape_factory: Rectangle
                   color:
                     Sequence:

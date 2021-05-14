@@ -5,7 +5,6 @@ background: "#AAAAAA"
 component:
   Layout:
     BrickWall:
-      name: brick layout
       brick:
         width: 128
         height: 64
@@ -17,7 +16,6 @@ component:
             component:
               Rendering:
                 Shape:
-                  name: red brick
                   shape_factory:
                     RoundedRectangle: 0.7
                   color:

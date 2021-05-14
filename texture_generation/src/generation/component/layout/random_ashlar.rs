@@ -195,7 +195,6 @@ mod tests {
             BLACK, BLUE, CYAN, GREEN, MAGENTA, ORANGE, RED, PINK, YELLOW,
         ]);
         let rendering = RenderingComponent::new_shape_with_depth(
-            "test",
             ShapeFactory::Rectangle,
             color_selector,
             DepthCalculator::Uniform(255),

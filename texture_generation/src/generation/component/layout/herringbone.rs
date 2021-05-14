@@ -142,8 +142,8 @@ mod tests {
         let size = Size::square(8);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let horizontal = create_component("h", PINK);
-        let vertical = create_component("v", BLUE);
+        let horizontal = create_component(PINK);
+        let vertical = create_component(BLUE);
         let pattern = HerringbonePattern::new(1, 2, horizontal, vertical);
 
         pattern.generate(&mut texture, &Data::for_texture(aabb));
@@ -163,7 +163,7 @@ mod tests {
         assert_eq!(texture.get_color_data(), &expected_colors);
     }
 
-    fn create_component(name: &str, color: Color) -> Component {
-        Component::Rendering(Box::new(RenderingComponent::new_fill_area(name, color, 0)))
+    fn create_component(color: Color) -> Component {
+        Component::Rendering(Box::new(RenderingComponent::new_fill_area(color, 0)))
     }
 }

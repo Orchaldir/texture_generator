@@ -14,7 +14,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum LayoutDefinition {
     BrickWall {
-        name: String,
         brick: Size,
         offset: u32,
         component: ComponentDefinition,
@@ -51,7 +50,6 @@ pub enum LayoutDefinition {
         component: ComponentDefinition,
     },
     Square {
-        name: String,
         side: u32,
         component: ComponentDefinition,
     },
@@ -65,7 +63,6 @@ impl LayoutDefinition {
     pub fn convert(&self, parent: &str, factor: f32) -> Result<LayoutComponent> {
         match self {
             LayoutDefinition::BrickWall {
-                name,
                 brick,
                 offset,
                 component,
@@ -73,7 +70,6 @@ impl LayoutDefinition {
                 let component =
                     component.convert(&format!("{}.BrickWall.component", parent), factor)?;
                 let pattern = BrickPattern::new(
-                    name,
                     convert_size(brick, factor),
                     convert(*offset, factor),
                     component,
@@ -162,14 +158,10 @@ impl LayoutDefinition {
                 let layout = RepeatLayout::new(false, convert(*size, factor), component);
                 Ok(LayoutComponent::Repeat(layout))
             }
-            LayoutDefinition::Square {
-                name,
-                side,
-                component,
-            } => {
+            LayoutDefinition::Square { side, component } => {
                 let component =
                     component.convert(&format!("{}.Square.component", parent), factor)?;
-                let pattern = BrickPattern::new_square(name, convert(*side, factor), component)
+                let pattern = BrickPattern::new_square(convert(*side, factor), component)
                     .context(format!("Failed to create '{}.Square'", parent))?;
                 Ok(LayoutComponent::BrickWall(pattern))
             }
@@ -202,13 +194,12 @@ mod tests {
     #[test]
     fn test_convert_brick_wall() {
         let definition = LayoutDefinition::BrickWall {
-            name: "test".to_string(),
             brick: Size::new(20, 10),
             offset: 10,
             component: ComponentDefinition::Mock(66),
         };
         let component = LayoutComponent::BrickWall(
-            BrickPattern::new("test", Size::new(40, 20), 20, Component::Mock(66)).unwrap(),
+            BrickPattern::new(Size::new(40, 20), 20, Component::Mock(66)).unwrap(),
         );
 
         assert_eq!(component, definition.convert("test", 2.0).unwrap())
@@ -239,12 +230,11 @@ mod tests {
     #[test]
     fn test_convert_square() {
         let definition = LayoutDefinition::Square {
-            name: "square".to_string(),
             side: 10,
             component: ComponentDefinition::Mock(66),
         };
         let component = LayoutComponent::BrickWall(
-            BrickPattern::new("square", Size::square(25), 0, Component::Mock(66)).unwrap(),
+            BrickPattern::new(Size::square(25), 0, Component::Mock(66)).unwrap(),
         );
 
         assert_eq!(component, definition.convert("test", 2.5).unwrap())

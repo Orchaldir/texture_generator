@@ -129,7 +129,7 @@ mod tests {
         let mut texture = Texture::new(size, WHITE);
 
         let random = Random::Mock(vec![1, 2, 3]);
-        let renderer = RenderingComponent::new_fill_area("red", RED, 0);
+        let renderer = RenderingComponent::new_fill_area(RED, 0);
         let component = Component::Rendering(Box::new(renderer));
         let layout = ShrinkAxis::new_random(true, 1, 3, component, random).unwrap();
 
@@ -151,7 +151,7 @@ mod tests {
         let mut texture = Texture::new(size, WHITE);
 
         let random = Random::Mock(vec![4, 5, 6]);
-        let renderer = RenderingComponent::new_fill_area("red", RED, 0);
+        let renderer = RenderingComponent::new_fill_area(RED, 0);
         let component = Component::Rendering(Box::new(renderer));
         let layout = ShrinkAxis::new_random(false, 1, 3, component, random).unwrap();
 

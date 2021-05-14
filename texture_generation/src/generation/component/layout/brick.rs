@@ -32,19 +32,13 @@ use anyhow::{bail, Result};
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct BrickPattern {
-    name: String,
     brick: Size,
     offset: u32,
     component: Component,
 }
 
 impl BrickPattern {
-    pub fn new<S: Into<String>>(
-        name: S,
-        brick: Size,
-        offset: u32,
-        component: Component,
-    ) -> Result<BrickPattern> {
+    pub fn new(brick: Size, offset: u32, component: Component) -> Result<BrickPattern> {
         if brick.width() < 1 {
             bail!("Argument 'brick.width' needs to be greater than 1");
         } else if brick.height() < 1 {
@@ -54,24 +48,18 @@ impl BrickPattern {
         }
 
         Ok(BrickPattern {
-            name: name.into(),
             brick,
             offset,
             component,
         })
     }
 
-    pub fn new_square<S: Into<String>>(
-        name: S,
-        side: u32,
-        component: Component,
-    ) -> Result<BrickPattern> {
+    pub fn new_square(side: u32, component: Component) -> Result<BrickPattern> {
         if side < 1 {
             bail!("Argument 'side' needs to be greater than 1");
         }
 
         Ok(BrickPattern {
-            name: name.into(),
             brick: Size::square(side),
             offset: 0,
             component,
@@ -158,7 +146,7 @@ mod tests {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = BrickPattern::new("test", Size::square(5), 2, create_component()).unwrap();
+        let layout = BrickPattern::new(Size::square(5), 2, create_component()).unwrap();
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 
@@ -191,7 +179,7 @@ mod tests {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = BrickPattern::new_square("test", 5, create_component()).unwrap();
+        let layout = BrickPattern::new_square(5, create_component()).unwrap();
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 

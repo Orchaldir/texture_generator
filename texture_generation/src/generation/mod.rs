@@ -48,7 +48,7 @@ impl TextureGenerator {
 
     /// Generates the texture to a specific part of [`Data`].
     pub fn render(&self, texture: &mut Texture, data: &Data) {
-        let background = RenderingComponent::new_fill_area("background", self.background, 0);
+        let background = RenderingComponent::new_fill_area(self.background, 0);
 
         background.render(texture, data);
         self.component.generate(texture, data);
@@ -71,7 +71,7 @@ mod tests {
 
     #[test]
     fn test_generate() {
-        let rendering = RenderingComponent::new_fill_area("test", RED, 200);
+        let rendering = RenderingComponent::new_fill_area(RED, 200);
         let rendering_component = Component::Rendering(Box::new(rendering));
         let border = BorderComponent::new_uniform(1, rendering_component);
         let border_component = Component::Border(Box::new(border));

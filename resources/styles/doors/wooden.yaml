@@ -12,7 +12,6 @@ edge_style:
           - - 8
             - Rendering:
                 FillArea:
-                  name: "front"
                   color: "#696969"
                   depth: 200
           - - 32
@@ -22,7 +21,6 @@ edge_style:
                   component:
                     Rendering:
                       Shape:
-                        name: "plank"
                         shape_factory: Rectangle
                         color:
                           ConstantColor: "#432711"
@@ -33,6 +31,5 @@ edge_style:
           - - 8
             - Rendering:
                 FillArea:
-                  name: "back"
                   color: "#696969"
                   depth: 200

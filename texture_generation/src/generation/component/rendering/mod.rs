@@ -12,14 +12,9 @@ pub mod depth;
 /// Renders the texture.
 pub enum RenderingComponent {
     /// Fills the area with a color.
-    FillArea {
-        name: String,
-        color: Color,
-        depth: u8,
-    },
+    FillArea { color: Color, depth: u8 },
     /// Renders a [`Shape`].
     Shape {
-        name: String,
         shape_factory: ShapeFactory,
         color_selector: ColorSelector,
         depth_calculator: DepthCalculator,
@@ -28,39 +23,27 @@ pub enum RenderingComponent {
 
 impl RenderingComponent {
     pub fn default() -> RenderingComponent {
-        Self::new_fill_area("default", PINK, 0)
+        Self::new_fill_area(PINK, 0)
     }
 
-    pub fn new_fill_area<S: Into<String>>(name: S, color: Color, depth: u8) -> RenderingComponent {
-        RenderingComponent::FillArea {
-            name: name.into(),
-            color,
-            depth,
-        }
+    pub fn new_fill_area(color: Color, depth: u8) -> RenderingComponent {
+        RenderingComponent::FillArea { color, depth }
     }
 
-    pub fn new_shape<S: Into<String>>(
-        name: S,
-        shape_factory: ShapeFactory,
-        color: Color,
-        depth: u8,
-    ) -> RenderingComponent {
+    pub fn new_shape(shape_factory: ShapeFactory, color: Color, depth: u8) -> RenderingComponent {
         RenderingComponent::new_shape_with_depth(
-            name,
             shape_factory,
             ColorSelector::ConstantColor(color),
             DepthCalculator::Uniform(depth),
         )
     }
 
-    pub fn new_shape_with_depth<S: Into<String>>(
-        name: S,
+    pub fn new_shape_with_depth(
         shape_factory: ShapeFactory,
         color_selector: ColorSelector,
         depth_calculator: DepthCalculator,
     ) -> RenderingComponent {
         RenderingComponent::Shape {
-            name: name.into(),
             shape_factory,
             color_selector,
             depth_calculator,
@@ -147,7 +130,7 @@ mod tests {
         let aabb = AABB::new(start, size);
 
         let mut texture = Texture::with_depth(data_size, WHITE, 3);
-        let renderer = RenderingComponent::new_fill_area("test", RED, 42);
+        let renderer = RenderingComponent::new_fill_area(RED, 42);
 
         renderer.render(&mut texture, &Data::for_two_aabb(0, outer, aabb));
 
@@ -187,7 +170,7 @@ mod tests {
         let aabb = AABB::new(start, size);
 
         let mut texture = Texture::with_depth(data_size, WHITE, 3);
-        let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 42);
+        let renderer = RenderingComponent::new_shape(Rectangle, RED, 42);
 
         renderer.render(&mut texture, &Data::for_two_aabb(0, outer, aabb));
 
@@ -227,7 +210,7 @@ mod tests {
         let aabb = AABB::new(start, size);
 
         let mut texture = Texture::new(data_size, WHITE);
-        let renderer = RenderingComponent::new_shape("test", Rectangle, RED, 200);
+        let renderer = RenderingComponent::new_shape(Rectangle, RED, 200);
 
         renderer.render(&mut texture, &Data::for_two_aabb(0, outer, aabb));
 

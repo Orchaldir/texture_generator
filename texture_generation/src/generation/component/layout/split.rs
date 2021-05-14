@@ -165,7 +165,7 @@ mod tests {
     }
 
     fn create(size: u32, color: Color) -> (u32, Component) {
-        let renderer = RenderingComponent::new_fill_area("area", color, 200);
+        let renderer = RenderingComponent::new_fill_area(color, 200);
         (size, Component::Rendering(Box::new(renderer)))
     }
 }

@@ -262,7 +262,7 @@ mod tests {
     pub fn create_random_component() -> Component {
         let color = ColorSelector::Sequence(vec![RED, GREEN, BLUE]);
         let depth = DepthCalculator::Uniform(255);
-        let renderer = RenderingComponent::new_shape_with_depth("tile", Rectangle, color, depth);
+        let renderer = RenderingComponent::new_shape_with_depth(Rectangle, color, depth);
         Component::Rendering(Box::new(renderer))
     }
 }

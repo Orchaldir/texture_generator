@@ -11,7 +11,6 @@ edge_style:
         component:
           Rendering:
             Shape:
-              name: "plank"
               shape_factory:
                 RoundedRectangle: 0.5
               color:
