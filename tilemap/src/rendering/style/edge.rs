@@ -1,4 +1,5 @@
 use crate::rendering::style::node::NodeStyle;
+use anyhow::{bail, Result};
 use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::texture::Texture;
@@ -24,26 +25,34 @@ pub enum EdgeStyle {
 }
 
 impl EdgeStyle {
-    pub fn default(thickness: u32) -> EdgeStyle {
+    pub fn default(thickness: u32) -> Result<EdgeStyle> {
         Self::new_solid(thickness, RenderingComponent::default())
     }
 
-    pub fn new_layout(thickness: u32, component: LayoutComponent) -> EdgeStyle {
+    pub fn new_layout(thickness: u32, component: LayoutComponent) -> Result<EdgeStyle> {
+        if thickness == 0 {
+            bail!("Argument 'thickness' needs to be greater than 0");
+        }
+
         let vertical = component.flip();
-        EdgeStyle::Layout {
+        Ok(EdgeStyle::Layout {
             thickness,
             half_thickness: (thickness / 2) as i32,
             horizontal: component,
             vertical,
-        }
+        })
     }
 
-    pub fn new_solid(thickness: u32, component: RenderingComponent) -> EdgeStyle {
-        EdgeStyle::Solid {
+    pub fn new_solid(thickness: u32, component: RenderingComponent) -> Result<EdgeStyle> {
+        if thickness == 0 {
+            bail!("Argument 'thickness' needs to be greater than 0");
+        }
+
+        Ok(EdgeStyle::Solid {
             thickness,
             half_thickness: (thickness / 2) as i32,
             component,
-        }
+        })
     }
 
     pub fn get_thickness(&self) -> u32 {
@@ -185,7 +194,7 @@ impl EdgeStyle {
 
 impl Default for EdgeStyle {
     fn default() -> Self {
-        EdgeStyle::default(1)
+        EdgeStyle::default(1).unwrap()
     }
 }
 
@@ -197,12 +206,24 @@ mod tests {
     use texture_generation::math::color::{BLACK, GREEN, RED};
 
     #[test]
+    #[should_panic]
+    fn test_new_layout_with_thickness_too_small() {
+        EdgeStyle::new_layout(0, LayoutComponent::Mock(8)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_solid_with_thickness_too_small() {
+        EdgeStyle::new_solid(0, RenderingComponent::default()).unwrap();
+    }
+
+    #[test]
     fn test_render_horizontal() {
         let component = RenderingComponent::new_fill_area(RED, 9);
         let edge_component = RenderingComponent::new_fill_area(GREEN, 4);
         let node_style0 = NodeStyle::new(4, component.clone());
         let node_style1 = NodeStyle::new(2, component);
-        let edge_style = EdgeStyle::new_solid(2, edge_component);
+        let edge_style = EdgeStyle::new_solid(2, edge_component).unwrap();
         let mut texture = Texture::new(Size::new(11, 6), BLACK);
 
         edge_style.render_horizontal(

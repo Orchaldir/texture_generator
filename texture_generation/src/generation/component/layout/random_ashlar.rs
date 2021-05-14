@@ -68,7 +68,7 @@ impl RandomAshlarPattern {
 
         for y in 0..self.cells_per_side {
             for x in 0..self.cells_per_side {
-                creator.try_generate(texture, &self.component, x, y);
+                creator.process_cell(texture, &self.component, x, y);
             }
         }
     }
@@ -104,7 +104,8 @@ impl RandomAshlarCreator {
         }
     }
 
-    pub fn try_generate(&mut self, texture: &mut Texture, component: &Component, x: u32, y: u32) {
+    /// Try to grow a random ashlar from the current cell.
+    pub fn process_cell(&mut self, texture: &mut Texture, component: &Component, x: u32, y: u32) {
         let cell_index = self.tile_size.convert_x_y(x, y);
 
         if self.occupancy_tile.is_free(cell_index) {

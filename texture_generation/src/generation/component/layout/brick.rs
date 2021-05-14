@@ -39,10 +39,10 @@ pub struct BrickPattern {
 
 impl BrickPattern {
     pub fn new(brick: Size, offset: u32, component: Component) -> Result<BrickPattern> {
-        if brick.width() < 1 {
-            bail!("Argument 'brick.width' needs to be greater than 1");
-        } else if brick.height() < 1 {
-            bail!("Argument 'brick.height' needs to be greater than 1");
+        if brick.width() == 0 {
+            bail!("Argument 'brick.width' needs to be greater than 0");
+        } else if brick.height() == 0 {
+            bail!("Argument 'brick.height' needs to be greater than 0");
         } else if offset >= brick.width() {
             bail!("Argument 'offset' needs to be greater than or equal to 'brick.width'");
         }
@@ -56,7 +56,7 @@ impl BrickPattern {
 
     pub fn new_square(side: u32, component: Component) -> Result<BrickPattern> {
         if side < 1 {
-            bail!("Argument 'side' needs to be greater than 1");
+            bail!("Argument 'side' needs to be greater than 0");
         }
 
         Ok(BrickPattern {
@@ -66,7 +66,7 @@ impl BrickPattern {
         })
     }
 
-    /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
+    /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         let aabb = data.get_inner();
         let (start_column, start_row) = self.calculate_column_row(aabb.start(), 0);
@@ -140,6 +140,30 @@ mod tests {
     use crate::generation::data::texture::Texture;
     use crate::math::color::{RED, WHITE};
     use crate::math::size::Size;
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_width_too_small() {
+        BrickPattern::new(Size::new(0, 5), 2, Component::Mock(2)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_height_too_small() {
+        BrickPattern::new(Size::new(4, 0), 2, Component::Mock(2)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_offset_too_large() {
+        BrickPattern::new(Size::new(4, 5), 6, Component::Mock(2)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_square_with_side_too_small() {
+        BrickPattern::new_square(0, Component::Mock(2)).unwrap();
+    }
 
     #[test]
     fn test_brick_wall() {

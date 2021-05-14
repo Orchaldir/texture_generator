@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use texture_generation::definition::convert;
 use texture_generation::definition::generation::component::layout::LayoutDefinition;
@@ -23,7 +23,9 @@ impl EdgeDefinition {
         match self {
             EdgeDefinition::Layout { thickness, layout } => {
                 let layout = layout.convert(&format!("{}.Layout.layout", parent), factor)?;
-                Ok(EdgeStyle::new_layout(convert(*thickness, factor), layout))
+                let edge_style = EdgeStyle::new_layout(convert(*thickness, factor), layout)
+                    .context(format!("Failed to create '{}.Layout'", parent))?;
+                Ok(edge_style)
             }
             EdgeDefinition::Mock(value) => Ok(EdgeStyle::Mock(convert(*value, factor))),
             EdgeDefinition::Solid {
@@ -32,7 +34,9 @@ impl EdgeDefinition {
             } => {
                 let component =
                     component.convert(&format!("{}.Solid.component", parent), factor)?;
-                Ok(EdgeStyle::new_solid(convert(*thickness, factor), component))
+                let edge_style = EdgeStyle::new_solid(convert(*thickness, factor), component)
+                    .context(format!("Failed to create '{}.Solid'", parent))?;
+                Ok(edge_style)
             }
         }
     }
@@ -49,7 +53,7 @@ mod tests {
             thickness: 10,
             layout: LayoutDefinition::Mock(42),
         };
-        let style = EdgeStyle::new_layout(30, LayoutComponent::Mock(42));
+        let style = EdgeStyle::new_layout(30, LayoutComponent::Mock(42)).unwrap();
 
         assert_eq!(style, definition.convert("test", 3.0).unwrap())
     }
