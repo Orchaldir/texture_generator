@@ -39,7 +39,6 @@ mod tests {
     #[test]
     fn test_convert() {
         let rendering_definition = RenderingDefinition::FillArea {
-            name: "rendering".to_string(),
             color: "#FF0000".to_string(),
             depth: 123,
         };
@@ -49,7 +48,7 @@ mod tests {
             size: 35,
             component: rendering_definition,
         };
-        let component = RenderingComponent::new_fill_area("rendering", RED, 123);
+        let component = RenderingComponent::new_fill_area(RED, 123);
         let style = NodeStyle::new(105, component);
 
         assert_eq!(style, definition.convert(600).unwrap())
