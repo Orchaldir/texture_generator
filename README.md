@@ -26,14 +26,10 @@ And a depth image:
 A library & editor to create tilemaps and render them with the previous procedural textures.
 See [an example](resources/tilemaps/example.tm).
 
-The rendered color image with [ambient occlusion](https://en.wikipedia.org/wiki/Ambient_occlusion):
+The rendered color image with [ambient occlusion](https://en.wikipedia.org/wiki/Ambient_occlusion) & lighting:
 
-![Color image with ambient occlusion](../assets/v0.3/color-ambient-occlusion.png)
-
-The rendered color image with ambient occlusion & lighting:
-
-![Color image with lighting](../assets/v0.3/color-lighting.png)
+![Color image](../assets/v0.4/color.png)
 
 And the depth image:
 
-![Depth Image](../assets/v0.3/depth.png)
+![Depth Image](../assets/v0.4/depth.png)
