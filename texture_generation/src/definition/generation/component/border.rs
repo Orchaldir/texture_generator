@@ -3,7 +3,7 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::component::border::shrink::ShrinkAxis;
 use crate::generation::component::border::BorderComponent;
 use crate::generation::random::Random;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -43,7 +43,8 @@ impl BorderDefinition {
                     convert(*max_border, factor),
                     component,
                     Random::Hash,
-                );
+                )
+                .context(format!("Failed to create '{}.ShrinkAxis'", parent))?;
                 Ok(BorderComponent::ShrinkAxis(border))
             }
         }
@@ -75,7 +76,7 @@ mod tests {
             component: ComponentDefinition::Mock(42),
         };
         let shrink = ShrinkAxis::new_random(false, 10, 40, Component::Mock(42), Random::Hash);
-        let component = BorderComponent::ShrinkAxis(shrink);
+        let component = BorderComponent::ShrinkAxis(shrink.unwrap());
 
         assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }

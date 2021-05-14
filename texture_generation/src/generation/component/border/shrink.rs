@@ -5,6 +5,7 @@ use crate::generation::random::Random;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
+use anyhow::{bail, Result};
 
 #[svgbobdoc::transform]
 /// Shrinks a [`Component`] along the x-axis or y-axis.
@@ -18,14 +19,22 @@ pub struct ShrinkAxis {
 }
 
 impl ShrinkAxis {
-    pub fn new(is_horizontal: bool, desired_border: u32, component: Component) -> ShrinkAxis {
-        ShrinkAxis {
+    pub fn new(
+        is_horizontal: bool,
+        desired_border: u32,
+        component: Component,
+    ) -> Result<ShrinkAxis> {
+        if desired_border == 0 {
+            bail!("Argument 'desired_border' needs to be greater than 0");
+        }
+
+        Ok(ShrinkAxis {
             is_horizontal,
             min_border: desired_border,
             border_diff: 0,
             component,
             random: Random::Hash,
-        }
+        })
     }
 
     pub fn new_random(
@@ -34,14 +43,18 @@ impl ShrinkAxis {
         max_border: u32,
         component: Component,
         random: Random,
-    ) -> ShrinkAxis {
-        ShrinkAxis {
+    ) -> Result<ShrinkAxis> {
+        if max_border <= min_border {
+            bail!("Argument 'max_border' needs to be greater than 'min_border'");
+        }
+
+        Ok(ShrinkAxis {
             is_horizontal,
             min_border,
             border_diff: 1 + max_border - min_border,
             component,
             random,
-        }
+        })
     }
 
     // Flips between horizontal & vertical mode.
@@ -98,6 +111,18 @@ mod tests {
     use crate::math::size::Size;
 
     #[test]
+    #[should_panic]
+    fn test_new() {
+        ShrinkAxis::new(true, 0, Component::Mock(42)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_random() {
+        ShrinkAxis::new_random(true, 3, 3, Component::Mock(42), Random::Hash).unwrap();
+    }
+
+    #[test]
     fn test_shrink_x() {
         let size = Size::new(8, 2);
         let aabb = AABB::with_size(size);
@@ -106,7 +131,7 @@ mod tests {
         let random = Random::Mock(vec![1, 2, 3]);
         let renderer = RenderingComponent::new_fill_area("red", RED, 0);
         let component = Component::Rendering(Box::new(renderer));
-        let layout = ShrinkAxis::new_random(true, 1, 3, component, random);
+        let layout = ShrinkAxis::new_random(true, 1, 3, component, random).unwrap();
 
         layout.generate(&mut texture, &Data::for_texture(aabb));
 
@@ -128,7 +153,7 @@ mod tests {
         let random = Random::Mock(vec![4, 5, 6]);
         let renderer = RenderingComponent::new_fill_area("red", RED, 0);
         let component = Component::Rendering(Box::new(renderer));
-        let layout = ShrinkAxis::new_random(false, 1, 3, component, random);
+        let layout = ShrinkAxis::new_random(false, 1, 3, component, random).unwrap();
 
         layout.generate(&mut texture, &Data::for_texture(aabb));
 

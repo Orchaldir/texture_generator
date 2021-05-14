@@ -22,9 +22,7 @@ pub enum ColorSelector {
 impl ColorSelector {
     pub fn new_sequence(colors: Vec<Color>) -> Result<ColorSelector> {
         if colors.len() < 2 {
-            bail!(format!(
-                "ColorSelector::Sequence requires at least 2 colors"
-            ));
+            bail!("ColorSelector::Sequence requires at least 2 colors");
         }
 
         Ok(ColorSelector::Sequence(colors))
@@ -32,7 +30,7 @@ impl ColorSelector {
 
     pub fn new_random(colors: Vec<Color>) -> Result<ColorSelector> {
         if colors.len() < 2 {
-            bail!(format!("ColorSelector::Random requires at least 2 colors"));
+            bail!("ColorSelector::Random requires at least 2 colors");
         }
 
         Ok(ColorSelector::Random {
@@ -43,7 +41,7 @@ impl ColorSelector {
 
     pub fn mock_random(numbers: Vec<u64>, colors: Vec<Color>) -> Result<ColorSelector> {
         if colors.len() < 2 {
-            bail!(format!("ColorSelector::Random requires at least 2 colors"));
+            bail!("ColorSelector::Random requires at least 2 colors");
         }
 
         Ok(ColorSelector::Random {
@@ -61,9 +59,7 @@ impl ColorSelector {
         colors: Vec<(usize, Color)>,
     ) -> Result<ColorSelector> {
         if colors.len() < 2 {
-            bail!(format!(
-                "ColorSelector::Probability requires at least 2 colors"
-            ));
+            bail!("ColorSelector::Probability requires at least 2 colors");
         }
 
         let mut converted_colors = Vec::with_capacity(colors.len());
