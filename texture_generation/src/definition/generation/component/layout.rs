@@ -96,7 +96,8 @@ impl LayoutDefinition {
                     *multiplier,
                     horizontal_component,
                     vertical_component,
-                );
+                )
+                .context(format!("Failed to create '{}.Herringbone'", parent))?;
                 Ok(LayoutComponent::Herringbone(pattern))
             }
             LayoutDefinition::Mock(id) => Ok(LayoutComponent::Mock(*id)),

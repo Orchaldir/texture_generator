@@ -4,6 +4,7 @@ use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
+use anyhow::{bail, Result};
 
 #[svgbobdoc::transform]
 /// The [Herringbone Pattern](https://en.wikipedia.org/wiki/Herringbone_pattern) alternates horizontal & vertical [`Component`]s.
@@ -42,11 +43,17 @@ impl HerringbonePattern {
         multiplier: u32,
         horizontal_component: Component,
         vertical_component: Component,
-    ) -> HerringbonePattern {
+    ) -> Result<HerringbonePattern> {
+        if side == 0 {
+            bail!("Argument 'side' needs to be greater than 0");
+        } else if multiplier < 2 {
+            bail!("Argument 'multiplier' needs to be greater than 1");
+        }
+
         let repeating_side = calculate_repeating_side(side, multiplier);
         let size = Size::new(side * multiplier, side);
 
-        HerringbonePattern {
+        Ok(HerringbonePattern {
             side: side as i32,
             multiplier,
             horizontal_size: size,
@@ -54,7 +61,7 @@ impl HerringbonePattern {
             repeating_side,
             horizontal_component,
             vertical_component,
-        }
+        })
     }
 
     /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
@@ -138,13 +145,25 @@ mod tests {
     use crate::math::size::Size;
 
     #[test]
+    #[should_panic]
+    fn test_new_side_too_small() {
+        HerringbonePattern::new(0, 2, Component::Mock(1), Component::Mock(2)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_multiplier_too_small() {
+        HerringbonePattern::new(1, 1, Component::Mock(1), Component::Mock(2)).unwrap();
+    }
+
+    #[test]
     fn test_herringbone_pattern() {
         let size = Size::square(8);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
         let horizontal = create_component(PINK);
         let vertical = create_component(BLUE);
-        let pattern = HerringbonePattern::new(1, 2, horizontal, vertical);
+        let pattern = HerringbonePattern::new(1, 2, horizontal, vertical).unwrap();
 
         pattern.generate(&mut texture, &Data::for_texture(aabb));
 
