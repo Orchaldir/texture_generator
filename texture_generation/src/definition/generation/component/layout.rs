@@ -129,7 +129,8 @@ impl LayoutDefinition {
                     convert(*max_size, factor),
                     component,
                     Random::Hash,
-                );
+                )
+                .context(format!("Failed to create '{}.RandomRepeatX'", parent))?;
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RandomRepeatY {
@@ -145,19 +146,22 @@ impl LayoutDefinition {
                     convert(*max_size, factor),
                     component,
                     Random::Hash,
-                );
+                )
+                .context(format!("Failed to create '{}.RandomRepeatY'", parent))?;
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatX { size, component } => {
                 let component =
                     component.convert(&format!("{}.RepeatX.component", parent), factor)?;
-                let layout = RepeatLayout::new(true, convert(*size, factor), component);
+                let layout = RepeatLayout::new(true, convert(*size, factor), component)
+                    .context(format!("Failed to create '{}.RepeatX'", parent))?;
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatY { size, component } => {
                 let component =
                     component.convert(&format!("{}.RepeatY.component", parent), factor)?;
-                let layout = RepeatLayout::new(false, convert(*size, factor), component);
+                let layout = RepeatLayout::new(false, convert(*size, factor), component)
+                    .context(format!("Failed to create '{}.RepeatY'", parent))?;
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::Square { side, component } => {
@@ -213,7 +217,8 @@ mod tests {
             size: 20,
             component: ComponentDefinition::Mock(88),
         };
-        let component = LayoutComponent::Repeat(RepeatLayout::new(true, 30, Component::Mock(88)));
+        let repeat = RepeatLayout::new(true, 30, Component::Mock(88));
+        let component = LayoutComponent::Repeat(repeat.unwrap());
 
         assert_eq!(component, definition.convert("test", 1.5).unwrap())
     }
@@ -224,7 +229,8 @@ mod tests {
             size: 50,
             component: ComponentDefinition::Mock(11),
         };
-        let component = LayoutComponent::Repeat(RepeatLayout::new(false, 75, Component::Mock(11)));
+        let repeat = RepeatLayout::new(false, 75, Component::Mock(11));
+        let component = LayoutComponent::Repeat(repeat.unwrap());
 
         assert_eq!(component, definition.convert("test", 1.5).unwrap())
     }

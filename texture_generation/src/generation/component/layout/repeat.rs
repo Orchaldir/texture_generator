@@ -4,6 +4,7 @@ use crate::generation::data::Data;
 use crate::generation::random::Random;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
+use anyhow::{bail, Result};
 
 #[svgbobdoc::transform]
 /// Repeats a component along the x-axis or y-axis.
@@ -45,14 +46,22 @@ pub struct RepeatLayout {
 }
 
 impl RepeatLayout {
-    pub fn new(is_horizontal: bool, desired_step: u32, component: Component) -> RepeatLayout {
-        RepeatLayout {
+    pub fn new(
+        is_horizontal: bool,
+        desired_step: u32,
+        component: Component,
+    ) -> Result<RepeatLayout> {
+        if desired_step == 0 {
+            bail!("Argument 'desired_step' needs to be greater than 0");
+        }
+
+        Ok(RepeatLayout {
             is_horizontal,
             min_step: desired_step,
             max_step: desired_step,
             component,
             random: Random::Hash,
-        }
+        })
     }
 
     pub fn new_random(
@@ -61,14 +70,20 @@ impl RepeatLayout {
         max_step: u32,
         component: Component,
         random: Random,
-    ) -> RepeatLayout {
-        RepeatLayout {
+    ) -> Result<RepeatLayout> {
+        if min_step == 0 {
+            bail!("Argument 'min_step' needs to be greater than 0");
+        } else if max_step <= min_step {
+            bail!("Argument 'max_step' needs to be greater than 'min_step'");
+        }
+
+        Ok(RepeatLayout {
             is_horizontal,
             min_step,
             max_step,
             component,
             random,
-        }
+        })
     }
 
     // Flips between horizontal & vertical mode.
@@ -184,11 +199,29 @@ mod tests {
     use crate::math::size::Size;
 
     #[test]
+    #[should_panic]
+    fn test_new_with_desired_step_too_small() {
+        RepeatLayout::new(true, 0, Component::Mock(2)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_min_step_too_small() {
+        RepeatLayout::new_random(true, 0, 5, Component::Mock(2), Random::Hash).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_max_step_too_small() {
+        RepeatLayout::new_random(true, 4, 3, Component::Mock(2), Random::Hash).unwrap();
+    }
+
+    #[test]
     fn test_repeat_x() {
         let size = Size::new(15, 5);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = RepeatLayout::new(true, 5, create_component());
+        let layout = RepeatLayout::new(true, 5, create_component()).unwrap();
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 
@@ -209,7 +242,7 @@ mod tests {
         let size = Size::new(5, 15);
         let aabb = AABB::with_size(size);
         let mut textzre = Texture::new(size, WHITE);
-        let layout = RepeatLayout::new(false, 5, create_component());
+        let layout = RepeatLayout::new(false, 5, create_component()).unwrap();
 
         layout.generate(&mut textzre, Data::for_texture(aabb));
 
@@ -243,7 +276,8 @@ mod tests {
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
         let random = Random::Mock(vec![0, 2, 1]);
-        let layout = RepeatLayout::new_random(true, 3, 5, create_random_component(), random);
+        let layout =
+            RepeatLayout::new_random(true, 3, 5, create_random_component(), random).unwrap();
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 
