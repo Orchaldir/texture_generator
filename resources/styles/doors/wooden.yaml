@@ -1,7 +1,7 @@
 ---
 name: "Wooden Door"
 tile_size: 512
-is_centered: true
+is_centered: false
 edge_style:
   Layout:
     thickness: 48
