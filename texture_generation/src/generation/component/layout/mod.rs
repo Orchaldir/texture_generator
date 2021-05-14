@@ -37,7 +37,7 @@ impl LayoutComponent {
         }
     }
 
-    /// Generates the layout in the area defined by the [`AABB`].
+    /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
         let combined = data.combine();
 

@@ -97,7 +97,7 @@ impl RepeatLayout {
         }
     }
 
-    /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
+    /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         if self.is_horizontal {
             self.generate_horizontal(texture, data)
@@ -136,6 +136,7 @@ impl RepeatLayout {
         }
     }
 
+    /// Splits the distance into one or more steps.
     fn calculate_steps(&self, data: &Data, distance: u32) -> Vec<u32> {
         if self.min_step == self.max_step {
             let desired_step = self.min_step;

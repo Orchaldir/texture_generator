@@ -66,7 +66,7 @@ impl BrickPattern {
         })
     }
 
-    /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
+    /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         let aabb = data.get_inner();
         let (start_column, start_row) = self.calculate_column_row(aabb.start(), 0);

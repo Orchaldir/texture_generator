@@ -77,7 +77,7 @@ impl SplitLayout {
         }
     }
 
-    /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
+    /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         if self.is_horizontal {
             self.generate_horizontal(texture, data)
