@@ -4,7 +4,7 @@ use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
-use crate::utils::error::ValueError;
+use anyhow::{bail, Result};
 
 #[svgbobdoc::transform]
 /// A simple brick wall:
@@ -44,21 +44,13 @@ impl BrickPattern {
         brick: Size,
         offset: u32,
         component: Component,
-    ) -> Result<BrickPattern, ValueError> {
+    ) -> Result<BrickPattern> {
         if brick.width() < 1 {
-            return Err(ValueError::value_too_small(
-                name,
-                "brick.width",
-                brick.width(),
-            ));
+            bail!("Argument 'brick.width' needs to be greater than 1");
         } else if brick.height() < 1 {
-            return Err(ValueError::value_too_small(
-                name,
-                "brick.height",
-                brick.height(),
-            ));
+            bail!("Argument 'brick.height' needs to be greater than 1");
         } else if offset >= brick.width() {
-            return Err(ValueError::value_too_big(name, "offset", brick.height()));
+            bail!("Argument 'offset' needs to be greater than or equal to 'brick.width'");
         }
 
         Ok(BrickPattern {
@@ -73,9 +65,9 @@ impl BrickPattern {
         name: S,
         side: u32,
         component: Component,
-    ) -> Result<BrickPattern, ValueError> {
+    ) -> Result<BrickPattern> {
         if side < 1 {
-            return Err(ValueError::value_too_small(name, "side", side));
+            bail!("Argument 'side' needs to be greater than 1");
         }
 
         Ok(BrickPattern {

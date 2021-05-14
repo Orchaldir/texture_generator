@@ -1,4 +1,4 @@
-use crate::utils::error::ValueError;
+use anyhow::{bail, Result};
 
 #[derive(Clone, Debug, PartialEq)]
 /// Calculates the depth for each pixel.
@@ -21,9 +21,10 @@ impl DepthCalculator {
             diff,
         }
     }
-    pub fn new_interpolate_many(data: Vec<(f32, u8)>) -> Result<DepthCalculator, ValueError> {
+
+    pub fn new_interpolate_many(data: Vec<(f32, u8)>) -> Result<DepthCalculator> {
         if data.len() < 2 {
-            return Err(ValueError::not_enough_values("InterpolateMany.data", 2));
+            bail!("InterpolateMany requires 2 or more entries");
         }
 
         Ok(DepthCalculator::InterpolateMany(

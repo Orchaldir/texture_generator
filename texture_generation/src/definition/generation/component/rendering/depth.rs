@@ -1,5 +1,4 @@
 use crate::generation::component::rendering::depth::DepthCalculator;
-use crate::utils::error::ValueError;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
@@ -12,7 +11,7 @@ pub enum DepthDefinition {
 }
 
 impl TryFrom<DepthDefinition> for DepthCalculator {
-    type Error = ValueError;
+    type Error = anyhow::Error;
 
     fn try_from(definition: DepthDefinition) -> Result<Self, Self::Error> {
         match definition {

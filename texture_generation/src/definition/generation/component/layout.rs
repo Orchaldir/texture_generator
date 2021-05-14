@@ -8,7 +8,7 @@ use crate::generation::component::layout::split::SplitLayout;
 use crate::generation::component::layout::LayoutComponent;
 use crate::generation::random::Random;
 use crate::math::size::Size;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -77,7 +77,8 @@ impl LayoutDefinition {
                     convert_size(brick, factor),
                     convert(*offset, factor),
                     component,
-                )?;
+                )
+                .context(format!("Failed to create '{}.BrickWall'", parent))?;
                 Ok(LayoutComponent::BrickWall(pattern))
             }
             LayoutDefinition::Herringbone {
@@ -168,7 +169,8 @@ impl LayoutDefinition {
             } => {
                 let component =
                     component.convert(&format!("{}.Square.component", parent), factor)?;
-                let pattern = BrickPattern::new_square(name, convert(*side, factor), component)?;
+                let pattern = BrickPattern::new_square(name, convert(*side, factor), component)
+                    .context(format!("Failed to create '{}.Square'", parent))?;
                 Ok(LayoutComponent::BrickWall(pattern))
             }
             LayoutDefinition::Split {
