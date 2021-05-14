@@ -14,7 +14,7 @@ pub struct WallStyle {
 
 impl WallStyle {
     pub fn default(thickness: u32) -> WallStyle {
-        Self::new("default", EdgeStyle::default(thickness), None, 0)
+        Self::new("default", EdgeStyle::default(thickness).unwrap(), None, 0)
     }
 
     pub fn new<S: Into<String>>(

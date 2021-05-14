@@ -11,7 +11,7 @@ pub struct DoorStyle {
 
 impl DoorStyle {
     pub fn default(thickness: u32) -> DoorStyle {
-        Self::new("default", EdgeStyle::default(thickness), true)
+        Self::new("default", EdgeStyle::default(thickness).unwrap(), true)
     }
 
     pub fn new<S: Into<String>>(name: S, edge_style: EdgeStyle, is_centered: bool) -> DoorStyle {

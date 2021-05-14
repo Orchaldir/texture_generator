@@ -18,8 +18,8 @@ impl WindowStyle {
     pub fn default(thickness: u32) -> WindowStyle {
         Self::new(
             "default",
-            EdgeStyle::default(thickness),
-            EdgeStyle::default(thickness),
+            EdgeStyle::default(thickness).unwrap(),
+            EdgeStyle::default(thickness).unwrap(),
         )
     }
 
