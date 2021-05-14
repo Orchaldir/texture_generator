@@ -27,9 +27,25 @@ impl DepthCalculator {
             bail!("InterpolateMany requires 2 or more entries");
         }
 
-        Ok(DepthCalculator::InterpolateMany(
-            data.into_iter().map(|(a, b)| (a, b as f32)).collect(),
-        ))
+        let mut converted_data = Vec::with_capacity(data.len());
+        let mut last_pos = -0.00001;
+
+        for (i, (pos, depth)) in data.into_iter().enumerate() {
+            if pos <= last_pos {
+                bail!(
+                    "{}.position of InterpolateMany is below {}",
+                    i + 1,
+                    if i == 0 { "zero" } else { "previous one" }
+                );
+            } else if pos > 1.0 {
+                bail!("{}.position of InterpolateMany is above 1", i + 1);
+            }
+
+            converted_data.push((pos, depth as f32));
+            last_pos = pos;
+        }
+
+        Ok(DepthCalculator::InterpolateMany(converted_data))
     }
 
     pub fn new_dome(center: u8, border: u8) -> DepthCalculator {
@@ -78,6 +94,30 @@ fn interpolate(factor: f32, pos0: f32, pos1: f32, depth0: f32, depth1: f32) -> u
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_new_interpolate_many_with_too_few_entries() {
+        assert!(DepthCalculator::new_interpolate_many(Vec::new()).is_err());
+        assert!(DepthCalculator::new_interpolate_many(vec![(0.5, 100)]).is_err());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_interpolate_many_with_pos_below_zero() {
+        DepthCalculator::new_interpolate_many(vec![(-0.3, 100), (0.7, 200)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_interpolate_many_with_pos_below_previous() {
+        DepthCalculator::new_interpolate_many(vec![(0.3, 100), (0.2, 200)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_interpolate_many_with_pos_above_one() {
+        DepthCalculator::new_interpolate_many(vec![(0.3, 100), (1.7, 200)]).unwrap();
+    }
 
     #[test]
     fn test_uniform() {

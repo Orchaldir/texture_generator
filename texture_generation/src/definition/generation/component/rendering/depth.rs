@@ -1,6 +1,6 @@
 use crate::generation::component::rendering::depth::DepthCalculator;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DepthDefinition {
@@ -10,18 +10,18 @@ pub enum DepthDefinition {
     Dome { center: u8, border: u8 },
 }
 
-impl TryFrom<DepthDefinition> for DepthCalculator {
-    type Error = anyhow::Error;
-
-    fn try_from(definition: DepthDefinition) -> Result<Self, Self::Error> {
-        match definition {
-            DepthDefinition::Uniform(depth) => Ok(DepthCalculator::Uniform(depth)),
+impl DepthDefinition {
+    pub fn convert(&self) -> Result<DepthCalculator> {
+        match self {
+            DepthDefinition::Uniform(depth) => Ok(DepthCalculator::Uniform(*depth)),
             DepthDefinition::InterpolateTwo { center, border } => {
-                Ok(DepthCalculator::new_interpolate_two(center, border))
+                Ok(DepthCalculator::new_interpolate_two(*center, *border))
             }
-            DepthDefinition::InterpolateMany(data) => DepthCalculator::new_interpolate_many(data),
+            DepthDefinition::InterpolateMany(data) => {
+                DepthCalculator::new_interpolate_many(data.clone())
+            }
             DepthDefinition::Dome { center, border } => {
-                Ok(DepthCalculator::new_dome(center, border))
+                Ok(DepthCalculator::new_dome(*center, *border))
             }
         }
     }
@@ -30,13 +30,12 @@ impl TryFrom<DepthDefinition> for DepthCalculator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::convert::TryInto;
 
     #[test]
     fn test_convert_uniform() {
         assert_eq!(
-            DepthDefinition::Uniform(42).try_into(),
-            Ok(DepthCalculator::Uniform(42))
+            DepthDefinition::Uniform(42).convert().unwrap(),
+            DepthCalculator::Uniform(42)
         );
     }
 
@@ -47,8 +46,9 @@ mod tests {
                 center: 100,
                 border: 200,
             }
-            .try_into(),
-            Ok(DepthCalculator::new_interpolate_two(100, 200))
+            .convert()
+            .unwrap(),
+            DepthCalculator::new_interpolate_two(100, 200)
         );
     }
 
@@ -59,8 +59,9 @@ mod tests {
                 center: 100,
                 border: 200,
             }
-            .try_into(),
-            Ok(DepthCalculator::new_dome(100, 200))
+            .convert()
+            .unwrap(),
+            DepthCalculator::new_dome(100, 200)
         );
     }
 }

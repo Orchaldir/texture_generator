@@ -6,7 +6,6 @@ use crate::generation::component::rendering::RenderingComponent;
 use crate::math::color::Color;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
-use std::convert::TryInto;
 
 pub mod color;
 pub mod depth;
@@ -50,7 +49,7 @@ impl RenderingDefinition {
                     .context(format!("Failed to convert 'color' of '{}.Shape'", parent))?;
                 let depth: DepthCalculator = depth
                     .clone()
-                    .try_into()
+                    .convert()
                     .context(format!("Failed to convert 'depth' of '{}.Shape'", parent))?;
 
                 Ok(RenderingComponent::new_shape_with_depth(
