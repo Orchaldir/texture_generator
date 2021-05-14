@@ -19,10 +19,10 @@ impl ColorSelectorDefinition {
                 Ok(ColorSelector::ConstantColor(color))
             }
             ColorSelectorDefinition::Sequence(colors) => {
-                Ok(ColorSelector::new_sequence(convert_colors(colors)?))
+                ColorSelector::new_sequence(convert_colors(colors)?)
             }
             ColorSelectorDefinition::Random(colors) => {
-                Ok(ColorSelector::new_random(convert_colors(colors)?))
+                ColorSelector::new_random(convert_colors(colors)?)
             }
             ColorSelectorDefinition::Probability(colors) => {
                 let mut converted_colors = Vec::with_capacity(colors.len());
@@ -32,7 +32,7 @@ impl ColorSelectorDefinition {
                     converted_colors.push((*probability, color));
                 }
 
-                Ok(ColorSelector::new_probability(converted_colors))
+                ColorSelector::new_probability(converted_colors)
             }
         }
     }
@@ -67,7 +67,7 @@ mod tests {
     fn test_convert_uniform() {
         let definition =
             ColorSelectorDefinition::Sequence(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
-        let selector = ColorSelector::new_sequence(vec![ORANGE, PINK]);
+        let selector = ColorSelector::new_sequence(vec![ORANGE, PINK]).unwrap();
 
         assert_eq!(selector, definition.convert().unwrap())
     }
@@ -76,7 +76,7 @@ mod tests {
     fn test_convert_random() {
         let definition =
             ColorSelectorDefinition::Random(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
-        let selector = ColorSelector::new_random(vec![ORANGE, PINK]);
+        let selector = ColorSelector::new_random(vec![ORANGE, PINK]).unwrap();
 
         assert_eq!(selector, definition.convert().unwrap())
     }
