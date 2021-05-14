@@ -10,7 +10,6 @@ edge_style:
         component:
           Rendering:
             Shape:
-              name: "block"
               shape_factory:
                 RoundedRectangle: 0.5
               color:

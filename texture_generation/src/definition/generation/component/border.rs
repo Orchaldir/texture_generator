@@ -3,7 +3,7 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::component::border::shrink::ShrinkAxis;
 use crate::generation::component::border::BorderComponent;
 use crate::generation::random::Random;
-use crate::utils::error::DefinitionError;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -21,10 +21,11 @@ pub enum BorderDefinition {
 }
 
 impl BorderDefinition {
-    pub fn convert(&self, factor: f32) -> Result<BorderComponent, DefinitionError> {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<BorderComponent> {
         match self {
             BorderDefinition::UniformBorder { border, component } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.UniformBorder.component", parent), factor)?;
                 let border = BorderComponent::new_uniform(convert(*border, factor), component);
                 Ok(border)
             }
@@ -34,14 +35,16 @@ impl BorderDefinition {
                 max_border,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.ShrinkAxis.component", parent), factor)?;
                 let border = ShrinkAxis::new_random(
                     *is_horizontal,
                     convert(*min_border, factor),
                     convert(*max_border, factor),
                     component,
                     Random::Hash,
-                );
+                )
+                .context(format!("Failed to create '{}.ShrinkAxis'", parent))?;
                 Ok(BorderComponent::ShrinkAxis(border))
             }
         }
@@ -61,7 +64,7 @@ mod tests {
         };
         let component = BorderComponent::new_uniform(20, Component::Mock(66));
 
-        assert_eq!(component, definition.convert(2.0).unwrap())
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 
     #[test]
@@ -73,8 +76,8 @@ mod tests {
             component: ComponentDefinition::Mock(42),
         };
         let shrink = ShrinkAxis::new_random(false, 10, 40, Component::Mock(42), Random::Hash);
-        let component = BorderComponent::ShrinkAxis(shrink);
+        let component = BorderComponent::ShrinkAxis(shrink.unwrap());
 
-        assert_eq!(component, definition.convert(2.0).unwrap())
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 }

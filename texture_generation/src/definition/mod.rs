@@ -1,5 +1,5 @@
 use crate::math::size::Size;
-use crate::utils::error::DefinitionError;
+use crate::utils::error::ResourceError;
 use serde::de::DeserializeOwned;
 use std::fs;
 use std::fs::DirEntry;
@@ -65,7 +65,7 @@ fn read_entry<T: DeserializeOwned>(results: &mut Vec<T>, entry: Result<DirEntry,
     }
 }
 
-pub fn read<T: DeserializeOwned>(path: &Path) -> Result<T, DefinitionError> {
+pub fn read<T: DeserializeOwned>(path: &Path) -> Result<T, ResourceError> {
     let string = fs::read_to_string(path)?;
     let data: T = serde_yaml::from_str(&string)?;
     Ok(data)

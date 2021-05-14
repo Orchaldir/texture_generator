@@ -1,6 +1,6 @@
 use crate::generation::component::rendering::color::ColorSelector;
 use crate::math::color::Color;
-use crate::utils::error::DefinitionError;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -12,40 +12,37 @@ pub enum ColorSelectorDefinition {
 }
 
 impl ColorSelectorDefinition {
-    pub fn convert(&self, name: &str) -> Result<ColorSelector, DefinitionError> {
+    pub fn convert(&self) -> Result<ColorSelector> {
         match self {
             ColorSelectorDefinition::ConstantColor(color) => {
-                let color = Color::convert(&color)
-                    .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
+                let color = Color::convert(&color)?;
                 Ok(ColorSelector::ConstantColor(color))
             }
             ColorSelectorDefinition::Sequence(colors) => {
-                Ok(ColorSelector::new_sequence(convert_colors(name, colors)?))
+                ColorSelector::new_sequence(convert_colors(colors)?)
             }
             ColorSelectorDefinition::Random(colors) => {
-                Ok(ColorSelector::new_random(convert_colors(name, colors)?))
+                ColorSelector::new_random(convert_colors(colors)?)
             }
             ColorSelectorDefinition::Probability(colors) => {
                 let mut converted_colors = Vec::with_capacity(colors.len());
 
                 for (probability, color) in colors {
-                    let color = Color::convert(&color)
-                        .ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
+                    let color = Color::convert(&color)?;
                     converted_colors.push((*probability, color));
                 }
 
-                Ok(ColorSelector::new_probability(converted_colors))
+                ColorSelector::new_probability(converted_colors)
             }
         }
     }
 }
 
-fn convert_colors(name: &str, colors: &[String]) -> Result<Vec<Color>, DefinitionError> {
+fn convert_colors(colors: &[String]) -> Result<Vec<Color>> {
     let mut converted_colors = Vec::with_capacity(colors.len());
 
     for color in colors {
-        let color =
-            Color::convert(&color).ok_or_else(|| DefinitionError::invalid_color(name, &color))?;
+        let color = Color::convert(&color)?;
         converted_colors.push(color);
     }
 
@@ -63,25 +60,25 @@ mod tests {
         let definition = ColorSelectorDefinition::ConstantColor("#FFA500".to_string());
         let selector = ColorSelector::ConstantColor(ORANGE);
 
-        assert_eq!(selector, definition.convert("test").unwrap())
+        assert_eq!(selector, definition.convert().unwrap())
     }
 
     #[test]
     fn test_convert_uniform() {
         let definition =
             ColorSelectorDefinition::Sequence(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
-        let selector = ColorSelector::new_sequence(vec![ORANGE, PINK]);
+        let selector = ColorSelector::new_sequence(vec![ORANGE, PINK]).unwrap();
 
-        assert_eq!(selector, definition.convert("test").unwrap())
+        assert_eq!(selector, definition.convert().unwrap())
     }
 
     #[test]
     fn test_convert_random() {
         let definition =
             ColorSelectorDefinition::Random(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
-        let selector = ColorSelector::new_random(vec![ORANGE, PINK]);
+        let selector = ColorSelector::new_random(vec![ORANGE, PINK]).unwrap();
 
-        assert_eq!(selector, definition.convert("test").unwrap())
+        assert_eq!(selector, definition.convert().unwrap())
     }
 
     #[test]
@@ -96,6 +93,6 @@ mod tests {
             max_number: 15,
         };
 
-        assert_eq!(selector, definition.convert("test").unwrap())
+        assert_eq!(selector, definition.convert().unwrap())
     }
 }

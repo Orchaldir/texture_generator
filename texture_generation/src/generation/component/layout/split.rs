@@ -3,6 +3,7 @@ use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::size::Size;
+use anyhow::{bail, Result};
 
 #[svgbobdoc::transform]
 /// Splits an area into different components of different sizes.
@@ -42,16 +43,26 @@ pub struct SplitLayout {
 }
 
 impl SplitLayout {
-    pub fn new(is_horizontal: bool, components: Vec<(u32, Component)>) -> SplitLayout {
+    pub fn new(is_horizontal: bool, components: Vec<(u32, Component)>) -> Result<SplitLayout> {
+        if components.len() < 2 {
+            bail!("Requires at least 2 'components'");
+        }
+
+        let mut converted = Vec::with_capacity(components.len());
         let total = components.iter().map(|(value, _c)| *value).sum::<u32>() as f32;
 
-        SplitLayout {
-            is_horizontal,
-            components: components
-                .into_iter()
-                .map(|(v, c)| (v as f32 / total, c))
-                .collect(),
+        for (i, (proportion, component)) in components.into_iter().enumerate() {
+            if proportion == 0 {
+                bail!(format!("{}.proportion is 0", i + 1));
+            }
+
+            converted.push((proportion as f32 / total, component))
         }
+
+        Ok(SplitLayout {
+            is_horizontal,
+            components: converted,
+        })
     }
 
     // Flips between horizontal & vertical mode.
@@ -119,6 +130,18 @@ mod tests {
     use crate::math::size::Size;
 
     #[test]
+    #[should_panic]
+    fn test_new_with_too_few_components() {
+        SplitLayout::new(true, vec![create(1, RED)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_proportion_is_zero() {
+        SplitLayout::new(true, vec![create(0, RED), create(3, GREEN)]).unwrap();
+    }
+
+    #[test]
     fn test_split_x() {
         let size = Size::new(6, 2);
         let aabb = AABB::with_size(size);
@@ -126,7 +149,8 @@ mod tests {
         let layout = SplitLayout::new(
             true,
             vec![create(1, RED), create(3, GREEN), create(2, BLUE)],
-        );
+        )
+        .unwrap();
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 
@@ -147,7 +171,8 @@ mod tests {
         let layout = SplitLayout::new(
             false,
             vec![create(3, RED), create(2, GREEN), create(1, BLUE)],
-        );
+        )
+        .unwrap();
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 
@@ -165,7 +190,7 @@ mod tests {
     }
 
     fn create(size: u32, color: Color) -> (u32, Component) {
-        let renderer = RenderingComponent::new_fill_area("area", color, 200);
+        let renderer = RenderingComponent::new_fill_area(color, 200);
         (size, Component::Rendering(Box::new(renderer)))
     }
 }

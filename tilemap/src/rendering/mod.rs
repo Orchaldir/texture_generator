@@ -357,7 +357,7 @@ mod tests {
     }
 
     fn create_texture(name: &str, color: Color, depth: u8) -> TextureGenerator {
-        let rendering = RenderingComponent::new_fill_area(name, color, depth);
+        let rendering = RenderingComponent::new_fill_area(color, depth);
         let component = Component::Rendering(Box::new(rendering));
         TextureGenerator::new(name, Size::default(), PINK, component)
     }

@@ -1,6 +1,6 @@
 use crate::rendering::style::edge::EdgeDefinition;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
-use texture_generation::utils::error::DefinitionError;
 use texture_generation::utils::resource::ResourceDefinition;
 use tilemap::rendering::style::wall::WallStyle;
 
@@ -16,9 +16,15 @@ pub struct WallDefinition {
 impl ResourceDefinition for WallDefinition {
     type R = WallStyle;
 
-    fn convert(&self, size: u32) -> Result<WallStyle, DefinitionError> {
+    fn convert(&self, size: u32) -> Result<WallStyle> {
         let factor = size as f32 / self.tile_size as f32;
-        let edge_style = self.edge_style.convert(factor)?;
+        let edge_style = self
+            .edge_style
+            .convert("edge_style", factor)
+            .context(format!(
+                "Failed to convert 'edge_style' of the wall '{}'",
+                self.name
+            ))?;
         Ok(WallStyle::new(
             self.name.clone(),
             edge_style,

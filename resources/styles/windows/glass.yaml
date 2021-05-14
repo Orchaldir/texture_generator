@@ -11,19 +11,16 @@ pane_style:
           - - 10
             - Rendering:
                 FillArea:
-                  name: "front"
                   color: "#432711"
                   depth: 100
           - - 12
             - Rendering:
                 FillArea:
-                  name: "glass"
                   color: "#00FFFF"
                   depth: 100
           - - 10
             - Rendering:
                 FillArea:
-                  name: "back"
                   color: "#432711"
                   depth: 100
 stool_style:
@@ -31,6 +28,5 @@ stool_style:
     thickness: 128
     component:
       FillArea:
-        name: "stool"
         color: "#646464"
         depth: 100

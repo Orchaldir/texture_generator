@@ -10,7 +10,6 @@ use texture_generation::definition::read;
 use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::generation::process::PostProcess;
 use texture_generation::generation::TextureGenerator;
-use texture_generation::utils::error::DefinitionError;
 use texture_generation::utils::logging::init_logging;
 use texture_generation::utils::resource::ResourceDefinition;
 
@@ -34,7 +33,7 @@ struct Cli {
     size: u32,
 }
 
-fn load_post_processing(path: &Path) -> Result<Vec<PostProcess>, DefinitionError> {
+fn load_post_processing(path: &Path) -> Result<Vec<PostProcess>> {
     if path.exists() {
         let definition = PostProcessDefinition::read(path)?;
         let post_processes = definition.into_iter().map(|d| d.into()).collect();

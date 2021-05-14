@@ -4,7 +4,7 @@ use crate::generation::data::Data;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
-use crate::utils::error::ValueError;
+use anyhow::{bail, Result};
 
 #[svgbobdoc::transform]
 /// A simple brick wall:
@@ -32,54 +32,34 @@ use crate::utils::error::ValueError;
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct BrickPattern {
-    name: String,
     brick: Size,
     offset: u32,
     component: Component,
 }
 
 impl BrickPattern {
-    pub fn new<S: Into<String>>(
-        name: S,
-        brick: Size,
-        offset: u32,
-        component: Component,
-    ) -> Result<BrickPattern, ValueError> {
+    pub fn new(brick: Size, offset: u32, component: Component) -> Result<BrickPattern> {
         if brick.width() < 1 {
-            return Err(ValueError::value_too_small(
-                name,
-                "brick.width",
-                brick.width(),
-            ));
+            bail!("Argument 'brick.width' needs to be greater than 1");
         } else if brick.height() < 1 {
-            return Err(ValueError::value_too_small(
-                name,
-                "brick.height",
-                brick.height(),
-            ));
+            bail!("Argument 'brick.height' needs to be greater than 1");
         } else if offset >= brick.width() {
-            return Err(ValueError::value_too_big(name, "offset", brick.height()));
+            bail!("Argument 'offset' needs to be greater than or equal to 'brick.width'");
         }
 
         Ok(BrickPattern {
-            name: name.into(),
             brick,
             offset,
             component,
         })
     }
 
-    pub fn new_square<S: Into<String>>(
-        name: S,
-        side: u32,
-        component: Component,
-    ) -> Result<BrickPattern, ValueError> {
+    pub fn new_square(side: u32, component: Component) -> Result<BrickPattern> {
         if side < 1 {
-            return Err(ValueError::value_too_small(name, "side", side));
+            bail!("Argument 'side' needs to be greater than 1");
         }
 
         Ok(BrickPattern {
-            name: name.into(),
             brick: Size::square(side),
             offset: 0,
             component,
@@ -166,7 +146,7 @@ mod tests {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = BrickPattern::new("test", Size::square(5), 2, create_component()).unwrap();
+        let layout = BrickPattern::new(Size::square(5), 2, create_component()).unwrap();
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 
@@ -199,7 +179,7 @@ mod tests {
         let size = Size::new(10, 15);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = BrickPattern::new_square("test", 5, create_component()).unwrap();
+        let layout = BrickPattern::new_square(5, create_component()).unwrap();
 
         layout.generate(&mut texture, Data::for_texture(aabb));
 

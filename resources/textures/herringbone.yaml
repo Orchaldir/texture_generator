@@ -14,7 +14,6 @@ component:
             component:
               Rendering:
                 FillArea:
-                  name: "black"
                   color: "#000000"
                   depth: 25
       vertical_component:
@@ -24,6 +23,5 @@ component:
             component:
               Rendering:
                 FillArea:
-                  name: "gold"
                   color: "#FFD700"
                   depth: 25

@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn test_render_node() {
-        let component = RenderingComponent::new_fill_area("corner", RED, 9);
+        let component = RenderingComponent::new_fill_area(RED, 9);
         let node_style = NodeStyle::new(2, component);
         let mut texture = Texture::new(Size::new(6, 5), BLACK);
 

@@ -198,8 +198,8 @@ mod tests {
 
     #[test]
     fn test_render_horizontal() {
-        let component = RenderingComponent::new_fill_area("corner", RED, 9);
-        let edge_component = RenderingComponent::new_fill_area("edge", GREEN, 4);
+        let component = RenderingComponent::new_fill_area(RED, 9);
+        let edge_component = RenderingComponent::new_fill_area(GREEN, 4);
         let node_style0 = NodeStyle::new(4, component.clone());
         let node_style1 = NodeStyle::new(2, component);
         let edge_style = EdgeStyle::new_solid(2, edge_component);

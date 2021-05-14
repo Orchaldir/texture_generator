@@ -2,8 +2,9 @@ use crate::definition::generation::component::ComponentDefinition;
 use crate::generation::TextureGenerator;
 use crate::math::color::Color;
 use crate::math::size::Size;
-use crate::utils::error::DefinitionError;
+use crate::utils::error::ResourceError;
 use crate::utils::resource::ResourceDefinition;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
@@ -34,7 +35,7 @@ impl TextureDefinition {
         }
     }
 
-    pub fn write(&self, path: &str) -> Result<(), DefinitionError> {
+    pub fn write(&self, path: &str) -> Result<(), ResourceError> {
         let mut file = File::create(path)?;
 
         let s = serde_yaml::to_string(self)?;
@@ -48,11 +49,19 @@ impl TextureDefinition {
 impl ResourceDefinition for TextureDefinition {
     type R = TextureGenerator;
 
-    fn convert(&self, size: u32) -> Result<TextureGenerator, DefinitionError> {
+    fn convert(&self, size: u32) -> Result<TextureGenerator> {
         let factor = size as f32 / self.size as f32;
-        let component = self.component.convert(factor)?;
-        let color = Color::convert(&self.background)
-            .ok_or_else(|| DefinitionError::invalid_color("background", &self.background))?;
+        let component = self
+            .component
+            .convert(&"component", factor)
+            .context(format!(
+                "Failed to convert 'component' of the texture '{}'",
+                self.name
+            ))?;
+        let color = Color::convert(&self.background).context(format!(
+            "Failed to convert 'background' of the texture '{}'",
+            self.name
+        ))?;
 
         Ok(TextureGenerator::new(
             self.name.clone(),

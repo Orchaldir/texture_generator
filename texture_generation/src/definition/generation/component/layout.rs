@@ -8,13 +8,12 @@ use crate::generation::component::layout::split::SplitLayout;
 use crate::generation::component::layout::LayoutComponent;
 use crate::generation::random::Random;
 use crate::math::size::Size;
-use crate::utils::error::DefinitionError;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum LayoutDefinition {
     BrickWall {
-        name: String,
         brick: Size,
         offset: u32,
         component: ComponentDefinition,
@@ -51,7 +50,6 @@ pub enum LayoutDefinition {
         component: ComponentDefinition,
     },
     Square {
-        name: String,
         side: u32,
         component: ComponentDefinition,
     },
@@ -62,21 +60,21 @@ pub enum LayoutDefinition {
 }
 
 impl LayoutDefinition {
-    pub fn convert(&self, factor: f32) -> Result<LayoutComponent, DefinitionError> {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<LayoutComponent> {
         match self {
             LayoutDefinition::BrickWall {
-                name,
                 brick,
                 offset,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.BrickWall.component", parent), factor)?;
                 let pattern = BrickPattern::new(
-                    name,
                     convert_size(brick, factor),
                     convert(*offset, factor),
                     component,
-                )?;
+                )
+                .context(format!("Failed to create '{}.BrickWall'", parent))?;
                 Ok(LayoutComponent::BrickWall(pattern))
             }
             LayoutDefinition::Herringbone {
@@ -85,12 +83,21 @@ impl LayoutDefinition {
                 horizontal_component,
                 vertical_component,
             } => {
+                let horizontal_component = horizontal_component.convert(
+                    &format!("{}.Herringbone.horizontal_component", parent),
+                    factor,
+                )?;
+                let vertical_component = vertical_component.convert(
+                    &format!("{}.Herringbone.vertical_component", parent),
+                    factor,
+                )?;
                 let pattern = HerringbonePattern::new(
                     convert(*side, factor),
                     *multiplier,
-                    horizontal_component.convert(factor)?,
-                    vertical_component.convert(factor)?,
-                );
+                    horizontal_component,
+                    vertical_component,
+                )
+                .context(format!("Failed to create '{}.Herringbone'", parent))?;
                 Ok(LayoutComponent::Herringbone(pattern))
             }
             LayoutDefinition::Mock(id) => Ok(LayoutComponent::Mock(*id)),
@@ -104,8 +111,9 @@ impl LayoutDefinition {
                     *cells_per_side,
                     *min_size,
                     *max_size,
-                    component.convert(factor)?,
-                );
+                    component.convert(&format!("{}.RandomAshlar.component", parent), factor)?,
+                )
+                .context(format!("Failed to create '{}.RandomAshlar'", parent))?;
                 Ok(LayoutComponent::RandomAshlar(pattern))
             }
             LayoutDefinition::RandomRepeatX {
@@ -113,14 +121,16 @@ impl LayoutDefinition {
                 max_size,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.RandomRepeatX.component", parent), factor)?;
                 let layout = RepeatLayout::new_random(
                     true,
                     convert(*min_size, factor),
                     convert(*max_size, factor),
                     component,
                     Random::Hash,
-                );
+                )
+                .context(format!("Failed to create '{}.RandomRepeatX'", parent))?;
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RandomRepeatY {
@@ -128,33 +138,37 @@ impl LayoutDefinition {
                 max_size,
                 component,
             } => {
-                let component = component.convert(factor)?;
+                let component =
+                    component.convert(&format!("{}.RandomRepeatY.component", parent), factor)?;
                 let layout = RepeatLayout::new_random(
                     false,
                     convert(*min_size, factor),
                     convert(*max_size, factor),
                     component,
                     Random::Hash,
-                );
+                )
+                .context(format!("Failed to create '{}.RandomRepeatY'", parent))?;
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatX { size, component } => {
-                let component = component.convert(factor)?;
-                let layout = RepeatLayout::new(true, convert(*size, factor), component);
+                let component =
+                    component.convert(&format!("{}.RepeatX.component", parent), factor)?;
+                let layout = RepeatLayout::new(true, convert(*size, factor), component)
+                    .context(format!("Failed to create '{}.RepeatX'", parent))?;
                 Ok(LayoutComponent::Repeat(layout))
             }
             LayoutDefinition::RepeatY { size, component } => {
-                let component = component.convert(factor)?;
-                let layout = RepeatLayout::new(false, convert(*size, factor), component);
+                let component =
+                    component.convert(&format!("{}.RepeatY.component", parent), factor)?;
+                let layout = RepeatLayout::new(false, convert(*size, factor), component)
+                    .context(format!("Failed to create '{}.RepeatY'", parent))?;
                 Ok(LayoutComponent::Repeat(layout))
             }
-            LayoutDefinition::Square {
-                name,
-                side,
-                component,
-            } => {
-                let component = component.convert(factor)?;
-                let pattern = BrickPattern::new_square(name, convert(*side, factor), component)?;
+            LayoutDefinition::Square { side, component } => {
+                let component =
+                    component.convert(&format!("{}.Square.component", parent), factor)?;
+                let pattern = BrickPattern::new_square(convert(*side, factor), component)
+                    .context(format!("Failed to create '{}.Square'", parent))?;
                 Ok(LayoutComponent::BrickWall(pattern))
             }
             LayoutDefinition::Split {
@@ -163,12 +177,16 @@ impl LayoutDefinition {
             } => {
                 let mut converted_components = Vec::with_capacity(components.len());
 
-                for (value, component) in components {
-                    let component = component.convert(factor)?;
+                for (i, (value, component)) in components.iter().enumerate() {
+                    let component = component.convert(
+                        &format!("{}.Split.component.{}|{}.", parent, i + 1, components.len()),
+                        factor,
+                    )?;
                     converted_components.push((*value, component));
                 }
 
-                let pattern = SplitLayout::new(*is_horizontal, converted_components);
+                let pattern = SplitLayout::new(*is_horizontal, converted_components)
+                    .context(format!("Failed to create '{}.Split'", parent))?;
                 Ok(LayoutComponent::Split(pattern))
             }
         }
@@ -183,16 +201,15 @@ mod tests {
     #[test]
     fn test_convert_brick_wall() {
         let definition = LayoutDefinition::BrickWall {
-            name: "test".to_string(),
             brick: Size::new(20, 10),
             offset: 10,
             component: ComponentDefinition::Mock(66),
         };
         let component = LayoutComponent::BrickWall(
-            BrickPattern::new("test", Size::new(40, 20), 20, Component::Mock(66)).unwrap(),
+            BrickPattern::new(Size::new(40, 20), 20, Component::Mock(66)).unwrap(),
         );
 
-        assert_eq!(component, definition.convert(2.0).unwrap())
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 
     #[test]
@@ -201,9 +218,10 @@ mod tests {
             size: 20,
             component: ComponentDefinition::Mock(88),
         };
-        let component = LayoutComponent::Repeat(RepeatLayout::new(true, 30, Component::Mock(88)));
+        let repeat = RepeatLayout::new(true, 30, Component::Mock(88));
+        let component = LayoutComponent::Repeat(repeat.unwrap());
 
-        assert_eq!(component, definition.convert(1.5).unwrap())
+        assert_eq!(component, definition.convert("test", 1.5).unwrap())
     }
 
     #[test]
@@ -212,23 +230,23 @@ mod tests {
             size: 50,
             component: ComponentDefinition::Mock(11),
         };
-        let component = LayoutComponent::Repeat(RepeatLayout::new(false, 75, Component::Mock(11)));
+        let repeat = RepeatLayout::new(false, 75, Component::Mock(11));
+        let component = LayoutComponent::Repeat(repeat.unwrap());
 
-        assert_eq!(component, definition.convert(1.5).unwrap())
+        assert_eq!(component, definition.convert("test", 1.5).unwrap())
     }
 
     #[test]
     fn test_convert_square() {
         let definition = LayoutDefinition::Square {
-            name: "square".to_string(),
             side: 10,
             component: ComponentDefinition::Mock(66),
         };
         let component = LayoutComponent::BrickWall(
-            BrickPattern::new("square", Size::square(25), 0, Component::Mock(66)).unwrap(),
+            BrickPattern::new(Size::square(25), 0, Component::Mock(66)).unwrap(),
         );
 
-        assert_eq!(component, definition.convert(2.5).unwrap())
+        assert_eq!(component, definition.convert("test", 2.5).unwrap())
     }
 
     #[test]
@@ -240,11 +258,12 @@ mod tests {
                 (6, ComponentDefinition::Mock(45)),
             ],
         };
-        let component = LayoutComponent::Split(SplitLayout::new(
+        let layout = SplitLayout::new(
             true,
             vec![(4, Component::Mock(11)), (6, Component::Mock(45))],
-        ));
+        );
+        let component = LayoutComponent::Split(layout.unwrap());
 
-        assert_eq!(component, definition.convert(2.0).unwrap())
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 }

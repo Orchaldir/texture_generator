@@ -5,6 +5,7 @@ use crate::math::aabb::{AxisAlignedBoundingBox, AABB};
 use crate::math::occupancy::tile::{check_column, check_row, fill_area, OccupancyTile, START};
 use crate::math::point::Point;
 use crate::math::size::Size;
+use anyhow::{bail, Result};
 use rand::distributions::{Distribution, Uniform};
 use rand::SeedableRng;
 use rand_pcg::Pcg64;
@@ -43,13 +44,21 @@ impl RandomAshlarPattern {
         min_size: u32,
         max_size: u32,
         component: Component,
-    ) -> RandomAshlarPattern {
-        RandomAshlarPattern {
+    ) -> Result<RandomAshlarPattern> {
+        if cells_per_side <= 1 {
+            bail!("Argument 'cells_per_side' needs to be greater than 1");
+        } else if min_size == 0 {
+            bail!("Argument 'min_size' needs to be greater than 0");
+        } else if max_size <= min_size {
+            bail!("Argument 'max_size' needs to be greater than 'min_size'");
+        }
+
+        Ok(RandomAshlarPattern {
             cells_per_side,
             min_size,
             max_size,
             component,
-        }
+        })
     }
 
     /// Generates the pattern in the area defined by the [`AABB`].
@@ -187,6 +196,24 @@ mod tests {
     use crate::math::size::Size;
 
     #[test]
+    #[should_panic]
+    fn test_new_with_cells_per_side_too_small() {
+        RandomAshlarPattern::new(1, 2, 4, Component::Mock(1)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_min_size_too_small() {
+        RandomAshlarPattern::new(4, 0, 4, Component::Mock(1)).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_max_size_too_small() {
+        RandomAshlarPattern::new(6, 4, 2, Component::Mock(1)).unwrap();
+    }
+
+    #[test]
     fn test_random_ashlar_pattern() {
         let size = Size::square(8);
         let aabb = AABB::with_size(size);
@@ -195,13 +222,12 @@ mod tests {
             BLACK, BLUE, CYAN, GREEN, MAGENTA, ORANGE, RED, PINK, YELLOW,
         ]);
         let rendering = RenderingComponent::new_shape_with_depth(
-            "test",
             ShapeFactory::Rectangle,
             color_selector,
             DepthCalculator::Uniform(255),
         );
         let component = Component::Rendering(Box::new(rendering));
-        let pattern = RandomAshlarPattern::new(8, 2, 4, component);
+        let pattern = RandomAshlarPattern::new(8, 2, 4, component).unwrap();
 
         pattern.generate(&mut texture, Data::for_texture(aabb));
 
