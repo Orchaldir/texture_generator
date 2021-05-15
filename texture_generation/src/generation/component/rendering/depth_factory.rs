@@ -4,7 +4,7 @@ use crate::generation::random::Random;
 use anyhow::{bail, Result};
 
 #[derive(Clone, Debug, PartialEq)]
-/// Calculates the depth for each pixel.
+/// Creates a ['DepthCalculator'] based on the situation.
 pub enum DepthFactory {
     /// All pixels have the same depth value.
     Uniform(u8),
@@ -39,7 +39,7 @@ impl DepthFactory {
         }
     }
 
-    /// Creates a ['DepthCalculator'] from the factory.
+    /// Creates a ['DepthCalculator'].
     pub fn create(&self, data: &Data) -> DepthCalculator {
         match self {
             DepthFactory::Uniform(depth) => DepthCalculator::Uniform(*depth),
@@ -55,10 +55,19 @@ impl DepthFactory {
             DepthFactory::Gradient { random, start, end } => {
                 let aabb = data.get_inner();
 
-                if random.get_random_instance_bool(data, 0) {
-                    DepthCalculator::new_gradient_x(aabb.start().x, aabb.end().x, *start, *end)
-                } else {
-                    DepthCalculator::new_gradient_y(aabb.start().y, aabb.end().y, *start, *end)
+                match random.get_random_instance_u32(data, 4, 0) {
+                    0 => {
+                        DepthCalculator::new_gradient_x(aabb.start().x, aabb.end().x, *start, *end)
+                    }
+                    1 => {
+                        DepthCalculator::new_gradient_x(aabb.start().x, aabb.end().x, *end, *start)
+                    }
+                    2 => {
+                        DepthCalculator::new_gradient_y(aabb.start().y, aabb.end().y, *start, *end)
+                    }
+                    _ => {
+                        DepthCalculator::new_gradient_y(aabb.start().y, aabb.end().y, *end, *start)
+                    }
                 }
             }
         }
