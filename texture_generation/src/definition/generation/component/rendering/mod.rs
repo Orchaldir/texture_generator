@@ -1,7 +1,7 @@
 use crate::definition::generation::component::rendering::color::ColorSelectorDefinition;
 use crate::definition::generation::component::rendering::depth::DepthDefinition;
 use crate::definition::math::shape_factor::ShapeFactorDefinition;
-use crate::generation::component::rendering::depth::DepthCalculator;
+use crate::generation::component::rendering::depth_factory::DepthFactory;
 use crate::generation::component::rendering::RenderingComponent;
 use crate::math::color::Color;
 use anyhow::{Context, Result};
@@ -44,7 +44,7 @@ impl RenderingDefinition {
                 let color = color
                     .convert()
                     .context(format!("Failed to convert 'color' of '{}.Shape'", parent))?;
-                let depth: DepthCalculator = depth
+                let depth: DepthFactory = depth
                     .clone()
                     .convert()
                     .context(format!("Failed to convert 'depth' of '{}.Shape'", parent))?;
@@ -63,7 +63,7 @@ impl RenderingDefinition {
 mod tests {
     use super::*;
     use crate::generation::component::rendering::color::ColorSelector;
-    use crate::generation::component::rendering::depth::DepthCalculator;
+    use crate::generation::component::rendering::depth_factory::DepthFactory;
     use crate::math::color::ORANGE;
     use crate::math::shape_factory::ShapeFactory;
 
@@ -91,7 +91,7 @@ mod tests {
         let component = RenderingComponent::new_shape_with_depth(
             ShapeFactory::Circle,
             ColorSelector::ConstantColor(ORANGE),
-            DepthCalculator::Uniform(111),
+            DepthFactory::Uniform(111),
         );
 
         assert_eq!(component, definition.convert("test", 3.0).unwrap())

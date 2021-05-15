@@ -1,4 +1,6 @@
-use anyhow::{bail, Result};
+use crate::generation::component::rendering::depth_factory::convert_many;
+use crate::math::point::Point;
+use anyhow::Result;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Calculates the depth for each pixel.
@@ -7,10 +9,24 @@ pub enum DepthCalculator {
     Uniform(u8),
     /// A linear interpolation between 2 depth values at the center & the border.
     InterpolateTwo { center: f32, diff: f32 },
-    /// A linear interpolation between many depth values
+    /// A linear interpolation between many depth values.
     InterpolateMany(Vec<(f32, f32)>),
     /// Creates a dome.
     Dome { center: f32, diff: f32 },
+    /// A gradient along the x-axis.
+    GradientX {
+        start_x: f32,
+        diff_x: f32,
+        start_depth: f32,
+        diff_depth: f32,
+    },
+    /// A gradient along the y-axis.
+    GradientY {
+        start_y: f32,
+        diff_y: f32,
+        start_depth: f32,
+        diff_depth: f32,
+    },
 }
 
 impl DepthCalculator {
@@ -23,29 +39,7 @@ impl DepthCalculator {
     }
 
     pub fn new_interpolate_many(data: Vec<(f32, u8)>) -> Result<DepthCalculator> {
-        if data.len() < 2 {
-            bail!("InterpolateMany requires 2 or more entries");
-        }
-
-        let mut converted_data = Vec::with_capacity(data.len());
-        let mut last_pos = -0.00001;
-
-        for (i, (pos, depth)) in data.into_iter().enumerate() {
-            if pos <= last_pos {
-                bail!(
-                    "{}.position of InterpolateMany is below {}",
-                    i + 1,
-                    if i == 0 { "zero" } else { "previous one" }
-                );
-            } else if pos > 1.0 {
-                bail!("{}.position of InterpolateMany is above 1", i + 1);
-            }
-
-            converted_data.push((pos, depth as f32));
-            last_pos = pos;
-        }
-
-        Ok(DepthCalculator::InterpolateMany(converted_data))
+        Ok(DepthCalculator::InterpolateMany(convert_many(data)?))
     }
 
     pub fn new_dome(center: u8, border: u8) -> DepthCalculator {
@@ -56,8 +50,36 @@ impl DepthCalculator {
         }
     }
 
+    pub fn new_gradient_x(
+        start_x: i32,
+        end_x: i32,
+        start_depth: u8,
+        end_depth: u8,
+    ) -> DepthCalculator {
+        DepthCalculator::GradientX {
+            start_x: start_x as f32,
+            diff_x: (end_x - start_x) as f32,
+            start_depth: start_depth as f32,
+            diff_depth: (end_depth as f32 - start_depth as f32),
+        }
+    }
+
+    pub fn new_gradient_y(
+        start_y: i32,
+        end_y: i32,
+        start_depth: u8,
+        end_depth: u8,
+    ) -> DepthCalculator {
+        DepthCalculator::GradientY {
+            start_y: start_y as f32,
+            diff_y: (end_y - start_y) as f32,
+            start_depth: start_depth as f32,
+            diff_depth: (end_depth as f32 - start_depth as f32),
+        }
+    }
+
     /// Calculates the depth value based on a factor between 0 & 1.
-    pub fn calculate(&self, factor: f32) -> u8 {
+    pub fn calculate(&self, point: &Point, factor: f32) -> u8 {
         match self {
             DepthCalculator::Uniform(depth) => *depth,
             DepthCalculator::InterpolateTwo { center, diff } => (*center + factor * (*diff)) as u8,
@@ -82,6 +104,24 @@ impl DepthCalculator {
                 let factor = 1.0 - (1.0 - factor * factor).sqrt();
                 (*center + factor * (*diff)) as u8
             }
+            DepthCalculator::GradientX {
+                start_x,
+                diff_x,
+                start_depth,
+                diff_depth,
+            } => {
+                let factor = (point.x as f32 - *start_x) / *diff_x;
+                (*start_depth + factor * (*diff_depth)) as u8
+            }
+            DepthCalculator::GradientY {
+                start_y,
+                diff_y,
+                start_depth,
+                diff_depth,
+            } => {
+                let factor = (point.y as f32 - *start_y) / *diff_y;
+                (*start_depth + factor * (*diff_depth)) as u8
+            }
         }
     }
 }
@@ -94,6 +134,8 @@ fn interpolate(factor: f32, pos0: f32, pos1: f32, depth0: f32, depth1: f32) -> u
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const POINT: Point = Point::new(i32::max_value(), i32::max_value());
 
     #[test]
     fn test_new_interpolate_many_with_too_few_entries() {
@@ -125,7 +167,7 @@ mod tests {
 
         for i in 0..100 {
             let distance = i as f32 / 100.0;
-            assert_eq!(calculator.calculate(distance), 99);
+            assert(&calculator, distance, 99);
         }
     }
 
@@ -133,36 +175,36 @@ mod tests {
     fn test_uniform_below_0() {
         let calculator = DepthCalculator::Uniform(99);
 
-        assert_eq!(calculator.calculate(-1.0), 99);
+        assert(&calculator, -1.0, 99);
     }
 
     #[test]
     fn test_uniform_above_1() {
         let calculator = DepthCalculator::Uniform(99);
 
-        assert_eq!(calculator.calculate(2.0), 99);
+        assert(&calculator, 2.0, 99);
     }
 
     #[test]
     fn test_interpolate_two() {
         let calculator = DepthCalculator::new_interpolate_two(100, 200);
 
-        assert_eq!(calculator.calculate(0.0), 100);
-        assert_eq!(calculator.calculate(0.25), 125);
-        assert_eq!(calculator.calculate(0.5), 150);
-        assert_eq!(calculator.calculate(0.75), 175);
-        assert_eq!(calculator.calculate(1.0), 200);
+        assert(&calculator, 0.0, 100);
+        assert(&calculator, 0.25, 125);
+        assert(&calculator, 0.5, 150);
+        assert(&calculator, 0.75, 175);
+        assert(&calculator, 1.0, 200);
     }
 
     #[test]
     fn test_interpolate_two_decreasing() {
         let calculator = DepthCalculator::new_interpolate_two(200, 0);
 
-        assert_eq!(calculator.calculate(0.0), 200);
-        assert_eq!(calculator.calculate(0.25), 150);
-        assert_eq!(calculator.calculate(0.5), 100);
-        assert_eq!(calculator.calculate(0.75), 50);
-        assert_eq!(calculator.calculate(1.0), 0);
+        assert(&calculator, 0.0, 200);
+        assert(&calculator, 0.25, 150);
+        assert(&calculator, 0.5, 100);
+        assert(&calculator, 0.75, 50);
+        assert(&calculator, 1.0, 0);
     }
 
     #[test]
@@ -170,15 +212,15 @@ mod tests {
         let calculator =
             DepthCalculator::new_interpolate_many(vec![(0.3, 100), (0.7, 200)]).unwrap();
 
-        assert_eq!(calculator.calculate(0.0), 100);
-        assert_eq!(calculator.calculate(0.1), 100);
-        assert_eq!(calculator.calculate(0.3), 100);
-        assert_eq!(calculator.calculate(0.4), 125);
-        assert_eq!(calculator.calculate(0.5), 150);
-        assert_eq!(calculator.calculate(0.6), 175);
-        assert_eq!(calculator.calculate(0.7), 200);
-        assert_eq!(calculator.calculate(0.8), 200);
-        assert_eq!(calculator.calculate(1.0), 200);
+        assert(&calculator, 0.0, 100);
+        assert(&calculator, 0.1, 100);
+        assert(&calculator, 0.3, 100);
+        assert(&calculator, 0.4, 125);
+        assert(&calculator, 0.5, 150);
+        assert(&calculator, 0.6, 175);
+        assert(&calculator, 0.7, 200);
+        assert(&calculator, 0.8, 200);
+        assert(&calculator, 1.0, 200);
     }
 
     #[test]
@@ -186,32 +228,62 @@ mod tests {
         let calculator =
             DepthCalculator::new_interpolate_many(vec![(0.3, 200), (0.7, 100)]).unwrap();
 
-        assert_eq!(calculator.calculate(0.0), 200);
-        assert_eq!(calculator.calculate(0.1), 200);
-        assert_eq!(calculator.calculate(0.3), 200);
-        assert_eq!(calculator.calculate(0.4), 175);
-        assert_eq!(calculator.calculate(0.5), 150);
-        assert_eq!(calculator.calculate(0.6), 124);
-        assert_eq!(calculator.calculate(0.7), 100);
-        assert_eq!(calculator.calculate(0.8), 100);
-        assert_eq!(calculator.calculate(1.0), 100);
+        assert(&calculator, 0.0, 200);
+        assert(&calculator, 0.1, 200);
+        assert(&calculator, 0.3, 200);
+        assert(&calculator, 0.4, 175);
+        assert(&calculator, 0.5, 150);
+        assert(&calculator, 0.6, 124);
+        assert(&calculator, 0.7, 100);
+        assert(&calculator, 0.8, 100);
+        assert(&calculator, 1.0, 100);
     }
 
     #[test]
     fn test_dome() {
         let calculator = DepthCalculator::new_dome(100, 200);
 
-        assert_eq!(calculator.calculate(0.0), 100);
-        assert_eq!(calculator.calculate(0.5), 113);
-        assert_eq!(calculator.calculate(1.0), 200);
+        assert(&calculator, 0.0, 100);
+        assert(&calculator, 0.5, 113);
+        assert(&calculator, 1.0, 200);
     }
 
     #[test]
     fn test_dome_decreasing() {
         let calculator = DepthCalculator::new_dome(200, 0);
 
-        assert_eq!(calculator.calculate(0.0), 200);
-        assert_eq!(calculator.calculate(0.5), 173);
-        assert_eq!(calculator.calculate(1.0), 0);
+        assert(&calculator, 0.0, 200);
+        assert(&calculator, 0.5, 173);
+        assert(&calculator, 1.0, 0);
+    }
+
+    #[test]
+    fn test_gradient_x() {
+        let calculator = DepthCalculator::new_gradient_x(10, 14, 100, 200);
+
+        assert_point(&calculator, &Point::new(10, 0), 100);
+        assert_point(&calculator, &Point::new(11, 10), 125);
+        assert_point(&calculator, &Point::new(12, 20), 150);
+        assert_point(&calculator, &Point::new(13, 30), 175);
+        assert_point(&calculator, &Point::new(14, -30), 200);
+    }
+
+    #[test]
+    fn test_gradient_y() {
+        let calculator = DepthCalculator::new_gradient_y(10, 14, 100, 200);
+
+        assert_point(&calculator, &Point::new(0, 10), 100);
+        assert_point(&calculator, &Point::new(10, 11), 125);
+        assert_point(&calculator, &Point::new(20, 12), 150);
+        assert_point(&calculator, &Point::new(30, 13), 175);
+        assert_point(&calculator, &Point::new(-30, 14), 200);
+    }
+
+    fn assert(calculator: &DepthCalculator, factor: f32, result: u8) {
+        assert_eq!(calculator.calculate(&POINT, factor), result);
+    }
+
+    fn assert_point(calculator: &DepthCalculator, point: &Point, result: u8) {
+        assert_eq!(calculator.calculate(point, 1000.0), result);
     }
 }

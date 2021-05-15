@@ -1,4 +1,5 @@
-use crate::generation::component::rendering::depth::DepthCalculator;
+use crate::generation::component::rendering::depth_factory::DepthFactory;
+use crate::generation::random::Random;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -8,21 +9,27 @@ pub enum DepthDefinition {
     InterpolateTwo { center: u8, border: u8 },
     InterpolateMany(Vec<(f32, u8)>),
     Dome { center: u8, border: u8 },
+    Gradient { start: u8, end: u8 },
 }
 
 impl DepthDefinition {
-    pub fn convert(&self) -> Result<DepthCalculator> {
+    pub fn convert(&self) -> Result<DepthFactory> {
         match self {
-            DepthDefinition::Uniform(depth) => Ok(DepthCalculator::Uniform(*depth)),
+            DepthDefinition::Uniform(depth) => Ok(DepthFactory::Uniform(*depth)),
             DepthDefinition::InterpolateTwo { center, border } => {
-                Ok(DepthCalculator::new_interpolate_two(*center, *border))
+                Ok(DepthFactory::new_interpolate_two(*center, *border))
             }
             DepthDefinition::InterpolateMany(data) => {
-                DepthCalculator::new_interpolate_many(data.clone())
+                DepthFactory::new_interpolate_many(data.clone())
             }
             DepthDefinition::Dome { center, border } => {
-                Ok(DepthCalculator::new_dome(*center, *border))
+                Ok(DepthFactory::new_dome(*center, *border))
             }
+            DepthDefinition::Gradient { start, end } => Ok(DepthFactory::Gradient {
+                random: Random::Hash,
+                start: *start,
+                end: *end,
+            }),
         }
     }
 }
@@ -35,7 +42,7 @@ mod tests {
     fn test_convert_uniform() {
         assert_eq!(
             DepthDefinition::Uniform(42).convert().unwrap(),
-            DepthCalculator::Uniform(42)
+            DepthFactory::Uniform(42)
         );
     }
 
@@ -48,7 +55,7 @@ mod tests {
             }
             .convert()
             .unwrap(),
-            DepthCalculator::new_interpolate_two(100, 200)
+            DepthFactory::new_interpolate_two(100, 200)
         );
     }
 
@@ -61,7 +68,7 @@ mod tests {
             }
             .convert()
             .unwrap(),
-            DepthCalculator::new_dome(100, 200)
+            DepthFactory::new_dome(100, 200)
         );
     }
 }

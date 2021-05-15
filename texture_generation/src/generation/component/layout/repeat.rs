@@ -192,7 +192,7 @@ mod tests {
     use super::*;
     use crate::generation::component::layout::tests::create_component;
     use crate::generation::component::rendering::color::ColorSelector;
-    use crate::generation::component::rendering::depth::DepthCalculator;
+    use crate::generation::component::rendering::depth_factory::DepthFactory;
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::texture::Texture;
     use crate::math::color::{BLUE, GREEN, RED, WHITE};
@@ -296,7 +296,7 @@ mod tests {
 
     pub fn create_random_component() -> Component {
         let color = ColorSelector::Sequence(vec![RED, GREEN, BLUE]);
-        let depth = DepthCalculator::Uniform(255);
+        let depth = DepthFactory::Uniform(255);
         let renderer = RenderingComponent::new_shape_with_depth(Rectangle, color, depth);
         Component::Rendering(Box::new(renderer))
     }

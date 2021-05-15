@@ -1,5 +1,5 @@
 use crate::generation::component::rendering::color::ColorSelector;
-use crate::generation::component::rendering::depth::DepthCalculator;
+use crate::generation::component::rendering::depth_factory::DepthFactory;
 use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
 use crate::math::color::{Color, PINK};
@@ -7,6 +7,7 @@ use crate::math::shape_factory::ShapeFactory;
 
 pub mod color;
 pub mod depth;
+pub mod depth_factory;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Renders the texture.
@@ -17,7 +18,7 @@ pub enum RenderingComponent {
     Shape {
         shape_factory: ShapeFactory,
         color_selector: ColorSelector,
-        depth_calculator: DepthCalculator,
+        depth_factory: DepthFactory,
     },
 }
 
@@ -34,19 +35,19 @@ impl RenderingComponent {
         RenderingComponent::new_shape_with_depth(
             shape_factory,
             ColorSelector::ConstantColor(color),
-            DepthCalculator::Uniform(depth),
+            DepthFactory::Uniform(depth),
         )
     }
 
     pub fn new_shape_with_depth(
         shape_factory: ShapeFactory,
         color_selector: ColorSelector,
-        depth_calculator: DepthCalculator,
+        depth_factory: DepthFactory,
     ) -> RenderingComponent {
         RenderingComponent::Shape {
             shape_factory,
             color_selector,
-            depth_calculator,
+            depth_factory,
         }
     }
 
@@ -80,11 +81,12 @@ impl RenderingComponent {
             RenderingComponent::Shape {
                 shape_factory,
                 color_selector,
-                depth_calculator,
+                depth_factory,
                 ..
             } => {
                 let mut point = start;
                 let color = color_selector.select(data);
+                let depth_calculator = depth_factory.create(data);
                 let base_depth = texture.get_base_depth();
 
                 if let Ok(shape) = shape_factory.create_shape(data.get_inner()) {
@@ -95,7 +97,7 @@ impl RenderingComponent {
                             let distance = shape.distance(&point);
 
                             if distance <= 1.0 {
-                                let depth = depth_calculator.calculate(distance);
+                                let depth = depth_calculator.calculate(&point, distance);
                                 let depth = base_depth.saturating_add(depth);
                                 texture.set(&point, &color, depth);
                             }

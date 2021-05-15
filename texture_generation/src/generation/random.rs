@@ -22,6 +22,11 @@ impl Random {
         (self.next(data, index) % (max_value as u64)) as u32
     }
 
+    /// Returns a reproducible random bool based on `instance_id` & `index`.
+    pub fn get_random_instance_bool(&self, data: &Data, index: u32) -> bool {
+        (self.next(data, index) % 2) != 0
+    }
+
     /// Returns a reproducible random number based on [`Data`]'s `instance_id` & `index`.
     fn next(&self, data: &Data, index: u32) -> u64 {
         match self {
