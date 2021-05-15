@@ -1,4 +1,5 @@
-use anyhow::{bail, Result};
+use crate::generation::component::rendering::depth_factory::convert_many;
+use anyhow::Result;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Calculates the depth for each pixel.
@@ -23,29 +24,7 @@ impl DepthCalculator {
     }
 
     pub fn new_interpolate_many(data: Vec<(f32, u8)>) -> Result<DepthCalculator> {
-        if data.len() < 2 {
-            bail!("InterpolateMany requires 2 or more entries");
-        }
-
-        let mut converted_data = Vec::with_capacity(data.len());
-        let mut last_pos = -0.00001;
-
-        for (i, (pos, depth)) in data.into_iter().enumerate() {
-            if pos <= last_pos {
-                bail!(
-                    "{}.position of InterpolateMany is below {}",
-                    i + 1,
-                    if i == 0 { "zero" } else { "previous one" }
-                );
-            } else if pos > 1.0 {
-                bail!("{}.position of InterpolateMany is above 1", i + 1);
-            }
-
-            converted_data.push((pos, depth as f32));
-            last_pos = pos;
-        }
-
-        Ok(DepthCalculator::InterpolateMany(converted_data))
+        Ok(DepthCalculator::InterpolateMany(convert_many(data)?))
     }
 
     pub fn new_dome(center: u8, border: u8) -> DepthCalculator {
