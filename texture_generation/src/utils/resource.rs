@@ -1,4 +1,5 @@
 use anyhow::Result;
+use std::collections::HashMap;
 
 pub trait ResourceDefinition {
     type R: Default;
@@ -8,11 +9,11 @@ pub trait ResourceDefinition {
 
 pub struct ResourceManager<T> {
     default: T,
-    resources: Vec<T>,
+    resources: HashMap<String, T>,
 }
 
 impl<T> ResourceManager<T> {
-    pub fn new(resources: Vec<T>, default: T) -> ResourceManager<T> {
+    pub fn new(resources: HashMap<String, T>, default: T) -> ResourceManager<T> {
         ResourceManager { resources, default }
     }
 
@@ -25,21 +26,24 @@ impl<T> ResourceManager<T> {
     }
 
     pub fn get(&self, id: usize) -> &T {
-        self.resources.get(id).unwrap_or(&self.default)
+        self.resources.get("id").unwrap_or(&self.default)
     }
 }
 
 impl<T: Default> Default for ResourceManager<T> {
     fn default() -> Self {
-        ResourceManager::new(Vec::default(), T::default())
+        ResourceManager::new(HashMap::default(), T::default())
     }
 }
 
-pub fn into_manager<T: ResourceDefinition>(definitions: &[T], size: u32) -> ResourceManager<T::R> {
-    let textures: Vec<T::R> = definitions
+pub fn into_manager<T: ResourceDefinition>(
+    definitions: &HashMap<String, T>,
+    size: u32,
+) -> ResourceManager<T::R> {
+    let textures: HashMap<String, T::R> = definitions
         .iter()
-        .filter_map(|d| match d.convert(size) {
-            Ok(resource) => Some(resource),
+        .filter_map(|(name, d)| match d.convert(size) {
+            Ok(resource) => Some((name.clone(), resource)),
             Err(error) => {
                 eprintln!("Error: {:?}", error);
                 None

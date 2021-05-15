@@ -1,6 +1,7 @@
 use crate::math::size::Size;
 use crate::utils::error::ResourceError;
 use serde::de::DeserializeOwned;
+use std::collections::HashMap;
 use std::fs;
 use std::fs::DirEntry;
 use std::io::Error;
@@ -20,16 +21,16 @@ pub fn convert_size(value: &Size, factor: f32) -> Size {
     )
 }
 
-pub fn read_dir<T: DeserializeOwned>(dir: &Path) -> Vec<T> {
+pub fn read_dir<T: DeserializeOwned>(dir: &Path) -> HashMap<String, T> {
     if !dir.is_dir() {
         warn!(
             "Couldn't read definitions, because the path {:?} is not a directory!",
             dir
         );
-        return Vec::default();
+        return HashMap::default();
     }
 
-    let mut results = Vec::new();
+    let mut results = HashMap::new();
 
     match fs::read_dir(dir) {
         Ok(entries) => {
@@ -43,7 +44,10 @@ pub fn read_dir<T: DeserializeOwned>(dir: &Path) -> Vec<T> {
     results
 }
 
-fn read_entry<T: DeserializeOwned>(results: &mut Vec<T>, entry: Result<DirEntry, Error>) {
+fn read_entry<T: DeserializeOwned>(
+    results: &mut HashMap<String, T>,
+    entry: Result<DirEntry, Error>,
+) {
     match entry {
         Ok(entry) => {
             let path = entry.path();
@@ -54,7 +58,10 @@ fn read_entry<T: DeserializeOwned>(results: &mut Vec<T>, entry: Result<DirEntry,
             }
 
             match read(&path) {
-                Ok(definition) => results.push(definition),
+                Ok(definition) => {
+                    let filename = path.file_name().unwrap().to_str().unwrap().to_string();
+                    results.insert(filename, definition);
+                }
                 Err(error) => warn!(
                     "Couldn't read definition {:?}, because of {:?}",
                     path, error
