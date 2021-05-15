@@ -50,6 +50,34 @@ impl DepthCalculator {
         }
     }
 
+    pub fn new_gradient_x(
+        start_x: i32,
+        end_x: i32,
+        start_depth: u8,
+        end_depth: u8,
+    ) -> DepthCalculator {
+        DepthCalculator::GradientX {
+            start_x: start_x as f32,
+            diff_x: (end_x - start_x) as f32,
+            start_depth: start_depth as f32,
+            diff_depth: (end_depth as f32 - start_depth as f32),
+        }
+    }
+
+    pub fn new_gradient_y(
+        start_y: i32,
+        end_y: i32,
+        start_depth: u8,
+        end_depth: u8,
+    ) -> DepthCalculator {
+        DepthCalculator::GradientY {
+            start_y: start_y as f32,
+            diff_y: (end_y - start_y) as f32,
+            start_depth: start_depth as f32,
+            diff_depth: (end_depth as f32 - start_depth as f32),
+        }
+    }
+
     /// Calculates the depth value based on a factor between 0 & 1.
     pub fn calculate(&self, point: &Point, factor: f32) -> u8 {
         match self {
@@ -231,12 +259,7 @@ mod tests {
 
     #[test]
     fn test_gradient_x() {
-        let calculator = DepthCalculator::GradientX {
-            start_x: 10.0,
-            diff_x: 4.0,
-            start_depth: 100.0,
-            diff_depth: 100.0,
-        };
+        let calculator = DepthCalculator::new_gradient_x(10, 14, 100, 200);
 
         assert_point(&calculator, &Point::new(10, 0), 100);
         assert_point(&calculator, &Point::new(11, 10), 125);
@@ -247,12 +270,7 @@ mod tests {
 
     #[test]
     fn test_gradient_y() {
-        let calculator = DepthCalculator::GradientY {
-            start_y: 10.0,
-            diff_y: 4.0,
-            start_depth: 100.0,
-            diff_depth: 100.0,
-        };
+        let calculator = DepthCalculator::new_gradient_y(10, 14, 100, 200);
 
         assert_point(&calculator, &Point::new(0, 10), 100);
         assert_point(&calculator, &Point::new(10, 11), 125);

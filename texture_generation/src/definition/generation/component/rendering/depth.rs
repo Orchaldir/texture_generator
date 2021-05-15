@@ -1,4 +1,5 @@
 use crate::generation::component::rendering::depth_factory::DepthFactory;
+use crate::generation::random::Random;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -8,6 +9,7 @@ pub enum DepthDefinition {
     InterpolateTwo { center: u8, border: u8 },
     InterpolateMany(Vec<(f32, u8)>),
     Dome { center: u8, border: u8 },
+    Gradient { start: u8, end: u8 },
 }
 
 impl DepthDefinition {
@@ -23,6 +25,11 @@ impl DepthDefinition {
             DepthDefinition::Dome { center, border } => {
                 Ok(DepthFactory::new_dome(*center, *border))
             }
+            DepthDefinition::Gradient { start, end } => Ok(DepthFactory::Gradient {
+                random: Random::Hash,
+                start: *start,
+                end: *end,
+            }),
         }
     }
 }

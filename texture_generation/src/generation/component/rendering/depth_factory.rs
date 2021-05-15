@@ -1,4 +1,6 @@
 use crate::generation::component::rendering::depth::DepthCalculator;
+use crate::generation::data::Data;
+use crate::generation::random::Random;
 use anyhow::{bail, Result};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -12,6 +14,8 @@ pub enum DepthFactory {
     InterpolateMany(Vec<(f32, f32)>),
     /// Creates a dome.
     Dome { center: f32, diff: f32 },
+    /// Creates a gradient along the x- or y-axis.
+    Gradient { random: Random, start: u8, end: u8 },
 }
 
 impl DepthFactory {
@@ -36,7 +40,7 @@ impl DepthFactory {
     }
 
     /// Creates a ['DepthCalculator'] from the factory.
-    pub fn create(&self) -> DepthCalculator {
+    pub fn create(&self, data: &Data) -> DepthCalculator {
         match self {
             DepthFactory::Uniform(depth) => DepthCalculator::Uniform(*depth),
             DepthFactory::InterpolateTwo { center, diff } => DepthCalculator::InterpolateTwo {
@@ -48,6 +52,15 @@ impl DepthFactory {
                 center: *center,
                 diff: *diff,
             },
+            DepthFactory::Gradient { random, start, end } => {
+                let aabb = data.get_inner();
+
+                if random.get_random_instance_bool(data, 0) {
+                    DepthCalculator::new_gradient_x(aabb.start().x, aabb.end().x, *start, *end)
+                } else {
+                    DepthCalculator::new_gradient_y(aabb.start().y, aabb.end().y, *start, *end)
+                }
+            }
         }
     }
 }
