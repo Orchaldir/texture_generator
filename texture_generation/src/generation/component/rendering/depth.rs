@@ -20,6 +20,13 @@ pub enum DepthCalculator {
         start_depth: f32,
         diff_depth: f32,
     },
+    /// A gradient along the y-axis.
+    GradientY {
+        start_y: f32,
+        diff_y: f32,
+        start_depth: f32,
+        diff_depth: f32,
+    },
 }
 
 impl DepthCalculator {
@@ -76,6 +83,15 @@ impl DepthCalculator {
                 diff_depth,
             } => {
                 let factor = (point.x as f32 - *start_x) / *diff_x;
+                (*start_depth + factor * (*diff_depth)) as u8
+            }
+            DepthCalculator::GradientY {
+                start_y,
+                diff_y,
+                start_depth,
+                diff_depth,
+            } => {
+                let factor = (point.y as f32 - *start_y) / *diff_y;
                 (*start_depth + factor * (*diff_depth)) as u8
             }
         }
@@ -227,6 +243,22 @@ mod tests {
         assert_point(&calculator, &Point::new(12, 20), 150);
         assert_point(&calculator, &Point::new(13, 30), 175);
         assert_point(&calculator, &Point::new(14, -30), 200);
+    }
+
+    #[test]
+    fn test_gradient_y() {
+        let calculator = DepthCalculator::GradientY {
+            start_y: 10.0,
+            diff_y: 4.0,
+            start_depth: 100.0,
+            diff_depth: 100.0,
+        };
+
+        assert_point(&calculator, &Point::new(0, 10), 100);
+        assert_point(&calculator, &Point::new(10, 11), 125);
+        assert_point(&calculator, &Point::new(20, 12), 150);
+        assert_point(&calculator, &Point::new(30, 13), 175);
+        assert_point(&calculator, &Point::new(-30, 14), 200);
     }
 
     fn assert(calculator: &DepthCalculator, factor: f32, result: u8) {
