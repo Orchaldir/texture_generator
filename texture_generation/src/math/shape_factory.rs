@@ -22,7 +22,7 @@ impl ShapeFactory {
         Ok(ShapeFactory::RoundedRectangle(factor))
     }
 
-    /// Creates a shape that fits inside the [`AABB`].
+    /// Creates a ['Shape'] that fits inside the [`AABB`].
     pub fn create_shape(&self, aabb: &AABB) -> Result<Shape, ShapeError> {
         let size = aabb.size();
         let min_side = size.width().min(size.height());

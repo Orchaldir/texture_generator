@@ -189,7 +189,7 @@ fn create_aabb(
 mod tests {
     use super::*;
     use crate::generation::component::rendering::color::ColorSelector;
-    use crate::generation::component::rendering::depth::DepthCalculator;
+    use crate::generation::component::rendering::depth_factory::DepthFactory;
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::texture::Texture;
     use crate::math::color::*;
@@ -225,7 +225,7 @@ mod tests {
         let rendering = RenderingComponent::new_shape_with_depth(
             ShapeFactory::Rectangle,
             color_selector,
-            DepthCalculator::Uniform(255),
+            DepthFactory::Uniform(255),
         );
         let component = Component::Rendering(Box::new(rendering));
         let pattern = RandomAshlarPattern::new(8, 2, 4, component).unwrap();
