@@ -97,7 +97,7 @@ impl RenderingComponent {
                             let distance = shape.distance(&point);
 
                             if distance <= 1.0 {
-                                let depth = depth_calculator.calculate(distance);
+                                let depth = depth_calculator.calculate(&point, distance);
                                 let depth = base_depth.saturating_add(depth);
                                 texture.set(&point, &color, depth);
                             }
