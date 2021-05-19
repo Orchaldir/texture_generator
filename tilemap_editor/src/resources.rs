@@ -34,7 +34,7 @@ impl ResourceInfo {
     }
 
     pub fn load(&self) -> (Renderer, Renderer) {
-        let lookup: ResourceLookup = read(&self.lookup_path).unwrap_or(ResourceLookup::default());
+        let lookup: ResourceLookup = read(&self.lookup_path).unwrap_or_default();
 
         let definitions = ResourceDefinitions::load(&self.resource_path);
 

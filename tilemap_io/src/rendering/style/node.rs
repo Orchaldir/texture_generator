@@ -26,7 +26,7 @@ impl ResourceDefinition for NodeDefinition {
                 "Failed to convert 'component' of the node '{}'",
                 self.name
             ))?;
-        Ok(NodeStyle::new(size, component))
+        Ok(NodeStyle::new(self.name.clone(), size, component))
     }
 }
 
@@ -49,7 +49,7 @@ mod tests {
             component: rendering_definition,
         };
         let component = RenderingComponent::new_fill_area(RED, 123);
-        let style = NodeStyle::new(105, component);
+        let style = NodeStyle::new("test", 105, component);
 
         assert_eq!(style, definition.convert(600).unwrap())
     }

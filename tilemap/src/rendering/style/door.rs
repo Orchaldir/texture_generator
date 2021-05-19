@@ -1,4 +1,5 @@
 use crate::rendering::style::edge::EdgeStyle;
+use texture_generation::utils::resource::Resource;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Determines how a door is rendered.
@@ -44,5 +45,11 @@ impl DoorStyle {
 impl Default for DoorStyle {
     fn default() -> Self {
         DoorStyle::default(1)
+    }
+}
+
+impl Resource for DoorStyle {
+    fn get_name(&self) -> &str {
+        &self.name
     }
 }

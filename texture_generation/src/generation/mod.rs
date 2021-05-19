@@ -3,6 +3,7 @@ use crate::generation::component::Component;
 use crate::math::aabb::AABB;
 use crate::math::color::{Color, PINK};
 use crate::math::size::Size;
+use crate::utils::resource::Resource;
 use data::texture::Texture;
 use data::Data;
 
@@ -58,6 +59,12 @@ impl TextureGenerator {
 impl Default for TextureGenerator {
     fn default() -> Self {
         TextureGenerator::new("default", Size::square(1), PINK, Component::Mock(42))
+    }
+}
+
+impl Resource for TextureGenerator {
+    fn get_name(&self) -> &str {
+        &self.name
     }
 }
 

@@ -4,9 +4,11 @@ use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
+use texture_generation::utils::resource::Resource;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct NodeStyle {
+    name: String,
     size: Size,
     half: i32,
     component: RenderingComponent,
@@ -14,11 +16,12 @@ pub struct NodeStyle {
 
 impl NodeStyle {
     pub fn default_with_size(size: u32) -> NodeStyle {
-        Self::new(size, RenderingComponent::default())
+        Self::new("default", size, RenderingComponent::default())
     }
 
-    pub fn new(size: u32, component: RenderingComponent) -> NodeStyle {
+    pub fn new<S: Into<String>>(name: S, size: u32, component: RenderingComponent) -> NodeStyle {
         NodeStyle {
+            name: name.into(),
             size: Size::square(size),
             half: (size / 2) as i32,
             component,
@@ -42,6 +45,12 @@ impl Default for NodeStyle {
     }
 }
 
+impl Resource for NodeStyle {
+    fn get_name(&self) -> &str {
+        &self.name
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -52,7 +61,7 @@ mod tests {
     #[test]
     fn test_render_node() {
         let component = RenderingComponent::new_fill_area(RED, 9);
-        let node_style = NodeStyle::new(2, component);
+        let node_style = NodeStyle::new("node", 2, component);
         let mut texture = Texture::new(Size::new(6, 5), BLACK);
 
         node_style.render(

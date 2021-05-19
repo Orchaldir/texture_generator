@@ -1,8 +1,12 @@
 use anyhow::Result;
 use std::collections::HashMap;
 
+pub trait Resource: Default {
+    fn get_name(&self) -> &str;
+}
+
 pub trait ResourceDefinition {
-    type R: Default;
+    type R: Resource;
 
     fn convert(&self, size: u32) -> Result<Self::R>;
 }
