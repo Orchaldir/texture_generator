@@ -42,11 +42,14 @@ pub fn into_manager<T: ResourceDefinition>(
 ) -> ResourceManager<T::R> {
     let textures: HashMap<String, T::R> = definitions
         .iter()
-        .filter_map(|(name, d)| match d.convert(size) {
-            Ok(resource) => Some((name.clone(), resource)),
-            Err(error) => {
-                eprintln!("Error: {:?}", error);
-                None
+        .filter_map(|(name, d)| {
+            info!("name={}", name);
+            match d.convert(size) {
+                Ok(resource) => Some((name.clone(), resource)),
+                Err(error) => {
+                    eprintln!("Error: {:?}", error);
+                    None
+                }
             }
         })
         .collect();

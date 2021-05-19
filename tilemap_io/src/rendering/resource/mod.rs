@@ -10,6 +10,8 @@ use texture_generation::generation::process::PostProcess;
 use texture_generation::utils::resource::into_manager;
 use tilemap::rendering::resource::Resources;
 
+pub mod lookup;
+
 pub struct ResourceDefinitions {
     doors: HashMap<String, DoorDefinition>,
     nodes: HashMap<String, NodeDefinition>,
@@ -20,6 +22,8 @@ pub struct ResourceDefinitions {
 
 impl ResourceDefinitions {
     pub fn load(path: &Path) -> Self {
+        info!("Load definitions from {:?}", path);
+
         let textures: HashMap<String, TextureDefinition> = read_dir(&path.join("textures"));
 
         info!("Loaded {} texture definitions", textures.len());
