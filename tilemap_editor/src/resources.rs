@@ -33,6 +33,8 @@ impl ResourceInfo {
     }
 
     pub fn load(&self) -> (Renderer, Renderer) {
+        info!("Load lookup from {:?}", self.lookup_path);
+
         let lookup: ResourceLookup = read(&self.lookup_path).unwrap_or_default();
 
         let definitions = lookup.convert(&self.resource_path);
