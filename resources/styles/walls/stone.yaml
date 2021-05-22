@@ -1,5 +1,4 @@
 ---
-name: "Stone Wall"
 tile_size: 512
 edge_style:
   Layout:

@@ -8,7 +8,7 @@ pub trait Resource: Default {
 pub trait ResourceDefinition {
     type R: Resource;
 
-    fn convert(&self, size: u32) -> Result<Self::R>;
+    fn convert(&self, name: &str, size: u32) -> Result<Self::R>;
 }
 
 pub struct ResourceManager<T: Resource> {
@@ -54,7 +54,7 @@ pub fn into_manager<T: ResourceDefinition>(
 ) -> ResourceManager<T::R> {
     let resources: Vec<T::R> = definitions
         .iter()
-        .filter_map(|(name, d)| match d.convert(size) {
+        .filter_map(|(name, d)| match d.convert(name, size) {
             Ok(resource) => Some(resource),
             Err(error) => {
                 eprintln!("Error: {:?}", error);

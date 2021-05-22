@@ -221,8 +221,8 @@ mod tests {
     fn test_render_horizontal() {
         let component = RenderingComponent::new_fill_area(RED, 9);
         let edge_component = RenderingComponent::new_fill_area(GREEN, 4);
-        let node_style0 = NodeStyle::new(4, component.clone());
-        let node_style1 = NodeStyle::new(2, component);
+        let node_style0 = NodeStyle::new("node0", 4, component.clone());
+        let node_style1 = NodeStyle::new("node0", 2, component);
         let edge_style = EdgeStyle::new_solid(2, edge_component).unwrap();
         let mut texture = Texture::new(Size::new(11, 6), BLACK);
 

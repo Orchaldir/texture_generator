@@ -1,5 +1,4 @@
 ---
-name: "Wooden Node"
 tile_size: 512
 size: 80
 component:
