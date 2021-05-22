@@ -72,27 +72,28 @@ fn read_entry<T: DeserializeOwned>(
     }
 }
 
-pub fn read_resources<T: DeserializeOwned>(dir: &Path, names: &[String]) -> HashMap<String, T> {
+pub fn read_resources<T: DeserializeOwned>(
+    dir: &Path,
+    names: &[String],
+) -> Vec<Option<(String, T)>> {
     if !dir.is_dir() {
         warn!(
             "Couldn't read definitions, because the path {:?} is not a directory!",
             dir
         );
-        return HashMap::default();
+        return Vec::default();
     }
 
-    let mut results = HashMap::new();
-
-    for name in names {
-        match read(&dir.join(name)) {
-            Ok(resource) => {
-                results.insert(name.clone(), resource);
+    names
+        .iter()
+        .map(|name| match read(&dir.join(name)) {
+            Ok(resource) => Some((name.clone(), resource)),
+            Err(error) => {
+                warn!("Couldn't read {}, because of {:?}", name, error);
+                None
             }
-            Err(error) => warn!("Couldn't read {}, because of {:?}", name, error),
-        };
-    }
-
-    results
+        })
+        .collect()
 }
 
 pub fn read<T: DeserializeOwned>(path: &Path) -> Result<T, ResourceError> {

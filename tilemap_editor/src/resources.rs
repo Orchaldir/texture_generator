@@ -6,7 +6,6 @@ use texture_generation::generation::process::PostProcess;
 use texture_generation::math::vector3::Vector3;
 use tilemap::rendering::Renderer;
 use tilemap_io::rendering::resource::lookup::ResourceLookup;
-use tilemap_io::rendering::resource::ResourceDefinitions;
 
 pub struct ResourceInfo {
     lookup_path: PathBuf,

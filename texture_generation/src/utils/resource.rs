@@ -1,5 +1,4 @@
 use anyhow::Result;
-use std::collections::HashMap;
 
 pub trait Resource: Default {
     fn get_name(&self) -> &str;
@@ -49,17 +48,20 @@ impl<T: Resource> Default for ResourceManager<T> {
 }
 
 pub fn into_manager<T: ResourceDefinition>(
-    definitions: &HashMap<String, T>,
+    definitions: &[Option<(String, T)>],
     size: u32,
 ) -> ResourceManager<T::R> {
     let resources: Vec<T::R> = definitions
         .iter()
-        .filter_map(|(name, d)| match d.convert(name, size) {
-            Ok(resource) => Some(resource),
-            Err(error) => {
-                eprintln!("Error: {:?}", error);
-                None
-            }
+        .map(|e| match e {
+            None => T::R::default(),
+            Some((name, d)) => match d.convert(name, size) {
+                Ok(resource) => resource,
+                Err(error) => {
+                    eprintln!("Error: {:?}", error);
+                    T::R::default()
+                }
+            },
         })
         .collect();
 
