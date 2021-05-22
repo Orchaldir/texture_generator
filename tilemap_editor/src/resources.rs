@@ -5,7 +5,7 @@ use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::vector3::Vector3;
 use tilemap::rendering::Renderer;
-use tilemap_io::rendering::resource::lookup::ResourceLookup;
+use tilemap_io::rendering::resource::lookup::TilemapResourceLookup;
 use tilemap_io::rendering::resource::ResourceDefinitions;
 
 pub struct ResourceInfo {
@@ -34,7 +34,7 @@ impl ResourceInfo {
     }
 
     pub fn load(&self) -> (Renderer, Renderer) {
-        let lookup: ResourceLookup = read(&self.lookup_path).unwrap_or_default();
+        let lookup: TilemapResourceLookup = read(&self.lookup_path).unwrap_or_default();
 
         let definitions = ResourceDefinitions::load(&self.resource_path);
 
