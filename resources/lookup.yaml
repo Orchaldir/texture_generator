@@ -1,0 +1,17 @@
+---
+doors:
+  - wooden.yaml
+nodes:
+  - stone.yaml
+  - wooden.yaml
+textures:
+  - brick.yaml
+  - herringbone.yaml
+  - random-ashlar.yaml
+  - sett.yaml
+walls:
+  - stone.yaml
+  - stone-random.yaml
+  - wooden.yaml
+windows:
+  - glass.yaml

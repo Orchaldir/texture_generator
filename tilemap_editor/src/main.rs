@@ -49,6 +49,10 @@ impl Mode {
 #[structopt(name = "texture_generator")]
 /// The arguments of the application.
 struct Cli {
+    /// The path of the resource lookup.
+    #[structopt(parse(from_os_str), default_value = "resources/lookup.yaml")]
+    lookup_path: PathBuf,
+
     /// The path of the resource definitions.
     #[structopt(parse(from_os_str), default_value = "resources")]
     resource_path: PathBuf,
@@ -296,6 +300,7 @@ fn main() {
 
     let args = Cli::from_args();
     let resource_info = ResourceInfo::new(
+        args.lookup_path,
         args.resource_path,
         args.preview_size,
         args.tile_size,

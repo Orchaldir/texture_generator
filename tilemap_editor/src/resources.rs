@@ -1,12 +1,14 @@
 use std::path::PathBuf;
+use texture_generation::definition::read;
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::vector3::Vector3;
 use tilemap::rendering::Renderer;
-use tilemap_io::rendering::resource::ResourceDefinitions;
+use tilemap_io::rendering::resource::lookup::ResourceLookup;
 
 pub struct ResourceInfo {
+    lookup_path: PathBuf,
     resource_path: PathBuf,
     preview_tile_size: u32,
     render_tile_size: u32,
@@ -15,12 +17,14 @@ pub struct ResourceInfo {
 
 impl ResourceInfo {
     pub fn new(
+        lookup_path: PathBuf,
         resource_path: PathBuf,
         preview_tile_size: u32,
         render_tile_size: u32,
         wall_height: u8,
     ) -> Self {
         Self {
+            lookup_path,
             resource_path,
             preview_tile_size,
             render_tile_size,
@@ -29,9 +33,11 @@ impl ResourceInfo {
     }
 
     pub fn load(&self) -> (Renderer, Renderer) {
-        info!("Load definitions from {:?}", self.resource_path);
+        info!("Load lookup from {:?}", self.lookup_path);
 
-        let definitions = ResourceDefinitions::load(&self.resource_path);
+        let lookup: ResourceLookup = read(&self.lookup_path).unwrap_or_default();
+
+        let definitions = lookup.convert(&self.resource_path);
 
         info!(
             "Init renderer: tile_size={} wall_height={}",

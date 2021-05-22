@@ -6,7 +6,6 @@ use tilemap::rendering::style::door::DoorStyle;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DoorDefinition {
-    name: String,
     tile_size: u32,
     edge_style: EdgeDefinition,
     is_centered: bool,
@@ -15,20 +14,16 @@ pub struct DoorDefinition {
 impl ResourceDefinition for DoorDefinition {
     type R = DoorStyle;
 
-    fn convert(&self, size: u32) -> Result<DoorStyle> {
+    fn convert(&self, name: &str, size: u32) -> Result<DoorStyle> {
         let factor = size as f32 / self.tile_size as f32;
         let edge_style = self
             .edge_style
             .convert("edge_style", factor)
             .context(format!(
                 "Failed to convert 'edge_style' of the door '{}'",
-                self.name
+                name
             ))?;
-        Ok(DoorStyle::new(
-            self.name.clone(),
-            edge_style,
-            self.is_centered,
-        ))
+        Ok(DoorStyle::new(name, edge_style, self.is_centered))
     }
 }
 
@@ -40,13 +35,12 @@ mod tests {
     #[test]
     fn test_convert_layout() {
         let definition = DoorDefinition {
-            name: "door0".to_string(),
             tile_size: 200,
             edge_style: EdgeDefinition::Mock(10),
             is_centered: true,
         };
         let style = DoorStyle::new("door0", EdgeStyle::Mock(30), true);
 
-        assert_eq!(style, definition.convert(600).unwrap())
+        assert_eq!(style, definition.convert("door0", 600).unwrap())
     }
 }

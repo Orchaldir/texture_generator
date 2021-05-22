@@ -1,5 +1,4 @@
 ---
-name: "Stone Node"
 tile_size: 512
 size: 128
 component:

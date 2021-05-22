@@ -7,7 +7,6 @@ use tilemap::rendering::style::node::NodeStyle;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NodeDefinition {
-    name: String,
     tile_size: u32,
     size: u32,
     component: RenderingDefinition,
@@ -16,7 +15,7 @@ pub struct NodeDefinition {
 impl ResourceDefinition for NodeDefinition {
     type R = NodeStyle;
 
-    fn convert(&self, size: u32) -> Result<NodeStyle> {
+    fn convert(&self, name: &str, size: u32) -> Result<NodeStyle> {
         let factor = size as f32 / self.tile_size as f32;
         let size = convert(self.size, factor);
         let component = self
@@ -24,9 +23,9 @@ impl ResourceDefinition for NodeDefinition {
             .convert("component", factor)
             .context(format!(
                 "Failed to convert 'component' of the node '{}'",
-                self.name
+                name
             ))?;
-        Ok(NodeStyle::new(size, component))
+        Ok(NodeStyle::new(name, size, component))
     }
 }
 
@@ -43,14 +42,13 @@ mod tests {
             depth: 123,
         };
         let definition = NodeDefinition {
-            name: "window0".to_string(),
             tile_size: 200,
             size: 35,
             component: rendering_definition,
         };
         let component = RenderingComponent::new_fill_area(RED, 123);
-        let style = NodeStyle::new(105, component);
+        let style = NodeStyle::new("window0", 105, component);
 
-        assert_eq!(style, definition.convert(600).unwrap())
+        assert_eq!(style, definition.convert("window0", 600).unwrap())
     }
 }

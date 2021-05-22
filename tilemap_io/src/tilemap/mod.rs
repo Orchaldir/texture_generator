@@ -11,7 +11,7 @@ use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 
 pub fn load(path: &Path) -> Result<Tilemap2d> {
-    info!("Load tilemap from '{:?}'", path);
+    info!("Load tilemap from {:?}", path);
 
     let string = fs::read_to_string(path).context(format!("Unable to read {:?}", path))?;
     load_from_string(string)

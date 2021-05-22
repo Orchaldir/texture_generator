@@ -56,7 +56,7 @@ fn main() -> Result<()> {
     info!("Load texture definition");
 
     let definition: TextureDefinition = read(&args.input)?;
-    let generator: TextureGenerator = definition.convert(args.size)?;
+    let generator: TextureGenerator = definition.convert("texture", args.size)?;
     let color_path = format!("{}-color.png", args.output);
     let depth_path = format!("{}-depth.png", args.output);
 

@@ -3,6 +3,7 @@ use crate::rendering::style::node::NodeStyle;
 use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::Data;
 use texture_generation::math::point::Point;
+use texture_generation::utils::resource::Resource;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Determines how a door is rendered.
@@ -69,5 +70,11 @@ impl WindowStyle {
 impl Default for WindowStyle {
     fn default() -> Self {
         WindowStyle::default(1)
+    }
+}
+
+impl Resource for WindowStyle {
+    fn get_name(&self) -> &str {
+        &self.name
     }
 }

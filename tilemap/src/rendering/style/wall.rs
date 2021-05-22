@@ -1,4 +1,5 @@
 use crate::rendering::style::edge::EdgeStyle;
+use texture_generation::utils::resource::Resource;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Determines how a wall is rendered.
@@ -51,5 +52,11 @@ impl WallStyle {
 impl Default for WallStyle {
     fn default() -> Self {
         Self::default(1)
+    }
+}
+
+impl Resource for WallStyle {
+    fn get_name(&self) -> &str {
+        &self.name
     }
 }

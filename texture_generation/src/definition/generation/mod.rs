@@ -14,21 +14,14 @@ pub mod process;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TextureDefinition {
-    name: String,
     size: u32,
     background: String,
     component: ComponentDefinition,
 }
 
 impl TextureDefinition {
-    pub fn new<S: Into<String>>(
-        name: S,
-        size: u32,
-        background: String,
-        component: ComponentDefinition,
-    ) -> TextureDefinition {
+    pub fn new(size: u32, background: String, component: ComponentDefinition) -> TextureDefinition {
         TextureDefinition {
-            name: name.into(),
             size,
             background,
             component,
@@ -49,22 +42,22 @@ impl TextureDefinition {
 impl ResourceDefinition for TextureDefinition {
     type R = TextureGenerator;
 
-    fn convert(&self, size: u32) -> Result<TextureGenerator> {
+    fn convert(&self, name: &str, size: u32) -> Result<TextureGenerator> {
         let factor = size as f32 / self.size as f32;
         let component = self
             .component
             .convert(&"component", factor)
             .context(format!(
                 "Failed to convert 'component' of the texture '{}'",
-                self.name
+                name
             ))?;
         let color = Color::convert(&self.background).context(format!(
             "Failed to convert 'background' of the texture '{}'",
-            self.name
+            name
         ))?;
 
         Ok(TextureGenerator::new(
-            self.name.clone(),
+            name,
             Size::square(size),
             color,
             component,
@@ -80,14 +73,10 @@ mod tests {
 
     #[test]
     fn test_convert_layout() {
-        let definition = TextureDefinition::new(
-            "test",
-            100,
-            "#0000FF".to_string(),
-            ComponentDefinition::Mock(42),
-        );
+        let definition =
+            TextureDefinition::new(100, "#0000FF".to_string(), ComponentDefinition::Mock(42));
         let generator = TextureGenerator::new("test", Size::square(200), BLUE, Component::Mock(42));
 
-        assert_eq!(generator, definition.convert(200).unwrap());
+        assert_eq!(generator, definition.convert("test", 200).unwrap());
     }
 }

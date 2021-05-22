@@ -1,5 +1,5 @@
 ---
-name: "glass window with stone stool"
+description: "glass window with stone stool"
 tile_size: 512
 pane_style:
   Layout:
