@@ -93,36 +93,38 @@ fn select_best_node_style(
     top_styles: Vec<(usize, Vec<Side>)>,
     is_corner: bool,
 ) -> Option<usize> {
-    if top_styles.len() == 1 {
-        let top_style = &top_styles[0];
-        let side_count = top_style.1.len();
+    match top_styles.len() {
+        1 => {
+            let top_style = &top_styles[0];
+            let side_count = top_style.1.len();
 
-        if !is_corner && side_count == 2 && is_straight(top_style) {
-            return get_node_style(wall_styles, top_style.0);
-        }
-
-        return Some(get_corner_style(wall_styles, top_style.0));
-    } else if top_styles.len() > 1 {
-        let side_count = top_styles[0].1.len();
-
-        if side_count == 2 {
-            let style0 = &top_styles[0];
-            let style1 = &top_styles[1];
-            let is_straight0 = is_straight(style0);
-            let is_straight1 = is_straight(style1);
-
-            if is_straight0 && !is_straight1 {
-                return Some(get_corner_style(wall_styles, style0.0));
-            } else if is_straight1 && !is_straight0 {
-                return Some(get_corner_style(wall_styles, style1.0));
+            if !is_corner && side_count == 2 && is_straight(top_style) {
+                return get_node_style(wall_styles, top_style.0);
             }
+
+            Some(get_corner_style(wall_styles, top_style.0))
         }
+        n if n > 1 => {
+            let side_count = top_styles[0].1.len();
 
-        let best_id = select_best_wall_style(wall_styles, top_styles);
-        return Some(get_corner_style(wall_styles, best_id));
+            if side_count == 2 {
+                let style0 = &top_styles[0];
+                let style1 = &top_styles[1];
+                let is_straight0 = is_straight(style0);
+                let is_straight1 = is_straight(style1);
+
+                if is_straight0 && !is_straight1 {
+                    return Some(get_corner_style(wall_styles, style0.0));
+                } else if is_straight1 && !is_straight0 {
+                    return Some(get_corner_style(wall_styles, style1.0));
+                }
+            }
+
+            let best_id = select_best_wall_style(wall_styles, top_styles);
+            Some(get_corner_style(wall_styles, best_id))
+        }
+        _ => None,
     }
-
-    None
 }
 
 fn select_best_wall_style(

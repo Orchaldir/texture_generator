@@ -17,7 +17,7 @@ pub struct ResourceManager<T: Resource> {
 
 impl<T: Resource> ResourceManager<T> {
     pub fn new(resources: Vec<T>, default: T) -> ResourceManager<T> {
-        ResourceManager { resources, default }
+        ResourceManager { default, resources }
     }
 
     pub fn is_empty(&self) -> bool {
