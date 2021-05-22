@@ -11,10 +11,6 @@ pub trait ResourceDefinition {
     fn convert(&self, name: &str, size: u32) -> Result<Self::R>;
 }
 
-pub trait ResourceLookup<T> {
-    fn lookup(&self, resource_type: T, name: &str) -> Option<usize>;
-}
-
 pub struct ResourceManager<T: Resource> {
     default: T,
     resources: Vec<T>,

@@ -72,6 +72,29 @@ fn read_entry<T: DeserializeOwned>(
     }
 }
 
+pub fn read_resources<T: DeserializeOwned>(dir: &Path, names: &[String]) -> HashMap<String, T> {
+    if !dir.is_dir() {
+        warn!(
+            "Couldn't read definitions, because the path {:?} is not a directory!",
+            dir
+        );
+        return HashMap::default();
+    }
+
+    let mut results = HashMap::new();
+
+    for name in names {
+        match read(&dir.join(name)) {
+            Ok(resource) => {
+                results.insert(name.clone(), resource);
+            }
+            Err(error) => warn!("Couldn't read {}, because of {:?}", name, error),
+        };
+    }
+
+    results
+}
+
 pub fn read<T: DeserializeOwned>(path: &Path) -> Result<T, ResourceError> {
     let string = fs::read_to_string(path)?;
     let data: T = serde_yaml::from_str(&string)?;

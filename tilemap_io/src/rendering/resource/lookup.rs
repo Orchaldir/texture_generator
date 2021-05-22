@@ -1,16 +1,16 @@
+use crate::rendering::resource::ResourceDefinitions;
+use crate::rendering::style::door::DoorDefinition;
+use crate::rendering::style::node::NodeDefinition;
+use crate::rendering::style::wall::WallDefinition;
+use crate::rendering::style::window::WindowDefinition;
 use serde::{Deserialize, Serialize};
-use texture_generation::utils::resource::ResourceLookup;
-
-pub enum ResourceType {
-    Door,
-    Node,
-    Texture,
-    Wall,
-    Window,
-}
+use std::collections::HashMap;
+use std::path::Path;
+use texture_generation::definition::generation::TextureDefinition;
+use texture_generation::definition::read_resources;
 
 #[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct TilemapResourceLookup {
+pub struct ResourceLookup {
     doors: Vec<String>,
     nodes: Vec<String>,
     textures: Vec<String>,
@@ -18,74 +18,43 @@ pub struct TilemapResourceLookup {
     windows: Vec<String>,
 }
 
-impl TilemapResourceLookup {
-    pub fn new(
-        doors: Vec<String>,
-        nodes: Vec<String>,
-        textures: Vec<String>,
-        walls: Vec<String>,
-        windows: Vec<String>,
-    ) -> Self {
-        Self {
+impl ResourceLookup {
+    pub fn convert(&self, path: &Path) -> ResourceDefinitions {
+        info!("Load definitions from {:?}", path);
+
+        let textures: HashMap<String, TextureDefinition> =
+            read_resources(&path.join("textures"), &self.textures);
+
+        info!("Loaded {} texture definitions", textures.len());
+
+        let style_path = path.join("styles");
+
+        let doors: HashMap<String, DoorDefinition> =
+            read_resources(&style_path.join("doors"), &self.doors);
+
+        info!("Loaded {} door definitions", doors.len());
+
+        let nodes: HashMap<String, NodeDefinition> =
+            read_resources(&style_path.join("nodes"), &self.nodes);
+
+        info!("Loaded {} node definitions", nodes.len());
+
+        let walls: HashMap<String, WallDefinition> =
+            read_resources(&style_path.join("walls"), &self.walls);
+
+        info!("Loaded {} wall definitions", walls.len());
+
+        let windows: HashMap<String, WindowDefinition> =
+            read_resources(&style_path.join("windows"), &self.windows);
+
+        info!("Loaded {} window definitions", windows.len());
+
+        ResourceDefinitions {
             doors,
             nodes,
             textures,
             walls,
             windows,
         }
-    }
-}
-
-impl ResourceLookup<ResourceType> for TilemapResourceLookup {
-    fn lookup(&self, resource_type: ResourceType, name: &str) -> Option<usize> {
-        let resources = match resource_type {
-            ResourceType::Door => &self.doors,
-            ResourceType::Node => &self.nodes,
-            ResourceType::Texture => &self.textures,
-            ResourceType::Wall => &self.walls,
-            ResourceType::Window => &self.windows,
-        };
-        lookup(resources, name)
-    }
-}
-
-fn lookup(resources: &[String], name: &str) -> Option<usize> {
-    resources.iter().position(|r| r.eq(name))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::rendering::resource::lookup::ResourceType::*;
-
-    #[test]
-    fn test_lookup() {
-        let doors = prepare(vec!["D0", "D2", "D4"]);
-        let wall = prepare(vec!["w10", "w11", "w111"]);
-        let lookup = TilemapResourceLookup::new(doors, Vec::new(), Vec::new(), wall, Vec::new());
-
-        assert_eq!(lookup.lookup(Door, "D0"), Some(0));
-        assert_eq!(lookup.lookup(Door, "D1"), None);
-        assert_eq!(lookup.lookup(Door, "D2"), Some(1));
-        assert_eq!(lookup.lookup(Door, "D3"), None);
-        assert_eq!(lookup.lookup(Door, "D4"), Some(2));
-
-        assert_eq!(lookup.lookup(Wall, "w10"), Some(0));
-        assert_eq!(lookup.lookup(Wall, "w11"), Some(1));
-        assert_eq!(lookup.lookup(Wall, "w111"), Some(2));
-
-        assert_eq!(lookup.lookup(Node, "D0"), None);
-        assert_eq!(lookup.lookup(Texture, "D0"), None);
-        assert_eq!(lookup.lookup(Wall, "D0"), None);
-        assert_eq!(lookup.lookup(Window, "D0"), None);
-
-        assert_eq!(lookup.lookup(Door, "w10"), None);
-        assert_eq!(lookup.lookup(Node, "w10"), None);
-        assert_eq!(lookup.lookup(Texture, "w10"), None);
-        assert_eq!(lookup.lookup(Window, "w10"), None);
-    }
-
-    fn prepare(names: Vec<&str>) -> Vec<String> {
-        names.into_iter().map(|s| s.into()).collect()
     }
 }
