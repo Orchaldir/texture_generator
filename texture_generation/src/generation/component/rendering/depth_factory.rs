@@ -12,6 +12,12 @@ pub enum DepthFactory {
     InterpolateTwo { center: f32, diff: f32 },
     /// A linear interpolation between many depth values
     InterpolateMany(Vec<(f32, f32)>),
+    /// Creates a cylinder along the x-axis or y-axis.
+    Cylinder {
+        is_horizontal: bool,
+        center_depth: u8,
+        border_depth: u8,
+    },
     /// Creates a dome.
     Dome { center: f32, diff: f32 },
     /// Creates a gradient along the x- or y-axis.
@@ -48,6 +54,19 @@ impl DepthFactory {
                 diff: *diff,
             },
             DepthFactory::InterpolateMany(data) => DepthCalculator::InterpolateMany(data.clone()),
+            DepthFactory::Cylinder {
+                is_horizontal,
+                center_depth,
+                border_depth,
+            } => {
+                let aabb = data.get_inner();
+                DepthCalculator::new_cylinder_x(
+                    aabb.start().x,
+                    aabb.end().x,
+                    *center_depth,
+                    *border_depth,
+                )
+            }
             DepthFactory::Dome { center, diff } => DepthCalculator::Dome {
                 center: *center,
                 diff: *diff,
