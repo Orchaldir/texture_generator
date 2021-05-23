@@ -13,7 +13,11 @@ pub mod depth_factory;
 /// Renders the texture.
 pub enum RenderingComponent {
     /// Fills the area with a color.
-    FillArea { color: Color, depth: u8 },
+    FillArea {
+        color: Color,
+        depth: u8,
+    },
+    Mock,
     /// Renders a [`Shape`].
     Shape {
         shape_factory: ShapeFactory,
@@ -78,6 +82,7 @@ impl RenderingComponent {
                     point.y += 1;
                 }
             }
+            RenderingComponent::Mock => {}
             RenderingComponent::Shape {
                 shape_factory,
                 color_selector,

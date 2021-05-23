@@ -39,6 +39,17 @@ impl Point {
         Point { x, y }
     }
 
+    /// Returns a new point with switched x & <height>.
+    ///
+    /// ```
+    ///# use texture_generation::math::point::Point;
+    /// let point = Point::new(-10, 30);
+    /// assert_eq!(point.flip(), Point::new(30, -10));
+    /// ```
+    pub fn flip(&self) -> Point {
+        Point::new(self.y, self.x)
+    }
+
     /// Calculates the euclidean distance to another point.
     ///
     /// ```
