@@ -18,6 +18,13 @@ pub enum DepthCalculator {
         center_depth: f32,
         diff_depth: f32,
     },
+    /// Creates a cylinder along the y-axis.
+    CylinderY {
+        center_y: f32,
+        diff_y: f32,
+        center_depth: f32,
+        diff_depth: f32,
+    },
     /// Creates a dome.
     Dome { center: f32, diff: f32 },
     /// A gradient along the x-axis.
@@ -58,6 +65,20 @@ impl DepthCalculator {
         DepthCalculator::CylinderX {
             center_x: (start_x + end_x) as f32 * 0.5,
             diff_x: (end_x - start_x) as f32 * 0.5,
+            center_depth: center_depth as f32,
+            diff_depth: (border_depth as f32 - center_depth as f32),
+        }
+    }
+
+    pub fn new_cylinder_y(
+        start_y: i32,
+        end_y: i32,
+        center_depth: u8,
+        border_depth: u8,
+    ) -> DepthCalculator {
+        DepthCalculator::CylinderY {
+            center_y: (start_y + end_y) as f32 * 0.5,
+            diff_y: (end_y - start_y) as f32 * 0.5,
             center_depth: center_depth as f32,
             diff_depth: (border_depth as f32 - center_depth as f32),
         }
@@ -129,6 +150,15 @@ impl DepthCalculator {
                 diff_depth,
             } => {
                 let factor = (point.x as f32 - *center_x).abs() / *diff_x;
+                calculate_rounded(factor, *center_depth, *diff_depth)
+            }
+            DepthCalculator::CylinderY {
+                center_y,
+                diff_y,
+                center_depth,
+                diff_depth,
+            } => {
+                let factor = (point.y as f32 - *center_y).abs() / *diff_y;
                 calculate_rounded(factor, *center_depth, *diff_depth)
             }
             DepthCalculator::GradientX {
@@ -296,6 +326,15 @@ mod tests {
         assert_point(&calculator, &Point::new(100, 0), 50);
         assert_point(&calculator, &Point::new(150, 10), 150);
         assert_point(&calculator, &Point::new(200, 20), 50);
+    }
+
+    #[test]
+    fn test_cylinder_y() {
+        let calculator = DepthCalculator::new_cylinder_y(100, 200, 150, 50);
+
+        assert_point(&calculator, &Point::new(0, 100), 50);
+        assert_point(&calculator, &Point::new(10, 150), 150);
+        assert_point(&calculator, &Point::new(20, 200), 50);
     }
 
     #[test]

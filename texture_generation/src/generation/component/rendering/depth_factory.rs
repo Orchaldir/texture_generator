@@ -60,12 +60,22 @@ impl DepthFactory {
                 border_depth,
             } => {
                 let aabb = data.get_inner();
-                DepthCalculator::new_cylinder_x(
-                    aabb.start().x,
-                    aabb.end().x,
-                    *center_depth,
-                    *border_depth,
-                )
+
+                if *is_horizontal {
+                    DepthCalculator::new_cylinder_x(
+                        aabb.start().x,
+                        aabb.end().x,
+                        *center_depth,
+                        *border_depth,
+                    )
+                } else {
+                    DepthCalculator::new_cylinder_y(
+                        aabb.start().y,
+                        aabb.end().y,
+                        *center_depth,
+                        *border_depth,
+                    )
+                }
             }
             DepthFactory::Dome { center, diff } => DepthCalculator::Dome {
                 center: *center,
