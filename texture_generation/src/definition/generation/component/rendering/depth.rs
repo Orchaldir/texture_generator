@@ -6,10 +6,24 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DepthDefinition {
     Uniform(u8),
-    InterpolateTwo { center: u8, border: u8 },
+    InterpolateTwo {
+        center: u8,
+        border: u8,
+    },
     InterpolateMany(Vec<(f32, u8)>),
-    Dome { center: u8, border: u8 },
-    Gradient { start: u8, end: u8 },
+    Cylinder {
+        is_horizontal: bool,
+        center_depth: u8,
+        border_depth: u8,
+    },
+    Dome {
+        center: u8,
+        border: u8,
+    },
+    Gradient {
+        start: u8,
+        end: u8,
+    },
 }
 
 impl DepthDefinition {
@@ -22,6 +36,15 @@ impl DepthDefinition {
             DepthDefinition::InterpolateMany(data) => {
                 DepthFactory::new_interpolate_many(data.clone())
             }
+            DepthDefinition::Cylinder {
+                is_horizontal,
+                center_depth,
+                border_depth,
+            } => Ok(DepthFactory::Cylinder {
+                is_horizontal: *is_horizontal,
+                center_depth: *center_depth,
+                border_depth: *border_depth,
+            }),
             DepthDefinition::Dome { center, border } => {
                 Ok(DepthFactory::new_dome(*center, *border))
             }

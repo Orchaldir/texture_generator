@@ -17,4 +17,4 @@ edge_style:
                 InterpolateTwo:
                   center: 250
                   border: 220
-corner_style: 1
+corner_style: 0
