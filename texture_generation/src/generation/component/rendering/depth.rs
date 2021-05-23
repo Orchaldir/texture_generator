@@ -11,6 +11,13 @@ pub enum DepthCalculator {
     InterpolateTwo { center: f32, diff: f32 },
     /// A linear interpolation between many depth values.
     InterpolateMany(Vec<(f32, f32)>),
+    /// Creates a cylinder along the x-axis.
+    CylinderX {
+        center_x: f32,
+        diff_x: f32,
+        center_depth: f32,
+        diff_depth: f32,
+    },
     /// Creates a dome.
     Dome { center: f32, diff: f32 },
     /// A gradient along the x-axis.
@@ -40,6 +47,20 @@ impl DepthCalculator {
 
     pub fn new_interpolate_many(data: Vec<(f32, u8)>) -> Result<DepthCalculator> {
         Ok(DepthCalculator::InterpolateMany(convert_many(data)?))
+    }
+
+    pub fn new_cylinder_x(
+        start_x: i32,
+        end_x: i32,
+        center_depth: u8,
+        border_depth: u8,
+    ) -> DepthCalculator {
+        DepthCalculator::CylinderX {
+            center_x: (start_x + end_x) as f32 * 0.5,
+            diff_x: (end_x - start_x) as f32 * 0.5,
+            center_depth: center_depth as f32,
+            diff_depth: (border_depth as f32 - center_depth as f32),
+        }
     }
 
     pub fn new_dome(center: u8, border: u8) -> DepthCalculator {
@@ -100,9 +121,15 @@ impl DepthCalculator {
 
                 last_depth as u8
             }
-            DepthCalculator::Dome { center, diff } => {
-                let factor = 1.0 - (1.0 - factor * factor).sqrt();
-                (*center + factor * (*diff)) as u8
+            DepthCalculator::Dome { center, diff } => calculate_rounded(factor, *center, *diff),
+            DepthCalculator::CylinderX {
+                center_x,
+                diff_x,
+                center_depth,
+                diff_depth,
+            } => {
+                let factor = (point.x as f32 - *center_x).abs() / *diff_x;
+                calculate_rounded(factor, *center_depth, *diff_depth)
             }
             DepthCalculator::GradientX {
                 start_x,
@@ -124,6 +151,11 @@ impl DepthCalculator {
             }
         }
     }
+}
+
+fn calculate_rounded(factor: f32, center: f32, diff: f32) -> u8 {
+    let factor = 1.0 - (1.0 - factor * factor).sqrt();
+    (center + factor * (diff)) as u8
 }
 
 fn interpolate(factor: f32, pos0: f32, pos1: f32, depth0: f32, depth1: f32) -> u8 {
@@ -255,6 +287,15 @@ mod tests {
         assert(&calculator, 0.0, 200);
         assert(&calculator, 0.5, 173);
         assert(&calculator, 1.0, 0);
+    }
+
+    #[test]
+    fn test_cylinder_x() {
+        let calculator = DepthCalculator::new_cylinder_x(100, 200, 150, 50);
+
+        assert_point(&calculator, &Point::new(100, 0), 50);
+        assert_point(&calculator, &Point::new(150, 10), 150);
+        assert_point(&calculator, &Point::new(200, 20), 50);
     }
 
     #[test]
