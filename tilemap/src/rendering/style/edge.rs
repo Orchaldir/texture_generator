@@ -11,14 +11,12 @@ use texture_generation::math::size::Size;
 pub enum EdgeStyle {
     Layout {
         thickness: u32,
-        half_thickness: i32,
         horizontal: LayoutComponent,
         vertical: LayoutComponent,
     },
     Mock(u32),
     Solid {
         thickness: u32,
-        half_thickness: i32,
         component: RenderingComponent,
     },
 }
@@ -36,7 +34,6 @@ impl EdgeStyle {
         let vertical = component.flip();
         Ok(EdgeStyle::Layout {
             thickness,
-            half_thickness: (thickness / 2) as i32,
             horizontal: component,
             vertical,
         })
@@ -49,7 +46,6 @@ impl EdgeStyle {
 
         Ok(EdgeStyle::Solid {
             thickness,
-            half_thickness: (thickness / 2) as i32,
             component,
         })
     }
@@ -73,22 +69,18 @@ impl EdgeStyle {
         match self {
             EdgeStyle::Layout {
                 thickness,
-                half_thickness,
                 horizontal,
                 ..
             } => {
-                let aabb =
-                    calculate_horizontal_aabb(node, edge, offset, *thickness, *half_thickness);
+                let aabb = calculate_horizontal_aabb(node, edge, offset, *thickness);
                 horizontal.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
                 thickness,
-                half_thickness,
                 component,
             } => {
-                let aabb =
-                    calculate_horizontal_aabb(node, edge, offset, *thickness, *half_thickness);
+                let aabb = calculate_horizontal_aabb(node, edge, offset, *thickness);
                 component.render(texture, &data.transform(aabb))
             }
         }
@@ -105,20 +97,18 @@ impl EdgeStyle {
         match self {
             EdgeStyle::Layout {
                 thickness,
-                half_thickness,
                 vertical,
                 ..
             } => {
-                let aabb = calculate_vertical_aabb(node, edge, offset, *thickness, *half_thickness);
+                let aabb = calculate_vertical_aabb(node, edge, offset, *thickness);
                 vertical.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
                 thickness,
-                half_thickness,
                 component,
             } => {
-                let aabb = calculate_vertical_aabb(node, edge, offset, *thickness, *half_thickness);
+                let aabb = calculate_vertical_aabb(node, edge, offset, *thickness);
                 component.render(texture, &data.transform(aabb))
             }
         }
@@ -131,27 +121,17 @@ impl Default for EdgeStyle {
     }
 }
 
-fn calculate_horizontal_aabb(
-    node: Point,
-    edge: (i32, u32),
-    offset: i32,
-    thickness: u32,
-    half_thickness: i32,
-) -> AABB {
+fn calculate_horizontal_aabb(node: Point, edge: (i32, u32), offset: i32, thickness: u32) -> AABB {
     let (start, length) = edge;
+    let half_thickness = (thickness / 2) as i32;
     let start = Point::new(node.x + start, node.y - half_thickness + offset);
     let size = Size::new(length, thickness);
     AABB::new(start, size)
 }
 
-fn calculate_vertical_aabb(
-    node: Point,
-    edge: (i32, u32),
-    offset: i32,
-    thickness: u32,
-    half_thickness: i32,
-) -> AABB {
+fn calculate_vertical_aabb(node: Point, edge: (i32, u32), offset: i32, thickness: u32) -> AABB {
     let (start, length) = edge;
+    let half_thickness = (thickness / 2) as i32;
     let start = Point::new(node.x - half_thickness + offset, node.y + start);
     let size = Size::new(thickness, length);
     AABB::new(start, size)
