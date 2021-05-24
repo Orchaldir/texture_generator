@@ -1,5 +1,4 @@
 use crate::rendering::style::edge::EdgeStyle;
-use crate::rendering::style::node::NodeStyle;
 use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::Data;
 use texture_generation::math::point::Point;
@@ -53,15 +52,13 @@ impl WindowStyle {
         &self,
         data: &Data,
         node: Point,
-        tile_size: u32,
-        start_node: Option<&NodeStyle>,
-        end_node: Option<&NodeStyle>,
+        edge: (i32, u32),
         texture: &mut Texture,
     ) {
         self.stool_style
-            .render_vertical(data, node, tile_size, 0, start_node, end_node, texture);
+            .render_vertical(data, node, edge, 0, texture);
         self.pane_style
-            .render_vertical(data, node, tile_size, 0, start_node, end_node, texture);
+            .render_vertical(data, node, edge, 0, texture);
     }
 }
 

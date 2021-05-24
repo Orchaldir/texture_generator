@@ -195,16 +195,12 @@ impl Renderer {
                     Border::Empty => {}
                     Border::Wall(id) => {
                         let wall_style = self.resources.wall_styles.get(id);
-                        let start_index = get_start_of_vertical_border(index);
-                        let end_index = get_end_of_vertical_border(size, index);
 
                         wall_style.get_edge_style().render_vertical(
                             &data,
                             start,
-                            self.tile_size,
+                            self.calculate_vertical_edge(nodes, size, index),
                             0,
-                            nodes[start_index],
-                            nodes[end_index],
                             texture,
                         );
                     }
@@ -215,32 +211,24 @@ impl Renderer {
                     } => {
                         let wall_style = self.resources.wall_styles.get(wall_id);
                         let door_style = self.resources.door_styles.get(door_id);
-                        let start_index = get_start_of_vertical_border(index);
-                        let end_index = get_end_of_vertical_border(size, index);
                         let offset = door_style
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
 
                         door_style.get_edge_style().render_vertical(
                             &data,
                             start,
-                            self.tile_size,
+                            self.calculate_vertical_edge(nodes, size, index),
                             offset,
-                            nodes[start_index],
-                            nodes[end_index],
                             texture,
                         );
                     }
                     Border::Window { window_id, .. } => {
                         let window_style = self.resources.window_styles.get(window_id);
-                        let start_index = get_start_of_vertical_border(index);
-                        let end_index = get_end_of_vertical_border(size, index);
 
                         window_style.render_vertical(
                             &data,
                             start,
-                            self.tile_size,
-                            nodes[start_index],
-                            nodes[end_index],
+                            self.calculate_vertical_edge(nodes, size, index),
                             texture,
                         );
                     }
@@ -297,6 +285,26 @@ impl Renderer {
     ) -> (i32, u32) {
         let start_index = get_start_of_horizontal_border(border_index, y);
         let end_index = get_end_of_horizontal_border(border_index, y);
+        self.calculate_edge(nodes, start_index, end_index)
+    }
+
+    fn calculate_vertical_edge(
+        &self,
+        nodes: &[Option<&NodeStyle>],
+        size: Size,
+        border_index: usize,
+    ) -> (i32, u32) {
+        let start_index = get_start_of_vertical_border(border_index);
+        let end_index = get_end_of_vertical_border(size, border_index);
+        self.calculate_edge(nodes, start_index, end_index)
+    }
+
+    fn calculate_edge(
+        &self,
+        nodes: &[Option<&NodeStyle>],
+        start_index: usize,
+        end_index: usize,
+    ) -> (i32, u32) {
         let start_half = nodes[start_index].map(|n| n.get_half()).unwrap_or(0);
         let end_half = nodes[end_index].map(|n| n.get_half()).unwrap_or(0);
         (start_half, self.tile_size - (start_half + end_half) as u32)

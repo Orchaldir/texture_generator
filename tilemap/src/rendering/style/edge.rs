@@ -1,4 +1,3 @@
-use crate::rendering::style::node::NodeStyle;
 use anyhow::{bail, Result};
 use texture_generation::generation::component::layout::LayoutComponent;
 use texture_generation::generation::component::rendering::RenderingComponent;
@@ -79,7 +78,7 @@ impl EdgeStyle {
                 ..
             } => {
                 let aabb =
-                    calculate_horizontal_aabb2(node, edge, offset, *thickness, *half_thickness);
+                    calculate_horizontal_aabb(node, edge, offset, *thickness, *half_thickness);
                 horizontal.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
@@ -89,7 +88,7 @@ impl EdgeStyle {
                 component,
             } => {
                 let aabb =
-                    calculate_horizontal_aabb2(node, edge, offset, *thickness, *half_thickness);
+                    calculate_horizontal_aabb(node, edge, offset, *thickness, *half_thickness);
                 component.render(texture, &data.transform(aabb))
             }
         }
@@ -99,10 +98,8 @@ impl EdgeStyle {
         &self,
         data: &Data,
         node: Point,
-        tile_size: u32,
+        edge: (i32, u32),
         offset: i32,
-        start_node: Option<&NodeStyle>,
-        end_node: Option<&NodeStyle>,
         texture: &mut Texture,
     ) {
         match self {
@@ -112,15 +109,7 @@ impl EdgeStyle {
                 vertical,
                 ..
             } => {
-                let aabb = EdgeStyle::calculate_vertical_aabb(
-                    node,
-                    tile_size,
-                    offset,
-                    start_node,
-                    end_node,
-                    *thickness,
-                    *half_thickness,
-                );
+                let aabb = calculate_vertical_aabb(node, edge, offset, *thickness, *half_thickness);
                 vertical.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
@@ -129,34 +118,10 @@ impl EdgeStyle {
                 half_thickness,
                 component,
             } => {
-                let aabb = EdgeStyle::calculate_vertical_aabb(
-                    node,
-                    tile_size,
-                    offset,
-                    start_node,
-                    end_node,
-                    *thickness,
-                    *half_thickness,
-                );
+                let aabb = calculate_vertical_aabb(node, edge, offset, *thickness, *half_thickness);
                 component.render(texture, &data.transform(aabb))
             }
         }
-    }
-
-    fn calculate_vertical_aabb(
-        node: Point,
-        tile_size: u32,
-        offset: i32,
-        start_node: Option<&NodeStyle>,
-        end_node: Option<&NodeStyle>,
-        thickness: u32,
-        half_thickness: i32,
-    ) -> AABB {
-        let start_half = start_node.map(|n| n.get_half()).unwrap_or(0);
-        let end_half = end_node.map(|n| n.get_half()).unwrap_or(0);
-        let start = Point::new(node.x - half_thickness + offset, node.y + start_half);
-        let size = Size::new(thickness, tile_size - (start_half + end_half) as u32);
-        AABB::new(start, size)
     }
 }
 
@@ -166,7 +131,7 @@ impl Default for EdgeStyle {
     }
 }
 
-fn calculate_horizontal_aabb2(
+fn calculate_horizontal_aabb(
     node: Point,
     edge: (i32, u32),
     offset: i32,
@@ -176,6 +141,19 @@ fn calculate_horizontal_aabb2(
     let (start, length) = edge;
     let start = Point::new(node.x + start, node.y - half_thickness + offset);
     let size = Size::new(length, thickness);
+    AABB::new(start, size)
+}
+
+fn calculate_vertical_aabb(
+    node: Point,
+    edge: (i32, u32),
+    offset: i32,
+    thickness: u32,
+    half_thickness: i32,
+) -> AABB {
+    let (start, length) = edge;
+    let start = Point::new(node.x - half_thickness + offset, node.y + start);
+    let size = Size::new(thickness, length);
     AABB::new(start, size)
 }
 
@@ -232,6 +210,55 @@ mod tests {
             0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ];
+
+        assert_eq!(texture.get_depth_data(), &depth);
+    }
+
+    #[test]
+    fn test_render_vertical() {
+        let edge_component = RenderingComponent::new_fill_area(GREEN, 4);
+        let edge_style = EdgeStyle::new_solid(2, edge_component).unwrap();
+        let mut texture = Texture::new(Size::new(6, 11), BLACK);
+
+        edge_style.render_vertical(
+            &Data::for_texture(texture.get_aabb()),
+            Point::new(3, 3),
+            (2, 4),
+            0,
+            &mut texture,
+        );
+
+        #[rustfmt::skip]
+        let result = vec![
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        ];
+
+        assert_eq!(texture.get_color_data(), &result);
+
+        #[rustfmt::skip]
+        let depth = vec![
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 4, 4, 0, 0,
+            0, 0, 4, 4, 0, 0,
+            0, 0, 4, 4, 0, 0,
+            0, 0, 4, 4, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
         ];
 
         assert_eq!(texture.get_depth_data(), &depth);
