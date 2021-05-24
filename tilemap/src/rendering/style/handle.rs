@@ -45,16 +45,30 @@ impl HandleStyle {
         offset: i32,
         texture: &mut Texture,
     ) {
-        let aabb = self.calculate_horizontal_aabb(node, edge, offset);
-        self.component.render(texture, &data.transform(aabb))
+        let aabb = self.calculate_horizontal_aabb(node, edge, offset, true);
+        self.component.render(texture, &data.transform(aabb));
+
+        let aabb = self.calculate_horizontal_aabb(node, edge, offset, false);
+        self.component.render(texture, &data.transform(aabb));
     }
 
-    fn calculate_horizontal_aabb(&self, node: Point, edge: (i32, u32), offset: i32) -> AABB {
+    fn calculate_horizontal_aabb(
+        &self,
+        node: Point,
+        edge: (i32, u32),
+        offset: i32,
+        is_front: bool,
+    ) -> AABB {
         let (start, length) = edge;
         let end = node.x + start + length as i32;
+        let handle_offset = if is_front {
+            self.offset
+        } else {
+            -(self.offset + self.horizontal_size.height() as i32)
+        };
         let start = Point::new(
             end - self.distance_to_end - self.horizontal_size.width() as i32,
-            node.y + offset + self.offset,
+            node.y + offset + handle_offset,
         );
         AABB::new(start, self.horizontal_size)
     }
@@ -82,11 +96,11 @@ mod tests {
     fn test_render_horizontal() {
         let component = RenderingComponent::new_fill_area(GREEN, 4);
         let handle = HandleStyle::new(2, 1, Size::new(3, 2), component).unwrap();
-        let mut texture = Texture::new(Size::new(11, 7), BLACK);
+        let mut texture = Texture::new(Size::new(11, 8), BLACK);
 
         handle.render_horizontal(
             &Data::for_texture(texture.get_aabb()),
-            Point::new(1, 3),
+            Point::new(1, 4),
             (1, 9),
             0,
             &mut texture,
@@ -95,7 +109,8 @@ mod tests {
         #[rustfmt::skip]
         let result = vec![
             BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK,
             BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
             BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
             BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK,
