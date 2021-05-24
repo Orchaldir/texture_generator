@@ -16,6 +16,7 @@ pub enum RenderingDefinition {
         color: String,
         depth: u8,
     },
+    Mock,
     Shape {
         shape_factory: ShapeFactorDefinition,
         color: ColorSelectorDefinition,
@@ -33,6 +34,7 @@ impl RenderingDefinition {
                 ))?;
                 Ok(RenderingComponent::new_fill_area(color, *depth))
             }
+            RenderingDefinition::Mock => Ok(RenderingComponent::Mock),
             RenderingDefinition::Shape {
                 shape_factory,
                 color,
