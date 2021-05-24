@@ -214,7 +214,7 @@ impl Renderer {
                         let offset = door_style
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
 
-                        door_style.get_edge_style().render_vertical(
+                        door_style.render_vertical(
                             &data,
                             start,
                             self.calculate_vertical_edge(nodes, size, index),

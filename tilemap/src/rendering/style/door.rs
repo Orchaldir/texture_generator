@@ -39,10 +39,6 @@ impl DoorStyle {
         }
     }
 
-    pub fn get_edge_style(&self) -> &EdgeStyle {
-        &self.edge_style
-    }
-
     pub fn get_offset(&self, wall_thickness: u32, is_front: bool) -> i32 {
         if self.is_centered {
             return 0;
@@ -71,6 +67,22 @@ impl DoorStyle {
 
         self.edge_style
             .render_horizontal(data, node, edge, offset, texture);
+    }
+
+    pub fn render_vertical(
+        &self,
+        data: &Data,
+        node: Point,
+        edge: (i32, u32),
+        offset: i32,
+        texture: &mut Texture,
+    ) {
+        if let Some(handle) = &self.handle_style {
+            handle.render_vertical(data, node, edge, offset, texture);
+        }
+
+        self.edge_style
+            .render_vertical(data, node, edge, offset, texture);
     }
 }
 

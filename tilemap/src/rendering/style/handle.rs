@@ -52,6 +52,21 @@ impl HandleStyle {
         self.component.render(texture, &data.transform(aabb));
     }
 
+    pub fn render_vertical(
+        &self,
+        data: &Data,
+        node: Point,
+        edge: (i32, u32),
+        offset: i32,
+        texture: &mut Texture,
+    ) {
+        let aabb = self.calculate_vertical_aabb(node, edge, offset, true);
+        self.component.render(texture, &data.transform(aabb));
+
+        let aabb = self.calculate_vertical_aabb(node, edge, offset, false);
+        self.component.render(texture, &data.transform(aabb));
+    }
+
     fn calculate_horizontal_aabb(
         &self,
         node: Point,
@@ -71,6 +86,27 @@ impl HandleStyle {
             node.y + offset + handle_offset,
         );
         AABB::new(start, self.horizontal_size)
+    }
+
+    fn calculate_vertical_aabb(
+        &self,
+        node: Point,
+        edge: (i32, u32),
+        offset: i32,
+        is_front: bool,
+    ) -> AABB {
+        let (start, length) = edge;
+        let end = node.y + start + length as i32;
+        let handle_offset = if is_front {
+            self.offset
+        } else {
+            -(self.offset + self.vertical_size.width() as i32)
+        };
+        let start = Point::new(
+            node.x + offset + handle_offset,
+            end - self.distance_to_end - self.vertical_size.height() as i32,
+        );
+        AABB::new(start, self.vertical_size)
     }
 }
 
