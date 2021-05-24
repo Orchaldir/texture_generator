@@ -138,7 +138,7 @@ impl Renderer {
                         let offset = door_style
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
 
-                        door_style.get_edge_style().render_horizontal(
+                        door_style.render_horizontal(
                             &data,
                             start,
                             self.calculate_horizontal_edge(nodes, index, y),

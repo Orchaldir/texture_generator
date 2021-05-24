@@ -1,4 +1,8 @@
 use crate::rendering::style::edge::EdgeStyle;
+use crate::rendering::style::handle::HandleStyle;
+use texture_generation::generation::data::texture::Texture;
+use texture_generation::generation::data::Data;
+use texture_generation::math::point::Point;
 use texture_generation::utils::resource::Resource;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -7,18 +11,30 @@ pub struct DoorStyle {
     name: String,
     /// The style of a movable part of the door.
     edge_style: EdgeStyle,
+    handle_style: Option<HandleStyle>,
     is_centered: bool,
 }
 
 impl DoorStyle {
     pub fn default(thickness: u32) -> DoorStyle {
-        Self::new("default", EdgeStyle::default(thickness).unwrap(), true)
+        Self::new(
+            "default",
+            EdgeStyle::default(thickness).unwrap(),
+            None,
+            true,
+        )
     }
 
-    pub fn new<S: Into<String>>(name: S, edge_style: EdgeStyle, is_centered: bool) -> DoorStyle {
+    pub fn new<S: Into<String>>(
+        name: S,
+        edge_style: EdgeStyle,
+        handle_style: Option<HandleStyle>,
+        is_centered: bool,
+    ) -> DoorStyle {
         DoorStyle {
             name: name.into(),
             edge_style,
+            handle_style,
             is_centered,
         }
     }
@@ -39,6 +55,22 @@ impl DoorStyle {
         } else {
             -offset
         }
+    }
+
+    pub fn render_horizontal(
+        &self,
+        data: &Data,
+        node: Point,
+        edge: (i32, u32),
+        offset: i32,
+        texture: &mut Texture,
+    ) {
+        if let Some(handle) = &self.handle_style {
+            handle.render_horizontal(data, node, edge, offset, texture);
+        }
+
+        self.edge_style
+            .render_horizontal(data, node, edge, offset, texture);
     }
 }
 
