@@ -32,3 +32,19 @@ edge_style:
                 FillArea:
                   color: "#696969"
                   depth: 200
+handle_style:
+  distance_to_end: 40
+  offset: 0
+  size:
+    width: 96
+    height: 48
+  component:
+    Shape:
+      shape_factory:
+        RoundedRectangle: 0.7
+      color:
+        ConstantColor: "#432711"
+      depth:
+        Dome:
+          center: 120
+          border: 100

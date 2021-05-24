@@ -1,4 +1,5 @@
 use crate::rendering::style::edge::EdgeDefinition;
+use crate::rendering::style::handle::HandleDefinition;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use texture_generation::utils::resource::ResourceDefinition;
@@ -8,6 +9,7 @@ use tilemap::rendering::style::door::DoorStyle;
 pub struct DoorDefinition {
     tile_size: u32,
     edge_style: EdgeDefinition,
+    handle_style: Option<HandleDefinition>,
     is_centered: bool,
 }
 
@@ -23,7 +25,21 @@ impl ResourceDefinition for DoorDefinition {
                 "Failed to convert 'edge_style' of the door '{}'",
                 name
             ))?;
-        Ok(DoorStyle::new(name, edge_style, self.is_centered))
+        let handle_style = self
+            .handle_style
+            .clone()
+            .map(|h| h.convert("handle_style", factor))
+            .map_or(Ok(None), |v| v.map(Some))
+            .context(format!(
+                "Failed to convert 'handle_style' of the door '{}'",
+                name
+            ))?;
+        Ok(DoorStyle::new(
+            name,
+            edge_style,
+            handle_style,
+            self.is_centered,
+        ))
     }
 }
 
@@ -33,13 +49,14 @@ mod tests {
     use tilemap::rendering::style::edge::EdgeStyle;
 
     #[test]
-    fn test_convert_layout() {
+    fn test_convert_without_handle() {
         let definition = DoorDefinition {
             tile_size: 200,
             edge_style: EdgeDefinition::Mock(10),
+            handle_style: None,
             is_centered: true,
         };
-        let style = DoorStyle::new("door0", EdgeStyle::Mock(30), true);
+        let style = DoorStyle::new("door0", EdgeStyle::Mock(30), None, true);
 
         assert_eq!(style, definition.convert("door0", 600).unwrap())
     }
