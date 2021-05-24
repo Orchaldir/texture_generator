@@ -156,4 +156,36 @@ mod tests {
 
         assert_eq!(texture.get_color_data(), &result);
     }
+
+    #[test]
+    fn test_render_vertical() {
+        let component = RenderingComponent::new_fill_area(GREEN, 4);
+        let handle = HandleStyle::new(2, 1, Size::new(3, 2), component).unwrap();
+        let mut texture = Texture::new(Size::new(8, 11), BLACK);
+
+        handle.render_vertical(
+            &Data::for_texture(texture.get_aabb()),
+            Point::new(4, 1),
+            (1, 9),
+            0,
+            &mut texture,
+        );
+
+        #[rustfmt::skip]
+        let result = vec![
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, GREEN, GREEN, BLACK, BLACK, GREEN, GREEN, BLACK,
+            BLACK, GREEN, GREEN, BLACK, BLACK, GREEN, GREEN, BLACK,
+            BLACK, GREEN, GREEN, BLACK, BLACK, GREEN, GREEN, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        ];
+
+        assert_eq!(texture.get_color_data(), &result);
+    }
 }
