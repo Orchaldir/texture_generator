@@ -119,16 +119,12 @@ impl Renderer {
                     Border::Empty => {}
                     Border::Wall(id) => {
                         let wall_style = self.resources.wall_styles.get(id);
-                        let start_index = get_start_of_horizontal_border(index, y);
-                        let end_index = get_end_of_horizontal_border(index, y);
 
                         wall_style.get_edge_style().render_horizontal(
                             &data,
                             start,
-                            self.tile_size,
+                            self.calculate_horizontal_edge(nodes, index, y),
                             0,
-                            nodes[start_index],
-                            nodes[end_index],
                             texture,
                         );
                     }
@@ -139,32 +135,24 @@ impl Renderer {
                     } => {
                         let wall_style = self.resources.wall_styles.get(wall_id);
                         let door_style = self.resources.door_styles.get(door_id);
-                        let start_index = get_start_of_horizontal_border(index, y);
-                        let end_index = get_end_of_horizontal_border(index, y);
                         let offset = door_style
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
 
                         door_style.get_edge_style().render_horizontal(
                             &data,
                             start,
-                            self.tile_size,
+                            self.calculate_horizontal_edge(nodes, index, y),
                             offset,
-                            nodes[start_index],
-                            nodes[end_index],
                             texture,
                         );
                     }
                     Border::Window { window_id, .. } => {
                         let window_style = self.resources.window_styles.get(window_id);
-                        let start_index = get_start_of_horizontal_border(index, y);
-                        let end_index = get_end_of_horizontal_border(index, y);
 
                         window_style.render_horizontal(
                             &data,
                             start,
-                            self.tile_size,
-                            nodes[start_index],
-                            nodes[end_index],
+                            self.calculate_horizontal_edge(nodes, index, y),
                             texture,
                         );
                     }
@@ -299,6 +287,19 @@ impl Renderer {
         let generator = self.resources.textures.get(generator_id);
         texture.set_base_depth(height);
         generator.render(texture, &data);
+    }
+
+    fn calculate_horizontal_edge(
+        &self,
+        nodes: &[Option<&NodeStyle>],
+        border_index: usize,
+        y: u32,
+    ) -> (i32, u32) {
+        let start_index = get_start_of_horizontal_border(border_index, y);
+        let end_index = get_end_of_horizontal_border(border_index, y);
+        let start_half = nodes[start_index].map(|n| n.get_half()).unwrap_or(0);
+        let end_half = nodes[end_index].map(|n| n.get_half()).unwrap_or(0);
+        (start_half, self.tile_size - (start_half + end_half) as u32)
     }
 }
 

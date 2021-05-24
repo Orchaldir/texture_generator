@@ -67,10 +67,8 @@ impl EdgeStyle {
         &self,
         data: &Data,
         node: Point,
-        tile_size: u32,
+        edge: (i32, u32),
         offset: i32,
-        start_node: Option<&NodeStyle>,
-        end_node: Option<&NodeStyle>,
         texture: &mut Texture,
     ) {
         match self {
@@ -80,15 +78,8 @@ impl EdgeStyle {
                 horizontal,
                 ..
             } => {
-                let aabb = EdgeStyle::calculate_horizontal_aabb(
-                    node,
-                    tile_size,
-                    offset,
-                    start_node,
-                    end_node,
-                    *thickness,
-                    *half_thickness,
-                );
+                let aabb =
+                    calculate_horizontal_aabb2(node, edge, offset, *thickness, *half_thickness);
                 horizontal.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
@@ -97,15 +88,8 @@ impl EdgeStyle {
                 half_thickness,
                 component,
             } => {
-                let aabb = EdgeStyle::calculate_horizontal_aabb(
-                    node,
-                    tile_size,
-                    offset,
-                    start_node,
-                    end_node,
-                    *thickness,
-                    *half_thickness,
-                );
+                let aabb =
+                    calculate_horizontal_aabb2(node, edge, offset, *thickness, *half_thickness);
                 component.render(texture, &data.transform(aabb))
             }
         }
@@ -159,22 +143,6 @@ impl EdgeStyle {
         }
     }
 
-    fn calculate_horizontal_aabb(
-        node: Point,
-        tile_size: u32,
-        offset: i32,
-        start_node: Option<&NodeStyle>,
-        end_node: Option<&NodeStyle>,
-        thickness: u32,
-        half_thickness: i32,
-    ) -> AABB {
-        let start_half = start_node.map(|n| n.get_half()).unwrap_or(0);
-        let end_half = end_node.map(|n| n.get_half()).unwrap_or(0);
-        let start = Point::new(node.x + start_half, node.y - half_thickness + offset);
-        let size = Size::new(tile_size - (start_half + end_half) as u32, thickness);
-        AABB::new(start, size)
-    }
-
     fn calculate_vertical_aabb(
         node: Point,
         tile_size: u32,
@@ -198,12 +166,25 @@ impl Default for EdgeStyle {
     }
 }
 
+fn calculate_horizontal_aabb2(
+    node: Point,
+    edge: (i32, u32),
+    offset: i32,
+    thickness: u32,
+    half_thickness: i32,
+) -> AABB {
+    let (start, length) = edge;
+    let start = Point::new(node.x + start, node.y - half_thickness + offset);
+    let size = Size::new(length, thickness);
+    AABB::new(start, size)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
     use texture_generation::generation::data::texture::Texture;
-    use texture_generation::math::color::{BLACK, GREEN, RED};
+    use texture_generation::math::color::{BLACK, GREEN};
 
     #[test]
     #[should_panic]
@@ -219,20 +200,15 @@ mod tests {
 
     #[test]
     fn test_render_horizontal() {
-        let component = RenderingComponent::new_fill_area(RED, 9);
         let edge_component = RenderingComponent::new_fill_area(GREEN, 4);
-        let node_style0 = NodeStyle::new("node0", 4, component.clone());
-        let node_style1 = NodeStyle::new("node0", 2, component);
         let edge_style = EdgeStyle::new_solid(2, edge_component).unwrap();
         let mut texture = Texture::new(Size::new(11, 6), BLACK);
 
         edge_style.render_horizontal(
             &Data::for_texture(texture.get_aabb()),
             Point::new(3, 3),
-            7,
+            (2, 4),
             0,
-            Some(&node_style0),
-            Some(&node_style1),
             &mut texture,
         );
 
