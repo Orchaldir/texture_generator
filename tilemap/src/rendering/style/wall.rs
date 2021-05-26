@@ -10,19 +10,24 @@ pub struct WallStyle {
     /// The optional style of a node between 2 wall segments in the same direction.
     node_style: Option<usize>,
     /// The style of corners.
-    corner_style: usize,
+    corner_style: Option<usize>,
 }
 
 impl WallStyle {
     pub fn default(thickness: u32) -> WallStyle {
-        Self::new("default", EdgeStyle::default(thickness).unwrap(), None, 0)
+        Self::new(
+            "default",
+            EdgeStyle::default(thickness).unwrap(),
+            None,
+            None,
+        )
     }
 
     pub fn new<S: Into<String>>(
         name: S,
         edge_style: EdgeStyle,
         node_style: Option<usize>,
-        corner_style: usize,
+        corner_style: Option<usize>,
     ) -> WallStyle {
         WallStyle {
             name: name.into(),
@@ -40,7 +45,7 @@ impl WallStyle {
         self.node_style
     }
 
-    pub fn get_corner_style(&self) -> usize {
+    pub fn get_corner_style(&self) -> Option<usize> {
         self.corner_style
     }
 

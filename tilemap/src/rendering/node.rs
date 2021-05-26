@@ -102,7 +102,7 @@ fn select_best_node_style(
                 return get_node_style(wall_styles, top_style.0);
             }
 
-            Some(get_corner_style(wall_styles, top_style.0))
+            get_corner_style(wall_styles, top_style.0)
         }
         n if n > 1 => {
             let side_count = top_styles[0].1.len();
@@ -114,14 +114,14 @@ fn select_best_node_style(
                 let is_straight1 = is_straight(style1);
 
                 if is_straight0 && !is_straight1 {
-                    return Some(get_corner_style(wall_styles, style0.0));
+                    return get_corner_style(wall_styles, style0.0);
                 } else if is_straight1 && !is_straight0 {
-                    return Some(get_corner_style(wall_styles, style1.0));
+                    return get_corner_style(wall_styles, style1.0);
                 }
             }
 
             let best_id = select_best_wall_style(wall_styles, top_styles);
-            Some(get_corner_style(wall_styles, best_id))
+            get_corner_style(wall_styles, best_id)
         }
         _ => None,
     }
@@ -146,7 +146,7 @@ fn select_best_wall_style(
     best_id
 }
 
-fn get_corner_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> usize {
+fn get_corner_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> Option<usize> {
     wall_styles.get(index).get_corner_style()
 }
 
@@ -496,6 +496,6 @@ mod tests {
         corner_style: usize,
     ) -> WallStyle {
         let edge_style = EdgeStyle::Mock(wall_thickness);
-        WallStyle::new("test", edge_style, node_style, corner_style)
+        WallStyle::new("test", edge_style, node_style, Some(corner_style))
     }
 }
