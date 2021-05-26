@@ -8,18 +8,18 @@ use std::collections::HashMap;
 use texture_generation::utils::resource::ResourceManager;
 
 #[derive(Debug, PartialEq)]
-pub enum NodeStatus<T> {
+pub enum NodeStatus<T, S> {
     Nothing,
     RenderNode(T),
-    RenderEdge(Vec<Side>),
+    RenderEdge(S, Vec<Side>),
 }
 
-impl<'a> NodeStatus<&'a NodeStyle> {
+impl<'a> NodeStatus<&'a NodeStyle, i32> {
     pub fn calculate_half(&self) -> i32 {
         match self {
             NodeStatus::Nothing => 0,
             NodeStatus::RenderNode(style) => style.get_half(),
-            NodeStatus::RenderEdge(_) => 0,
+            NodeStatus::RenderEdge(half, ..) => *half,
         }
     }
 }
@@ -28,13 +28,16 @@ pub fn calculate_node_styles<'a>(
     node_styles: &'a ResourceManager<NodeStyle>,
     wall_styles: &'a ResourceManager<WallStyle>,
     tilemap: &'a Tilemap2d,
-) -> Vec<NodeStatus<&'a NodeStyle>> {
+) -> Vec<NodeStatus<&'a NodeStyle, i32>> {
     calculate_node_style_ids(wall_styles, tilemap)
         .into_iter()
         .map(|option| match option {
             NodeStatus::Nothing => NodeStatus::Nothing,
             NodeStatus::RenderNode(id) => NodeStatus::RenderNode(node_styles.get(id)),
-            NodeStatus::RenderEdge(sides) => NodeStatus::RenderEdge(sides),
+            NodeStatus::RenderEdge(id, sides) => {
+                let thickness = wall_styles.get(id).get_edge_style().get_thickness() as i32;
+                NodeStatus::RenderEdge(thickness / 2, sides)
+            }
         })
         .collect()
 }
@@ -42,7 +45,7 @@ pub fn calculate_node_styles<'a>(
 pub fn calculate_node_style_ids(
     wall_styles: &ResourceManager<WallStyle>,
     tilemap: &Tilemap2d,
-) -> Vec<NodeStatus<usize>> {
+) -> Vec<NodeStatus<usize, usize>> {
     let size = get_nodes_size(tilemap.get_size());
     let mut node_styles = Vec::with_capacity(size.len());
     let mut index = 0;
@@ -61,7 +64,7 @@ pub fn calculate_node_style(
     wall_styles: &ResourceManager<WallStyle>,
     tilemap: &Tilemap2d,
     index: usize,
-) -> NodeStatus<usize> {
+) -> NodeStatus<usize, usize> {
     let sides_per_style = calculate_sides_per_style(tilemap, index);
     let is_corner = sides_per_style.len() > 1;
     let top_styles = get_top_styles(sides_per_style);
@@ -113,7 +116,7 @@ fn select_best_node_style(
     wall_styles: &ResourceManager<WallStyle>,
     top_styles: Vec<(usize, Vec<Side>)>,
     is_corner: bool,
-) -> NodeStatus<usize> {
+) -> NodeStatus<usize, usize> {
     match top_styles.len() {
         1 => {
             let top_style = &top_styles[0];
@@ -170,14 +173,17 @@ fn select_best_wall_style(
 fn get_corner_style(
     wall_styles: &ResourceManager<WallStyle>,
     top_style: &(usize, Vec<Side>),
-) -> NodeStatus<usize> {
+) -> NodeStatus<usize, usize> {
     match wall_styles.get(top_style.0).get_corner_style() {
-        None => NodeStatus::RenderEdge(top_style.1.clone()),
+        None => NodeStatus::RenderEdge(top_style.0, top_style.1.clone()),
         Some(id) => NodeStatus::RenderNode(id),
     }
 }
 
-fn get_node_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> NodeStatus<usize> {
+fn get_node_style(
+    wall_styles: &ResourceManager<WallStyle>,
+    index: usize,
+) -> NodeStatus<usize, usize> {
     match wall_styles.get(index).get_node_style() {
         None => NodeStatus::Nothing,
         Some(id) => NodeStatus::RenderNode(id),
