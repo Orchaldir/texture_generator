@@ -1,4 +1,4 @@
-use crate::rendering::node::calculate_node_styles;
+use crate::rendering::node::{calculate_node_styles, NodeStatus};
 use crate::rendering::resource::Resources;
 use crate::rendering::style::node::NodeStyle;
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
@@ -94,7 +94,7 @@ impl Renderer {
     fn render_horizontal_borders(
         &self,
         tilemap: &Tilemap2d,
-        nodes: &[Option<&NodeStyle>],
+        nodes: &[NodeStatus<&NodeStyle>],
         texture: &mut Texture,
     ) {
         let size = get_horizontal_borders_size(tilemap.get_size());
@@ -170,7 +170,7 @@ impl Renderer {
     fn render_vertical_borders(
         &self,
         tilemap: &Tilemap2d,
-        nodes: &[Option<&NodeStyle>],
+        nodes: &[NodeStatus<&NodeStyle>],
         texture: &mut Texture,
     ) {
         let size = get_vertical_borders_size(tilemap.get_size());
@@ -246,7 +246,7 @@ impl Renderer {
     fn render_nodes(
         &self,
         tilemap: &Tilemap2d,
-        nodes: &[Option<&NodeStyle>],
+        nodes: &[NodeStatus<&NodeStyle>],
         texture: &mut Texture,
     ) {
         let size = get_nodes_size(tilemap.get_size());
@@ -259,7 +259,7 @@ impl Renderer {
             point.x = 0;
 
             for _x in 0..size.width() {
-                if let Some(generator) = nodes[index] {
+                if let NodeStatus::RenderNode(generator) = nodes[index] {
                     generator.render(&data, point, texture);
                 }
 
@@ -279,7 +279,7 @@ impl Renderer {
 
     fn calculate_horizontal_edge(
         &self,
-        nodes: &[Option<&NodeStyle>],
+        nodes: &[NodeStatus<&NodeStyle>],
         border_index: usize,
         y: u32,
     ) -> (i32, u32) {
@@ -290,7 +290,7 @@ impl Renderer {
 
     fn calculate_vertical_edge(
         &self,
-        nodes: &[Option<&NodeStyle>],
+        nodes: &[NodeStatus<&NodeStyle>],
         size: Size,
         border_index: usize,
     ) -> (i32, u32) {
@@ -301,12 +301,12 @@ impl Renderer {
 
     fn calculate_edge(
         &self,
-        nodes: &[Option<&NodeStyle>],
+        nodes: &[NodeStatus<&NodeStyle>],
         start_index: usize,
         end_index: usize,
     ) -> (i32, u32) {
-        let start_half = nodes[start_index].map(|n| n.get_half()).unwrap_or(0);
-        let end_half = nodes[end_index].map(|n| n.get_half()).unwrap_or(0);
+        let start_half = nodes[start_index].calculate_half();
+        let end_half = nodes[end_index].calculate_half();
         (start_half, self.tile_size - (start_half + end_half) as u32)
     }
 }
