@@ -25,7 +25,7 @@ pane_style:
                   depth: 100
 stool_style:
   Solid:
-    thickness: 128
+    thickness: 80
     component:
       FillArea:
         color: "#646464"
