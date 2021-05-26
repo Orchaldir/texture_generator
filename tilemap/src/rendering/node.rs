@@ -7,6 +7,7 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use texture_generation::utils::resource::ResourceManager;
 
+#[derive(Debug, PartialEq)]
 pub enum NodeStatus<T> {
     Nothing,
     RenderNode(T),
@@ -193,6 +194,7 @@ fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::rendering::node::NodeStatus::{Nothing, RenderNode};
     use crate::rendering::style::edge::EdgeStyle;
     use crate::tilemap::border::Border;
     use crate::tilemap::tile::Tile;
@@ -225,8 +227,8 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(LOW_CORNER2), Some(LOW_CORNER2),
-                None, None
+                RenderNode(LOW_CORNER2), RenderNode(LOW_CORNER2),
+                Nothing, Nothing
             ]
         );
     }
@@ -244,9 +246,9 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(HIGH_CORNER2), None,
-                None, None,
-                Some(HIGH_CORNER2), None
+                RenderNode(HIGH_CORNER2), Nothing,
+                Nothing, Nothing,
+                RenderNode(HIGH_CORNER2), Nothing
             ]
         );
     }
@@ -265,10 +267,10 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(HIGH_CORNER2), None,
-                None, None,
-                None, None,
-                Some(HIGH_CORNER2), None
+                RenderNode(HIGH_CORNER2), Nothing,
+                Nothing, Nothing,
+                Nothing, Nothing,
+                RenderNode(HIGH_CORNER2), Nothing
             ]
         );
     }
@@ -286,8 +288,8 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, None, None,
-                Some(LOW_CORNER), Some(LOW_NODE), Some(LOW_CORNER)
+                Nothing, Nothing, Nothing,
+                RenderNode(LOW_CORNER), RenderNode(LOW_NODE), RenderNode(LOW_CORNER)
             ]
         );
     }
@@ -305,8 +307,8 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(HIGH_CORNER),
-                Some(HIGH_CORNER), Some(HIGH_CORNER)
+                Nothing, RenderNode(HIGH_CORNER),
+                RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER)
             ]
         );
     }
@@ -325,8 +327,8 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(HIGH_CORNER),
-                None, Some(HIGH_CORNER), None
+                RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER),
+                Nothing, RenderNode(HIGH_CORNER), Nothing
             ]
         );
     }
@@ -346,9 +348,9 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(HIGH_CORNER), None,
-                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(HIGH_CORNER),
-                None, Some(HIGH_CORNER), None
+                Nothing, RenderNode(HIGH_CORNER), Nothing,
+                RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER),
+                Nothing, RenderNode(HIGH_CORNER), Nothing
             ]
         );
     }
@@ -367,8 +369,8 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, None, None,
-                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(LOW_CORNER),
+                Nothing, Nothing, Nothing,
+                RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER), RenderNode(LOW_CORNER),
             ]
         );
     }
@@ -387,8 +389,8 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(HIGH_CORNER), Some(LOW_CORNER),
-                Some(HIGH_CORNER), None
+                RenderNode(HIGH_CORNER), RenderNode(LOW_CORNER),
+                RenderNode(HIGH_CORNER), Nothing
             ]
         );
     }
@@ -407,8 +409,8 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(LOW_CORNER2), Some(LOW_CORNER2), Some(LOW_CORNER2),
-                None, Some(HIGH_CORNER), None
+                RenderNode(LOW_CORNER2), RenderNode(LOW_CORNER2), RenderNode(LOW_CORNER2),
+                Nothing, RenderNode(HIGH_CORNER), Nothing
             ]
         );
     }
@@ -427,8 +429,8 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                Some(LOW_CORNER), Some(LOW_CORNER), Some(HIGH_CORNER2),
-                None, Some(LOW_CORNER), None
+                RenderNode(LOW_CORNER), RenderNode(LOW_CORNER), RenderNode(HIGH_CORNER2),
+                Nothing, RenderNode(LOW_CORNER), Nothing
             ]
         );
     }
@@ -451,9 +453,9 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(LOW_CORNER), None,
-                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(HIGH_CORNER),
-                None, Some(LOW_CORNER), None
+                Nothing, RenderNode(LOW_CORNER), Nothing,
+                RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER),
+                Nothing, RenderNode(LOW_CORNER), Nothing
             ]
         );
     }
@@ -473,9 +475,9 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(HIGH_CORNER), None,
-                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(LOW_CORNER),
-                None, Some(LOW_CORNER), None
+                Nothing, RenderNode(HIGH_CORNER), Nothing,
+                RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER), RenderNode(LOW_CORNER),
+                Nothing, RenderNode(LOW_CORNER), Nothing
             ]
         );
     }
@@ -495,9 +497,9 @@ mod tests {
         assert_eq!(
             calculate_node_style_ids(&wall_styles, &tilemap),
             vec![
-                None, Some(HIGH_CORNER2), None,
-                Some(HIGH_CORNER), Some(HIGH_CORNER), Some(LOW_CORNER),
-                None, Some(LOW_CORNER2), None
+                Nothing, RenderNode(HIGH_CORNER2), Nothing,
+                RenderNode(HIGH_CORNER), RenderNode(HIGH_CORNER), RenderNode(LOW_CORNER),
+                Nothing, RenderNode(LOW_CORNER2), Nothing
             ]
         );
     }
