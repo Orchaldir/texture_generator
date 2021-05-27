@@ -1,6 +1,5 @@
 use crate::rendering::node::{calculate_node_styles, NodeStatus};
 use crate::rendering::resource::Resources;
-use crate::rendering::style::node::NodeStyle;
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
 use crate::tilemap::node::{
     get_end_of_horizontal_border, get_end_of_vertical_border, get_nodes_size,
@@ -94,7 +93,7 @@ impl Renderer {
     fn render_horizontal_borders(
         &self,
         tilemap: &Tilemap2d,
-        nodes: &[NodeStatus<&NodeStyle, i32>],
+        nodes: &[NodeStatus],
         texture: &mut Texture,
     ) {
         let size = get_horizontal_borders_size(tilemap.get_size());
@@ -170,7 +169,7 @@ impl Renderer {
     fn render_vertical_borders(
         &self,
         tilemap: &Tilemap2d,
-        nodes: &[NodeStatus<&NodeStyle, i32>],
+        nodes: &[NodeStatus],
         texture: &mut Texture,
     ) {
         let size = get_vertical_borders_size(tilemap.get_size());
@@ -243,12 +242,7 @@ impl Renderer {
         }
     }
 
-    fn render_nodes(
-        &self,
-        tilemap: &Tilemap2d,
-        nodes: &[NodeStatus<&NodeStyle, i32>],
-        texture: &mut Texture,
-    ) {
+    fn render_nodes(&self, tilemap: &Tilemap2d, nodes: &[NodeStatus], texture: &mut Texture) {
         let size = get_nodes_size(tilemap.get_size());
         let mut point = Point::default();
         let data = Data::for_texture(texture.get_aabb());
@@ -279,7 +273,7 @@ impl Renderer {
 
     fn calculate_horizontal_edge(
         &self,
-        nodes: &[NodeStatus<&NodeStyle, i32>],
+        nodes: &[NodeStatus],
         border_index: usize,
         y: u32,
     ) -> (i32, u32) {
@@ -290,7 +284,7 @@ impl Renderer {
 
     fn calculate_vertical_edge(
         &self,
-        nodes: &[NodeStatus<&NodeStyle, i32>],
+        nodes: &[NodeStatus],
         size: Size,
         border_index: usize,
     ) -> (i32, u32) {
@@ -301,7 +295,7 @@ impl Renderer {
 
     fn calculate_edge(
         &self,
-        nodes: &[NodeStatus<&NodeStyle, i32>],
+        nodes: &[NodeStatus],
         start_index: usize,
         end_index: usize,
     ) -> (i32, u32) {

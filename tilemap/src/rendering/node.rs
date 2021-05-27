@@ -8,13 +8,13 @@ use std::collections::HashMap;
 use texture_generation::utils::resource::ResourceManager;
 
 #[derive(Debug, PartialEq)]
-pub enum NodeStatus<T, S> {
+pub enum NodeStatus<'a> {
     Nothing,
-    RenderNode(T),
-    RenderEdge(S, Vec<Side>),
+    RenderNode(&'a NodeStyle),
+    RenderEdge(i32, Side),
 }
 
-impl<'a> NodeStatus<&'a NodeStyle, i32> {
+impl<'a> NodeStatus<'a> {
     pub fn calculate_half(&self) -> i32 {
         match self {
             NodeStatus::Nothing => 0,
@@ -24,28 +24,36 @@ impl<'a> NodeStatus<&'a NodeStyle, i32> {
     }
 }
 
+#[derive(Debug, PartialEq)]
+enum InternalNode {
+    Nothing,
+    RenderNode(usize),
+    RenderEdge(usize, Vec<Side>),
+}
+
 pub fn calculate_node_styles<'a>(
     node_styles: &'a ResourceManager<NodeStyle>,
     wall_styles: &'a ResourceManager<WallStyle>,
     tilemap: &'a Tilemap2d,
-) -> Vec<NodeStatus<&'a NodeStyle, i32>> {
+) -> Vec<NodeStatus<'a>> {
     calculate_node_style_ids(wall_styles, tilemap)
         .into_iter()
         .map(|option| match option {
-            NodeStatus::Nothing => NodeStatus::Nothing,
-            NodeStatus::RenderNode(id) => NodeStatus::RenderNode(node_styles.get(id)),
-            NodeStatus::RenderEdge(id, sides) => {
+            InternalNode::Nothing => NodeStatus::Nothing,
+            InternalNode::RenderNode(id) => NodeStatus::RenderNode(node_styles.get(id)),
+            InternalNode::RenderEdge(id, sides) => {
                 let thickness = wall_styles.get(id).get_edge_style().get_thickness() as i32;
-                NodeStatus::RenderEdge(thickness / 2, sides)
+                let best_side = sides[0];
+                NodeStatus::RenderEdge(thickness / 2, best_side)
             }
         })
         .collect()
 }
 
-pub fn calculate_node_style_ids(
+fn calculate_node_style_ids(
     wall_styles: &ResourceManager<WallStyle>,
     tilemap: &Tilemap2d,
-) -> Vec<NodeStatus<usize, usize>> {
+) -> Vec<InternalNode> {
     let size = get_nodes_size(tilemap.get_size());
     let mut node_styles = Vec::with_capacity(size.len());
     let mut index = 0;
@@ -60,11 +68,11 @@ pub fn calculate_node_style_ids(
     node_styles
 }
 
-pub fn calculate_node_style(
+fn calculate_node_style(
     wall_styles: &ResourceManager<WallStyle>,
     tilemap: &Tilemap2d,
     index: usize,
-) -> NodeStatus<usize, usize> {
+) -> InternalNode {
     let sides_per_style = calculate_sides_per_style(tilemap, index);
     let is_corner = sides_per_style.len() > 1;
     let top_styles = get_top_styles(sides_per_style);
@@ -116,7 +124,7 @@ fn select_best_node_style(
     wall_styles: &ResourceManager<WallStyle>,
     top_styles: Vec<(usize, Vec<Side>)>,
     is_corner: bool,
-) -> NodeStatus<usize, usize> {
+) -> InternalNode {
     match top_styles.len() {
         1 => {
             let top_style = &top_styles[0];
@@ -147,7 +155,7 @@ fn select_best_node_style(
             let best_style = select_best_wall_style(wall_styles, top_styles);
             get_corner_style(wall_styles, &best_style)
         }
-        _ => NodeStatus::Nothing,
+        _ => InternalNode::Nothing,
     }
 }
 
@@ -173,20 +181,17 @@ fn select_best_wall_style(
 fn get_corner_style(
     wall_styles: &ResourceManager<WallStyle>,
     top_style: &(usize, Vec<Side>),
-) -> NodeStatus<usize, usize> {
+) -> InternalNode {
     match wall_styles.get(top_style.0).get_corner_style() {
-        None => NodeStatus::RenderEdge(top_style.0, top_style.1.clone()),
-        Some(id) => NodeStatus::RenderNode(id),
+        None => InternalNode::RenderEdge(top_style.0, top_style.1.clone()),
+        Some(id) => InternalNode::RenderNode(id),
     }
 }
 
-fn get_node_style(
-    wall_styles: &ResourceManager<WallStyle>,
-    index: usize,
-) -> NodeStatus<usize, usize> {
+fn get_node_style(wall_styles: &ResourceManager<WallStyle>, index: usize) -> InternalNode {
     match wall_styles.get(index).get_node_style() {
-        None => NodeStatus::Nothing,
-        Some(id) => NodeStatus::RenderNode(id),
+        None => InternalNode::Nothing,
+        Some(id) => InternalNode::RenderNode(id),
     }
 }
 
@@ -200,7 +205,7 @@ fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rendering::node::NodeStatus::{Nothing, RenderNode};
+    use crate::rendering::node::InternalNode::{Nothing, RenderNode};
     use crate::rendering::style::edge::EdgeStyle;
     use crate::tilemap::border::Border;
     use crate::tilemap::tile::Tile;
