@@ -7,6 +7,7 @@ use crate::tilemap::node::{
 };
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
+use crate::tilemap::Side;
 use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::{AabbData, Data};
 use texture_generation::math::aabb::AABB;
@@ -279,7 +280,7 @@ impl Renderer {
     ) -> (i32, u32) {
         let start_index = get_start_of_horizontal_border(border_index, y);
         let end_index = get_end_of_horizontal_border(border_index, y);
-        self.calculate_edge(nodes, start_index, end_index)
+        self.calculate_edge(nodes, start_index, Side::Right, end_index, Side::Left)
     }
 
     fn calculate_vertical_edge(
@@ -290,18 +291,23 @@ impl Renderer {
     ) -> (i32, u32) {
         let start_index = get_start_of_vertical_border(border_index);
         let end_index = get_end_of_vertical_border(size, border_index);
-        self.calculate_edge(nodes, start_index, end_index)
+        self.calculate_edge(nodes, start_index, Side::Bottom, end_index, Side::Top)
     }
 
     fn calculate_edge(
         &self,
         nodes: &[NodeStatus],
         start_index: usize,
+        start_side: Side,
         end_index: usize,
+        end_side: Side,
     ) -> (i32, u32) {
-        let start_half = nodes[start_index].calculate_half();
-        let end_half = nodes[end_index].calculate_half();
-        (start_half, self.tile_size - (start_half + end_half) as u32)
+        let start_half = nodes[start_index].calculate_half(start_side);
+        let end_half = nodes[end_index].calculate_half(end_side);
+        (
+            start_half,
+            (self.tile_size as i32 - (start_half + end_half)) as u32,
+        )
     }
 }
 

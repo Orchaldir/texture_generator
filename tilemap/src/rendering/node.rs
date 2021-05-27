@@ -15,11 +15,17 @@ pub enum NodeStatus<'a> {
 }
 
 impl<'a> NodeStatus<'a> {
-    pub fn calculate_half(&self) -> i32 {
+    pub fn calculate_half(&self, side: Side) -> i32 {
         match self {
             NodeStatus::Nothing => 0,
             NodeStatus::RenderNode(style) => style.get_half(),
-            NodeStatus::RenderEdge(half, ..) => *half,
+            NodeStatus::RenderEdge(half, dominant_side) => {
+                if side == *dominant_side {
+                    -*half
+                } else {
+                    *half
+                }
+            }
         }
     }
 }
