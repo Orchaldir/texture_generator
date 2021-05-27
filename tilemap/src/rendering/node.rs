@@ -241,6 +241,33 @@ mod tests {
     const HIGH_CORNER2: usize = 15;
 
     #[test]
+    fn test_calculate_half_of_nothing() {
+        for side in Side::iterator() {
+            assert_eq!(NodeStatus::Nothing.calculate_half(*side), 0);
+        }
+    }
+
+    #[test]
+    fn test_calculate_half_of_node() {
+        let style = NodeStyle::default_with_size(24);
+        let node = NodeStatus::RenderNode(&style);
+
+        for side in Side::iterator() {
+            assert_eq!(node.calculate_half(*side), 12);
+        }
+    }
+
+    #[test]
+    fn test_calculate_half_of_edge() {
+        let node = NodeStatus::RenderEdge(33, Right);
+
+        assert_eq!(node.calculate_half(Top), 33);
+        assert_eq!(node.calculate_half(Left), 33);
+        assert_eq!(node.calculate_half(Bottom), 33);
+        assert_eq!(node.calculate_half(Right), -33);
+    }
+
+    #[test]
     fn test_single_horizontal_wall() {
         let wall_styles = create_wall_styles();
         let size = Size::new(1, 1);
