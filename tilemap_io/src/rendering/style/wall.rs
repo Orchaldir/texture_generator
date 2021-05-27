@@ -9,7 +9,7 @@ pub struct WallDefinition {
     tile_size: u32,
     edge_style: EdgeDefinition,
     node_style: Option<usize>,
-    corner_style: usize,
+    corner_style: Option<usize>,
 }
 
 impl ResourceDefinition for WallDefinition {
@@ -44,9 +44,9 @@ mod tests {
             tile_size: 200,
             edge_style: EdgeDefinition::Mock(10),
             node_style: Some(4),
-            corner_style: 3,
+            corner_style: Some(3),
         };
-        let style = WallStyle::new("wall0", EdgeStyle::Mock(30), Some(4), 3);
+        let style = WallStyle::new("wall0", EdgeStyle::Mock(30), Some(4), Some(3));
 
         assert_eq!(style, definition.convert("wall0", 600).unwrap())
     }

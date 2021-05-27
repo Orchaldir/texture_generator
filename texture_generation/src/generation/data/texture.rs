@@ -78,9 +78,12 @@ impl Texture {
     /// Sets the [`Color`] & depth at the [`Point`].
     pub fn set(&mut self, point: &Point, color: &Color, depth: u8) {
         let index = self.size.to_index_risky(point);
+        let old_depth = self.depth[index];
 
-        self.depth[index] = depth;
-        self.colors[index] = *color;
+        if depth > old_depth {
+            self.depth[index] = depth;
+            self.colors[index] = *color;
+        }
     }
 
     /// Gets all the colors.

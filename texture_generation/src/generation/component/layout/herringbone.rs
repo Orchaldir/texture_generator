@@ -183,6 +183,6 @@ mod tests {
     }
 
     fn create_component(color: Color) -> Component {
-        Component::Rendering(Box::new(RenderingComponent::new_fill_area(color, 0)))
+        Component::Rendering(Box::new(RenderingComponent::new_fill_area(color, 1)))
     }
 }

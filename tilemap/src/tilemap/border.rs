@@ -30,6 +30,10 @@ impl Border {
         Border::Window { wall_id, window_id }
     }
 
+    pub fn is_wall(&self) -> bool {
+        matches!(self, Border::Wall(_))
+    }
+
     pub fn get_wall_style(&self) -> Option<usize> {
         match self {
             Border::Empty => None,
@@ -94,6 +98,14 @@ mod tests {
     const DOOR: Border = Border::new_door(42, 2, true);
     const DOOR2: Border = Border::new_door(42, 2, false);
     const WINDOW: Border = Border::new_window(42, 5);
+
+    #[test]
+    fn test_is_wall() {
+        assert!(!Empty.is_wall());
+        assert!(WALL.is_wall());
+        assert!(!DOOR.is_wall());
+        assert!(!WINDOW.is_wall());
+    }
 
     #[test]
     fn test_get_wall_style() {
