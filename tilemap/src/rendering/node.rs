@@ -44,13 +44,20 @@ pub fn calculate_node_styles<'a>(
 ) -> Vec<NodeStatus<'a>> {
     calculate_node_style_ids(wall_styles, tilemap)
         .into_iter()
-        .map(|option| match option {
+        .enumerate()
+        .map(|(i, node)| match node {
             InternalNode::Nothing => NodeStatus::Nothing,
             InternalNode::RenderNode(id) => NodeStatus::RenderNode(node_styles.get(id)),
             InternalNode::RenderEdge(id, sides) => {
                 let thickness = wall_styles.get(id).get_edge_style().get_thickness() as i32;
-                let best_side = sides[0];
-                NodeStatus::RenderEdge(thickness / 2, best_side)
+                if let Some(best_side) = sides
+                    .iter()
+                    .find(|s| tilemap.get_border_at_node(i, **s).is_wall())
+                {
+                    NodeStatus::RenderEdge(thickness / 2, *best_side)
+                } else {
+                    NodeStatus::Nothing
+                }
             }
         })
         .collect()
