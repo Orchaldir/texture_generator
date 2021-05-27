@@ -218,7 +218,7 @@ fn is_straight(entry: &(usize, Vec<Side>)) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rendering::node::InternalNode::{Nothing, RenderNode};
+    use crate::rendering::node::InternalNode::{Nothing, RenderEdge, RenderNode};
     use crate::rendering::style::edge::EdgeStyle;
     use crate::tilemap::border::Border;
     use crate::tilemap::tile::Tile;
@@ -230,6 +230,7 @@ mod tests {
     const LOW_WITH_NODE: usize = 1;
     const HIGH: usize = 2;
     const HIGH_WITH_NODE: usize = 3;
+    const WITHOUT_CORNERS: usize = 4;
 
     // Nodes styles
     const LOW_CORNER: usize = 10;
@@ -241,7 +242,7 @@ mod tests {
 
     #[test]
     fn test_single_horizontal_wall() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(1, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -259,7 +260,7 @@ mod tests {
 
     #[test]
     fn test_long_vertical_wall() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(1, 2);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -279,7 +280,7 @@ mod tests {
 
     #[test]
     fn test_long_vertical_wall_with_door() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(1, 3);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -301,7 +302,7 @@ mod tests {
 
     #[test]
     fn test_long_horizontal_wall_with_nodes() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -320,7 +321,7 @@ mod tests {
 
     #[test]
     fn test_corner() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(1, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -339,7 +340,7 @@ mod tests {
 
     #[test]
     fn test_t_crossing() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -359,7 +360,7 @@ mod tests {
 
     #[test]
     fn test_crossing() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 2);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -382,7 +383,7 @@ mod tests {
     /// Greater wall style gets the node.
     #[test]
     fn test_two_different_styles_straight() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -402,7 +403,7 @@ mod tests {
     /// Greater wall style gets the node.
     #[test]
     fn test_two_different_styles_corner() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(1, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -421,7 +422,7 @@ mod tests {
 
     #[test]
     fn test_t_crossing_with_dominant_style_straight() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -441,7 +442,7 @@ mod tests {
 
     #[test]
     fn test_t_crossing_with_dominant_style_corner() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 1);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -461,7 +462,7 @@ mod tests {
 
     #[test]
     fn test_crossing_with_dominant_style_straight() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 2);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -486,7 +487,7 @@ mod tests {
 
     #[test]
     fn test_crossing_with_dominant_style_corner() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 2);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -508,7 +509,7 @@ mod tests {
 
     #[test]
     fn test_crossing_with_4_styles() {
-        let wall_styles = crate_wall_styles();
+        let wall_styles = create_wall_styles();
         let size = Size::new(2, 2);
         let mut tilemap = Tilemap2d::default(size, Tile::Empty);
 
@@ -528,11 +529,32 @@ mod tests {
         );
     }
 
-    fn crate_wall_styles() -> ResourceManager<WallStyle> {
-        let low_style = crate_wall_style(10, None, LOW_CORNER2);
-        let low_style_with_nodes = crate_wall_style(15, Some(LOW_NODE), LOW_CORNER);
-        let high_style = crate_wall_style(20, None, HIGH_CORNER2);
-        let high_style_with_nodes = crate_wall_style(25, Some(HIGH_NODE), HIGH_CORNER);
+    #[test]
+    fn test_without_corner() {
+        let wall_styles = create_wall_styles();
+        let size = Size::new(2, 2);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+
+        tilemap.set_border(0, Bottom, Border::Wall(WITHOUT_CORNERS));
+        tilemap.set_border(0, Right, Border::Wall(WITHOUT_CORNERS));
+
+        #[rustfmt::skip]
+        assert_eq!(
+            calculate_node_style_ids(&wall_styles, &tilemap),
+            vec![
+                Nothing, RenderEdge(WITHOUT_CORNERS, vec![Bottom]), Nothing,
+                RenderEdge(WITHOUT_CORNERS, vec![Right]), RenderEdge(WITHOUT_CORNERS, vec![Top, Left]), Nothing,
+                Nothing, Nothing, Nothing
+            ]
+        );
+    }
+
+    fn create_wall_styles() -> ResourceManager<WallStyle> {
+        let low_style = create_wall_style(10, None, LOW_CORNER2);
+        let low_style_with_nodes = create_wall_style(15, Some(LOW_NODE), LOW_CORNER);
+        let high_style = create_wall_style(20, None, HIGH_CORNER2);
+        let high_style_with_nodes = create_wall_style(25, Some(HIGH_NODE), HIGH_CORNER);
+        let without_corners = create_without_corners(25);
 
         ResourceManager::new(
             vec![
@@ -540,17 +562,23 @@ mod tests {
                 low_style_with_nodes,
                 high_style,
                 high_style_with_nodes,
+                without_corners,
             ],
             WallStyle::default(10),
         )
     }
 
-    fn crate_wall_style(
+    fn create_wall_style(
         wall_thickness: u32,
         node_style: Option<usize>,
         corner_style: usize,
     ) -> WallStyle {
         let edge_style = EdgeStyle::Mock(wall_thickness);
         WallStyle::new("test", edge_style, node_style, Some(corner_style))
+    }
+
+    fn create_without_corners(wall_thickness: u32) -> WallStyle {
+        let edge_style = EdgeStyle::Mock(wall_thickness);
+        WallStyle::new("test", edge_style, None, None)
     }
 }
