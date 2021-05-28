@@ -2,7 +2,7 @@ use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
 use crate::tilemap::Side::*;
 
-/// Renders a [`Tilemap2d`] in a specific style.
+/// Transform coordinates into indices of a [`Tilemap2d`].
 pub struct Selector {
     tile_size: u32,
 }
@@ -16,12 +16,14 @@ impl Selector {
         self.tile_size
     }
 
+    /// Returns the tile of the coordinates.
     pub fn get_tile_index(&self, tilemap: &Tilemap2d, x: u32, y: u32) -> usize {
         let tile_x = x / self.tile_size;
         let tile_y = y / self.tile_size;
         tilemap.get_size().convert_x_y(tile_x, tile_y)
     }
 
+    /// Returns which [`Side`] of a tile the coordinates are inside or None for its center or corners.
     pub fn get_side(&self, tilemap: &Tilemap2d, x: u32, y: u32, tile_index: usize) -> Option<Side> {
         let tile_size = self.tile_size;
         let start = tilemap.get_size().to_point(tile_index);
