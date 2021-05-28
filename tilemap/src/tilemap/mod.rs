@@ -2,6 +2,7 @@ use self::Side::*;
 use std::slice::Iter;
 
 pub mod border;
+pub mod furniture;
 pub mod node;
 pub mod selector;
 pub mod tile;
