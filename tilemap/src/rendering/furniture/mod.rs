@@ -11,6 +11,7 @@ use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::{AabbData, Data};
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::{BLUE, GREEN, RED};
+use texture_generation::math::point::Point;
 use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 
@@ -86,26 +87,10 @@ impl<'a> FurnitureRenderer<'a> {
 
         info!("end: cell={:?} tile={}", end_cell_xy, end_tile);
 
-        let top_border = if self.furniture_map.is_border(start_cell_xy, Top) {
-            self.get_border(start_tile, Top)
-        } else {
-            0
-        };
-        let left_border = if self.furniture_map.is_border(start_cell_xy, Left) {
-            self.get_border(start_tile, Left)
-        } else {
-            0
-        };
-        let bottom_border = if self.furniture_map.is_border(end_cell_xy, Bottom) {
-            self.get_border(end_tile, Bottom)
-        } else {
-            0
-        };
-        let right_border = if self.furniture_map.is_border(end_cell_xy, Right) {
-            self.get_border(end_tile, Right)
-        } else {
-            0
-        };
+        let top_border = self.get_border(start_cell_xy, start_tile, Top);
+        let left_border = self.get_border(start_cell_xy, start_tile, Left);
+        let bottom_border = self.get_border(end_cell_xy, end_tile, Bottom);
+        let right_border = self.get_border(end_cell_xy, end_tile, Right);
 
         let start = start + Size::new(left_border, top_border);
         let size = Size::new(
@@ -116,22 +101,20 @@ impl<'a> FurnitureRenderer<'a> {
         AABB::new(start, size)
     }
 
-    fn get_border(&self, tile: usize, side: Side) -> u32 {
-        let border = self.tilemap.get_border(tile, side);
+    fn get_border(&self, cell: Point, tile: usize, side: Side) -> u32 {
+        if self.furniture_map.is_border(cell, side) {
+            let border = self.tilemap.get_border(tile, side);
 
-        let thickness = border.get_wall_style().map_or(0, |id| {
-            self.resources
-                .wall_styles
-                .get(id)
-                .get_edge_style()
-                .get_thickness()
-                / 2
-        });
-
-        info!(
-            "tile={} side={:?} border={:?} thickness={}",
-            tile, side, border, thickness
-        );
-        thickness
+            border.get_wall_style().map_or(0, |id| {
+                self.resources
+                    .wall_styles
+                    .get(id)
+                    .get_edge_style()
+                    .get_thickness()
+                    / 2
+            })
+        } else {
+            0
+        }
     }
 }
