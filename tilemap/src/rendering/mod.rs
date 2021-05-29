@@ -36,7 +36,7 @@ impl Renderer {
             tile_size,
             wall_height,
             resources,
-            furniture_renderer: FurnitureRenderer::new(tile_size, wall_height),
+            furniture_renderer: FurnitureRenderer::new(tile_size),
         }
     }
 
