@@ -242,9 +242,9 @@ impl Mul<Size> for Point {
 ///
 /// ```
 ///# use texture_generation::math::point::Point;
-/// let point = Point::new(10, 30);
+/// let point = Point::new(10, -30);
 ///
-/// assert_eq!(point / 2, Point::new(5, 15));
+/// assert_eq!(point / 2, Point::new(5, -15));
 /// ```
 impl Div<u32> for Point {
     type Output = Self;

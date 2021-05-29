@@ -17,6 +17,7 @@ use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::math::color::convert;
+use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use tilemap::tilemap::border::Border;
@@ -163,11 +164,8 @@ impl TilemapEditor {
         self.has_changed = true;
     }
 
-    fn paint_wall(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
-        if let Some(side) = self
-            .selector
-            .get_side(&self.tilemap, point.0, point.1, index)
-        {
+    fn paint_wall(&mut self, button: MouseButton, point: Point, index: usize) {
+        if let Some(side) = self.selector.get_side(&self.tilemap, point, index) {
             let border = match button {
                 MouseButton::Left => Border::Wall(self.get_resource_id(Mode::Wall)),
                 _ => Border::Empty,
@@ -180,11 +178,8 @@ impl TilemapEditor {
         }
     }
 
-    fn paint_door(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
-        if let Some(side) = self
-            .selector
-            .get_side(&self.tilemap, point.0, point.1, index)
-        {
+    fn paint_door(&mut self, button: MouseButton, point: Point, index: usize) {
+        if let Some(side) = self.selector.get_side(&self.tilemap, point, index) {
             let old_border = self.tilemap.get_border(index, side);
 
             let border = match button {
@@ -208,11 +203,8 @@ impl TilemapEditor {
         }
     }
 
-    fn paint_window(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
-        if let Some(side) = self
-            .selector
-            .get_side(&self.tilemap, point.0, point.1, index)
-        {
+    fn paint_window(&mut self, button: MouseButton, point: Point, index: usize) {
+        if let Some(side) = self.selector.get_side(&self.tilemap, point, index) {
             let old_border = self.tilemap.get_border(index, side);
 
             let border = match button {
@@ -295,15 +287,15 @@ impl App for TilemapEditor {
     }
 
     fn on_button_released(&mut self, button: MouseButton, point: (u32, u32)) {
-        let index = self
-            .selector
-            .get_tile_index(&self.tilemap, point.0, point.1);
+        let point = Point::new(point.0 as i32, point.1 as i32);
 
-        match self.mode {
-            Mode::Tile => self.paint_tile(button, index),
-            Mode::Wall => self.paint_wall(button, point, index),
-            Mode::Door => self.paint_door(button, point, index),
-            Mode::Window => self.paint_window(button, point, index),
+        if let Some(index) = self.selector.get_tile_index(&self.tilemap, point) {
+            match self.mode {
+                Mode::Tile => self.paint_tile(button, index),
+                Mode::Wall => self.paint_wall(button, point, index),
+                Mode::Door => self.paint_door(button, point, index),
+                Mode::Window => self.paint_window(button, point, index),
+            }
         }
     }
 }
