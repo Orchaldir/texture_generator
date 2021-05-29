@@ -117,6 +117,28 @@ impl Size {
         point.x >= 0 && point.y >= 0 && point.x < self.width as i32 && point.y < self.height as i32
     }
 
+    /// Is the area inside?
+    ///
+    /// ```
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
+    /// let size = Size::new(3, 4);
+    /// let area_size = Size::new(2, 1);
+    /// let inside = Point::new(1, 2);
+    /// let outside = Point::new(2, 2);
+    /// let negative = Point::new(-1, 1);
+    ///
+    /// assert!(size.is_area_inside(&inside, &area_size));
+    /// assert!(!size.is_area_inside(&outside, &area_size));
+    /// assert!(!size.is_area_inside(&negative, &area_size));
+    /// ```
+    pub fn is_area_inside(&self, start: &Point, size: &Size) -> bool {
+        start.x >= 0
+            && start.y >= 0
+            && start.x as u32 + size.width <= self.width
+            && start.y as u32 + size.height <= self.height
+    }
+
     /// Converts an index to the x-coordinate of the equivalent [`Point`].
     ///
     /// ```
