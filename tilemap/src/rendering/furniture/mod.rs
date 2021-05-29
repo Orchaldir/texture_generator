@@ -69,27 +69,50 @@ impl FurnitureRenderer {
         tilemap: &Tilemap2d,
         resources: &Resources,
     ) -> AABB {
-        let cell_xy = map_size.to_point(furniture.position);
-        let start = cell_xy * self.cell_size;
+        let start_cell_xy = map_size.to_point(furniture.position);
+        let start = start_cell_xy * self.cell_size;
         let size = furniture.size * self.cell_size;
-        let end = start + size;
 
-        let start_tile = self
-            .selector
-            .get_tile_index(tilemap, start)
-            .expect(&format!(
-                "Start point of furniture {} is outside tilemap!",
-                id
-            ));
-        let end_tile = self.selector.get_tile_index(tilemap, end).expect(&format!(
+        let start_tile_xy = start_cell_xy / RESOLUTION;
+        let start_tile = tilemap.get_size().to_index(&start_tile_xy).expect(&format!(
+            "Start point of furniture {} is outside tilemap!",
+            id
+        ));
+
+        info!(
+            "id={} pos={} start: cell={:?} tile={}",
+            id, furniture.position, start_cell_xy, start_tile
+        );
+
+        let end_cell_xy = start_cell_xy + furniture.size - Size::square(1);
+        let end_tile_xy = end_cell_xy / RESOLUTION;
+        let end_tile = tilemap.get_size().to_index(&end_tile_xy).expect(&format!(
             "End point of furniture {} is outside tilemap!",
             id
         ));
 
-        let top_border = get_border(resources, tilemap, start_tile, Side::Top);
-        let left_border = get_border(resources, tilemap, start_tile, Side::Left);
-        let bottom_border = get_border(resources, tilemap, end_tile, Side::Bottom);
-        let right_border = get_border(resources, tilemap, end_tile, Side::Right);
+        info!("end: cell={:?} tile={}", end_cell_xy, end_tile);
+
+        let top_border = if start_cell_xy.y % RESOLUTION as i32 == 0 {
+            get_border(resources, tilemap, start_tile, Side::Top)
+        } else {
+            0
+        };
+        let left_border = if start_cell_xy.x % RESOLUTION as i32 == 0 {
+            get_border(resources, tilemap, start_tile, Side::Left)
+        } else {
+            0
+        };
+        let bottom_border = if end_cell_xy.y % RESOLUTION as i32 != 0 {
+            get_border(resources, tilemap, end_tile, Side::Bottom)
+        } else {
+            0
+        };
+        let right_border = if end_cell_xy.x % RESOLUTION as i32 != 0 {
+            get_border(resources, tilemap, end_tile, Side::Right)
+        } else {
+            0
+        };
 
         let start = start + Size::new(left_border, top_border);
         let size = Size::new(
@@ -102,15 +125,20 @@ impl FurnitureRenderer {
 }
 
 fn get_border(resources: &Resources, tilemap: &Tilemap2d, tile: usize, side: Side) -> u32 {
-    tilemap
-        .get_border(tile, side)
-        .get_wall_style()
-        .map_or(0, |id| {
-            resources
-                .wall_styles
-                .get(id)
-                .get_edge_style()
-                .get_thickness()
-                / 2
-        })
+    let border = tilemap.get_border(tile, side);
+
+    let thickness = border.get_wall_style().map_or(0, |id| {
+        resources
+            .wall_styles
+            .get(id)
+            .get_edge_style()
+            .get_thickness()
+            / 2
+    });
+
+    info!(
+        "tile={} side={:?} border={:?} thickness={}",
+        tile, side, border, thickness
+    );
+    thickness
 }
