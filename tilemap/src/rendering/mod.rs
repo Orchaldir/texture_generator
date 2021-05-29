@@ -53,7 +53,8 @@ impl Renderer {
         self.render_borders(tilemap, &mut texture);
 
         if let Some(furniture_map) = furniture_map {
-            self.furniture_renderer.render(&mut texture, furniture_map);
+            self.furniture_renderer
+                .render(&mut texture, furniture_map, tilemap, &self.resources);
         }
 
         texture.apply(&self.resources.post_processes);
