@@ -5,7 +5,7 @@ use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 
 const EMPTY: usize = 0;
-pub const RESOLUTION: u32 = 2;
+const RESOLUTION: u32 = 2;
 
 pub struct FurnitureMap2d {
     size: Size,
@@ -35,6 +35,16 @@ impl FurnitureMap2d {
 
     pub fn get_size(&self) -> &Size {
         &self.size
+    }
+
+    /// Calculates the cell size from the size of a [`Tile`].
+    pub fn convert_from_tile_size(&self, tile_size: u32) -> u32 {
+        tile_size / RESOLUTION
+    }
+
+    /// Calculates the cell size from the size of a [`Tile`].
+    pub fn convert_to_tile(&self, cell: Point) -> Point {
+        cell / RESOLUTION
     }
 
     /// Is the side of the cell a [`Border`] of the [`Tilemap2d`] or in the middle of a [`Tile`]?

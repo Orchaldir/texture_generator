@@ -1,5 +1,5 @@
 use crate::rendering::resource::Resources;
-use crate::tilemap::furniture::map2d::{FurnitureMap2d, RESOLUTION};
+use crate::tilemap::furniture::map2d::FurnitureMap2d;
 use crate::tilemap::furniture::Furniture;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
@@ -16,14 +16,12 @@ use texture_generation::math::size::Size;
 
 /// Renders a [`FurnitureMap2d`] in a specific style.
 pub struct FurnitureRenderer {
-    cell_size: Size,
+    tile_size: u32,
 }
 
 impl FurnitureRenderer {
     pub fn new(tile_size: u32) -> Self {
-        FurnitureRenderer {
-            cell_size: Size::square(tile_size).divide(RESOLUTION),
-        }
+        FurnitureRenderer { tile_size }
     }
 
     /// Renders a [`FurnitureMap2d`].
@@ -65,11 +63,12 @@ impl FurnitureRenderer {
         tilemap: &Tilemap2d,
         resources: &Resources,
     ) -> AABB {
+        let cell_size = Size::square(furniture_map.convert_from_tile_size(self.tile_size));
         let start_cell_xy = map_size.to_point(furniture.position);
-        let start = start_cell_xy * self.cell_size;
-        let size = furniture.size * self.cell_size;
+        let start = start_cell_xy * cell_size;
+        let size = furniture.size * cell_size;
 
-        let start_tile_xy = start_cell_xy / RESOLUTION;
+        let start_tile_xy = furniture_map.convert_to_tile(start_cell_xy);
         let start_tile = tilemap
             .get_size()
             .to_index(&start_tile_xy)
@@ -81,7 +80,7 @@ impl FurnitureRenderer {
         );
 
         let end_cell_xy = start_cell_xy + furniture.size - Size::square(1);
-        let end_tile_xy = end_cell_xy / RESOLUTION;
+        let end_tile_xy = furniture_map.convert_to_tile(end_cell_xy);
         let end_tile = tilemap
             .get_size()
             .to_index(&end_tile_xy)
