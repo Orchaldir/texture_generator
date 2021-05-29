@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use texture_generation::math::size::Size;
 
 const EMPTY: usize = 0;
-const RESOLUTION: usize = 2;
+pub const RESOLUTION: u32 = 2;
 
 pub struct FurnitureMap2d {
     size: Size,
