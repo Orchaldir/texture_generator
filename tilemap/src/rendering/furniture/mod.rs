@@ -15,23 +15,30 @@ use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 
 /// Renders a [`FurnitureMap2d`] in a specific style.
-pub struct FurnitureRenderer {
-    tile_size: u32,
+pub struct FurnitureRenderer<'a> {
+    resources: &'a Resources,
+    furniture_map: &'a FurnitureMap2d,
+    tilemap: &'a Tilemap2d,
+    cell_size: Size,
 }
 
-impl FurnitureRenderer {
-    pub fn new(tile_size: u32) -> Self {
-        FurnitureRenderer { tile_size }
+impl<'a> FurnitureRenderer<'a> {
+    pub fn new(
+        resources: &'a Resources,
+        furniture_map: &'a FurnitureMap2d,
+        tilemap: &'a Tilemap2d,
+        tile_size: u32,
+    ) -> Self {
+        FurnitureRenderer {
+            resources,
+            furniture_map,
+            tilemap,
+            cell_size: Size::square(furniture_map.convert_from_tile_size(tile_size)),
+        }
     }
 
     /// Renders a [`FurnitureMap2d`].
-    pub fn render(
-        &self,
-        texture: &mut Texture,
-        furniture_map: &FurnitureMap2d,
-        tilemap: &Tilemap2d,
-        resources: &Resources,
-    ) {
+    pub fn render(&self, texture: &mut Texture) {
         let color_selector = ColorSelector::Sequence(vec![RED, GREEN, BLUE]);
         let depth_factory = DepthFactory::new_dome(150, 101);
         let component = RenderingComponent::new_shape_with_depth(
@@ -39,11 +46,9 @@ impl FurnitureRenderer {
             color_selector,
             depth_factory,
         );
-        let map_size = furniture_map.get_size();
 
-        for (id, furniture) in furniture_map.get_furniture() {
-            let aabb =
-                self.calculate_aabb(&map_size, *id, furniture, furniture_map, tilemap, resources);
+        for (id, furniture) in self.furniture_map.get_furniture() {
+            let aabb = self.calculate_aabb(*id, furniture);
             let aabb_data = AabbData::TwoAabbs {
                 outer: texture.get_aabb(),
                 inner: aabb,
@@ -54,22 +59,14 @@ impl FurnitureRenderer {
         }
     }
 
-    fn calculate_aabb(
-        &self,
-        map_size: &Size,
-        id: usize,
-        furniture: &Furniture,
-        furniture_map: &FurnitureMap2d,
-        tilemap: &Tilemap2d,
-        resources: &Resources,
-    ) -> AABB {
-        let cell_size = Size::square(furniture_map.convert_from_tile_size(self.tile_size));
-        let start_cell_xy = map_size.to_point(furniture.position);
-        let start = start_cell_xy * cell_size;
-        let size = furniture.size * cell_size;
+    fn calculate_aabb(&self, id: usize, furniture: &Furniture) -> AABB {
+        let start_cell_xy = self.furniture_map.get_size().to_point(furniture.position);
+        let start = start_cell_xy * self.cell_size;
+        let size = furniture.size * self.cell_size;
 
-        let start_tile_xy = furniture_map.convert_to_tile(start_cell_xy);
-        let start_tile = tilemap
+        let start_tile_xy = self.furniture_map.convert_to_tile(start_cell_xy);
+        let start_tile = self
+            .tilemap
             .get_size()
             .to_index(&start_tile_xy)
             .unwrap_or_else(|| panic!("Start point of furniture {} is outside tilemap!", id));
@@ -80,31 +77,32 @@ impl FurnitureRenderer {
         );
 
         let end_cell_xy = start_cell_xy + furniture.size - Size::square(1);
-        let end_tile_xy = furniture_map.convert_to_tile(end_cell_xy);
-        let end_tile = tilemap
+        let end_tile_xy = self.furniture_map.convert_to_tile(end_cell_xy);
+        let end_tile = self
+            .tilemap
             .get_size()
             .to_index(&end_tile_xy)
             .unwrap_or_else(|| panic!("End point of furniture {} is outside tilemap!", id));
 
         info!("end: cell={:?} tile={}", end_cell_xy, end_tile);
 
-        let top_border = if furniture_map.is_border(start_cell_xy, Top) {
-            get_border(resources, tilemap, start_tile, Top)
+        let top_border = if self.furniture_map.is_border(start_cell_xy, Top) {
+            self.get_border(start_tile, Top)
         } else {
             0
         };
-        let left_border = if furniture_map.is_border(start_cell_xy, Left) {
-            get_border(resources, tilemap, start_tile, Left)
+        let left_border = if self.furniture_map.is_border(start_cell_xy, Left) {
+            self.get_border(start_tile, Left)
         } else {
             0
         };
-        let bottom_border = if furniture_map.is_border(end_cell_xy, Bottom) {
-            get_border(resources, tilemap, end_tile, Bottom)
+        let bottom_border = if self.furniture_map.is_border(end_cell_xy, Bottom) {
+            self.get_border(end_tile, Bottom)
         } else {
             0
         };
-        let right_border = if furniture_map.is_border(end_cell_xy, Right) {
-            get_border(resources, tilemap, end_tile, Right)
+        let right_border = if self.furniture_map.is_border(end_cell_xy, Right) {
+            self.get_border(end_tile, Right)
         } else {
             0
         };
@@ -117,23 +115,23 @@ impl FurnitureRenderer {
 
         AABB::new(start, size)
     }
-}
 
-fn get_border(resources: &Resources, tilemap: &Tilemap2d, tile: usize, side: Side) -> u32 {
-    let border = tilemap.get_border(tile, side);
+    fn get_border(&self, tile: usize, side: Side) -> u32 {
+        let border = self.tilemap.get_border(tile, side);
 
-    let thickness = border.get_wall_style().map_or(0, |id| {
-        resources
-            .wall_styles
-            .get(id)
-            .get_edge_style()
-            .get_thickness()
-            / 2
-    });
+        let thickness = border.get_wall_style().map_or(0, |id| {
+            self.resources
+                .wall_styles
+                .get(id)
+                .get_edge_style()
+                .get_thickness()
+                / 2
+        });
 
-    info!(
-        "tile={} side={:?} border={:?} thickness={}",
-        tile, side, border, thickness
-    );
-    thickness
+        info!(
+            "tile={} side={:?} border={:?} thickness={}",
+            tile, side, border, thickness
+        );
+        thickness
+    }
 }

@@ -27,7 +27,6 @@ pub struct Renderer {
     tile_size: u32,
     wall_height: u8,
     resources: Resources,
-    furniture_renderer: FurnitureRenderer,
 }
 
 impl Renderer {
@@ -36,7 +35,6 @@ impl Renderer {
             tile_size,
             wall_height,
             resources,
-            furniture_renderer: FurnitureRenderer::new(tile_size),
         }
     }
 
@@ -53,8 +51,8 @@ impl Renderer {
         self.render_borders(tilemap, &mut texture);
 
         if let Some(furniture_map) = furniture_map {
-            self.furniture_renderer
-                .render(&mut texture, furniture_map, tilemap, &self.resources);
+            FurnitureRenderer::new(&self.resources, furniture_map, tilemap, self.tile_size)
+                .render(&mut texture);
         }
 
         texture.apply(&self.resources.post_processes);
