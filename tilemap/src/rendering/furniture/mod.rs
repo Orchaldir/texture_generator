@@ -4,15 +4,10 @@ use crate::tilemap::furniture::Furniture;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
 use crate::tilemap::Side::*;
-use texture_generation::generation::component::rendering::color::ColorSelector;
-use texture_generation::generation::component::rendering::depth_factory::DepthFactory;
-use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::{AabbData, Data};
 use texture_generation::math::aabb::AABB;
-use texture_generation::math::color::{BLUE, GREEN, RED};
 use texture_generation::math::point::Point;
-use texture_generation::math::shape_factory::ShapeFactory;
 use texture_generation::math::size::Size;
 
 /// Renders a [`FurnitureMap2d`] in a specific style.
@@ -40,14 +35,6 @@ impl<'a> FurnitureRenderer<'a> {
 
     /// Renders a [`FurnitureMap2d`].
     pub fn render(&self, texture: &mut Texture) {
-        let color_selector = ColorSelector::Sequence(vec![RED, GREEN, BLUE]);
-        let depth_factory = DepthFactory::new_dome(150, 101);
-        let component = RenderingComponent::new_shape_with_depth(
-            ShapeFactory::RoundedRectangle(0.3),
-            color_selector,
-            depth_factory,
-        );
-
         for (id, furniture) in self.furniture_map.get_furniture() {
             let aabb = self.calculate_aabb(*id, furniture);
             let aabb_data = AabbData::TwoAabbs {
@@ -56,7 +43,10 @@ impl<'a> FurnitureRenderer<'a> {
             };
             let data = Data::new(0, *id, aabb_data);
 
-            component.render(texture, &data);
+            self.resources
+                .furniture_styles
+                .get(furniture.style_id)
+                .render(texture, &data);
         }
     }
 
@@ -72,11 +62,6 @@ impl<'a> FurnitureRenderer<'a> {
             .to_index(&start_tile_xy)
             .unwrap_or_else(|| panic!("Start point of furniture {} is outside tilemap!", id));
 
-        info!(
-            "id={} pos={} start: cell={:?} tile={}",
-            id, furniture.position, start_cell_xy, start_tile
-        );
-
         let end_cell_xy = start_cell_xy + furniture.size - Size::square(1);
         let end_tile_xy = self.furniture_map.convert_to_tile(end_cell_xy);
         let end_tile = self
@@ -84,8 +69,6 @@ impl<'a> FurnitureRenderer<'a> {
             .get_size()
             .to_index(&end_tile_xy)
             .unwrap_or_else(|| panic!("End point of furniture {} is outside tilemap!", id));
-
-        info!("end: cell={:?} tile={}", end_cell_xy, end_tile);
 
         let top_border = self.get_border(start_cell_xy, start_tile, Top);
         let left_border = self.get_border(start_cell_xy, start_tile, Left);

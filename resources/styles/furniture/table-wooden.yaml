@@ -1,0 +1,17 @@
+---
+tile_size: 512
+component:
+  Layout:
+    RepeatY:
+      size: 76
+      component:
+        Rendering:
+          Shape:
+            shape_factory:
+              RoundedRectangle: 0.5
+            color:
+              ConstantColor: "#DEB887"
+            depth:
+              InterpolateMany:
+                - [ 0.8,130 ]
+                - [ 1.0,101 ]

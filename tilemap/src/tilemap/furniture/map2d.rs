@@ -4,27 +4,22 @@ use std::collections::HashMap;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 
-const EMPTY: usize = 0;
 const RESOLUTION: u32 = 2;
 
 pub struct FurnitureMap2d {
     size: Size,
     /// The id of the next [`Furniture`]. It starts at 1.
     next_id: usize,
-    /// Is the cell free? Is 0 if free and otherwise is the id of the [`Furniture`] occupying the cell.
-    cells: Vec<usize>,
     furniture: HashMap<usize, Furniture>,
 }
 
 impl FurnitureMap2d {
     pub fn empty(tilemap_size: Size) -> FurnitureMap2d {
         let size = tilemap_size * RESOLUTION as f32;
-        let cells = vec![EMPTY; size.len()];
 
         FurnitureMap2d {
             size,
             next_id: 1,
-            cells,
             furniture: HashMap::new(),
         }
     }

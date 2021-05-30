@@ -6,6 +6,7 @@ use texture_generation::definition::read_resources;
 #[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ResourceLookup {
     doors: Vec<String>,
+    furniture: Vec<String>,
     nodes: Vec<String>,
     textures: Vec<String>,
     walls: Vec<String>,
@@ -26,6 +27,10 @@ impl ResourceLookup {
 
         info!("Loaded {} door definitions", doors.len());
 
+        let furniture = read_resources(&style_path.join("furniture"), &self.furniture);
+
+        info!("Loaded {} furniture definitions", furniture.len());
+
         let nodes = read_resources(&style_path.join("nodes"), &self.nodes);
 
         info!("Loaded {} node definitions", nodes.len());
@@ -40,6 +45,7 @@ impl ResourceLookup {
 
         ResourceDefinitions {
             doors,
+            furniture,
             nodes,
             textures,
             walls,
