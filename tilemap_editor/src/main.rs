@@ -17,8 +17,12 @@ use std::rc::Rc;
 use structopt::StructOpt;
 use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::math::color::convert;
+use texture_generation::math::point::Point;
+use texture_generation::math::size::Size;
 use texture_generation::utils::logging::init_logging;
 use tilemap::tilemap::border::Border;
+use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
+use tilemap::tilemap::furniture::Furniture;
 use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
@@ -89,6 +93,7 @@ pub struct TilemapEditor {
     renderer: tilemap::rendering::Renderer,
     preview_renderer: tilemap::rendering::Renderer,
     tilemap: Tilemap2d,
+    furniture_map: FurnitureMap2d,
     selector: Selector,
     has_changed: bool,
     mode: Mode,
@@ -96,7 +101,11 @@ pub struct TilemapEditor {
 }
 
 impl TilemapEditor {
-    pub fn new(resource_info: ResourceInfo, tilemap: Tilemap2d) -> TilemapEditor {
+    pub fn new(
+        resource_info: ResourceInfo,
+        tilemap: Tilemap2d,
+        furniture_map: FurnitureMap2d,
+    ) -> TilemapEditor {
         let (renderer, preview_renderer) = resource_info.load();
         let selector = Selector::new(preview_renderer.get_tile_size());
 
@@ -107,6 +116,7 @@ impl TilemapEditor {
             renderer,
             preview_renderer,
             tilemap,
+            furniture_map,
             selector,
             has_changed: true,
             mode: Mode::Tile,
@@ -126,7 +136,9 @@ impl TilemapEditor {
         if self.has_changed {
             info!("Render preview");
 
-            let data = self.preview_renderer.render(&self.tilemap);
+            let data = self
+                .preview_renderer
+                .render(&self.tilemap, Some(&self.furniture_map));
             let rbg = convert(data.get_color_data());
             let size = data.get_size();
 
@@ -152,11 +164,8 @@ impl TilemapEditor {
         self.has_changed = true;
     }
 
-    fn paint_wall(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
-        if let Some(side) = self
-            .selector
-            .get_side(&self.tilemap, point.0, point.1, index)
-        {
+    fn paint_wall(&mut self, button: MouseButton, point: Point, index: usize) {
+        if let Some(side) = self.selector.get_side(&self.tilemap, point, index) {
             let border = match button {
                 MouseButton::Left => Border::Wall(self.get_resource_id(Mode::Wall)),
                 _ => Border::Empty,
@@ -169,11 +178,8 @@ impl TilemapEditor {
         }
     }
 
-    fn paint_door(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
-        if let Some(side) = self
-            .selector
-            .get_side(&self.tilemap, point.0, point.1, index)
-        {
+    fn paint_door(&mut self, button: MouseButton, point: Point, index: usize) {
+        if let Some(side) = self.selector.get_side(&self.tilemap, point, index) {
             let old_border = self.tilemap.get_border(index, side);
 
             let border = match button {
@@ -197,11 +203,8 @@ impl TilemapEditor {
         }
     }
 
-    fn paint_window(&mut self, button: MouseButton, point: (u32, u32), index: usize) {
-        if let Some(side) = self
-            .selector
-            .get_side(&self.tilemap, point.0, point.1, index)
-        {
+    fn paint_window(&mut self, button: MouseButton, point: Point, index: usize) {
+        if let Some(side) = self.selector.get_side(&self.tilemap, point, index) {
             let old_border = self.tilemap.get_border(index, side);
 
             let border = match button {
@@ -252,7 +255,9 @@ impl App for TilemapEditor {
     fn on_key_released(&mut self, key: KeyCode) {
         if key == KeyCode::Space {
             info!("Generate tilemap images");
-            let data = self.renderer.render(&self.tilemap);
+            let data = self
+                .renderer
+                .render(&self.tilemap, Some(&self.furniture_map));
             save_color_image(&data, "tilemap-color.png");
             save_depth_image(&data, "tilemap-depth.png");
             info!("Finished saving tilemap images");
@@ -282,15 +287,15 @@ impl App for TilemapEditor {
     }
 
     fn on_button_released(&mut self, button: MouseButton, point: (u32, u32)) {
-        let index = self
-            .selector
-            .get_tile_index(&self.tilemap, point.0, point.1);
+        let point = Point::new(point.0 as i32, point.1 as i32);
 
-        match self.mode {
-            Mode::Tile => self.paint_tile(button, index),
-            Mode::Wall => self.paint_wall(button, point, index),
-            Mode::Door => self.paint_door(button, point, index),
-            Mode::Window => self.paint_window(button, point, index),
+        if let Some(index) = self.selector.get_tile_index(&self.tilemap, point) {
+            match self.mode {
+                Mode::Tile => self.paint_tile(button, index),
+                Mode::Wall => self.paint_wall(button, point, index),
+                Mode::Door => self.paint_door(button, point, index),
+                Mode::Window => self.paint_window(button, point, index),
+            }
         }
     }
 }
@@ -314,12 +319,16 @@ fn main() {
         tilemap2d.get_size().height()
     );
 
+    let mut furniture_map = FurnitureMap2d::empty(tilemap2d.get_size());
+    furniture_map.add(Furniture::new(0, 30, Size::new(3, 2)));
+    furniture_map.add(Furniture::new(0, 100, Size::new(6, 1)));
+
     let window_size = (
         args.width * args.preview_size,
         args.height * args.preview_size,
     );
     let mut window = GliumWindow::new("Tilemap Editor", window_size);
-    let editor = TilemapEditor::new(resource_info, tilemap2d);
+    let editor = TilemapEditor::new(resource_info, tilemap2d, furniture_map);
     let app = Rc::new(RefCell::new(editor));
 
     window.run(app);

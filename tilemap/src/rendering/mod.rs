@@ -1,6 +1,8 @@
+use crate::rendering::furniture::FurnitureRenderer;
 use crate::rendering::node::{calculate_node_styles, NodeStatus};
 use crate::rendering::resource::Resources;
 use crate::tilemap::border::{get_horizontal_borders_size, get_vertical_borders_size, Border};
+use crate::tilemap::furniture::map2d::FurnitureMap2d;
 use crate::tilemap::node::{
     get_end_of_horizontal_border, get_end_of_vertical_border, get_nodes_size,
     get_start_of_horizontal_border, get_start_of_vertical_border,
@@ -15,6 +17,7 @@ use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 
+pub mod furniture;
 pub mod node;
 pub mod resource;
 pub mod style;
@@ -40,12 +43,17 @@ impl Renderer {
     }
 
     /// Renders a [`Tilemap2d`].
-    pub fn render(&self, tilemap: &Tilemap2d) -> Texture {
+    pub fn render(&self, tilemap: &Tilemap2d, furniture_map: Option<&FurnitureMap2d>) -> Texture {
         let tile_size = Size::square(self.tile_size);
         let mut texture = Texture::for_tilemap(tilemap.get_size(), tile_size, BLACK);
 
         self.render_tiles(tilemap, tile_size, &mut texture);
         self.render_borders(tilemap, &mut texture);
+
+        if let Some(furniture_map) = furniture_map {
+            FurnitureRenderer::new(&self.resources, furniture_map, tilemap, self.tile_size)
+                .render(&mut texture);
+        }
 
         texture.apply(&self.resources.post_processes);
 
@@ -338,7 +346,7 @@ mod tests {
         ];
         let tilemap = Tilemap2d::new(Size::new(2, 3), tiles).unwrap();
 
-        let data = renderer.render(&tilemap);
+        let data = renderer.render(&tilemap, None);
 
         #[rustfmt::skip]
         let result = vec![

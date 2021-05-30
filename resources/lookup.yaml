@@ -1,6 +1,8 @@
 ---
 doors:
   - wooden.yaml
+furniture:
+  - table-wooden.yaml
 nodes:
   - stone.yaml
   - wooden.yaml

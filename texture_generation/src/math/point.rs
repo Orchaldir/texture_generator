@@ -220,13 +220,31 @@ impl Mul<u32> for Point {
     }
 }
 
+/// Multiplies a [`Point`] by a [`Size`].
+///
+/// ```
+///# use texture_generation::math::point::Point;
+///# use texture_generation::math::size::Size;
+/// let point = Point::new(10, 30);
+/// let size = Size::new(20, 40);
+///
+/// assert_eq!(point * size, Point::new(200, 1200));
+/// ```
+impl Mul<Size> for Point {
+    type Output = Self;
+
+    fn mul(self, size: Size) -> Self::Output {
+        Point::new(self.x * size.width() as i32, self.y * size.height() as i32)
+    }
+}
+
 /// Divides a [`Point`] by an integer.
 ///
 /// ```
 ///# use texture_generation::math::point::Point;
-/// let point = Point::new(10, 30);
+/// let point = Point::new(10, -30);
 ///
-/// assert_eq!(point / 2, Point::new(5, 15));
+/// assert_eq!(point / 2, Point::new(5, -15));
 /// ```
 impl Div<u32> for Point {
     type Output = Self;

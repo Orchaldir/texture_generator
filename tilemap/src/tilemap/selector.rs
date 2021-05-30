@@ -1,8 +1,9 @@
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
 use crate::tilemap::Side::*;
+use texture_generation::math::point::Point;
 
-/// Renders a [`Tilemap2d`] in a specific style.
+/// Transform coordinates into indices of a [`Tilemap2d`].
 pub struct Selector {
     tile_size: u32,
 }
@@ -16,17 +17,23 @@ impl Selector {
         self.tile_size
     }
 
-    pub fn get_tile_index(&self, tilemap: &Tilemap2d, x: u32, y: u32) -> usize {
-        let tile_x = x / self.tile_size;
-        let tile_y = y / self.tile_size;
-        tilemap.get_size().convert_x_y(tile_x, tile_y)
+    /// Returns the tile of the coordinates.
+    pub fn get_tile_index(&self, tilemap: &Tilemap2d, point: Point) -> Option<usize> {
+        if point.x < 0 || point.y < 0 {
+            return None;
+        }
+
+        let tile = point / self.tile_size;
+        tilemap.get_size().to_index(&tile)
     }
 
-    pub fn get_side(&self, tilemap: &Tilemap2d, x: u32, y: u32, tile_index: usize) -> Option<Side> {
+    /// Returns which [`Side`] of a tile the coordinates are inside or None for its center or corners.
+    pub fn get_side(&self, tilemap: &Tilemap2d, point: Point, tile_index: usize) -> Option<Side> {
         let tile_size = self.tile_size;
-        let start = tilemap.get_size().to_point(tile_index);
-        let x = (x - start.x as u32 * tile_size) as f32 / tile_size as f32;
-        let y = (y - start.y as u32 * tile_size) as f32 / tile_size as f32;
+        let start = tilemap.get_size().to_point(tile_index) * tile_size;
+        let local = point - start;
+        let x = local.x as f32 / tile_size as f32;
+        let y = local.y as f32 / tile_size as f32;
         let border = 0.1;
         let is_top = y < border;
         let is_left = x < border;
@@ -55,26 +62,59 @@ mod tests {
 
     #[test]
     fn test_get_tile_index() {
-        let renderer = Selector::new(100);
+        let selector = Selector::new(100);
         let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
 
-        assert_eq!(renderer.get_tile_index(&tilemap, 50, 50), 0);
-        assert_eq!(renderer.get_tile_index(&tilemap, 150, 50), 1);
-        assert_eq!(renderer.get_tile_index(&tilemap, 50, 150), 2);
-        assert_eq!(renderer.get_tile_index(&tilemap, 150, 150), 3);
-        assert_eq!(renderer.get_tile_index(&tilemap, 50, 250), 4);
-        assert_eq!(renderer.get_tile_index(&tilemap, 150, 250), 5);
+        assert_index(&selector, &tilemap, 50, 50, 0);
+        assert_index(&selector, &tilemap, 150, 50, 1);
+        assert_index(&selector, &tilemap, 50, 150, 2);
+        assert_index(&selector, &tilemap, 150, 150, 3);
+        assert_index(&selector, &tilemap, 50, 250, 4);
+        assert_index(&selector, &tilemap, 150, 250, 5);
+    }
+
+    #[test]
+    fn test_get_tile_index_outside() {
+        let selector = Selector::new(100);
+        let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
+
+        assert_outside(&selector, &tilemap, -50, 50);
+        assert_outside(&selector, &tilemap, 50, -50);
+        assert_outside(&selector, &tilemap, 250, 50);
+        assert_outside(&selector, &tilemap, 50, 350);
     }
 
     #[test]
     fn test_get_side() {
-        let renderer = Selector::new(100);
+        let selector = Selector::new(100);
         let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
 
-        assert_eq!(renderer.get_side(&tilemap, 50, 150, 2), None);
-        assert_eq!(renderer.get_side(&tilemap, 50, 105, 2), Some(Top));
-        assert_eq!(renderer.get_side(&tilemap, 5, 150, 2), Some(Left));
-        assert_eq!(renderer.get_side(&tilemap, 50, 195, 2), Some(Bottom));
-        assert_eq!(renderer.get_side(&tilemap, 95, 150, 2), Some(Right));
+        assert_side(&selector, &tilemap, 50, 150, 2, None);
+        assert_side(&selector, &tilemap, 50, 105, 2, Some(Top));
+        assert_side(&selector, &tilemap, 5, 150, 2, Some(Left));
+        assert_side(&selector, &tilemap, 50, 195, 2, Some(Bottom));
+        assert_side(&selector, &tilemap, 95, 150, 2, Some(Right));
+    }
+
+    fn assert_index(selector: &Selector, tilemap: &Tilemap2d, x: i32, y: i32, index: usize) {
+        assert_eq!(
+            selector.get_tile_index(tilemap, Point::new(x, y)),
+            Some(index)
+        );
+    }
+
+    fn assert_outside(selector: &Selector, tilemap: &Tilemap2d, x: i32, y: i32) {
+        assert_eq!(selector.get_tile_index(tilemap, Point::new(x, y)), None);
+    }
+
+    fn assert_side(
+        selector: &Selector,
+        tilemap: &Tilemap2d,
+        x: i32,
+        y: i32,
+        index: usize,
+        result: Option<Side>,
+    ) {
+        assert_eq!(selector.get_side(tilemap, Point::new(x, y), index), result);
     }
 }

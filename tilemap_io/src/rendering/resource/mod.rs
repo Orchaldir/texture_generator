@@ -1,4 +1,5 @@
 use crate::rendering::style::door::DoorDefinition;
+use crate::rendering::style::furniture::FurnitureDefinition;
 use crate::rendering::style::node::NodeDefinition;
 use crate::rendering::style::wall::WallDefinition;
 use crate::rendering::style::window::WindowDefinition;
@@ -11,6 +12,7 @@ pub mod lookup;
 
 pub struct ResourceDefinitions {
     doors: Vec<Option<(String, DoorDefinition)>>,
+    furniture: Vec<Option<(String, FurnitureDefinition)>>,
     nodes: Vec<Option<(String, NodeDefinition)>>,
     textures: Vec<Option<(String, TextureDefinition)>>,
     walls: Vec<Option<(String, WallDefinition)>>,
@@ -21,6 +23,7 @@ impl ResourceDefinitions {
     pub fn convert(&self, post_processes: Vec<PostProcess>, size: u32) -> Resources {
         Resources::new(
             into_manager(&self.doors, size),
+            into_manager(&self.furniture, size),
             into_manager(&self.nodes, size),
             into_manager(&self.textures, size),
             into_manager(&self.walls, size),

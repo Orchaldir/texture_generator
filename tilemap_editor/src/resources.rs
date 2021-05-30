@@ -4,6 +4,7 @@ use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::vector3::Vector3;
+use texture_generation::utils::error::ResourceError;
 use tilemap::rendering::Renderer;
 use tilemap_io::rendering::resource::lookup::ResourceLookup;
 
@@ -35,7 +36,14 @@ impl ResourceInfo {
     pub fn load(&self) -> (Renderer, Renderer) {
         info!("Load lookup from {:?}", self.lookup_path);
 
-        let lookup: ResourceLookup = read(&self.lookup_path).unwrap_or_default();
+        let lookup: Result<ResourceLookup, ResourceError> = read(&self.lookup_path);
+        let lookup = match lookup {
+            Ok(lookup) => lookup,
+            Err(error) => {
+                warn!("Couldn't read the lookup, because of {:?}", error);
+                ResourceLookup::default()
+            }
+        };
 
         let definitions = lookup.convert(&self.resource_path);
 
