@@ -101,3 +101,125 @@ impl<'a> FurnitureRenderer<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::rendering::style::edge::EdgeStyle;
+    use crate::rendering::style::furniture::FurnitureStyle;
+    use crate::rendering::style::wall::WallStyle;
+    use crate::tilemap::border::Border;
+    use crate::tilemap::tile::Tile;
+    use texture_generation::generation::component::rendering::RenderingComponent;
+    use texture_generation::generation::component::Component;
+    use texture_generation::generation::data::texture::Texture;
+    use texture_generation::math::color::{Color, BLACK, GREEN, RED};
+    use texture_generation::utils::resource::ResourceManager;
+
+    #[test]
+    fn test_render_furniture_covering_whole_tiles() {
+        let resources = create_resources();
+
+        let size = Size::new(1, 2);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+        tilemap.set_border(0, Top, Border::Wall(0));
+        tilemap.set_border(0, Left, Border::Wall(1));
+        tilemap.set_border(1, Right, Border::Wall(2));
+        tilemap.set_border(1, Bottom, Border::Wall(3));
+
+        let mut furniture_map = FurnitureMap2d::empty(size);
+        furniture_map.add(Furniture::new(0, 0, Size::new(2, 4)));
+
+        let mut texture = Texture::new(Size::new(8, 16), BLACK);
+
+        let renderer = FurnitureRenderer::new(&resources, &furniture_map, &tilemap, 8);
+
+        renderer.render(&mut texture);
+
+        #[rustfmt::skip]
+        let result = vec![
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, GREEN, GREEN, GREEN, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        ];
+
+        assert_eq!(texture.get_color_data(), &result);
+    }
+
+    #[test]
+    fn test_render_furniture_no_touching_a_border() {
+        let resources = create_resources();
+
+        let size = Size::new(1, 1);
+        let mut tilemap = Tilemap2d::default(size, Tile::Empty);
+        tilemap.set_border(0, Left, Border::Wall(0));
+        tilemap.set_border(0, Bottom, Border::Wall(0));
+
+        let mut furniture_map = FurnitureMap2d::empty(size);
+        furniture_map.add(Furniture::new(0, 1, Size::new(1, 1)));
+
+        let mut texture = Texture::new(Size::new(8, 8), BLACK);
+
+        let renderer = FurnitureRenderer::new(&resources, &furniture_map, &tilemap, 8);
+
+        renderer.render(&mut texture);
+
+        #[rustfmt::skip]
+        let result = vec![
+            BLACK, BLACK, BLACK, BLACK, GREEN, GREEN, GREEN, GREEN,
+            BLACK, BLACK, BLACK, BLACK, GREEN, GREEN, GREEN, GREEN,
+            BLACK, BLACK, BLACK, BLACK, GREEN, GREEN, GREEN, GREEN,
+            BLACK, BLACK, BLACK, BLACK, GREEN, GREEN, GREEN, GREEN,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+            BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        ];
+
+        assert_eq!(texture.get_color_data(), &result);
+    }
+
+    fn create_resources() -> Resources {
+        let mut resources = Resources::empty();
+        resources.furniture_styles = ResourceManager::new(
+            vec![create_furniture("f0", GREEN)],
+            FurnitureStyle::default(),
+        );
+        resources.wall_styles = ResourceManager::new(
+            vec![
+                create_wall("wall0", RED, 2),
+                create_wall("wall1", RED, 4),
+                create_wall("wall2", RED, 6),
+                create_wall("wall3", RED, 8),
+            ],
+            WallStyle::default(1),
+        );
+        resources
+    }
+
+    fn create_wall(name: &str, color: Color, thickness: u32) -> WallStyle {
+        let rendering = RenderingComponent::new_fill_area(color, 1);
+        let edge = EdgeStyle::new_solid(thickness, rendering).unwrap();
+        WallStyle::new(name, edge, None, None)
+    }
+
+    fn create_furniture(name: &str, color: Color) -> FurnitureStyle {
+        let rendering = RenderingComponent::new_fill_area(color, 1);
+        let component = Component::Rendering(Box::new(rendering));
+        FurnitureStyle::new(name, component)
+    }
+}
