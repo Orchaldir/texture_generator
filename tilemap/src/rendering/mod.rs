@@ -150,6 +150,7 @@ impl Renderer {
                             &data,
                             point,
                             self.calculate_horizontal_edge(nodes, index, y),
+                            is_front,
                             texture,
                         );
                     }
@@ -225,6 +226,7 @@ impl Renderer {
                             &data,
                             point,
                             self.calculate_vertical_edge(nodes, size, index),
+                            is_front,
                             texture,
                         );
                     }

@@ -58,10 +58,11 @@ impl DoorStyle {
         data: &Data,
         node: Point,
         edge: (i32, u32),
+        is_front: bool,
         texture: &mut Texture,
     ) {
         if let Some(handle) = &self.handle_style {
-            handle.render_horizontal(data, node, edge, texture);
+            handle.render_horizontal(data, node, edge, is_front, texture);
         }
 
         self.edge_style.render_horizontal(data, node, edge, texture);
@@ -72,10 +73,11 @@ impl DoorStyle {
         data: &Data,
         node: Point,
         edge: (i32, u32),
+        is_front: bool,
         texture: &mut Texture,
     ) {
         if let Some(handle) = &self.handle_style {
-            handle.render_vertical(data, node, edge, texture);
+            handle.render_vertical(data, node, edge, is_front, texture);
         }
 
         self.edge_style.render_vertical(data, node, edge, texture);

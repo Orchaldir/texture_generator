@@ -10,6 +10,7 @@ use texture_generation::math::size::Size;
 pub struct HandleStyle {
     distance_to_end: i32,
     offset: i32,
+    both_sides: bool,
     horizontal_size: Size,
     vertical_size: Size,
     component: RenderingComponent,
@@ -19,6 +20,7 @@ impl HandleStyle {
     pub fn new(
         distance_to_end: u32,
         offset: u32,
+        both_sides: bool,
         size: Size,
         component: RenderingComponent,
     ) -> Result<HandleStyle> {
@@ -31,6 +33,7 @@ impl HandleStyle {
         Ok(HandleStyle {
             distance_to_end: distance_to_end as i32,
             offset: offset as i32,
+            both_sides,
             horizontal_size: size,
             vertical_size: size.flip(),
             component,
@@ -42,13 +45,18 @@ impl HandleStyle {
         data: &Data,
         node: Point,
         edge: (i32, u32),
+        is_front: bool,
         texture: &mut Texture,
     ) {
-        let aabb = self.calculate_horizontal_aabb(node, edge, true);
-        self.component.render(texture, &data.transform(aabb));
+        if is_front || self.both_sides {
+            let aabb = self.calculate_horizontal_aabb(node, edge, true);
+            self.component.render(texture, &data.transform(aabb));
+        }
 
-        let aabb = self.calculate_horizontal_aabb(node, edge, false);
-        self.component.render(texture, &data.transform(aabb));
+        if !is_front || self.both_sides {
+            let aabb = self.calculate_horizontal_aabb(node, edge, false);
+            self.component.render(texture, &data.transform(aabb));
+        }
     }
 
     pub fn render_vertical(
@@ -56,13 +64,18 @@ impl HandleStyle {
         data: &Data,
         node: Point,
         edge: (i32, u32),
+        is_front: bool,
         texture: &mut Texture,
     ) {
-        let aabb = self.calculate_vertical_aabb(node, edge, true);
-        self.component.render(texture, &data.transform(aabb));
+        if is_front || self.both_sides {
+            let aabb = self.calculate_vertical_aabb(node, edge, true);
+            self.component.render(texture, &data.transform(aabb));
+        }
 
-        let aabb = self.calculate_vertical_aabb(node, edge, false);
-        self.component.render(texture, &data.transform(aabb));
+        if !is_front || self.both_sides {
+            let aabb = self.calculate_vertical_aabb(node, edge, false);
+            self.component.render(texture, &data.transform(aabb));
+        }
     }
 
     fn calculate_horizontal_aabb(&self, node: Point, edge: (i32, u32), is_front: bool) -> AABB {
@@ -105,25 +118,26 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_new_with_0_width() {
-        HandleStyle::new(0, 0, Size::new(0, 10), RenderingComponent::Mock).unwrap();
+        HandleStyle::new(0, 0, true, Size::new(0, 10), RenderingComponent::Mock).unwrap();
     }
 
     #[test]
     #[should_panic]
     fn test_new_with_0_height() {
-        HandleStyle::new(0, 0, Size::new(20, 0), RenderingComponent::Mock).unwrap();
+        HandleStyle::new(0, 0, false, Size::new(20, 0), RenderingComponent::Mock).unwrap();
     }
 
     #[test]
     fn test_render_horizontal() {
         let component = RenderingComponent::new_fill_area(GREEN, 4);
-        let handle = HandleStyle::new(2, 1, Size::new(3, 2), component).unwrap();
+        let handle = HandleStyle::new(2, 1, true, Size::new(3, 2), component).unwrap();
         let mut texture = Texture::new(Size::new(11, 8), BLACK);
 
         handle.render_horizontal(
             &Data::for_texture(texture.get_aabb()),
             Point::new(1, 4),
             (1, 9),
+            true,
             &mut texture,
         );
 
@@ -145,13 +159,14 @@ mod tests {
     #[test]
     fn test_render_vertical() {
         let component = RenderingComponent::new_fill_area(GREEN, 4);
-        let handle = HandleStyle::new(2, 1, Size::new(3, 2), component).unwrap();
+        let handle = HandleStyle::new(2, 1, true, Size::new(3, 2), component).unwrap();
         let mut texture = Texture::new(Size::new(8, 11), BLACK);
 
         handle.render_vertical(
             &Data::for_texture(texture.get_aabb()),
             Point::new(4, 1),
             (1, 9),
+            true,
             &mut texture,
         );
 
