@@ -132,7 +132,6 @@ impl Renderer {
                             &data,
                             start,
                             self.calculate_horizontal_edge(nodes, index, y),
-                            0,
                             texture,
                         );
                     }
@@ -145,12 +144,12 @@ impl Renderer {
                         let door_style = self.resources.door_styles.get(door_id);
                         let offset = door_style
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
+                        let point = Point::new(start.x, start.y + offset);
 
                         door_style.render_horizontal(
                             &data,
-                            start,
+                            point,
                             self.calculate_horizontal_edge(nodes, index, y),
-                            offset,
                             texture,
                         );
                     }
@@ -208,7 +207,6 @@ impl Renderer {
                             &data,
                             start,
                             self.calculate_vertical_edge(nodes, size, index),
-                            0,
                             texture,
                         );
                     }
@@ -221,12 +219,12 @@ impl Renderer {
                         let door_style = self.resources.door_styles.get(door_id);
                         let offset = door_style
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
+                        let point = Point::new(start.x + offset, start.y);
 
                         door_style.render_vertical(
                             &data,
-                            start,
+                            point,
                             self.calculate_vertical_edge(nodes, size, index),
-                            offset,
                             texture,
                         );
                     }

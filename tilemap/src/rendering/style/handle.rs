@@ -42,13 +42,12 @@ impl HandleStyle {
         data: &Data,
         node: Point,
         edge: (i32, u32),
-        offset: i32,
         texture: &mut Texture,
     ) {
-        let aabb = self.calculate_horizontal_aabb(node, edge, offset, true);
+        let aabb = self.calculate_horizontal_aabb(node, edge, true);
         self.component.render(texture, &data.transform(aabb));
 
-        let aabb = self.calculate_horizontal_aabb(node, edge, offset, false);
+        let aabb = self.calculate_horizontal_aabb(node, edge, false);
         self.component.render(texture, &data.transform(aabb));
     }
 
@@ -57,23 +56,16 @@ impl HandleStyle {
         data: &Data,
         node: Point,
         edge: (i32, u32),
-        offset: i32,
         texture: &mut Texture,
     ) {
-        let aabb = self.calculate_vertical_aabb(node, edge, offset, true);
+        let aabb = self.calculate_vertical_aabb(node, edge, true);
         self.component.render(texture, &data.transform(aabb));
 
-        let aabb = self.calculate_vertical_aabb(node, edge, offset, false);
+        let aabb = self.calculate_vertical_aabb(node, edge, false);
         self.component.render(texture, &data.transform(aabb));
     }
 
-    fn calculate_horizontal_aabb(
-        &self,
-        node: Point,
-        edge: (i32, u32),
-        offset: i32,
-        is_front: bool,
-    ) -> AABB {
+    fn calculate_horizontal_aabb(&self, node: Point, edge: (i32, u32), is_front: bool) -> AABB {
         let (start, length) = edge;
         let end = node.x + start + length as i32;
         let handle_offset = if is_front {
@@ -83,18 +75,12 @@ impl HandleStyle {
         };
         let start = Point::new(
             end - self.distance_to_end - self.horizontal_size.width() as i32,
-            node.y + offset + handle_offset,
+            node.y + handle_offset,
         );
         AABB::new(start, self.horizontal_size)
     }
 
-    fn calculate_vertical_aabb(
-        &self,
-        node: Point,
-        edge: (i32, u32),
-        offset: i32,
-        is_front: bool,
-    ) -> AABB {
+    fn calculate_vertical_aabb(&self, node: Point, edge: (i32, u32), is_front: bool) -> AABB {
         let (start, length) = edge;
         let end = node.y + start + length as i32;
         let handle_offset = if is_front {
@@ -103,7 +89,7 @@ impl HandleStyle {
             -(self.offset + self.vertical_size.width() as i32)
         };
         let start = Point::new(
-            node.x + offset + handle_offset,
+            node.x + handle_offset,
             end - self.distance_to_end - self.vertical_size.height() as i32,
         );
         AABB::new(start, self.vertical_size)
@@ -138,7 +124,6 @@ mod tests {
             &Data::for_texture(texture.get_aabb()),
             Point::new(1, 4),
             (1, 9),
-            0,
             &mut texture,
         );
 
@@ -167,7 +152,6 @@ mod tests {
             &Data::for_texture(texture.get_aabb()),
             Point::new(4, 1),
             (1, 9),
-            0,
             &mut texture,
         );
 
