@@ -26,6 +26,7 @@ use tilemap::tilemap::furniture::Furniture;
 use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
+use tilemap::tilemap::Side::{Bottom, Top};
 use tilemap_io::tilemap::{load, save};
 
 mod resources;
@@ -320,8 +321,8 @@ fn main() {
     );
 
     let mut furniture_map = FurnitureMap2d::empty(tilemap2d.get_size());
-    furniture_map.add(Furniture::new(0, 30, Size::new(3, 2)));
-    furniture_map.add(Furniture::new(0, 100, Size::new(6, 1)));
+    furniture_map.add(Furniture::new(0, 30, Size::new(3, 2), Bottom));
+    furniture_map.add(Furniture::new(1, 100, Size::new(6, 1), Top));
 
     let window_size = (
         args.width * args.preview_size,

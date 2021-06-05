@@ -43,9 +43,8 @@ impl WindowStyle {
         texture: &mut Texture,
     ) {
         self.stool_style
-            .render_horizontal(data, node, edge, 0, texture);
-        self.pane_style
-            .render_horizontal(data, node, edge, 0, texture);
+            .render_horizontal(data, node, edge, texture);
+        self.pane_style.render_horizontal(data, node, edge, texture);
     }
 
     pub fn render_vertical(
@@ -55,10 +54,8 @@ impl WindowStyle {
         edge: (i32, u32),
         texture: &mut Texture,
     ) {
-        self.stool_style
-            .render_vertical(data, node, edge, 0, texture);
-        self.pane_style
-            .render_vertical(data, node, edge, 0, texture);
+        self.stool_style.render_vertical(data, node, edge, texture);
+        self.pane_style.render_vertical(data, node, edge, texture);
     }
 }
 

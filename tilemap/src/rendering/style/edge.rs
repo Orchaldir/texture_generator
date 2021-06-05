@@ -63,7 +63,6 @@ impl EdgeStyle {
         data: &Data,
         node: Point,
         edge: (i32, u32),
-        offset: i32,
         texture: &mut Texture,
     ) {
         match self {
@@ -72,7 +71,7 @@ impl EdgeStyle {
                 horizontal,
                 ..
             } => {
-                let aabb = calculate_horizontal_aabb(node, edge, offset, *thickness);
+                let aabb = calculate_horizontal_aabb(node, edge, *thickness);
                 horizontal.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
@@ -80,7 +79,7 @@ impl EdgeStyle {
                 thickness,
                 component,
             } => {
-                let aabb = calculate_horizontal_aabb(node, edge, offset, *thickness);
+                let aabb = calculate_horizontal_aabb(node, edge, *thickness);
                 component.render(texture, &data.transform(aabb))
             }
         }
@@ -91,7 +90,6 @@ impl EdgeStyle {
         data: &Data,
         node: Point,
         edge: (i32, u32),
-        offset: i32,
         texture: &mut Texture,
     ) {
         match self {
@@ -100,7 +98,7 @@ impl EdgeStyle {
                 vertical,
                 ..
             } => {
-                let aabb = calculate_vertical_aabb(node, edge, offset, *thickness);
+                let aabb = calculate_vertical_aabb(node, edge, *thickness);
                 vertical.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
@@ -108,7 +106,7 @@ impl EdgeStyle {
                 thickness,
                 component,
             } => {
-                let aabb = calculate_vertical_aabb(node, edge, offset, *thickness);
+                let aabb = calculate_vertical_aabb(node, edge, *thickness);
                 component.render(texture, &data.transform(aabb))
             }
         }
@@ -121,18 +119,18 @@ impl Default for EdgeStyle {
     }
 }
 
-fn calculate_horizontal_aabb(node: Point, edge: (i32, u32), offset: i32, thickness: u32) -> AABB {
+fn calculate_horizontal_aabb(node: Point, edge: (i32, u32), thickness: u32) -> AABB {
     let (start, length) = edge;
     let half_thickness = (thickness / 2) as i32;
-    let start = Point::new(node.x + start, node.y - half_thickness + offset);
+    let start = Point::new(node.x + start, node.y - half_thickness);
     let size = Size::new(length, thickness);
     AABB::new(start, size)
 }
 
-fn calculate_vertical_aabb(node: Point, edge: (i32, u32), offset: i32, thickness: u32) -> AABB {
+fn calculate_vertical_aabb(node: Point, edge: (i32, u32), thickness: u32) -> AABB {
     let (start, length) = edge;
     let half_thickness = (thickness / 2) as i32;
-    let start = Point::new(node.x - half_thickness + offset, node.y + start);
+    let start = Point::new(node.x - half_thickness, node.y + start);
     let size = Size::new(thickness, length);
     AABB::new(start, size)
 }
@@ -166,7 +164,6 @@ mod tests {
             &Data::for_texture(texture.get_aabb()),
             Point::new(3, 3),
             (2, 4),
-            0,
             &mut texture,
         );
 
@@ -205,7 +202,6 @@ mod tests {
             &Data::for_texture(texture.get_aabb()),
             Point::new(3, 3),
             (2, 4),
-            0,
             &mut texture,
         );
 

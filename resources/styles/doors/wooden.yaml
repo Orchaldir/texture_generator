@@ -35,6 +35,7 @@ edge_style:
 handle_style:
   distance_to_end: 40
   offset: 0
+  both_sides: true
   size:
     width: 96
     height: 48

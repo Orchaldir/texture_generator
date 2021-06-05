@@ -44,20 +44,7 @@ pub struct SplitLayout {
 
 impl SplitLayout {
     pub fn new(is_horizontal: bool, components: Vec<(u32, Component)>) -> Result<SplitLayout> {
-        if components.len() < 2 {
-            bail!("Requires at least 2 'components'");
-        }
-
-        let mut converted = Vec::with_capacity(components.len());
-        let total = components.iter().map(|(value, _c)| *value).sum::<u32>() as f32;
-
-        for (i, (proportion, component)) in components.into_iter().enumerate() {
-            if proportion == 0 {
-                bail!(format!("{}.proportion is 0", i + 1));
-            }
-
-            converted.push((proportion as f32 / total, component))
-        }
+        let converted = convert(components, "components")?;
 
         Ok(SplitLayout {
             is_horizontal,
@@ -119,6 +106,25 @@ impl SplitLayout {
             start.y += height as i32;
         }
     }
+}
+
+pub fn convert<T>(entries: Vec<(u32, T)>, description: &str) -> Result<Vec<(f32, T)>> {
+    if entries.len() < 2 {
+        bail!("Requires at least 2 '{}'", description);
+    }
+
+    let mut converted = Vec::with_capacity(entries.len());
+    let total = entries.iter().map(|(value, _c)| *value).sum::<u32>() as f32;
+
+    for (i, (proportion, value)) in entries.into_iter().enumerate() {
+        if proportion == 0 {
+            bail!(format!("{}.proportion is 0", i + 1));
+        }
+
+        converted.push((proportion as f32 / total, value))
+    }
+
+    Ok(converted)
 }
 
 #[cfg(test)]

@@ -1,0 +1,33 @@
+---
+tile_size: 512
+is_centered: true
+edge_style:
+  Solid:
+    thickness: 32
+    component:
+      Shape:
+        shape_factory:
+          RoundedRectangle: 0.5
+        color:
+          ConstantColor: "#DEB887"
+        depth:
+          Dome:
+            center: 30
+            border: 1
+handle_style:
+  distance_to_end: 40
+  offset: 0
+  both_sides: false
+  size:
+    width: 96
+    height: 32
+  component:
+    Shape:
+      shape_factory:
+        RoundedRectangle: 0.7
+      color:
+        ConstantColor: "#DEB887"
+      depth:
+        Dome:
+          center: 20
+          border: 1

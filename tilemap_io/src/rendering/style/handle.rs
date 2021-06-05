@@ -9,6 +9,7 @@ use tilemap::rendering::style::handle::HandleStyle;
 pub struct HandleDefinition {
     distance_to_end: u32,
     offset: u32,
+    both_sides: bool,
     size: Size,
     component: RenderingDefinition,
 }
@@ -22,6 +23,7 @@ impl HandleDefinition {
         HandleStyle::new(
             convert(self.distance_to_end, factor),
             convert(self.offset, factor),
+            self.both_sides,
             convert_size(&self.size, factor),
             component,
         )
@@ -38,10 +40,12 @@ mod tests {
         let definition = HandleDefinition {
             distance_to_end: 1,
             offset: 2,
+            both_sides: true,
             size: Size::new(3, 4),
             component: RenderingDefinition::Mock,
         };
-        let style = HandleStyle::new(10, 20, Size::new(30, 40), RenderingComponent::Mock).unwrap();
+        let style =
+            HandleStyle::new(10, 20, true, Size::new(30, 40), RenderingComponent::Mock).unwrap();
 
         assert_eq!(style, definition.convert("test", 10.0).unwrap())
     }

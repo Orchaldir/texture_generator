@@ -1,0 +1,17 @@
+---
+tile_size: 512
+depth: 200
+component:
+  Rendering:
+    Shape:
+      shape_factory: Rectangle
+      color:
+        ConstantColor: "#DEB887"
+      depth:
+        InterpolateMany:
+          - [ 0.8,30 ]
+          - [ 1.0,1 ]
+front:
+  Repeat:
+    step: 400
+    door_id: 1

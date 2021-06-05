@@ -46,7 +46,7 @@ impl<'a> FurnitureRenderer<'a> {
             self.resources
                 .furniture_styles
                 .get(furniture.style_id)
-                .render(texture, &data);
+                .render(self.resources, texture, &data, furniture.front_side);
         }
     }
 
@@ -106,6 +106,7 @@ impl<'a> FurnitureRenderer<'a> {
 mod tests {
     use super::*;
     use crate::rendering::style::edge::EdgeStyle;
+    use crate::rendering::style::front::FrontStyle;
     use crate::rendering::style::furniture::FurnitureStyle;
     use crate::rendering::style::wall::WallStyle;
     use crate::tilemap::border::Border;
@@ -128,7 +129,7 @@ mod tests {
         tilemap.set_border(1, Bottom, Border::Wall(3));
 
         let mut furniture_map = FurnitureMap2d::empty(size);
-        furniture_map.add(Furniture::new(0, 0, Size::new(2, 4)));
+        furniture_map.add(Furniture::without_front(0, 0, Size::new(2, 4)));
 
         let mut texture = Texture::new(Size::new(8, 16), BLACK);
 
@@ -158,6 +159,29 @@ mod tests {
         ];
 
         assert_eq!(texture.get_color_data(), &result);
+
+        #[rustfmt::skip]
+        let depth = vec![
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+        ];
+
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 
     #[test]
@@ -170,7 +194,7 @@ mod tests {
         tilemap.set_border(0, Bottom, Border::Wall(0));
 
         let mut furniture_map = FurnitureMap2d::empty(size);
-        furniture_map.add(Furniture::new(0, 1, Size::new(1, 1)));
+        furniture_map.add(Furniture::without_front(0, 1, Size::new(1, 1)));
 
         let mut texture = Texture::new(Size::new(8, 8), BLACK);
 
@@ -191,6 +215,20 @@ mod tests {
         ];
 
         assert_eq!(texture.get_color_data(), &result);
+
+        #[rustfmt::skip]
+        let depth = vec![
+              0,   0,   0,   0, 101, 101, 101, 101,
+              0,   0,   0,   0, 101, 101, 101, 101,
+              0,   0,   0,   0, 101, 101, 101, 101,
+              0,   0,   0,   0, 101, 101, 101, 101,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+        ];
+
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 
     fn create_resources() -> Resources {
@@ -220,6 +258,6 @@ mod tests {
     fn create_furniture(name: &str, color: Color) -> FurnitureStyle {
         let rendering = RenderingComponent::new_fill_area(color, 1);
         let component = Component::Rendering(Box::new(rendering));
-        FurnitureStyle::new(name, component)
+        FurnitureStyle::new(name, 100, component, FrontStyle::None)
     }
 }
