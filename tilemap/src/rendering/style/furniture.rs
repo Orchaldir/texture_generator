@@ -1,5 +1,6 @@
 use crate::rendering::resource::Resources;
 use crate::rendering::style::front::FrontStyle;
+use crate::tilemap::Side;
 use texture_generation::generation::component::rendering::color::ColorSelector;
 use texture_generation::generation::component::rendering::depth_factory::DepthFactory;
 use texture_generation::generation::component::rendering::RenderingComponent;
@@ -16,7 +17,8 @@ use texture_generation::utils::resource::Resource;
 /// How does the furniture look like?
 pub struct FurnitureStyle {
     name: String,
-    component: Component,
+    horizontal_component: Component,
+    vertical_component: Component,
     front: FrontStyle,
 }
 
@@ -24,19 +26,104 @@ impl FurnitureStyle {
     pub fn new<S: Into<String>>(name: S, component: Component) -> Self {
         FurnitureStyle {
             name: name.into(),
-            component,
+            horizontal_component: component.clone(),
+            vertical_component: component.flip(),
             front: FrontStyle::Split(vec![(0.333, Some(1)), (0.333, None), (0.333, Some(1))]),
         }
     }
 
     /// Renders the furniture into the [`Texture`] in the area defined by [`Data`].
-    pub fn render(&self, resources: &Resources, texture: &mut Texture, data: &Data) {
+    pub fn render(
+        &self,
+        resources: &Resources,
+        texture: &mut Texture,
+        data: &Data,
+        front_side: Side,
+    ) {
         let thickness = self.front.get_thickness(resources);
 
         if thickness > 0 {
-            let size = data.get_inner().size();
-            let start = data.get_inner().start();
+            let (aabb_component, aabb_front) = calculate_aabbs(data, front_side, thickness);
 
+            match front_side {
+                Side::Top => {
+                    self.horizontal_component
+                        .generate(texture, &data.transform(aabb_component));
+                    self.front.render_horizontal(
+                        resources,
+                        &data.transform(aabb_front),
+                        false,
+                        texture,
+                    );
+                }
+                Side::Left => {
+                    self.vertical_component
+                        .generate(texture, &data.transform(aabb_component));
+                    self.front.render_vertical(
+                        resources,
+                        &data.transform(aabb_front),
+                        false,
+                        texture,
+                    );
+                }
+                Side::Bottom => {
+                    self.horizontal_component
+                        .generate(texture, &data.transform(aabb_component));
+                    self.front.render_horizontal(
+                        resources,
+                        &data.transform(aabb_front),
+                        true,
+                        texture,
+                    );
+                }
+                Side::Right => {
+                    self.vertical_component
+                        .generate(texture, &data.transform(aabb_component));
+                    self.front.render_vertical(
+                        resources,
+                        &data.transform(aabb_front),
+                        true,
+                        texture,
+                    );
+                }
+            }
+        } else {
+            match front_side {
+                Side::Top | Side::Bottom => self.horizontal_component.generate(texture, &data),
+                Side::Left | Side::Right => self.vertical_component.generate(texture, &data),
+            }
+        }
+    }
+}
+
+fn calculate_aabbs(data: &Data, front_side: Side, thickness: u32) -> (AABB, AABB) {
+    let size = data.get_inner().size();
+    let start = data.get_inner().start();
+
+    match front_side {
+        Side::Top => {
+            let size_component = Size::new(size.width(), size.height() - thickness);
+            let size_front = Size::new(size.width(), thickness);
+            let mut start_component = start;
+            start_component.y += thickness as i32;
+
+            let aabb_component = AABB::new(start_component, size_component);
+            let aabb_front = AABB::new(start, size_front);
+
+            (aabb_component, aabb_front)
+        }
+        Side::Left => {
+            let size_component = Size::new(size.width() - thickness, size.height());
+            let size_front = Size::new(thickness, size.height());
+            let mut start_component = start;
+            start_component.x += thickness as i32;
+
+            (
+                AABB::new(start_component, size_component),
+                AABB::new(start, size_front),
+            )
+        }
+        Side::Bottom => {
             let size_component = Size::new(size.width(), size.height() - thickness);
             let size_front = Size::new(size.width(), thickness);
             let mut start_front = start;
@@ -45,12 +132,18 @@ impl FurnitureStyle {
             let aabb_component = AABB::new(start, size_component);
             let aabb_front = AABB::new(start_front, size_front);
 
-            self.component
-                .generate(texture, &data.transform(aabb_component));
-            self.front
-                .render_horizontal(resources, &data.transform(aabb_front), true, texture);
-        } else {
-            self.component.generate(texture, &data);
+            (aabb_component, aabb_front)
+        }
+        Side::Right => {
+            let size_component = Size::new(size.width() - thickness, size.height());
+            let size_front = Size::new(thickness, size.height());
+            let mut start_front = start;
+            start_front.x += size_component.width() as i32;
+
+            (
+                AABB::new(start, size_component),
+                AABB::new(start_front, size_front),
+            )
         }
     }
 }
