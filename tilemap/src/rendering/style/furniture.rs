@@ -17,15 +17,22 @@ use texture_generation::utils::resource::Resource;
 /// How does the furniture look like?
 pub struct FurnitureStyle {
     name: String,
+    depth: u8,
     horizontal_component: Component,
     vertical_component: Component,
     front: FrontStyle,
 }
 
 impl FurnitureStyle {
-    pub fn new<S: Into<String>>(name: S, component: Component, front: FrontStyle) -> Self {
+    pub fn new<S: Into<String>>(
+        name: S,
+        depth: u8,
+        component: Component,
+        front: FrontStyle,
+    ) -> Self {
         FurnitureStyle {
             name: name.into(),
+            depth,
             horizontal_component: component.clone(),
             vertical_component: component.flip(),
             front,
@@ -40,6 +47,8 @@ impl FurnitureStyle {
         data: &Data,
         front_side: Side,
     ) {
+        texture.set_base_depth(self.depth);
+
         let thickness = self.front.get_thickness(resources);
 
         if thickness > 0 {
@@ -156,6 +165,7 @@ impl Default for FurnitureStyle {
 
         Self::new(
             "default",
+            100,
             Component::Rendering(Box::new(component)),
             FrontStyle::None,
         )

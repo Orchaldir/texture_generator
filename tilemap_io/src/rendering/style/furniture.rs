@@ -8,6 +8,7 @@ use tilemap::rendering::style::furniture::FurnitureStyle;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct FurnitureDefinition {
     tile_size: u32,
+    depth: u8,
     component: ComponentDefinition,
     front: FrontDefinition,
 }
@@ -28,7 +29,7 @@ impl ResourceDefinition for FurnitureDefinition {
             "Failed to convert 'front' of the furniture '{}'",
             name
         ))?;
-        Ok(FurnitureStyle::new(name, component, front))
+        Ok(FurnitureStyle::new(name, self.depth, component, front))
     }
 }
 
@@ -42,10 +43,12 @@ mod tests {
     fn test_convert_without_handle() {
         let definition = FurnitureDefinition {
             tile_size: 200,
+            depth: 123,
             component: ComponentDefinition::Mock(56),
             front: FrontDefinition::One(99),
         };
-        let style = FurnitureStyle::new("furniture0", Component::Mock(56), FrontStyle::One(99));
+        let style =
+            FurnitureStyle::new("furniture0", 123, Component::Mock(56), FrontStyle::One(99));
 
         assert_eq!(style, definition.convert("furniture0", 600).unwrap())
     }

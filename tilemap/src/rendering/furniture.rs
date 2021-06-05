@@ -159,6 +159,29 @@ mod tests {
         ];
 
         assert_eq!(texture.get_color_data(), &result);
+
+        #[rustfmt::skip]
+        let depth = vec![
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0, 101, 101, 101,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+        ];
+
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 
     #[test]
@@ -192,6 +215,20 @@ mod tests {
         ];
 
         assert_eq!(texture.get_color_data(), &result);
+
+        #[rustfmt::skip]
+        let depth = vec![
+              0,   0,   0,   0, 101, 101, 101, 101,
+              0,   0,   0,   0, 101, 101, 101, 101,
+              0,   0,   0,   0, 101, 101, 101, 101,
+              0,   0,   0,   0, 101, 101, 101, 101,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+              0,   0,   0,   0,   0,   0,   0,   0,
+        ];
+
+        assert_eq!(texture.get_depth_data(), &depth);
     }
 
     fn create_resources() -> Resources {
@@ -221,6 +258,6 @@ mod tests {
     fn create_furniture(name: &str, color: Color) -> FurnitureStyle {
         let rendering = RenderingComponent::new_fill_area(color, 1);
         let component = Component::Rendering(Box::new(rendering));
-        FurnitureStyle::new(name, component, FrontStyle::None)
+        FurnitureStyle::new(name, 100, component, FrontStyle::None)
     }
 }

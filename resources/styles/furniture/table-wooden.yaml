@@ -1,5 +1,6 @@
 ---
 tile_size: 512
+depth: 200
 component:
   Layout:
     RepeatY:
@@ -13,8 +14,8 @@ component:
               ConstantColor: "#DEB887"
             depth:
               InterpolateMany:
-                - [ 0.8,130 ]
-                - [ 1.0,101 ]
+                - [ 0.8,30 ]
+                - [ 1.0,1 ]
 front:
   Repeat:
     step: 400
