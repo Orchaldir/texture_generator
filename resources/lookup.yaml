@@ -3,7 +3,8 @@ doors:
   - wooden.yaml
   - furniture-wood.yaml
 furniture:
-  - table-wooden.yaml
+  - table-wood.yaml
+  - cabinet-wood.yaml
 nodes:
   - stone.yaml
   - wooden.yaml

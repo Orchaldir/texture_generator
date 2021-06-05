@@ -1,6 +1,6 @@
 ---
 tile_size: 512
-depth: 200
+depth: 100
 component:
   Layout:
     RepeatY:
@@ -17,6 +17,7 @@ component:
                 - [ 0.8,30 ]
                 - [ 1.0,1 ]
 front:
-  Repeat:
-    step: 400
-    door_id: 1
+  Split:
+    - [ 1,1 ]
+    - [ 1,null ]
+    - [ 1,1 ]
