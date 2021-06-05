@@ -1,4 +1,5 @@
 use crate::rendering::resource::Resources;
+use texture_generation::generation::component::layout::repeat::calculate_steps;
 use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::Data;
 
@@ -7,7 +8,7 @@ use texture_generation::generation::data::Data;
 pub enum FrontStyle {
     None,
     One(usize),
-    Repeat { size: u32, door_id: usize },
+    Repeat { step: u32, door_id: usize },
     Split(Vec<(u32, Option<usize>)>),
 }
 
@@ -36,12 +37,13 @@ impl FrontStyle {
         is_front: bool,
         texture: &mut Texture,
     ) {
+        let start = data.get_inner().start();
+        let size = data.get_inner().size();
+        let mut point = start;
+        point.y += size.height() as i32 / 2;
+
         match self {
             FrontStyle::One(door_id) => {
-                let mut point = data.get_inner().start();
-                let size = data.get_inner().size();
-                point.y += size.height() as i32 / 2;
-
                 resources.door_styles.get(*door_id).render_horizontal(
                     data,
                     point,
@@ -49,6 +51,14 @@ impl FrontStyle {
                     is_front,
                     texture,
                 );
+            }
+            FrontStyle::Repeat { step, door_id } => {
+                let door_style = resources.door_styles.get(*door_id);
+
+                for step in calculate_steps(size.width(), *step) {
+                    door_style.render_horizontal(data, point, (0, step), is_front, texture);
+                    point.x += step as i32;
+                }
             }
             _ => {}
         }

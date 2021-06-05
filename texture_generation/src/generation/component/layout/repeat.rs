@@ -139,17 +139,7 @@ impl RepeatLayout {
     /// Splits the distance into one or more steps.
     fn calculate_steps(&self, data: &Data, distance: u32) -> Vec<u32> {
         if self.min_step == self.max_step {
-            let desired_step = self.min_step;
-            let factor = (distance % desired_step) as f32 / desired_step as f32;
-            let n = distance / desired_step;
-            let n = if factor < 0.5 { n } else { n + 1 };
-            let step = distance / n;
-            let n_big = distance - n * step;
-
-            let mut big_steps = vec![step + 1; n_big as usize];
-            let mut steps = vec![step; (n - n_big) as usize];
-            big_steps.append(&mut steps);
-            big_steps
+            calculate_steps(distance, self.min_step)
         } else {
             let step_diff = 1 + self.max_step - self.min_step;
             let mut pos = 0;
@@ -187,6 +177,19 @@ impl RepeatLayout {
     }
 }
 
+pub fn calculate_steps(distance: u32, desired_step: u32) -> Vec<u32> {
+    let factor = (distance % desired_step) as f32 / desired_step as f32;
+    let n = distance / desired_step;
+    let n = if factor < 0.5 { n } else { n + 1 };
+    let step = distance / n;
+    let n_big = distance - n * step;
+
+    let mut big_steps = vec![step + 1; n_big as usize];
+    let mut steps = vec![step; (n - n_big) as usize];
+    big_steps.append(&mut steps);
+    big_steps
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -215,6 +218,21 @@ mod tests {
     #[should_panic]
     fn test_new_with_max_step_too_small() {
         RepeatLayout::new_random(true, 4, 3, Component::Mock(2), Random::Hash).unwrap();
+    }
+
+    #[test]
+    fn test_calculate_steps() {
+        assert_eq!(calculate_steps(60, 20), vec![20, 20, 20]);
+    }
+
+    #[test]
+    fn test_calculate_big_steps() {
+        assert_eq!(calculate_steps(62, 20), vec![21, 21, 20]);
+    }
+
+    #[test]
+    fn test_calculate_more_steps() {
+        assert_eq!(calculate_steps(71, 20), vec![18, 18, 18, 17]);
     }
 
     #[test]
