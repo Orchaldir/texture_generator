@@ -43,49 +43,13 @@ impl FurnitureStyle {
         let thickness = self.front.get_thickness(resources);
 
         if thickness > 0 {
-            let (aabb_component, aabb_front) = calculate_aabbs(data, front_side, thickness);
+            let aabbs = calculate_aabbs(data, front_side, thickness);
 
             match front_side {
-                Side::Top => {
-                    self.horizontal_component
-                        .generate(texture, &data.transform(aabb_component));
-                    self.front.render_horizontal(
-                        resources,
-                        &data.transform(aabb_front),
-                        false,
-                        texture,
-                    );
-                }
-                Side::Left => {
-                    self.vertical_component
-                        .generate(texture, &data.transform(aabb_component));
-                    self.front.render_vertical(
-                        resources,
-                        &data.transform(aabb_front),
-                        false,
-                        texture,
-                    );
-                }
-                Side::Bottom => {
-                    self.horizontal_component
-                        .generate(texture, &data.transform(aabb_component));
-                    self.front.render_horizontal(
-                        resources,
-                        &data.transform(aabb_front),
-                        true,
-                        texture,
-                    );
-                }
-                Side::Right => {
-                    self.vertical_component
-                        .generate(texture, &data.transform(aabb_component));
-                    self.front.render_vertical(
-                        resources,
-                        &data.transform(aabb_front),
-                        true,
-                        texture,
-                    );
-                }
+                Side::Top => self.render_horizontal(resources, texture, data, aabbs, false),
+                Side::Left => self.render_vertical(resources, texture, data, aabbs, false),
+                Side::Bottom => self.render_horizontal(resources, texture, data, aabbs, true),
+                Side::Right => self.render_vertical(resources, texture, data, aabbs, true),
             }
         } else {
             match front_side {
@@ -93,6 +57,38 @@ impl FurnitureStyle {
                 Side::Left | Side::Right => self.vertical_component.generate(texture, &data),
             }
         }
+    }
+
+    fn render_horizontal(
+        &self,
+        resources: &Resources,
+        texture: &mut Texture,
+        data: &Data,
+        aabbs: (AABB, AABB),
+        is_front: bool,
+    ) {
+        let (aabb_component, aabb_front) = aabbs;
+
+        self.horizontal_component
+            .generate(texture, &data.transform(aabb_component));
+        self.front
+            .render_horizontal(resources, &data.transform(aabb_front), is_front, texture);
+    }
+
+    fn render_vertical(
+        &self,
+        resources: &Resources,
+        texture: &mut Texture,
+        data: &Data,
+        aabbs: (AABB, AABB),
+        is_front: bool,
+    ) {
+        let (aabb_component, aabb_front) = aabbs;
+
+        self.vertical_component
+            .generate(texture, &data.transform(aabb_component));
+        self.front
+            .render_vertical(resources, &data.transform(aabb_front), is_front, texture);
     }
 }
 
