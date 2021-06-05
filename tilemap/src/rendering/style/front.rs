@@ -1,5 +1,7 @@
 use crate::rendering::resource::Resources;
+use anyhow::{bail, Result};
 use texture_generation::generation::component::layout::repeat::calculate_steps;
+use texture_generation::generation::component::layout::split::convert;
 use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::Data;
 
@@ -13,6 +15,38 @@ pub enum FrontStyle {
 }
 
 impl FrontStyle {
+    pub fn new_repeat(step: u32, door_id: usize) -> Result<Self> {
+        if step < 1 {
+            bail!("Step is is too small!");
+        }
+
+        Ok(FrontStyle::Repeat { step, door_id })
+    }
+
+    pub fn new_split(entries: Vec<(u32, Option<usize>)>) -> Result<Self> {
+        let converted = convert(entries, "doors")?;
+        let mut has_some = false;
+        let mut was_last_none = false;
+
+        for (_, option) in converted.iter() {
+            if option.is_some() {
+                if !has_some {
+                    has_some = true;
+                }
+            } else if was_last_none {
+                bail!("2 entries next to each other have no door!");
+            } else {
+                was_last_none = true;
+            }
+        }
+
+        if !has_some {
+            bail!("{} entries without a single door!", converted.len());
+        }
+
+        Ok(FrontStyle::Split(converted))
+    }
+
     pub fn get_thickness(&self, resources: &Resources) -> u32 {
         match self {
             FrontStyle::None => 0,
@@ -140,5 +174,45 @@ impl FrontStyle {
 impl Default for FrontStyle {
     fn default() -> Self {
         Self::None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn test_new_repeat_with_too_small_step() {
+        FrontStyle::new_repeat(0, 10).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_split_with_too_few_doors() {
+        FrontStyle::new_split(vec![(2, Some(10))]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_split_with_proportion_is_zero() {
+        FrontStyle::new_split(vec![(0, Some(10)), (3, Some(11))]).unwrap();
+    }
+
+    #[test]
+    fn test_new_split_with_no_door() {
+        FrontStyle::new_split(vec![(3, Some(10)), (3, None)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_split_with_no_doors() {
+        FrontStyle::new_split(vec![(3, None), (3, None)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_split_with_2_nones_next_to_each_other() {
+        FrontStyle::new_split(vec![(3, Some(10)), (3, None), (3, None)]).unwrap();
     }
 }
