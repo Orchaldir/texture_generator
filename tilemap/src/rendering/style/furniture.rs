@@ -23,12 +23,12 @@ pub struct FurnitureStyle {
 }
 
 impl FurnitureStyle {
-    pub fn new<S: Into<String>>(name: S, component: Component) -> Self {
+    pub fn new<S: Into<String>>(name: S, component: Component, front: FrontStyle) -> Self {
         FurnitureStyle {
             name: name.into(),
             horizontal_component: component.clone(),
             vertical_component: component.flip(),
-            front: FrontStyle::Split(vec![(0.333, Some(1)), (0.333, None), (0.333, Some(1))]),
+            front,
         }
     }
 
@@ -154,7 +154,11 @@ impl Default for FurnitureStyle {
             depth_factory,
         );
 
-        Self::new("default", Component::Rendering(Box::new(component)))
+        Self::new(
+            "default",
+            Component::Rendering(Box::new(component)),
+            FrontStyle::None,
+        )
     }
 }
 

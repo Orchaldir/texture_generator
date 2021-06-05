@@ -1,5 +1,6 @@
 pub mod door;
 pub mod edge;
+pub mod front;
 pub mod furniture;
 pub mod handle;
 pub mod node;

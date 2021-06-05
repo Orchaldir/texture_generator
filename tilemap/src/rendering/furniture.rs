@@ -106,6 +106,7 @@ impl<'a> FurnitureRenderer<'a> {
 mod tests {
     use super::*;
     use crate::rendering::style::edge::EdgeStyle;
+    use crate::rendering::style::front::FrontStyle;
     use crate::rendering::style::furniture::FurnitureStyle;
     use crate::rendering::style::wall::WallStyle;
     use crate::tilemap::border::Border;
@@ -220,6 +221,6 @@ mod tests {
     fn create_furniture(name: &str, color: Color) -> FurnitureStyle {
         let rendering = RenderingComponent::new_fill_area(color, 1);
         let component = Component::Rendering(Box::new(rendering));
-        FurnitureStyle::new(name, component)
+        FurnitureStyle::new(name, component, FrontStyle::None)
     }
 }

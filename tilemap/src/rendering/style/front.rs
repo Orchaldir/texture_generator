@@ -201,7 +201,9 @@ mod tests {
 
     #[test]
     fn test_new_split_with_no_door() {
-        FrontStyle::new_split(vec![(3, Some(10)), (3, None)]).unwrap();
+        let result = FrontStyle::new_split(vec![(3, Some(10)), (3, None)]);
+        let style = FrontStyle::Split(vec![(0.5, Some(10)), (0.5, None)]);
+        assert_eq!(result.unwrap(), style);
     }
 
     #[test]

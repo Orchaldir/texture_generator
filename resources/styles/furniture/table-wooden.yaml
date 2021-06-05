@@ -15,3 +15,7 @@ component:
               InterpolateMany:
                 - [ 0.8,130 ]
                 - [ 1.0,101 ]
+front:
+  Repeat:
+    step: 512
+    door_id: 1

@@ -179,7 +179,7 @@ impl RepeatLayout {
 
 pub fn calculate_steps(distance: u32, desired_step: u32) -> Vec<u32> {
     let factor = (distance % desired_step) as f32 / desired_step as f32;
-    let n = distance / desired_step;
+    let n = (distance / desired_step).max(1);
     let n = if factor < 0.5 { n } else { n + 1 };
     let step = distance / n;
     let n_big = distance - n * step;

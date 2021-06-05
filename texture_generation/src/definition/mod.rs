@@ -89,7 +89,7 @@ pub fn read_resources<T: DeserializeOwned>(
         .map(|name| match read(&dir.join(name)) {
             Ok(resource) => Some((name.clone(), resource)),
             Err(error) => {
-                warn!("Couldn't read {}, because of {:?}", name, error);
+                warn!("Couldn't read '{}', because of {:?}", name, error);
                 None
             }
         })
