@@ -17,5 +17,5 @@ component:
                 - [ 1.0,101 ]
 front:
   Repeat:
-    step: 512
+    step: 400
     door_id: 1
