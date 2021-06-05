@@ -20,7 +20,7 @@ handle_style:
   both_sides: false
   size:
     width: 96
-    height: 48
+    height: 32
   component:
     Shape:
       shape_factory:

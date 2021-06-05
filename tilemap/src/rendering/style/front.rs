@@ -9,7 +9,7 @@ pub enum FrontStyle {
     None,
     One(usize),
     Repeat { step: u32, door_id: usize },
-    Split(Vec<(u32, Option<usize>)>),
+    Split(Vec<(f32, Option<usize>)>),
 }
 
 impl FrontStyle {
@@ -57,6 +57,25 @@ impl FrontStyle {
 
                 for step in calculate_steps(size.width(), *step) {
                     door_style.render_horizontal(data, point, (0, step), is_front, texture);
+                    point.x += step as i32;
+                }
+            }
+            FrontStyle::Split(entries) => {
+                let length = size.width() as f32;
+
+                for (factor, o) in entries {
+                    let step = (length * *factor) as u32;
+
+                    if let Some(door_id) = o {
+                        resources.door_styles.get(*door_id).render_horizontal(
+                            data,
+                            point,
+                            (0, step),
+                            is_front,
+                            texture,
+                        );
+                    }
+
                     point.x += step as i32;
                 }
             }

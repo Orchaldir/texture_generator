@@ -25,7 +25,7 @@ impl FurnitureStyle {
         FurnitureStyle {
             name: name.into(),
             component,
-            front: FrontStyle::One(1),
+            front: FrontStyle::Split(vec![(0.333, Some(1)), (0.333, None), (0.333, Some(1))]),
         }
     }
 
