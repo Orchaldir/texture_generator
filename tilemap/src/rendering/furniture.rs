@@ -46,7 +46,7 @@ impl<'a> FurnitureRenderer<'a> {
             self.resources
                 .furniture_styles
                 .get(furniture.style_id)
-                .render(texture, &data);
+                .render(self.resources, texture, &data);
         }
     }
 

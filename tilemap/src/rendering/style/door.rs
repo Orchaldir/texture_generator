@@ -53,6 +53,10 @@ impl DoorStyle {
         }
     }
 
+    pub fn get_thickness(&self) -> u32 {
+        self.edge_style.get_thickness()
+    }
+
     pub fn render_horizontal(
         &self,
         data: &Data,
