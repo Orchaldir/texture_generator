@@ -6,9 +6,9 @@ use crate::math::size::Size;
 use anyhow::{bail, Result};
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum SplitEntry {
+pub enum SplitEntry<T> {
     Fixed(u32, Component),
-    Proportional(f32, Component),
+    Proportional(T, Component),
 }
 
 #[svgbobdoc::transform]
@@ -45,11 +45,59 @@ pub enum SplitEntry {
 #[derive(Clone, Debug, PartialEq)]
 pub struct SplitLayout {
     is_horizontal: bool,
-    entries: Vec<SplitEntry>,
+    entries: Vec<SplitEntry<f32>>,
     total_fixed_length: u32,
 }
 
 impl SplitLayout {
+    pub fn new(is_horizontal: bool, entries: Vec<SplitEntry<u32>>) -> Result<SplitLayout> {
+        if entries.len() < 2 {
+            bail!("Requires at least 2 entries");
+        }
+
+        let mut converted = Vec::with_capacity(entries.len());
+        let total_proportion = entries
+            .iter()
+            .map(|entry| match entry {
+                SplitEntry::Proportional(v, _) => *v,
+                _ => 0,
+            })
+            .sum::<u32>() as f32;
+        let mut total_fixed_length = 0;
+
+        if total_proportion == 0.0 {
+            bail!("Requires at least 1 proportional entry");
+        }
+
+        for (i, entry) in entries.into_iter().enumerate() {
+            match entry {
+                SplitEntry::Fixed(length, component) => {
+                    if length == 0 {
+                        bail!(format!("{}.length is 0", i + 1));
+                    }
+
+                    total_fixed_length += length;
+
+                    converted.push(SplitEntry::Fixed(length, component));
+                }
+                SplitEntry::Proportional(proportion, component) => {
+                    if proportion == 0 {
+                        bail!(format!("{}.proportion is 0", i + 1));
+                    }
+
+                    let factor = proportion as f32 / total_proportion;
+                    converted.push(SplitEntry::Proportional(factor, component));
+                }
+            }
+        }
+
+        Ok(SplitLayout {
+            is_horizontal,
+            entries: converted,
+            total_fixed_length,
+        })
+    }
+
     pub fn new_proportional(
         is_horizontal: bool,
         entries: Vec<(u32, Component)>,
@@ -179,13 +227,37 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn test_new_with_too_few_components() {
-        SplitLayout::new_proportional(true, vec![create(1, RED)]).unwrap();
+    fn test_new_with_too_few_entries() {
+        SplitLayout::new(true, vec![proportional(1)]).unwrap();
     }
 
     #[test]
     #[should_panic]
     fn test_new_with_proportion_is_zero() {
+        SplitLayout::new(true, vec![proportional(1), proportional(0)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_no_proportional_entry() {
+        SplitLayout::new(true, vec![fixed(1), fixed(1)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_with_fixed_length_is_0() {
+        SplitLayout::new(true, vec![proportional(1), fixed(0)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_proportional_with_too_few_entries() {
+        SplitLayout::new_proportional(true, vec![create(1, RED)]).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_new_proportional_with_proportion_is_zero() {
         SplitLayout::new_proportional(true, vec![create(0, RED), create(3, GREEN)]).unwrap();
     }
 
@@ -240,5 +312,13 @@ mod tests {
     fn create(size: u32, color: Color) -> (u32, Component) {
         let renderer = RenderingComponent::new_fill_area(color, 200);
         (size, Component::Rendering(Box::new(renderer)))
+    }
+
+    fn fixed(size: u32) -> SplitEntry<u32> {
+        SplitEntry::Fixed(size, Component::Mock(2))
+    }
+
+    fn proportional(size: u32) -> SplitEntry<u32> {
+        SplitEntry::Proportional(size, Component::Mock(2))
     }
 }
