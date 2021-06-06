@@ -5,6 +5,12 @@ use crate::math::aabb::AABB;
 use crate::math::size::Size;
 use anyhow::{bail, Result};
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum SplitEntry {
+    Fixed(u32, Component),
+    Proportional(f32, Component),
+}
+
 #[svgbobdoc::transform]
 /// Splits an area into different components of different sizes.
 ///
@@ -39,16 +45,24 @@ use anyhow::{bail, Result};
 #[derive(Clone, Debug, PartialEq)]
 pub struct SplitLayout {
     is_horizontal: bool,
-    components: Vec<(f32, Component)>,
+    entries: Vec<SplitEntry>,
+    total_fixed_length: u32,
 }
 
 impl SplitLayout {
-    pub fn new(is_horizontal: bool, components: Vec<(u32, Component)>) -> Result<SplitLayout> {
-        let converted = convert(components, "components")?;
+    pub fn new_proportional(
+        is_horizontal: bool,
+        entries: Vec<(u32, Component)>,
+    ) -> Result<SplitLayout> {
+        let converted = convert_proportional(entries, "entries")?
+            .into_iter()
+            .map(|(proportion, component)| SplitEntry::Proportional(proportion, component))
+            .collect();
 
         Ok(SplitLayout {
             is_horizontal,
-            components: converted,
+            entries: converted,
+            total_fixed_length: 0,
         })
     }
 
@@ -56,11 +70,15 @@ impl SplitLayout {
     pub fn flip(&self) -> SplitLayout {
         SplitLayout {
             is_horizontal: !self.is_horizontal,
-            components: self
-                .components
+            entries: self
+                .entries
                 .iter()
-                .map(|(v, c)| (*v, c.flip()))
+                .map(|entry| match entry {
+                    SplitEntry::Fixed(v, c) => SplitEntry::Fixed(*v, c.flip()),
+                    SplitEntry::Proportional(v, c) => SplitEntry::Proportional(*v, c.flip()),
+                })
                 .collect(),
+            total_fixed_length: self.total_fixed_length,
         }
     }
 
@@ -79,13 +97,25 @@ impl SplitLayout {
         let height = total_aabb.size().height();
         let mut start = total_aabb.start();
 
-        for (factor, component) in self.components.iter() {
-            let width = (total_width as f32 * *factor) as u32;
+        if total_width < self.total_fixed_length {
+            return;
+        }
+
+        let remaining_width = total_width - self.total_fixed_length;
+
+        for entry in self.entries.iter() {
+            let (width, component) = match entry {
+                SplitEntry::Fixed(width, component) => (*width, component),
+                SplitEntry::Proportional(factor, component) => {
+                    let width = (remaining_width as f32 * *factor) as u32;
+                    (width, component)
+                }
+            };
+
             let size = Size::new(width, height);
             let aabb = AABB::new(start, size);
 
             component.generate(texture, &data.next(aabb));
-
             start.x += width as i32;
         }
     }
@@ -96,19 +126,31 @@ impl SplitLayout {
         let total_height = total_aabb.size().height();
         let mut start = total_aabb.start();
 
-        for (factor, component) in self.components.iter() {
-            let height = (total_height as f32 * *factor) as u32;
+        if total_height < self.total_fixed_length {
+            return;
+        }
+
+        let remaining_height = total_height - self.total_fixed_length;
+
+        for entry in self.entries.iter() {
+            let (height, component) = match entry {
+                SplitEntry::Fixed(height, component) => (*height, component),
+                SplitEntry::Proportional(factor, component) => {
+                    let height = (remaining_height as f32 * *factor) as u32;
+                    (height, component)
+                }
+            };
+
             let size = Size::new(width, height);
             let aabb = AABB::new(start, size);
 
             component.generate(texture, &data.next(aabb));
-
             start.y += height as i32;
         }
     }
 }
 
-pub fn convert<T>(entries: Vec<(u32, T)>, description: &str) -> Result<Vec<(f32, T)>> {
+pub fn convert_proportional<T>(entries: Vec<(u32, T)>, description: &str) -> Result<Vec<(f32, T)>> {
     if entries.len() < 2 {
         bail!("Requires at least 2 '{}'", description);
     }
@@ -138,13 +180,13 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_new_with_too_few_components() {
-        SplitLayout::new(true, vec![create(1, RED)]).unwrap();
+        SplitLayout::new_proportional(true, vec![create(1, RED)]).unwrap();
     }
 
     #[test]
     #[should_panic]
     fn test_new_with_proportion_is_zero() {
-        SplitLayout::new(true, vec![create(0, RED), create(3, GREEN)]).unwrap();
+        SplitLayout::new_proportional(true, vec![create(0, RED), create(3, GREEN)]).unwrap();
     }
 
     #[test]
@@ -152,7 +194,7 @@ mod tests {
         let size = Size::new(6, 2);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = SplitLayout::new(
+        let layout = SplitLayout::new_proportional(
             true,
             vec![create(1, RED), create(3, GREEN), create(2, BLUE)],
         )
@@ -174,7 +216,7 @@ mod tests {
         let size = Size::new(2, 6);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = SplitLayout::new(
+        let layout = SplitLayout::new_proportional(
             false,
             vec![create(3, RED), create(2, GREEN), create(1, BLUE)],
         )

@@ -1,7 +1,7 @@
 use crate::rendering::resource::Resources;
 use anyhow::{bail, Result};
 use texture_generation::generation::component::layout::repeat::calculate_steps;
-use texture_generation::generation::component::layout::split::convert;
+use texture_generation::generation::component::layout::split::convert_proportional;
 use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::Data;
 
@@ -24,7 +24,7 @@ impl FrontStyle {
     }
 
     pub fn new_split(entries: Vec<(u32, Option<usize>)>) -> Result<Self> {
-        let converted = convert(entries, "doors")?;
+        let converted = convert_proportional(entries, "doors")?;
         let mut has_some = false;
         let mut was_last_none = false;
 

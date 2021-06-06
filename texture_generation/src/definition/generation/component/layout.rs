@@ -185,7 +185,7 @@ impl LayoutDefinition {
                     converted_components.push((*value, component));
                 }
 
-                let pattern = SplitLayout::new(*is_horizontal, converted_components)
+                let pattern = SplitLayout::new_proportional(*is_horizontal, converted_components)
                     .context(format!("Failed to create '{}.Split'", parent))?;
                 Ok(LayoutComponent::Split(pattern))
             }
@@ -258,7 +258,7 @@ mod tests {
                 (6, ComponentDefinition::Mock(45)),
             ],
         };
-        let layout = SplitLayout::new(
+        let layout = SplitLayout::new_proportional(
             true,
             vec![(4, Component::Mock(11)), (6, Component::Mock(45))],
         );
