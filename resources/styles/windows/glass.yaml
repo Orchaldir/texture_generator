@@ -12,17 +12,17 @@ pane_style:
             - Rendering:
                 FillArea:
                   color: "#432711"
-                  depth: 101
+                  depth: 201
           - - 12
             - Rendering:
                 FillArea:
                   color: "#00FFFF"
-                  depth: 101
+                  depth: 221
           - - 10
             - Rendering:
                 FillArea:
                   color: "#432711"
-                  depth: 101
+                  depth: 201
 stool_style:
   Solid:
     thickness: 80

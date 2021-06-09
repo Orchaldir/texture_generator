@@ -77,7 +77,6 @@ impl SplitLayout {
                     }
 
                     total_fixed_length += length;
-
                     converted.push(SplitEntry::Fixed(length, component));
                 }
                 SplitEntry::Proportional(proportion, component) => {

@@ -1,0 +1,48 @@
+---
+tile_size: 512
+depth: 100
+component:
+  Layout:
+    ComplexSplit:
+      is_horizontal: true
+      components:
+        - Fixed:
+            size: 40
+            component:
+              Rendering:
+                Shape:
+                  shape_factory:
+                    RoundedRectangle: 0.5
+                  color:
+                    ConstantColor: "#432711"
+                  depth:
+                    Dome:
+                      center: 60
+                      border: 40
+        - Proportional:
+            weight: 32
+            component:
+              Rendering:
+                Shape:
+                  shape_factory:
+                    RoundedRectangle: 0.1
+                  color:
+                    ConstantColor: "#FFFFFF"
+                  depth:
+                    Dome:
+                      center: 20
+                      border: 1
+        - Fixed:
+            size: 40
+            component:
+              Rendering:
+                Shape:
+                  shape_factory:
+                    RoundedRectangle: 0.5
+                  color:
+                    ConstantColor: "#432711"
+                  depth:
+                    Dome:
+                      center: 60
+                      border: 50
+front: None
