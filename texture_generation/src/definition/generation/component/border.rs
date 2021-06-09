@@ -12,10 +12,15 @@ pub enum BorderDefinition {
         border: u32,
         component: ComponentDefinition,
     },
-    ShrinkAxis {
+    RandomShrinkAxis {
         is_horizontal: bool,
         min_border: u32,
         max_border: u32,
+        component: ComponentDefinition,
+    },
+    ShrinkAxis {
+        is_horizontal: bool,
+        border: u32,
         component: ComponentDefinition,
     },
 }
@@ -29,14 +34,14 @@ impl BorderDefinition {
                 let border = BorderComponent::new_uniform(convert(*border, factor), component);
                 Ok(border)
             }
-            BorderDefinition::ShrinkAxis {
+            BorderDefinition::RandomShrinkAxis {
                 is_horizontal,
                 min_border,
                 max_border,
                 component,
             } => {
                 let component =
-                    component.convert(&format!("{}.ShrinkAxis.component", parent), factor)?;
+                    component.convert(&format!("{}.RandomShrinkAxis.component", parent), factor)?;
                 let border = ShrinkAxis::new_random(
                     *is_horizontal,
                     convert(*min_border, factor),
@@ -44,7 +49,18 @@ impl BorderDefinition {
                     component,
                     Random::Hash,
                 )
-                .context(format!("Failed to create '{}.ShrinkAxis'", parent))?;
+                .context(format!("Failed to create '{}.RandomShrinkAxis'", parent))?;
+                Ok(BorderComponent::ShrinkAxis(border))
+            }
+            BorderDefinition::ShrinkAxis {
+                is_horizontal,
+                border,
+                component,
+            } => {
+                let component =
+                    component.convert(&format!("{}.ShrinkAxis.component", parent), factor)?;
+                let border = ShrinkAxis::new(*is_horizontal, convert(*border, factor), component)
+                    .context(format!("Failed to create '{}.ShrinkAxis'", parent))?;
                 Ok(BorderComponent::ShrinkAxis(border))
             }
         }
@@ -68,14 +84,27 @@ mod tests {
     }
 
     #[test]
-    fn test_shrink_axis() {
-        let definition = BorderDefinition::ShrinkAxis {
+    fn test_random_shrink_axis() {
+        let definition = BorderDefinition::RandomShrinkAxis {
             is_horizontal: false,
             min_border: 5,
             max_border: 20,
             component: ComponentDefinition::Mock(42),
         };
         let shrink = ShrinkAxis::new_random(false, 10, 40, Component::Mock(42), Random::Hash);
+        let component = BorderComponent::ShrinkAxis(shrink.unwrap());
+
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
+    }
+
+    #[test]
+    fn test_shrink_axis() {
+        let definition = BorderDefinition::ShrinkAxis {
+            is_horizontal: false,
+            border: 10,
+            component: ComponentDefinition::Mock(42),
+        };
+        let shrink = ShrinkAxis::new(false, 20, Component::Mock(42));
         let component = BorderComponent::ShrinkAxis(shrink.unwrap());
 
         assert_eq!(component, definition.convert("test", 2.0).unwrap())

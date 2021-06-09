@@ -20,18 +20,23 @@ component:
                       center: 60
                       border: 40
         - Proportional:
-            weight: 32
+            weight: 1
             component:
-              Rendering:
-                Shape:
-                  shape_factory:
-                    RoundedRectangle: 0.1
-                  color:
-                    ConstantColor: "#FFFFFF"
-                  depth:
-                    Dome:
-                      center: 20
-                      border: 1
+              Border:
+                ShrinkAxis:
+                  is_horizontal: false
+                  border: 20
+                  component:
+                    Rendering:
+                      Shape:
+                        shape_factory:
+                          RoundedRectangle: 0.1
+                        color:
+                          ConstantColor: "#FFFFFF"
+                        depth:
+                          Dome:
+                            center: 20
+                            border: 1
         - Fixed:
             size: 40
             component:
