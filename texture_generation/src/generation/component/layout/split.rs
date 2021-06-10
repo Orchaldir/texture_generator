@@ -221,7 +221,7 @@ mod tests {
     use super::*;
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::texture::Texture;
-    use crate::math::color::{Color, BLUE, GREEN, RED, WHITE};
+    use crate::math::color::{Color, BLUE, GREEN, RED, WHITE, YELLOW};
     use crate::math::size::Size;
 
     #[test]
@@ -261,7 +261,7 @@ mod tests {
     }
 
     #[test]
-    fn test_split_x() {
+    fn test_split_proportional_x() {
         let size = Size::new(6, 2);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
@@ -284,12 +284,17 @@ mod tests {
 
     #[test]
     fn test_split_y() {
-        let size = Size::new(2, 6);
+        let size = Size::new(2, 8);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let layout = SplitLayout::new_proportional(
+        let layout = SplitLayout::new(
             false,
-            vec![create(3, RED), create(2, GREEN), create(1, BLUE)],
+            vec![
+                create_fixed(3, RED),
+                create_proportional(GREEN),
+                create_proportional(YELLOW),
+                create_fixed(1, BLUE),
+            ],
         )
         .unwrap();
 
@@ -302,6 +307,8 @@ mod tests {
             RED, RED,
             GREEN, GREEN,
             GREEN, GREEN,
+            YELLOW, YELLOW,
+            YELLOW, YELLOW,
             BLUE, BLUE,
         ];
 
@@ -311,6 +318,16 @@ mod tests {
     fn create(size: u32, color: Color) -> (u32, Component) {
         let renderer = RenderingComponent::new_fill_area(color, 200);
         (size, Component::Rendering(Box::new(renderer)))
+    }
+
+    fn create_fixed(size: u32, color: Color) -> SplitEntry<u32> {
+        let renderer = RenderingComponent::new_fill_area(color, 200);
+        SplitEntry::Fixed(size, Component::Rendering(Box::new(renderer)))
+    }
+
+    fn create_proportional(color: Color) -> SplitEntry<u32> {
+        let renderer = RenderingComponent::new_fill_area(color, 200);
+        SplitEntry::Proportional(1, Component::Rendering(Box::new(renderer)))
     }
 
     fn fixed(size: u32) -> SplitEntry<u32> {
