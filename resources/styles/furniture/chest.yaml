@@ -25,7 +25,24 @@ component:
                           border_depth: 1
             - Fixed:
                 size: 10
-                component: Empty
+                component:
+                  Layout:
+                    ComplexSplit:
+                      is_horizontal: true
+                      components:
+                        - Proportional:
+                            weight: 1
+                            component: Empty
+                        - Fixed:
+                            size: 100
+                            component:
+                              Rendering:
+                                FillArea:
+                                  color: "#696969"
+                                  depth: 1
+                        - Proportional:
+                            weight: 1
+                            component: Empty
     - Layout:
         ComplexSplit:
           is_horizontal: true
