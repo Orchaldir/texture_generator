@@ -12,6 +12,7 @@ pub mod rendering;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ComponentDefinition {
     Border(Box<BorderDefinition>),
+    Empty,
     Layers(Vec<ComponentDefinition>),
     Layout(Box<LayoutDefinition>),
     Mock(u8),
@@ -24,6 +25,7 @@ impl ComponentDefinition {
             ComponentDefinition::Border(definition) => Ok(Component::Border(Box::new(
                 definition.convert(parent, factor)?,
             ))),
+            ComponentDefinition::Empty => Ok(Component::Empty),
             ComponentDefinition::Layers(layers) => {
                 let mut converted_layers = Vec::with_capacity(layers.len());
 

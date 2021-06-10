@@ -1,0 +1,68 @@
+---
+tile_size: 512
+depth: 50
+component:
+  Layers:
+    - Layout:
+        ComplexSplit:
+          is_horizontal: false
+          components:
+            - Fixed:
+                size: 10
+                component: Empty
+            - Proportional:
+                weight: 1
+                component:
+                  Rendering:
+                    Shape:
+                      shape_factory: Rectangle
+                      color:
+                        ConstantColor: "#432711"
+                      depth:
+                        Cylinder:
+                          is_horizontal: false
+                          center_depth: 60
+                          border_depth: 1
+            - Fixed:
+                size: 10
+                component: Empty
+    - Layout:
+        ComplexSplit:
+          is_horizontal: true
+          components:
+            - Proportional:
+                weight: 1
+                component: Empty
+            - Fixed:
+                size: 40
+                component:
+                  Rendering:
+                    Shape:
+                      shape_factory: Rectangle
+                      color:
+                        ConstantColor: "#646464"
+                      depth:
+                        Cylinder:
+                          is_horizontal: false
+                          center_depth: 70
+                          border_depth: 11
+            - Proportional:
+                weight: 2
+                component: Empty
+            - Fixed:
+                size: 40
+                component:
+                  Rendering:
+                    Shape:
+                      shape_factory: Rectangle
+                      color:
+                        ConstantColor: "#646464"
+                      depth:
+                        Cylinder:
+                          is_horizontal: false
+                          center_depth: 70
+                          border_depth: 11
+            - Proportional:
+                weight: 1
+                component: Empty
+front: None
