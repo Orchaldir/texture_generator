@@ -33,7 +33,8 @@ edge_style:
                   color: "#696969"
                   depth: 200
 handle_style:
-  distance_to_end: 40
+  position:
+    DistanceToEnd: 40
   offset: 0
   both_sides: true
   size:

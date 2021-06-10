@@ -57,7 +57,18 @@ impl RenderingComponent {
 
     /// Flips between horizontal & vertical mode.
     pub fn flip(&self) -> RenderingComponent {
-        self.clone()
+        match self {
+            RenderingComponent::Shape {
+                shape_factory,
+                color_selector,
+                depth_factory,
+            } => RenderingComponent::Shape {
+                shape_factory: *shape_factory,
+                color_selector: color_selector.clone(),
+                depth_factory: depth_factory.flip(),
+            },
+            _ => self.clone(),
+        }
     }
 
     /// Renders the texture in the area defined by the [`AABB`].

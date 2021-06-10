@@ -6,6 +6,7 @@ furniture:
   - table-wood.yaml
   - cabinet-wood.yaml
   - bed-wood.yaml
+  - chest.yaml
 nodes:
   - stone.yaml
   - wooden.yaml

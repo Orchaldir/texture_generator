@@ -12,6 +12,8 @@ pub mod rendering;
 /// A wrapper for different types of components.
 pub enum Component {
     Border(Box<BorderComponent>),
+    Empty,
+    Layers(Vec<Component>),
     Layout(Box<LayoutComponent>),
     Mock(u8),
     Rendering(Box<RenderingComponent>),
@@ -22,6 +24,10 @@ impl Component {
     pub fn flip(&self) -> Component {
         match self {
             Component::Border(component) => Component::Border(Box::new(component.flip())),
+            Component::Empty => Component::Empty,
+            Component::Layers(layers) => {
+                Component::Layers(layers.iter().map(|component| component.flip()).collect())
+            }
             Component::Layout(component) => Component::Layout(Box::new(component.flip())),
             Component::Mock(id) => Component::Mock(*id),
             Component::Rendering(component) => Component::Rendering(Box::new(component.flip())),
@@ -32,9 +38,12 @@ impl Component {
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
         match self {
             Component::Border(component) => component.generate(texture, data),
+            Component::Layers(layers) => layers
+                .iter()
+                .for_each(|component| component.generate(texture, data)),
             Component::Layout(component) => component.generate(texture, data),
-            Component::Mock(id) => info!("Generate mock {}", *id),
             Component::Rendering(component) => component.render(texture, data),
+            _ => {}
         }
     }
 }

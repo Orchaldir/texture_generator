@@ -7,8 +7,14 @@ use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 
 #[derive(Clone, Debug, PartialEq)]
+pub enum HandlePosition {
+    Centered,
+    DistanceToEnd(i32),
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct HandleStyle {
-    distance_to_end: i32,
+    position: HandlePosition,
     offset: i32,
     both_sides: bool,
     horizontal_size: Size,
@@ -18,7 +24,7 @@ pub struct HandleStyle {
 
 impl HandleStyle {
     pub fn new(
-        distance_to_end: u32,
+        position: HandlePosition,
         offset: u32,
         both_sides: bool,
         size: Size,
@@ -31,7 +37,7 @@ impl HandleStyle {
         }
 
         Ok(HandleStyle {
-            distance_to_end: distance_to_end as i32,
+            position,
             offset: offset as i32,
             both_sides,
             horizontal_size: size,
@@ -80,31 +86,39 @@ impl HandleStyle {
 
     fn calculate_horizontal_aabb(&self, node: Point, edge: (i32, u32), is_front: bool) -> AABB {
         let (start, length) = edge;
-        let end = node.x + start + length as i32;
         let handle_offset = if is_front {
             self.offset
         } else {
             -(self.offset + self.horizontal_size.height() as i32)
         };
-        let start = Point::new(
-            end - self.distance_to_end - self.horizontal_size.width() as i32,
-            node.y + handle_offset,
-        );
+        let handle_length = self.horizontal_size.width() as i32;
+        let start_x = match self.position {
+            HandlePosition::Centered => node.x + start + (length as i32 - handle_length) / 2,
+            HandlePosition::DistanceToEnd(distance) => {
+                let end = node.x + start + length as i32;
+                end - distance - handle_length
+            }
+        };
+        let start = Point::new(start_x, node.y + handle_offset);
         AABB::new(start, self.horizontal_size)
     }
 
     fn calculate_vertical_aabb(&self, node: Point, edge: (i32, u32), is_front: bool) -> AABB {
         let (start, length) = edge;
-        let end = node.y + start + length as i32;
         let handle_offset = if is_front {
             self.offset
         } else {
             -(self.offset + self.vertical_size.width() as i32)
         };
-        let start = Point::new(
-            node.x + handle_offset,
-            end - self.distance_to_end - self.vertical_size.height() as i32,
-        );
+        let handle_length = self.vertical_size.height() as i32;
+        let start_y = match self.position {
+            HandlePosition::Centered => node.y + start + (length as i32 - handle_length) / 2,
+            HandlePosition::DistanceToEnd(distance) => {
+                let end = node.y + start + length as i32;
+                end - distance - handle_length
+            }
+        };
+        let start = Point::new(node.x + handle_offset, start_y);
         AABB::new(start, self.vertical_size)
     }
 }
@@ -114,23 +128,39 @@ mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
     use texture_generation::math::color::{BLACK, GREEN};
+    use HandlePosition::*;
 
     #[test]
     #[should_panic]
     fn test_new_with_0_width() {
-        HandleStyle::new(0, 0, true, Size::new(0, 10), RenderingComponent::Mock).unwrap();
+        HandleStyle::new(
+            Centered,
+            0,
+            true,
+            Size::new(0, 10),
+            RenderingComponent::Mock,
+        )
+        .unwrap();
     }
 
     #[test]
     #[should_panic]
     fn test_new_with_0_height() {
-        HandleStyle::new(0, 0, false, Size::new(20, 0), RenderingComponent::Mock).unwrap();
+        HandleStyle::new(
+            Centered,
+            0,
+            false,
+            Size::new(20, 0),
+            RenderingComponent::Mock,
+        )
+        .unwrap();
     }
 
     #[test]
     fn test_render_horizontal() {
         let component = RenderingComponent::new_fill_area(GREEN, 4);
-        let handle = HandleStyle::new(2, 1, true, Size::new(3, 2), component).unwrap();
+        let position = DistanceToEnd(2);
+        let handle = HandleStyle::new(position, 1, true, Size::new(3, 2), component).unwrap();
         let mut texture = Texture::new(Size::new(11, 8), BLACK);
 
         handle.render_horizontal(
@@ -159,7 +189,8 @@ mod tests {
     #[test]
     fn test_render_vertical() {
         let component = RenderingComponent::new_fill_area(GREEN, 4);
-        let handle = HandleStyle::new(2, 1, true, Size::new(3, 2), component).unwrap();
+        let position = DistanceToEnd(2);
+        let handle = HandleStyle::new(position, 1, true, Size::new(3, 2), component).unwrap();
         let mut texture = Texture::new(Size::new(8, 11), BLACK);
 
         handle.render_vertical(

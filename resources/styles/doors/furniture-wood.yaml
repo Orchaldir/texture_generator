@@ -15,7 +15,8 @@ edge_style:
             center: 30
             border: 1
 handle_style:
-  distance_to_end: 40
+  position:
+    DistanceToEnd: 40
   offset: 0
   both_sides: false
   size:
