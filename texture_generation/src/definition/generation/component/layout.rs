@@ -4,12 +4,39 @@ use crate::generation::component::layout::brick::BrickPattern;
 use crate::generation::component::layout::herringbone::HerringbonePattern;
 use crate::generation::component::layout::random_ashlar::RandomAshlarPattern;
 use crate::generation::component::layout::repeat::RepeatLayout;
-use crate::generation::component::layout::split::SplitLayout;
+use crate::generation::component::layout::split::{SplitEntry, SplitLayout};
 use crate::generation::component::layout::LayoutComponent;
 use crate::generation::random::Random;
 use crate::math::size::Size;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum SplitEntryDefinition {
+    Fixed {
+        size: u32,
+        component: ComponentDefinition,
+    },
+    Proportional {
+        weight: u32,
+        component: ComponentDefinition,
+    },
+}
+
+impl SplitEntryDefinition {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<SplitEntry<u32>> {
+        Ok(match self {
+            SplitEntryDefinition::Fixed { size, component } => {
+                let component = component.convert(&format!("{}.component", parent), factor)?;
+                SplitEntry::Fixed(convert(*size, factor), component)
+            }
+            SplitEntryDefinition::Proportional { weight, component } => {
+                let component = component.convert(&format!("{}.component", parent), factor)?;
+                SplitEntry::Proportional(*weight, component)
+            }
+        })
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum LayoutDefinition {
@@ -56,6 +83,10 @@ pub enum LayoutDefinition {
     Split {
         is_horizontal: bool,
         components: Vec<(u32, ComponentDefinition)>,
+    },
+    ComplexSplit {
+        is_horizontal: bool,
+        components: Vec<SplitEntryDefinition>,
     },
 }
 
@@ -185,8 +216,26 @@ impl LayoutDefinition {
                     converted_components.push((*value, component));
                 }
 
-                let pattern = SplitLayout::new(*is_horizontal, converted_components)
+                let pattern = SplitLayout::new_proportional(*is_horizontal, converted_components)
                     .context(format!("Failed to create '{}.Split'", parent))?;
+                Ok(LayoutComponent::Split(pattern))
+            }
+            LayoutDefinition::ComplexSplit {
+                is_horizontal,
+                components,
+            } => {
+                let mut converted_components = Vec::with_capacity(components.len());
+
+                for (i, entry) in components.iter().enumerate() {
+                    let entry = entry.convert(
+                        &format!("{}.ComplexSplit.{}|{}.", parent, i + 1, components.len()),
+                        factor,
+                    )?;
+                    converted_components.push(entry);
+                }
+
+                let pattern = SplitLayout::new(*is_horizontal, converted_components)
+                    .context(format!("Failed to create '{}.ComplexSplit'", parent))?;
                 Ok(LayoutComponent::Split(pattern))
             }
         }
@@ -258,12 +307,39 @@ mod tests {
                 (6, ComponentDefinition::Mock(45)),
             ],
         };
-        let layout = SplitLayout::new(
+        let layout = SplitLayout::new_proportional(
             true,
             vec![(4, Component::Mock(11)), (6, Component::Mock(45))],
         );
         let component = LayoutComponent::Split(layout.unwrap());
 
         assert_eq!(component, definition.convert("test", 2.0).unwrap())
+    }
+
+    #[test]
+    fn test_convert_complex_split() {
+        let definition = LayoutDefinition::ComplexSplit {
+            is_horizontal: true,
+            components: vec![
+                SplitEntryDefinition::Fixed {
+                    size: 10,
+                    component: ComponentDefinition::Mock(2),
+                },
+                SplitEntryDefinition::Proportional {
+                    weight: 4,
+                    component: ComponentDefinition::Mock(3),
+                },
+            ],
+        };
+        let layout = SplitLayout::new(
+            true,
+            vec![
+                SplitEntry::Fixed(30, Component::Mock(2)),
+                SplitEntry::Proportional(4, Component::Mock(3)),
+            ],
+        );
+        let component = LayoutComponent::Split(layout.unwrap());
+
+        assert_eq!(component, definition.convert("test", 3.0).unwrap())
     }
 }

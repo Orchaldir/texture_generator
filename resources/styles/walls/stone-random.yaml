@@ -9,7 +9,7 @@ edge_style:
         max_size: 100
         component:
           Border:
-            ShrinkAxis:
+            RandomShrinkAxis:
               is_horizontal: false
               min_border: 0
               max_border: 10
