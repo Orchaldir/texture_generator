@@ -12,6 +12,7 @@ pub mod rendering;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ComponentDefinition {
     Border(Box<BorderDefinition>),
+    Layers(Vec<ComponentDefinition>),
     Layout(Box<LayoutDefinition>),
     Mock(u8),
     Rendering(Box<RenderingDefinition>),
@@ -23,6 +24,18 @@ impl ComponentDefinition {
             ComponentDefinition::Border(definition) => Ok(Component::Border(Box::new(
                 definition.convert(parent, factor)?,
             ))),
+            ComponentDefinition::Layers(layers) => {
+                let mut converted_layers = Vec::with_capacity(layers.len());
+
+                for (i, definition) in layers.iter().enumerate() {
+                    let component = definition.convert(
+                        &format!("{}.Layers.{}|{}.", parent, i + 1, layers.len()),
+                        factor,
+                    )?;
+                    converted_layers.push(component);
+                }
+                Ok(Component::Layers(converted_layers))
+            }
             ComponentDefinition::Layout(definition) => Ok(Component::Layout(Box::new(
                 definition.convert(parent, factor)?,
             ))),
@@ -31,5 +44,21 @@ impl ComponentDefinition {
                 definition.convert(parent, factor)?,
             ))),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_convert_layers() {
+        let definition = ComponentDefinition::Layers(vec![
+            ComponentDefinition::Mock(1),
+            ComponentDefinition::Mock(2),
+        ]);
+        let component = Component::Layers(vec![Component::Mock(1), Component::Mock(2)]);
+
+        assert_eq!(component, definition.convert("test", 2.0).unwrap())
     }
 }
