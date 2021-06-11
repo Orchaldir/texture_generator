@@ -10,7 +10,7 @@ edition = "2018"
 anyhow = "1.0"
 chrono = "0.4"
 env_logger = "0.8"
-iced = "0.3"
+iced = { version = "0.3", features = ["image"] }
 log = "0.4"
 structopt = "0.3"
 svgbobdoc = "0.2"

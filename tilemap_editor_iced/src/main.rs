@@ -1,16 +1,22 @@
-use iced::{Element, Sandbox, Settings, Text};
+use iced::{image, Column, Element, Sandbox, Settings, Text};
 
 pub fn main() -> iced::Result {
     Hello::run(Settings::default())
 }
 
-struct Hello;
+struct Hello {
+    image: image::Handle,
+    image_viewer: image::viewer::State,
+}
 
 impl Sandbox for Hello {
     type Message = ();
 
     fn new() -> Hello {
-        Hello
+        Hello {
+            image: image::Handle::from("tilemap-color.png"),
+            image_viewer: image::viewer::State::new(),
+        }
     }
 
     fn title(&self) -> String {
@@ -22,6 +28,13 @@ impl Sandbox for Hello {
     }
 
     fn view(&mut self) -> Element<Self::Message> {
-        Text::new("Hello, world!").into()
+        Column::new()
+            .spacing(20)
+            .push(image::Viewer::new(
+                &mut self.image_viewer,
+                self.image.clone(),
+            ))
+            .push(Text::new("Tilemap"))
+            .into()
     }
 }
