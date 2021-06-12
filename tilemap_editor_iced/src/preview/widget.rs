@@ -1,3 +1,4 @@
+use crate::message::EditorMessage;
 use iced_native::layout::{Limits, Node};
 use iced_native::{
     event, image, mouse, Clipboard, Element, Event, Hasher, Layout, Length, Point, Rectangle, Size,
@@ -39,7 +40,7 @@ impl Preview {
     }
 }
 
-impl<Message, Renderer> Widget<Message, Renderer> for Preview
+impl<Renderer> Widget<EditorMessage, Renderer> for Preview
 where
     Renderer: crate::preview::renderer::Renderer + image::Renderer,
 {
@@ -90,7 +91,7 @@ where
         cursor_position: Point,
         renderer: &Renderer,
         _clipboard: &mut dyn Clipboard,
-        _messages: &mut Vec<Message>,
+        messages: &mut Vec<EditorMessage>,
     ) -> event::Status {
         match event {
             Event::Mouse(mouse_event) => match mouse_event {
@@ -104,6 +105,11 @@ where
                     if image.contains(cursor_position) {
                         let position = cursor_position - image_top_left;
                         info!("Clicked at {:?} with {:?}", position, button);
+                        messages.push(EditorMessage::Click {
+                            x: position.x as u32,
+                            y: position.y as u32,
+                            button,
+                        })
                     }
                 }
                 _ => {}
@@ -114,12 +120,11 @@ where
     }
 }
 
-impl<'a, Message, Renderer> From<Preview> for Element<'a, Message, Renderer>
+impl<'a, Renderer> From<Preview> for Element<'a, EditorMessage, Renderer>
 where
     Renderer: crate::preview::renderer::Renderer + image::Renderer,
-    Message: 'a,
 {
-    fn from(preview: Preview) -> Element<'a, Message, Renderer> {
+    fn from(preview: Preview) -> Element<'a, EditorMessage, Renderer> {
         Element::new(preview)
     }
 }

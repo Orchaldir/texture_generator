@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate log;
+use crate::message::EditorMessage;
 use crate::preview::widget::Preview;
 use crate::resources::ResourceInfo;
 use iced::{image, Column, Element, Sandbox, Settings, Text};
@@ -7,6 +8,7 @@ use structopt::StructOpt;
 use texture_generation::math::color::convert_bgra;
 use texture_generation::utils::logging::init_logging;
 
+mod message;
 mod preview;
 mod resources;
 
@@ -21,7 +23,7 @@ struct Hello {
 }
 
 impl Sandbox for Hello {
-    type Message = ();
+    type Message = EditorMessage;
 
     fn new() -> Hello {
         let resource_info: ResourceInfo = ResourceInfo::from_args();
@@ -42,8 +44,8 @@ impl Sandbox for Hello {
         String::from("Tilemap Editor")
     }
 
-    fn update(&mut self, _message: Self::Message) {
-        // This application has no interactions
+    fn update(&mut self, message: Self::Message) {
+        info!("Got message {:?}", message);
     }
 
     fn view(&mut self) -> Element<Self::Message> {
