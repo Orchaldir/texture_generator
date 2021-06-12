@@ -11,5 +11,5 @@ pub trait Tool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool;
 
-    fn view_sidebar(&self, data: &EditorData) -> Element<EditorMessage>;
+    fn view_sidebar(&mut self, data: &EditorData) -> Element<EditorMessage>;
 }

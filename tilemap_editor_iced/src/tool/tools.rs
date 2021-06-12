@@ -51,7 +51,7 @@ impl Tools {
         return false;
     }
 
-    pub fn view_sidebar(&self, data: &EditorData) -> Element<EditorMessage> {
-        self.get_tool().view_sidebar(data)
+    pub fn view_sidebar(&mut self, data: &EditorData) -> Element<EditorMessage> {
+        self.get_tool_mut().view_sidebar(data)
     }
 }

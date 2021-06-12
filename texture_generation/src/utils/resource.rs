@@ -39,6 +39,10 @@ impl<T: Resource> ResourceManager<T> {
             .find(|(_i, r)| r.get_name().eq(name))
             .map(|(i, _r)| i)
     }
+
+    pub fn get_names(&self) -> Vec<&str> {
+        self.resources.iter().map(|r| r.get_name()).collect()
+    }
 }
 
 impl<T: Resource> Default for ResourceManager<T> {

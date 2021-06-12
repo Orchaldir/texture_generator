@@ -64,10 +64,10 @@ impl Sandbox for Hello {
     }
 
     fn view(&mut self) -> Element<Self::Message> {
-        let sidebar = self.tools.view_sidebar(&self.data);
         let toolbar = self
             .toolbar
             .view_toolbar(self.tools.get_tool_names(), self.tools.get_current_tool());
+        let sidebar = self.tools.view_sidebar(&self.data);
 
         let main = Row::new()
             .push(Preview::new(self.image.clone()))

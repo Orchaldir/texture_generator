@@ -2,14 +2,15 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::Tool;
 use iced::mouse::Button;
-use iced::{Column, Element, Text};
+use iced::{pick_list, Column, Element, PickList, Text};
 use texture_generation::math::point::Point;
 use texture_generation::utils::resource::Resource;
 use tilemap::tilemap::tile::Tile;
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default)]
 pub struct TileTool {
     texture_id: usize,
+    pick_list_state: pick_list::State<String>,
 }
 
 impl Tool for TileTool {
@@ -19,6 +20,12 @@ impl Tool for TileTool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool {
         match message {
+            EditorMessage::ChangeTexture(name) => {
+                if let Some(id) = data.renderer.get_resources().textures.get_id(&name) {
+                    info!("TileTool: Change texture id to {}", id);
+                    self.texture_id = id;
+                }
+            }
             EditorMessage::ClickedButton { x, y, button } => {
                 let point = Point::new(x as i32, y as i32);
 
@@ -42,17 +49,26 @@ impl Tool for TileTool {
         return false;
     }
 
-    fn view_sidebar(&self, data: &EditorData) -> Element<'_, EditorMessage> {
-        let name = data
-            .renderer
-            .get_resources()
-            .textures
-            .get(self.texture_id)
-            .get_name();
+    fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
+        let resource_manager = &data.renderer.get_resources().textures;
+        let selected_name = resource_manager.get(self.texture_id).get_name();
+        let names: Vec<String> = resource_manager
+            .get_names()
+            .iter()
+            .map(|n| n.to_string())
+            .collect();
+        let pick_list = PickList::new(
+            &mut self.pick_list_state,
+            names,
+            Some(selected_name.to_string()),
+            EditorMessage::ChangeTexture,
+        );
+
         Column::new()
             .max_width(800)
             .spacing(20)
-            .push(Text::new(&format!("Texture: {}", name)))
+            .push(Text::new("Tile Texture"))
+            .push(pick_list)
             .into()
     }
 }

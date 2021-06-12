@@ -2,7 +2,7 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::Tool;
 use iced::mouse::Button;
-use iced::{Column, Element, Text};
+use iced::{pick_list, Column, Element, Text};
 use texture_generation::math::point::Point;
 use texture_generation::utils::resource::Resource;
 use tilemap::tilemap::border::Border;
@@ -42,7 +42,7 @@ impl Tool for WallTool {
         return false;
     }
 
-    fn view_sidebar(&self, data: &EditorData) -> Element<'_, EditorMessage> {
+    fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
         let name = data
             .renderer
             .get_resources()
