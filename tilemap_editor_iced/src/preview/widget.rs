@@ -120,11 +120,12 @@ where
                     let image = self.get_image_rectangle(renderer, bounds);
 
                     if image.contains(cursor_position) {
+                        let (width, height) = renderer.dimensions(&self.handle);
                         let position = cursor_position - image.position();
                         info!("Clicked at {:?} with {:?}", position, button);
                         messages.push(EditorMessage::ClickedButton {
-                            x: position.x as u32,
-                            y: position.y as u32,
+                            x: (width as f32 * position.x / image.width) as u32,
+                            y: (height as f32 * position.y / image.height) as u32,
                             button,
                         })
                     }
