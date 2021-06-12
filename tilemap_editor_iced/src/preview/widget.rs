@@ -38,6 +38,15 @@ impl Preview {
             bounds.height / 2.0 - image_size.height / 2.0,
         )
     }
+
+    fn get_image_rectangle<Renderer>(&self, renderer: &Renderer, bounds: Rectangle) -> Rectangle
+    where
+        Renderer: crate::preview::renderer::Renderer + image::Renderer,
+    {
+        let image_size = self.image_size(renderer, bounds.size());
+        let image_top_left = self.get_image_top_left(bounds, image_size);
+        Rectangle::new(Point::new(image_top_left.x, image_top_left.y), image_size)
+    }
 }
 
 impl<Renderer> Widget<EditorMessage, Renderer> for Preview
@@ -94,18 +103,26 @@ where
         messages: &mut Vec<EditorMessage>,
     ) -> event::Status {
         match event {
+            Event::Keyboard(event) => match event {
+                iced::keyboard::Event::KeyReleased { key_code, .. } => {
+                    let image = self.get_image_rectangle(renderer, layout.bounds());
+
+                    if image.contains(cursor_position) {
+                        info!("Released key {:?}", key_code);
+                        messages.push(EditorMessage::PressedKey(key_code))
+                    }
+                }
+                _ => {}
+            },
             Event::Mouse(mouse_event) => match mouse_event {
                 mouse::Event::ButtonPressed(button) => {
                     let bounds = layout.bounds();
-                    let image_size = self.image_size(renderer, bounds.size());
-                    let image_top_left = self.get_image_top_left(bounds, image_size);
-                    let image =
-                        Rectangle::new(Point::new(image_top_left.x, image_top_left.y), image_size);
+                    let image = self.get_image_rectangle(renderer, bounds);
 
                     if image.contains(cursor_position) {
-                        let position = cursor_position - image_top_left;
+                        let position = cursor_position - image.position();
                         info!("Clicked at {:?} with {:?}", position, button);
-                        messages.push(EditorMessage::Click {
+                        messages.push(EditorMessage::ClickedButton {
                             x: position.x as u32,
                             y: position.y as u32,
                             button,
