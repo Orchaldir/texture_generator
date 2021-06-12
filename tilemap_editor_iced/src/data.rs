@@ -3,6 +3,7 @@ use iced_native::image;
 use texture_generation::math::color::convert_bgra;
 use tilemap::rendering::Renderer;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
+use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 
 pub struct EditorData {
@@ -11,12 +12,14 @@ pub struct EditorData {
     pub preview_renderer: Renderer,
     pub tilemap: Tilemap2d,
     pub furniture_map: FurnitureMap2d,
+    pub selector: Selector,
 }
 
 impl EditorData {
     pub fn new(resource_info: ResourceInfo) -> Self {
         let (renderer, preview_renderer) = resource_info.create_renderers();
         let (tilemap, furniture_map) = resource_info.load_tilemap();
+        let selector = Selector::new(preview_renderer.get_tile_size());
 
         EditorData {
             resource_info,
@@ -24,6 +27,7 @@ impl EditorData {
             preview_renderer,
             tilemap,
             furniture_map,
+            selector,
         }
     }
 
