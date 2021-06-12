@@ -3,6 +3,7 @@ use crate::message::EditorMessage;
 
 pub mod tile;
 pub mod tools;
+pub mod wall;
 
 pub trait Tool {
     fn get_name(&self) -> &str;

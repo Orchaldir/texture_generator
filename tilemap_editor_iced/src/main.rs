@@ -62,7 +62,6 @@ impl Sandbox for Hello {
     fn view(&mut self) -> Element<Self::Message> {
         let toolbar = self.tools.view_toolbar();
         Column::new()
-            .spacing(20)
             .push(toolbar)
             .push(Preview::new(self.image.clone()))
             .into()
