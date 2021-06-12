@@ -6,5 +6,5 @@ pub mod tile;
 pub trait Tool {
     fn get_name(&self) -> &str;
 
-    fn update(&mut self, data: &EditorData, message: EditorMessage);
+    fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool;
 }

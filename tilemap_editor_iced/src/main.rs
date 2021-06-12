@@ -56,7 +56,9 @@ impl Sandbox for Hello {
             }
             _ => {
                 if let Some(tool) = self.tools.get_mut(self.current_tool) {
-                    tool.update(&self.data, message);
+                    if tool.update(&mut self.data, message) {
+                        self.image = self.data.render_preview();
+                    }
                 }
             }
         }
