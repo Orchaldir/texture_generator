@@ -106,6 +106,20 @@ pub fn convert(colors: &[Color]) -> Vec<u8> {
     data
 }
 
+pub fn convert_bgra(colors: &[Color]) -> Vec<u8> {
+    let n = colors.len();
+    let mut data = Vec::with_capacity(n * 3);
+
+    for color in colors {
+        data.push(color.b());
+        data.push(color.g());
+        data.push(color.r());
+        data.push(255);
+    }
+
+    data
+}
+
 /// Adds a [`Color`] to another [`Color`].
 ///
 /// ```

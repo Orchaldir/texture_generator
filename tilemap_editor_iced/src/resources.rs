@@ -30,14 +30,6 @@ pub struct ResourceInfo {
     #[structopt(parse(from_os_str), default_value = "resources/tilemaps/example.tm")]
     tilemap_path: PathBuf,
 
-    /// The width of the tilemap.
-    #[structopt(default_value = "7")]
-    width: u32,
-
-    /// The height of the tilemap.
-    #[structopt(default_value = "5")]
-    height: u32,
-
     /// The size of a tile for the preview.
     #[structopt(default_value = "128")]
     preview_tile_size: u32,
