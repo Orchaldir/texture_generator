@@ -2,7 +2,9 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::Tool;
 use iced::mouse::Button;
+use iced::{Column, Element, Text};
 use texture_generation::math::point::Point;
+use texture_generation::utils::resource::Resource;
 use tilemap::tilemap::tile::Tile;
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
@@ -38,5 +40,19 @@ impl Tool for TileTool {
         }
 
         return false;
+    }
+
+    fn view_sidebar(&self, data: &EditorData) -> Element<'_, EditorMessage> {
+        let name = data
+            .renderer
+            .get_resources()
+            .textures
+            .get(self.texture_id)
+            .get_name();
+        Column::new()
+            .max_width(800)
+            .spacing(20)
+            .push(Text::new(&format!("Texture: {}", name)))
+            .into()
     }
 }

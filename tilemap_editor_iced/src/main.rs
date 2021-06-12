@@ -4,7 +4,7 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::preview::widget::Preview;
 use crate::resources::ResourceInfo;
-use iced::{image, Column, Element, Sandbox, Settings};
+use iced::{image, Column, Element, Row, Sandbox, Settings};
 use structopt::StructOpt;
 use texture_generation::utils::logging::init_logging;
 use tool::tools::Tools;
@@ -60,10 +60,12 @@ impl Sandbox for Hello {
     }
 
     fn view(&mut self) -> Element<Self::Message> {
+        let sidebar = self.tools.view_sidebar(&self.data);
         let toolbar = self.tools.view_toolbar();
-        Column::new()
-            .push(toolbar)
-            .push(Preview::new(self.image.clone()))
-            .into()
+
+        let main = Row::new()
+            .push(sidebar)
+            .push(Preview::new(self.image.clone()));
+        Column::new().push(toolbar).push(main).into()
     }
 }
