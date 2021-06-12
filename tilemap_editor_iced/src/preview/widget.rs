@@ -1,5 +1,8 @@
 use iced_native::layout::{Limits, Node};
-use iced_native::{image, Element, Hasher, Layout, Length, Point, Rectangle, Size, Vector, Widget};
+use iced_native::{
+    event, image, mouse, Clipboard, Element, Event, Hasher, Layout, Length, Point, Rectangle, Size,
+    Vector, Widget,
+};
 use std::hash::Hash;
 
 pub struct Preview {
@@ -26,6 +29,13 @@ impl Preview {
         let ratio = width_ratio.min(height_ratio);
 
         Size::new(width * ratio, height * ratio)
+    }
+
+    fn get_image_top_left(&self, bounds: Rectangle, image_size: Size) -> Vector {
+        Vector::new(
+            bounds.width / 2.0 - image_size.width / 2.0,
+            bounds.height / 2.0 - image_size.height / 2.0,
+        )
     }
 }
 
@@ -54,17 +64,8 @@ where
         _viewport: &Rectangle,
     ) -> Renderer::Output {
         let bounds = layout.bounds();
-
         let image_size = self.image_size(renderer, bounds.size());
-
-        let translation = {
-            let image_top_left = Vector::new(
-                bounds.width / 2.0 - image_size.width / 2.0,
-                bounds.height / 2.0 - image_size.height / 2.0,
-            );
-
-            image_top_left
-        };
+        let image_top_left = self.get_image_top_left(bounds, image_size);
 
         let is_mouse_over = bounds.contains(cursor_position);
 
@@ -72,7 +73,7 @@ where
             renderer,
             bounds,
             image_size,
-            translation,
+            image_top_left,
             self.handle.clone(),
             is_mouse_over,
         )
@@ -80,6 +81,36 @@ where
 
     fn hash_layout(&self, state: &mut Hasher) {
         self.handle.hash(state);
+    }
+
+    fn on_event(
+        &mut self,
+        event: Event,
+        layout: Layout<'_>,
+        cursor_position: Point,
+        renderer: &Renderer,
+        _clipboard: &mut dyn Clipboard,
+        _messages: &mut Vec<Message>,
+    ) -> event::Status {
+        match event {
+            Event::Mouse(mouse_event) => match mouse_event {
+                mouse::Event::ButtonPressed(button) => {
+                    let bounds = layout.bounds();
+                    let image_size = self.image_size(renderer, bounds.size());
+                    let image_top_left = self.get_image_top_left(bounds, image_size);
+                    let image =
+                        Rectangle::new(Point::new(image_top_left.x, image_top_left.y), image_size);
+
+                    if image.contains(cursor_position) {
+                        let position = cursor_position - image_top_left;
+                        info!("Clicked at {:?} with {:?}", position, button);
+                    }
+                }
+                _ => {}
+            },
+            _ => {}
+        }
+        event::Status::Ignored
     }
 }
 

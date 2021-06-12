@@ -5,11 +5,13 @@ use crate::resources::ResourceInfo;
 use iced::{image, Column, Element, Sandbox, Settings, Text};
 use structopt::StructOpt;
 use texture_generation::math::color::convert_bgra;
+use texture_generation::utils::logging::init_logging;
 
 mod preview;
 mod resources;
 
 pub fn main() -> iced::Result {
+    init_logging();
     Hello::run(Settings::default())
 }
 
