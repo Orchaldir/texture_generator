@@ -4,11 +4,10 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::preview::widget::Preview;
 use crate::resources::ResourceInfo;
-use crate::tool::tile::TileTool;
-use crate::tool::Tool;
-use iced::{image, Column, Element, Sandbox, Settings, Text};
+use iced::{image, Column, Element, Sandbox, Settings};
 use structopt::StructOpt;
 use texture_generation::utils::logging::init_logging;
+use tool::tools::Tools;
 
 mod data;
 mod message;
@@ -24,8 +23,7 @@ pub fn main() -> iced::Result {
 struct Hello {
     data: EditorData,
     image: image::Handle,
-    tools: Vec<Box<dyn Tool>>,
-    current_tool: usize,
+    tools: Tools,
 }
 
 impl Sandbox for Hello {
@@ -38,8 +36,7 @@ impl Sandbox for Hello {
         Hello {
             data,
             image,
-            tools: vec![Box::new(TileTool::default())],
-            current_tool: 0,
+            tools: Tools::new(),
         }
     }
 
@@ -55,20 +52,19 @@ impl Sandbox for Hello {
                 self.image = self.data.render_preview();
             }
             _ => {
-                if let Some(tool) = self.tools.get_mut(self.current_tool) {
-                    if tool.update(&mut self.data, message) {
-                        self.image = self.data.render_preview();
-                    }
+                if self.tools.update(&mut self.data, message) {
+                    self.image = self.data.render_preview();
                 }
             }
         }
     }
 
     fn view(&mut self) -> Element<Self::Message> {
+        let toolbar = self.tools.view_toolbar();
         Column::new()
             .spacing(20)
+            .push(toolbar)
             .push(Preview::new(self.image.clone()))
-            .push(Text::new("Tilemap"))
             .into()
     }
 }
