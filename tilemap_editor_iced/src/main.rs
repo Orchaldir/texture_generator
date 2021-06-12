@@ -37,7 +37,7 @@ impl Sandbox for Hello {
     }
 
     fn title(&self) -> String {
-        String::from("A cool application")
+        String::from("Tilemap Editor")
     }
 
     fn update(&mut self, _message: Self::Message) {
