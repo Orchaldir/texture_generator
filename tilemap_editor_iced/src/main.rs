@@ -4,6 +4,7 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::preview::widget::Preview;
 use crate::resources::ResourceInfo;
+use crate::toolbar::Toolbar;
 use iced::{image, Column, Element, Row, Sandbox, Settings};
 use structopt::StructOpt;
 use texture_generation::utils::logging::init_logging;
@@ -14,6 +15,7 @@ mod message;
 mod preview;
 mod resources;
 mod tool;
+mod toolbar;
 
 pub fn main() -> iced::Result {
     init_logging();
@@ -24,6 +26,7 @@ struct Hello {
     data: EditorData,
     image: image::Handle,
     tools: Tools,
+    toolbar: Toolbar,
 }
 
 impl Sandbox for Hello {
@@ -37,6 +40,7 @@ impl Sandbox for Hello {
             data,
             image,
             tools: Tools::new(),
+            toolbar: Toolbar::new(),
         }
     }
 
@@ -61,11 +65,13 @@ impl Sandbox for Hello {
 
     fn view(&mut self) -> Element<Self::Message> {
         let sidebar = self.tools.view_sidebar(&self.data);
-        let toolbar = self.tools.view_toolbar();
+        let toolbar = self
+            .toolbar
+            .view_toolbar(self.tools.get_tool_names(), self.tools.get_current_tool());
 
         let main = Row::new()
-            .push(sidebar)
-            .push(Preview::new(self.image.clone()));
+            .push(Preview::new(self.image.clone()))
+            .push(sidebar);
         Column::new().push(toolbar).push(main).into()
     }
 }

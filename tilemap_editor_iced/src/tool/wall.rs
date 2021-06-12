@@ -46,7 +46,7 @@ impl Tool for WallTool {
         let name = data
             .renderer
             .get_resources()
-            .textures
+            .wall_styles
             .get(self.wall_id)
             .get_name();
         Column::new()
