@@ -5,4 +5,5 @@ use iced_native::mouse::Button;
 pub enum EditorMessage {
     ClickedButton { x: u32, y: u32, button: Button },
     PressedKey(KeyCode),
+    Render,
 }
