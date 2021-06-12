@@ -44,8 +44,8 @@ impl Preview {
         Renderer: crate::preview::renderer::Renderer + image::Renderer,
     {
         let image_size = self.image_size(renderer, bounds.size());
-        let image_top_left = self.get_image_top_left(bounds, image_size);
-        Rectangle::new(Point::new(image_top_left.x, image_top_left.y), image_size)
+        let image_top_left = bounds.position() + self.get_image_top_left(bounds, image_size);
+        Rectangle::new(image_top_left, image_size)
     }
 }
 
