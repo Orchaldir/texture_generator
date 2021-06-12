@@ -1,10 +1,9 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
-use crate::tool::Tool;
+use crate::tool::{create_pick_list, Tool};
 use iced::mouse::Button;
-use iced::{pick_list, Column, Element, PickList, Text};
+use iced::{pick_list, Column, Element, Text};
 use texture_generation::math::point::Point;
-use texture_generation::utils::resource::Resource;
 use tilemap::tilemap::tile::Tile;
 
 #[derive(Clone, Debug, Default)]
@@ -22,7 +21,7 @@ impl Tool for TileTool {
         match message {
             EditorMessage::ChangeTexture(name) => {
                 if let Some(id) = data.renderer.get_resources().textures.get_id(&name) {
-                    info!("TileTool: Change texture id to {}", id);
+                    info!("TileTool: Change texture to '{}' with id {}", &name, id);
                     self.texture_id = id;
                 }
             }
@@ -51,16 +50,10 @@ impl Tool for TileTool {
 
     fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
         let resource_manager = &data.renderer.get_resources().textures;
-        let selected_name = resource_manager.get(self.texture_id).get_name();
-        let names: Vec<String> = resource_manager
-            .get_names()
-            .iter()
-            .map(|n| n.to_string())
-            .collect();
-        let pick_list = PickList::new(
+        let pick_list = create_pick_list(
+            resource_manager,
             &mut self.pick_list_state,
-            names,
-            Some(selected_name.to_string()),
+            self.texture_id,
             EditorMessage::ChangeTexture,
         );
 

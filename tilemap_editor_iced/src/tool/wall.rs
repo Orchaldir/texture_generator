@@ -1,15 +1,15 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
-use crate::tool::Tool;
+use crate::tool::{create_pick_list, Tool};
 use iced::mouse::Button;
 use iced::{pick_list, Column, Element, Text};
 use texture_generation::math::point::Point;
-use texture_generation::utils::resource::Resource;
 use tilemap::tilemap::border::Border;
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default)]
 pub struct WallTool {
     wall_id: usize,
+    pick_list_state: pick_list::State<String>,
 }
 
 impl Tool for WallTool {
@@ -19,6 +19,12 @@ impl Tool for WallTool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool {
         match message {
+            EditorMessage::ChangeWall(name) => {
+                if let Some(id) = data.renderer.get_resources().wall_styles.get_id(&name) {
+                    info!("WallTool: Change wall style to '{}' with id {}", &name, id);
+                    self.wall_id = id;
+                }
+            }
             EditorMessage::ClickedButton { x, y, button } => {
                 let point = Point::new(x as i32, y as i32);
 
@@ -43,16 +49,18 @@ impl Tool for WallTool {
     }
 
     fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
-        let name = data
-            .renderer
-            .get_resources()
-            .wall_styles
-            .get(self.wall_id)
-            .get_name();
+        let resource_manager = &data.renderer.get_resources().wall_styles;
+        let pick_list = create_pick_list(
+            resource_manager,
+            &mut self.pick_list_state,
+            self.wall_id,
+            EditorMessage::ChangeWall,
+        );
         Column::new()
             .max_width(800)
             .spacing(20)
-            .push(Text::new(&format!("Wall-Style: {}", name)))
+            .push(Text::new("Wall Style"))
+            .push(pick_list)
             .into()
     }
 }

@@ -28,13 +28,6 @@ impl Tools {
         self.current_tool
     }
 
-    fn get_tool(&self) -> &dyn Tool {
-        match self.current_tool {
-            1 => &self.wall_tool,
-            _ => &self.tile_tool,
-        }
-    }
-
     fn get_tool_mut(&mut self) -> &mut dyn Tool {
         match self.current_tool {
             1 => &mut self.wall_tool,
