@@ -20,6 +20,8 @@ pub struct FurnitureTool {
     height: u32,
     height_state: slider::State,
     max_size: u32,
+    side: Side,
+    side_state: pick_list::State<Side>,
 }
 
 impl FurnitureTool {
@@ -33,6 +35,8 @@ impl FurnitureTool {
             height,
             height_state: Default::default(),
             max_size,
+            side: Side::Bottom,
+            side_state: Default::default(),
         }
     }
 }
@@ -46,6 +50,7 @@ impl Tool for FurnitureTool {
         match message {
             EditorMessage::ChangeWidth(width) => self.width = width,
             EditorMessage::ChangeHeight(height) => self.height = height,
+            EditorMessage::ChangeSide(side) => self.side = side,
             EditorMessage::ChangeFurnitureStyle(name) => {
                 if let Some(style_id) = data.renderer.get_resources().furniture_styles.get_id(&name)
                 {
@@ -92,7 +97,7 @@ impl Tool for FurnitureTool {
                             self.style_id,
                             start,
                             size,
-                            Side::Bottom,
+                            self.side,
                         ));
                         return true;
                     }
@@ -147,6 +152,14 @@ impl Tool for FurnitureTool {
             EditorMessage::ChangeHeight,
         );
 
+        let options: Vec<Side> = Side::iterator().map(|s| s.clone()).collect();
+        let side_pick_list = PickList::new(
+            &mut self.side_state,
+            options,
+            Some(self.side),
+            EditorMessage::ChangeSide,
+        );
+
         Column::new()
             .max_width(250)
             .spacing(20)
@@ -156,6 +169,8 @@ impl Tool for FurnitureTool {
             .push(width_slider)
             .push(Text::new(format!("Height: {} cells", self.height)))
             .push(height_slider)
+            .push(Text::new("Front Side"))
+            .push(side_pick_list)
             .into()
     }
 }
