@@ -70,15 +70,23 @@ impl FurnitureMap2d {
         self.next_id += 1;
         id
     }
+
+    pub fn get_id_at(&self, position: usize) -> Option<usize> {
+        let point = self.size.to_point(position);
+        for (id, furniture) in &self.furniture {
+            if furniture.aabb.is_inside(&point) {
+                return Some(*id);
+            }
+        }
+
+        None
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::tilemap::Side::*;
-
-    const FURNITURE0: Furniture = Furniture::new(0, 0, Size::square(1), Top);
-    const FURNITURE1: Furniture = Furniture::new(1, 1, Size::square(2), Left);
 
     #[test]
     fn test_empty() {
@@ -93,26 +101,26 @@ mod tests {
     fn test_add_and_get_furniture() {
         let size = Size::new(2, 3);
         let mut map = FurnitureMap2d::empty(size);
-        map.add(FURNITURE0.clone());
-        map.add(FURNITURE1.clone());
+        map.add(furniture0());
+        map.add(furniture1());
 
         assert_eq!(map.get_all_furniture().len(), 2);
-        assert_eq!(map.get_furniture(0), Some(&FURNITURE0));
-        assert_eq!(map.get_furniture(1), Some(&FURNITURE1));
+        assert_eq!(map.get_furniture(0), Some(&furniture0()));
+        assert_eq!(map.get_furniture(1), Some(&furniture1()));
     }
 
     #[test]
     fn test_remove_furniture() {
         let size = Size::new(2, 3);
         let mut map = FurnitureMap2d::empty(size);
-        map.add(FURNITURE0.clone());
-        map.add(FURNITURE1.clone());
+        map.add(furniture0());
+        map.add(furniture1());
 
         assert!(map.remove_furniture(0));
 
         assert_eq!(map.get_all_furniture().len(), 1);
         assert_eq!(map.get_furniture(0), None);
-        assert_eq!(map.get_furniture(1), Some(&FURNITURE1));
+        assert_eq!(map.get_furniture(1), Some(&furniture1()));
     }
 
     #[test]
@@ -146,5 +154,13 @@ mod tests {
         assert!(!map.is_border(cell, Left));
         assert!(!map.is_border(cell, Bottom));
         assert!(map.is_border(cell, Right));
+    }
+
+    fn furniture0() -> Furniture {
+        Furniture::new(0, Point::new(0, 0), Size::square(1), Top)
+    }
+
+    fn furniture1() -> Furniture {
+        Furniture::new(1, Point::new(1, 0), Size::square(2), Left)
     }
 }

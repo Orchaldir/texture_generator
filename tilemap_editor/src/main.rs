@@ -321,9 +321,9 @@ fn main() {
     );
 
     let mut furniture_map = FurnitureMap2d::empty(tilemap2d.get_size());
-    furniture_map.add(Furniture::new(2, 30, Size::new(3, 2), Bottom));
-    furniture_map.add(Furniture::new(3, 33, Size::new(1, 2), Right));
-    furniture_map.add(Furniture::new(1, 100, Size::new(6, 1), Top));
+    furniture_map.add(Furniture::new(2, Point::new(2, 2), Size::new(3, 2), Bottom));
+    furniture_map.add(Furniture::new(3, Point::new(5, 2), Size::new(1, 2), Right));
+    furniture_map.add(Furniture::new(1, Point::new(2, 7), Size::new(6, 1), Top));
 
     let window_size = (
         args.width * args.preview_size,
