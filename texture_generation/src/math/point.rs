@@ -118,6 +118,25 @@ impl Point {
     }
 }
 
+/// Add a [`Point`] to another [`Point`].
+///
+/// ```
+///# use texture_generation::math::point::Point;
+/// let a = Point::new(1, 2);
+/// let b = Point::new(30, 50);
+/// let result = Point::new(31, 52);
+///
+/// assert_eq!(a + b, result);
+/// assert_eq!(b + a, result);
+/// ```
+impl Add<Point> for Point {
+    type Output = Point;
+
+    fn add(self, other: Point) -> Point {
+        Point::new(self.x + other.x, self.y + other.y)
+    }
+}
+
 /// Adds an integer to a [`Point`].
 ///
 /// ```

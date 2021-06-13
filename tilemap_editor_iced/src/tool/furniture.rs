@@ -1,8 +1,10 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::{create_pick_list, Tool};
+use iced::keyboard::KeyCode;
 use iced::mouse::Button;
 use iced::{pick_list, slider, Column, HorizontalAlignment, Length, PickList, Slider, Text};
+use std::fmt::Debug;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
@@ -39,17 +41,17 @@ impl FurnitureTool {
         }
     }
 
-    fn update_aabb(
+    fn update_aabb<T: Debug>(
         &mut self,
         data: &mut EditorData,
         id: usize,
         description: &str,
-        value: u32,
-        f: fn(&AABB, u32) -> AABB,
+        value: T,
+        f: fn(&AABB, T) -> AABB,
     ) -> bool {
         if let Some(old_furniture) = data.furniture_map.get_furniture(id) {
             info!(
-                "FurnitureTool: Change furniture {}'s {} to {}",
+                "FurnitureTool: Update furniture {}'s {} with {:?}",
                 id, description, value
             );
             let furniture = Furniture {
@@ -85,6 +87,16 @@ impl FurnitureTool {
         }
 
         self.height = height;
+        return false;
+    }
+
+    fn move_furniture(&mut self, data: &mut EditorData, x: i32, y: i32) -> bool {
+        if let Some(id) = self.selected_id {
+            let delta = Point::new(x, y);
+            return self.update_aabb(data, id, "position", delta, |old, delta| {
+                AABB::new(old.start() + delta, old.size())
+            });
+        }
         return false;
     }
 
@@ -187,6 +199,10 @@ impl Tool for FurnitureTool {
                 }
                 false
             }
+            EditorMessage::PressedKey(KeyCode::Up) => self.move_furniture(data, 0, -1),
+            EditorMessage::PressedKey(KeyCode::Left) => self.move_furniture(data, -1, 0),
+            EditorMessage::PressedKey(KeyCode::Down) => self.move_furniture(data, 0, 1),
+            EditorMessage::PressedKey(KeyCode::Right) => self.move_furniture(data, 1, 0),
             _ => false,
         }
     }
