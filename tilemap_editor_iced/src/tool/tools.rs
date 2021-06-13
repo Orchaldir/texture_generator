@@ -47,6 +47,11 @@ impl Tools {
     }
 
     pub fn view_sidebar(&mut self, data: &EditorData) -> Element<EditorMessage> {
-        self.tools[self.current_tool].view_sidebar(data)
+        self.tools[self.current_tool]
+            .view_sidebar(data)
+            .max_width(250)
+            .padding(10)
+            .spacing(10)
+            .into()
     }
 }

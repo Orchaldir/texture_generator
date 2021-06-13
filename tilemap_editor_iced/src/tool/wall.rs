@@ -2,7 +2,7 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::{create_pick_list, Tool};
 use iced::mouse::Button;
-use iced::{pick_list, Column, Element, Text};
+use iced::{pick_list, Column, Text};
 use texture_generation::math::point::Point;
 use tilemap::tilemap::border::Border;
 
@@ -48,7 +48,7 @@ impl Tool for WallTool {
         return false;
     }
 
-    fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
+    fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage> {
         let resource_manager = &data.renderer.get_resources().wall_styles;
         let pick_list = create_pick_list(
             resource_manager,
@@ -56,11 +56,6 @@ impl Tool for WallTool {
             self.wall_id,
             EditorMessage::ChangeWallStyle,
         );
-        Column::new()
-            .max_width(800)
-            .spacing(20)
-            .push(Text::new("Wall Style"))
-            .push(pick_list)
-            .into()
+        Column::new().push(Text::new("Wall Style")).push(pick_list)
     }
 }

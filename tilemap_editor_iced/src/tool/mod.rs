@@ -1,6 +1,6 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
-use iced::{pick_list, Element, PickList};
+use iced::{pick_list, Column, PickList};
 use texture_generation::utils::resource::{Resource, ResourceManager};
 
 pub mod door;
@@ -16,7 +16,7 @@ pub trait Tool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool;
 
-    fn view_sidebar(&mut self, data: &EditorData) -> Element<EditorMessage>;
+    fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage>;
 }
 
 fn create_pick_list<'a, T: Resource>(

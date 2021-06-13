@@ -2,14 +2,14 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::{create_pick_list, Tool};
 use iced::mouse::Button;
-use iced::{pick_list, Column, Element, Text};
+use iced::{pick_list, Column, Text};
 use texture_generation::math::point::Point;
 use tilemap::tilemap::tile::Tile;
 
 #[derive(Clone, Debug, Default)]
 pub struct TileTool {
     texture_id: usize,
-    pick_list_state: pick_list::State<String>,
+    texture_state: pick_list::State<String>,
 }
 
 impl Tool for TileTool {
@@ -48,20 +48,16 @@ impl Tool for TileTool {
         return false;
     }
 
-    fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
-        let resource_manager = &data.renderer.get_resources().textures;
+    fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage> {
         let pick_list = create_pick_list(
-            resource_manager,
-            &mut self.pick_list_state,
+            &data.renderer.get_resources().textures,
+            &mut self.texture_state,
             self.texture_id,
             EditorMessage::ChangeTexture,
         );
 
         Column::new()
-            .max_width(800)
-            .spacing(20)
             .push(Text::new("Tile Texture"))
             .push(pick_list)
-            .into()
     }
 }

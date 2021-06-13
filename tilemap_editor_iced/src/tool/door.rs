@@ -2,7 +2,7 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::{create_pick_list, Tool};
 use iced::mouse::Button;
-use iced::{pick_list, Column, Element, Text};
+use iced::{pick_list, Column, Text};
 use texture_generation::math::point::Point;
 use tilemap::tilemap::border::Border;
 
@@ -65,7 +65,7 @@ impl Tool for DoorTool {
         return false;
     }
 
-    fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
+    fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage> {
         let wall_pick_list = create_pick_list(
             &data.renderer.get_resources().wall_styles,
             &mut self.wall_state,
@@ -78,13 +78,11 @@ impl Tool for DoorTool {
             self.door_id,
             EditorMessage::ChangeDoorStyle,
         );
+
         Column::new()
-            .max_width(800)
-            .spacing(20)
             .push(Text::new("Wall Style"))
             .push(wall_pick_list)
             .push(Text::new("Door Style"))
             .push(door_pick_list)
-            .into()
     }
 }

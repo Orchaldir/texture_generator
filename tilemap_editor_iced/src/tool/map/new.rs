@@ -1,7 +1,7 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::{create_pick_list, Tool};
-use iced::{button, pick_list, slider, Button, Column, Element, Slider, Text};
+use iced::{button, pick_list, slider, Button, Column, Slider, Text};
 use texture_generation::math::size::Size;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
 use tilemap::tilemap::tile::Tile;
@@ -62,7 +62,7 @@ impl Tool for NewMapTool {
         return false;
     }
 
-    fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
+    fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage> {
         let width_slider = Slider::new(
             &mut self.width_state,
             1..=self.max_size,
@@ -85,8 +85,6 @@ impl Tool for NewMapTool {
             .on_press(EditorMessage::NewMap);
 
         Column::new()
-            .spacing(20)
-            .max_width(200)
             .push(Text::new(format!("Map Width: {} tiles", self.width)))
             .push(width_slider)
             .push(Text::new(format!("Map Height: {} tiles", self.height)))
@@ -94,6 +92,5 @@ impl Tool for NewMapTool {
             .push(Text::new("Default Texture"))
             .push(texture_pick_list)
             .push(new_button)
-            .into()
     }
 }

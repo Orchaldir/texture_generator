@@ -2,9 +2,7 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::{create_pick_list, Tool};
 use iced::mouse::Button;
-use iced::{
-    pick_list, slider, Column, Element, HorizontalAlignment, Length, PickList, Slider, Text,
-};
+use iced::{pick_list, slider, Column, HorizontalAlignment, Length, PickList, Slider, Text};
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
@@ -174,7 +172,7 @@ impl Tool for FurnitureTool {
         }
     }
 
-    fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
+    fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage> {
         let (style_id, width, height, front) = if let Some(furniture_id) = self.selected_id {
             if let Some(furniture) = data.furniture_map.get_furniture(furniture_id) {
                 let size = furniture.aabb.size();
@@ -185,7 +183,7 @@ impl Tool for FurnitureTool {
                     furniture.front_side,
                 )
             } else {
-                return Text::new("Invalid furniture selected!").into();
+                return Column::new().push(Text::new("Invalid furniture selected!"));
             }
         } else {
             (self.style_id, self.width, self.height, self.front)
@@ -219,7 +217,7 @@ impl Tool for FurnitureTool {
             EditorMessage::ChangeSide,
         );
 
-        let mut column = Column::new().max_width(250).spacing(20).push(
+        let mut column = Column::new().push(
             Text::new("Furniture")
                 .width(Length::Fill)
                 .horizontal_alignment(HorizontalAlignment::Center),
@@ -238,6 +236,5 @@ impl Tool for FurnitureTool {
             .push(height_slider)
             .push(Text::new("Front"))
             .push(side_pick_list)
-            .into()
     }
 }
