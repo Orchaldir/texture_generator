@@ -3,6 +3,7 @@ use crate::message::EditorMessage;
 use crate::tool::door::DoorTool;
 use crate::tool::tile::TileTool;
 use crate::tool::wall::WallTool;
+use crate::tool::window::WindowTool;
 use crate::tool::Tool;
 use iced::Element;
 
@@ -18,6 +19,7 @@ impl Tools {
                 Box::new(TileTool::default()),
                 Box::new(WallTool::default()),
                 Box::new(DoorTool::default()),
+                Box::new(WindowTool::default()),
             ],
             current_tool: 0,
         }

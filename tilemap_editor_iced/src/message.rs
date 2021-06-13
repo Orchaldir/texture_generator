@@ -7,6 +7,7 @@ pub enum EditorMessage {
     ChangeTexture(String),
     ChangeWall(String),
     ChangeDoor(String),
+    ChangeWindow(String),
     ClickedButton { x: u32, y: u32, button: Button },
     PressedKey(KeyCode),
     Render,

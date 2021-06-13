@@ -7,6 +7,7 @@ pub mod door;
 pub mod tile;
 pub mod tools;
 pub mod wall;
+pub mod window;
 
 pub trait Tool {
     fn get_name(&self) -> &str;
