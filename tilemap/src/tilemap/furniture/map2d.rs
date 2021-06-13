@@ -24,22 +24,6 @@ impl FurnitureMap2d {
         }
     }
 
-    pub fn get_all_furniture(&self) -> &HashMap<usize, Furniture> {
-        &self.furniture
-    }
-
-    pub fn get_furniture(&self, id: usize) -> Option<&Furniture> {
-        self.furniture.get(&id)
-    }
-
-    pub fn get_furniture_mut(&mut self, id: usize) -> Option<&mut Furniture> {
-        self.furniture.get_mut(&id)
-    }
-
-    pub fn remove_furniture(&mut self, id: usize) -> bool {
-        self.furniture.remove(&id).is_some()
-    }
-
     pub fn get_size(&self) -> &Size {
         &self.size
     }
@@ -75,6 +59,14 @@ impl FurnitureMap2d {
         Some(id)
     }
 
+    pub fn get_all_furniture(&self) -> &HashMap<usize, Furniture> {
+        &self.furniture
+    }
+
+    pub fn get_furniture(&self, id: usize) -> Option<&Furniture> {
+        self.furniture.get(&id)
+    }
+
     pub fn get_id_at(&self, position: usize) -> Option<usize> {
         let point = self.size.to_point(position);
         for (id, furniture) in &self.furniture {
@@ -84,6 +76,29 @@ impl FurnitureMap2d {
         }
 
         None
+    }
+
+    pub fn remove_furniture(&mut self, id: usize) -> bool {
+        self.furniture.remove(&id).is_some()
+    }
+
+    /// Updates the existing ['Furniture'] with a specific id, if the new one fits into the map.
+    /// Also fails if the furniture didn't change.
+    pub fn update_furniture(&mut self, id: usize, furniture: Furniture) -> bool {
+        if !self.size.is_aabb_inside(&furniture.aabb) || !self.can_update(id, &furniture) {
+            return false;
+        }
+
+        self.furniture.insert(id, furniture);
+        true
+    }
+
+    fn can_update(&self, id: usize, furniture: &Furniture) -> bool {
+        if let Some(old_furniture) = self.furniture.get(&id) {
+            !furniture.eq(old_furniture)
+        } else {
+            false
+        }
     }
 }
 

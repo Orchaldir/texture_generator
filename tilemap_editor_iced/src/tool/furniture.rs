@@ -41,15 +41,18 @@ impl FurnitureTool {
 
     fn update_width(&mut self, data: &mut EditorData, width: u32) -> bool {
         if let Some(id) = self.selected_id {
-            if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
+            if let Some(old_furniture) = data.furniture_map.get_furniture(id) {
                 info!(
                     "FurnitureTool: Change furniture {}'s width to {}",
                     id, width
                 );
-                let start = furniture.aabb.start();
-                let size = Size::new(width, furniture.aabb.size().height());
-                furniture.aabb = AABB::new(start, size);
-                return true;
+                let start = old_furniture.aabb.start();
+                let size = Size::new(width, old_furniture.aabb.size().height());
+                let furniture = Furniture {
+                    aabb: AABB::new(start, size),
+                    ..*old_furniture
+                };
+                return data.furniture_map.update_furniture(id, furniture);
             }
         }
 
@@ -59,15 +62,18 @@ impl FurnitureTool {
 
     fn update_height(&mut self, data: &mut EditorData, height: u32) -> bool {
         if let Some(id) = self.selected_id {
-            if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
+            if let Some(old_furniture) = data.furniture_map.get_furniture(id) {
                 info!(
                     "FurnitureTool: Change furniture {}'s height to {}",
                     id, height
                 );
-                let start = furniture.aabb.start();
-                let size = Size::new(furniture.aabb.size().width(), height);
-                furniture.aabb = AABB::new(start, size);
-                return true;
+                let start = old_furniture.aabb.start();
+                let size = Size::new(old_furniture.aabb.size().width(), height);
+                let furniture = Furniture {
+                    aabb: AABB::new(start, size),
+                    ..*old_furniture
+                };
+                return data.furniture_map.update_furniture(id, furniture);
             }
         }
 
@@ -77,13 +83,16 @@ impl FurnitureTool {
 
     fn update_front(&mut self, data: &mut EditorData, front: Side) -> bool {
         if let Some(id) = self.selected_id {
-            if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
+            if let Some(old_furniture) = data.furniture_map.get_furniture(id) {
                 info!(
                     "FurnitureTool: Change furniture {}'s front to {}",
                     id, front
                 );
-                furniture.front_side = front;
-                return true;
+                let furniture = Furniture {
+                    front_side: front,
+                    ..*old_furniture
+                };
+                return data.furniture_map.update_furniture(id, furniture);
             }
         }
 
@@ -99,13 +108,16 @@ impl FurnitureTool {
             .get_id(&style)
         {
             if let Some(id) = self.selected_id {
-                if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
+                if let Some(old_furniture) = data.furniture_map.get_furniture(id) {
                     info!(
                         "FurnitureTool: Change furniture {}'s style to '{}' with id {}",
                         id, &style, style_id
                     );
-                    furniture.style_id = style_id;
-                    return true;
+                    let furniture = Furniture {
+                        style_id,
+                        ..*old_furniture
+                    };
+                    return data.furniture_map.update_furniture(id, furniture);
                 }
             }
             info!(

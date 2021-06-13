@@ -57,6 +57,7 @@ impl Sandbox for Hello {
             }
             _ => {
                 if self.tools.update(&mut self.data, message) {
+                    info!("Update triggered rendering");
                     self.image = self.data.render_preview();
                 }
             }
