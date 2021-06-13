@@ -39,21 +39,36 @@ impl FurnitureTool {
         }
     }
 
+    fn update_aabb(
+        &mut self,
+        data: &mut EditorData,
+        id: usize,
+        description: &str,
+        value: u32,
+        f: fn(&AABB, u32) -> AABB,
+    ) -> bool {
+        if let Some(old_furniture) = data.furniture_map.get_furniture(id) {
+            info!(
+                "FurnitureTool: Change furniture {}'s {} to {}",
+                id, description, value
+            );
+            let furniture = Furniture {
+                aabb: f(&old_furniture.aabb, value),
+                ..*old_furniture
+            };
+            return data.furniture_map.update_furniture(id, furniture);
+        }
+
+        return false;
+    }
+
     fn update_width(&mut self, data: &mut EditorData, width: u32) -> bool {
         if let Some(id) = self.selected_id {
-            if let Some(old_furniture) = data.furniture_map.get_furniture(id) {
-                info!(
-                    "FurnitureTool: Change furniture {}'s width to {}",
-                    id, width
-                );
-                let start = old_furniture.aabb.start();
-                let size = Size::new(width, old_furniture.aabb.size().height());
-                let furniture = Furniture {
-                    aabb: AABB::new(start, size),
-                    ..*old_furniture
-                };
-                return data.furniture_map.update_furniture(id, furniture);
-            }
+            return self.update_aabb(data, id, "width", width, |old, w| {
+                let start = old.start();
+                let size = Size::new(w, old.size().height());
+                AABB::new(start, size)
+            });
         }
 
         self.width = width;
@@ -62,19 +77,11 @@ impl FurnitureTool {
 
     fn update_height(&mut self, data: &mut EditorData, height: u32) -> bool {
         if let Some(id) = self.selected_id {
-            if let Some(old_furniture) = data.furniture_map.get_furniture(id) {
-                info!(
-                    "FurnitureTool: Change furniture {}'s height to {}",
-                    id, height
-                );
-                let start = old_furniture.aabb.start();
-                let size = Size::new(old_furniture.aabb.size().width(), height);
-                let furniture = Furniture {
-                    aabb: AABB::new(start, size),
-                    ..*old_furniture
-                };
-                return data.furniture_map.update_furniture(id, furniture);
-            }
+            return self.update_aabb(data, id, "height", height, |old, h| {
+                let start = old.start();
+                let size = Size::new(old.size().width(), h);
+                AABB::new(start, size)
+            });
         }
 
         self.height = height;
