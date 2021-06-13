@@ -1,6 +1,6 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
-use iced::{pick_list, Column, PickList};
+use iced::{pick_list, Column, HorizontalAlignment, Length, PickList, Row, Text};
 use texture_generation::utils::resource::{Resource, ResourceManager};
 
 pub mod door;
@@ -32,4 +32,14 @@ fn create_pick_list<'a, T: Resource>(
         .map(|n| n.to_string())
         .collect();
     PickList::new(state, names, Some(selected_name.to_string()), on_selected)
+}
+
+pub fn title(label: &str) -> Text {
+    Text::new(label)
+        .width(Length::Fill)
+        .horizontal_alignment(HorizontalAlignment::Center)
+}
+
+pub fn help(label: &str) -> Row<EditorMessage> {
+    Row::new().push(Text::new("+")).push(Text::new(label))
 }

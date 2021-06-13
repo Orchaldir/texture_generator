@@ -1,6 +1,6 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
-use crate::tool::{create_pick_list, Tool};
+use crate::tool::{create_pick_list, help, title, Tool};
 use iced::mouse::Button;
 use iced::{pick_list, Column, Text};
 use texture_generation::math::point::Point;
@@ -59,5 +59,11 @@ impl Tool for TileTool {
         Column::new()
             .push(Text::new("Tile Texture"))
             .push(pick_list)
+            .push(title("Help"))
+            .push(help("Click right to paint a floor tile"))
+            .push(help(
+                "Click middle button to paint a full tile, which blocks movement",
+            ))
+            .push(help("Click left to remove a tile"))
     }
 }

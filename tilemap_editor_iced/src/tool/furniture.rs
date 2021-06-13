@@ -1,9 +1,9 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
-use crate::tool::{create_pick_list, Tool};
+use crate::tool::{create_pick_list, help, title, Tool};
 use iced::keyboard::KeyCode;
 use iced::mouse::Button;
-use iced::{pick_list, slider, Column, HorizontalAlignment, Length, PickList, Slider, Text};
+use iced::{pick_list, slider, Column, PickList, Slider, Text};
 use std::fmt::Debug;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
@@ -252,11 +252,7 @@ impl Tool for FurnitureTool {
             EditorMessage::ChangeSide,
         );
 
-        let mut column = Column::new().push(
-            Text::new("Furniture")
-                .width(Length::Fill)
-                .horizontal_alignment(HorizontalAlignment::Center),
-        );
+        let mut column = Column::new().push(title("Control"));
 
         if let Some(id) = self.selected_id {
             column = column.push(Text::new(format!("Id = {}", id)));
@@ -271,5 +267,9 @@ impl Tool for FurnitureTool {
             .push(height_slider)
             .push(Text::new("Front"))
             .push(side_pick_list)
+            .push(title("Help"))
+            .push(help("Click right to add or select"))
+            .push(help("Click left to delete"))
+            .push(help("Arrow keys to move selected furniture"))
     }
 }

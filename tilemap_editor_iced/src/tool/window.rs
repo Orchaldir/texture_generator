@@ -1,6 +1,6 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
-use crate::tool::{create_pick_list, Tool};
+use crate::tool::{create_pick_list, help, title, Tool};
 use iced::mouse::Button;
 use iced::{pick_list, Column, Text};
 use texture_generation::math::point::Point;
@@ -86,5 +86,8 @@ impl Tool for WindowTool {
             .push(wall_pick_list)
             .push(Text::new("Window Style"))
             .push(window_pick_list)
+            .push(title("Help"))
+            .push(help("Click right to add"))
+            .push(help("Click left to remove"))
     }
 }
