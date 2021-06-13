@@ -4,6 +4,7 @@ use iced::{pick_list, Element, PickList};
 use texture_generation::utils::resource::{Resource, ResourceManager};
 
 pub mod door;
+pub mod map;
 pub mod tile;
 pub mod tools;
 pub mod wall;

@@ -8,7 +8,10 @@ pub enum EditorMessage {
     ChangeWall(String),
     ChangeDoor(String),
     ChangeWindow(String),
+    ChangeMapWidth(u32),
+    ChangeMapHeight(u32),
     ClickedButton { x: u32, y: u32, button: Button },
+    NewMap,
     PressedKey(KeyCode),
     Render,
 }
