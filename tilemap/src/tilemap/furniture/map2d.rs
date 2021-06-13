@@ -64,11 +64,15 @@ impl FurnitureMap2d {
         }
     }
 
-    pub fn add(&mut self, furniture: Furniture) -> usize {
+    pub fn add(&mut self, furniture: Furniture) -> Option<usize> {
+        if !self.size.is_aabb_inside(&furniture.aabb) {
+            return None;
+        }
+
         let id = self.next_id;
         self.furniture.insert(id, furniture);
         self.next_id += 1;
-        id
+        Some(id)
     }
 
     pub fn get_id_at(&self, position: usize) -> Option<usize> {
@@ -101,8 +105,9 @@ mod tests {
     fn test_add_and_get_furniture() {
         let size = Size::new(2, 3);
         let mut map = FurnitureMap2d::empty(size);
-        map.add(furniture0());
-        map.add(furniture1());
+
+        assert_eq!(map.add(furniture0()), Some(0));
+        assert_eq!(map.add(furniture1()), Some(1));
 
         assert_eq!(map.get_all_furniture().len(), 2);
         assert_eq!(map.get_furniture(0), Some(&furniture0()));
@@ -110,11 +115,38 @@ mod tests {
     }
 
     #[test]
+    fn test_add_furniture_with_start_outside() {
+        let size = Size::new(2, 3);
+        let mut map = FurnitureMap2d::empty(size);
+
+        assert_eq!(
+            map.add(Furniture::new(0, Point::new(-1, 0), Size::square(1), Top)),
+            None
+        );
+
+        assert!(map.get_all_furniture().is_empty());
+    }
+
+    #[test]
+    fn test_add_furniture_with_end_outside() {
+        let size = Size::new(2, 3);
+        let mut map = FurnitureMap2d::empty(size);
+
+        assert_eq!(
+            map.add(Furniture::new(0, Point::new(4, 2), Size::square(4), Top)),
+            None
+        );
+
+        assert!(map.get_all_furniture().is_empty());
+    }
+
+    #[test]
     fn test_remove_furniture() {
         let size = Size::new(2, 3);
         let mut map = FurnitureMap2d::empty(size);
-        map.add(furniture0());
-        map.add(furniture1());
+
+        assert_eq!(map.add(furniture0()), Some(0));
+        assert_eq!(map.add(furniture1()), Some(1));
 
         assert!(map.remove_furniture(0));
 

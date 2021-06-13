@@ -152,15 +152,20 @@ impl Tool for FurnitureTool {
                             }
                         };
                     } else {
-                        let start = data.furniture_map.get_size().to_point(index);
-                        let size = Size::new(self.width, self.height);
-                        data.furniture_map.add(Furniture::new(
+                        let furniture = Furniture::new(
                             self.style_id,
-                            start,
-                            size,
+                            data.furniture_map.get_size().to_point(index),
+                            Size::new(self.width, self.height),
                             self.front,
-                        ));
-                        return true;
+                        );
+
+                        if let Some(id) = data.furniture_map.add(furniture) {
+                            info!("FurnitureTool: Add furniture with id {}", id);
+                            self.selected_id = Some(id);
+                            return true;
+                        } else {
+                            warn!("FurnitureTool: Failed to add furniture, because its partly outside the map!");
+                        }
                     }
                 }
                 false
