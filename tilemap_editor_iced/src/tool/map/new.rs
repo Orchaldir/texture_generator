@@ -41,8 +41,8 @@ impl Tool for NewMapTool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool {
         match message {
-            EditorMessage::ChangeMapWidth(width) => self.width = width,
-            EditorMessage::ChangeMapHeight(height) => self.height = height,
+            EditorMessage::ChangeWidth(width) => self.width = width,
+            EditorMessage::ChangeHeight(height) => self.height = height,
             EditorMessage::ChangeTexture(name) => {
                 if let Some(id) = data.renderer.get_resources().textures.get_id(&name) {
                     info!("NewTool: Change texture to '{}' with id {}", &name, id);
@@ -67,13 +67,13 @@ impl Tool for NewMapTool {
             &mut self.width_state,
             1..=self.max_size,
             self.width,
-            EditorMessage::ChangeMapWidth,
+            EditorMessage::ChangeWidth,
         );
         let height_slider = Slider::new(
             &mut self.height_state,
             1..=self.max_size,
             self.height,
-            EditorMessage::ChangeMapHeight,
+            EditorMessage::ChangeHeight,
         );
         let texture_pick_list = create_pick_list(
             &data.renderer.get_resources().textures,
@@ -85,7 +85,6 @@ impl Tool for NewMapTool {
             .on_press(EditorMessage::NewMap);
 
         Column::new()
-            .max_width(800)
             .spacing(20)
             .max_width(200)
             .push(Text::new(format!("Map Width: {} tiles", self.width)))
