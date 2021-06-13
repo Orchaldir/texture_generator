@@ -10,8 +10,10 @@ edition = "2018"
 anyhow = "1.0"
 chrono = "0.4"
 env_logger = "0.8"
+iced = { version = "0.3", features = ["image"] }
+iced_native = "0.4"
+iced_graphics = "0.2"
 log = "0.4"
-rendering = { path = "../rendering" }
 structopt = "0.3"
 svgbobdoc = "0.2"
 texture_generation = { path = "../texture_generation" }

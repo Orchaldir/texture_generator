@@ -1,4 +1,5 @@
 use self::Side::*;
+use core::fmt;
 use std::slice::Iter;
 
 pub mod border;
@@ -31,6 +32,12 @@ impl Side {
             Bottom => other == Top,
             Right => other == Left,
         }
+    }
+}
+
+impl fmt::Display for Side {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 

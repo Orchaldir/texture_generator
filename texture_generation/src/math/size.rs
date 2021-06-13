@@ -1,3 +1,4 @@
+use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use serde::{Deserialize, Serialize};
 use std::ops::Mul;
@@ -137,6 +138,26 @@ impl Size {
             && start.y >= 0
             && start.x as u32 + size.width <= self.width
             && start.y as u32 + size.height <= self.height
+    }
+
+    /// Is the [`AABB`] inside?
+    ///
+    /// ```
+    ///# use texture_generation::math::point::Point;
+    ///# use texture_generation::math::size::Size;
+    ///# use texture_generation::math::aabb::AABB;
+    /// let size = Size::new(3, 4);
+    /// let area_size = Size::new(2, 1);
+    /// let inside = Point::new(1, 2);
+    /// let outside = Point::new(2, 2);
+    /// let negative = Point::new(-1, 1);
+    ///
+    /// assert!(size.is_aabb_inside(&AABB::new(inside, area_size)));
+    /// assert!(!size.is_aabb_inside(&AABB::new(outside, area_size)));
+    /// assert!(!size.is_aabb_inside(&AABB::new(negative, area_size)));
+    /// ```
+    pub fn is_aabb_inside(&self, aabb: &AABB) -> bool {
+        self.is_area_inside(&aabb.start(), &aabb.size())
     }
 
     /// Converts an index to the x-coordinate of the equivalent [`Point`].

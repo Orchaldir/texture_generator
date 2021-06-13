@@ -38,6 +38,10 @@ impl Renderer {
         }
     }
 
+    pub fn get_resources(&self) -> &Resources {
+        &self.resources
+    }
+
     pub fn get_tile_size(&self) -> u32 {
         self.tile_size
     }

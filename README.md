@@ -33,3 +33,7 @@ The rendered color image with [ambient occlusion](https://en.wikipedia.org/wiki/
 And the depth image:
 
 ![Depth Image](../assets/v0.4/depth.png)
+
+The editor uses the GUI library [Iced](https://github.com/hecrj/iced).
+
+![Editor with Iced](../assets/v0.5/editor.png)

@@ -35,7 +35,7 @@ impl<'a> FurnitureRenderer<'a> {
 
     /// Renders a [`FurnitureMap2d`].
     pub fn render(&self, texture: &mut Texture) {
-        for (id, furniture) in self.furniture_map.get_furniture() {
+        for (id, furniture) in self.furniture_map.get_all_furniture() {
             let aabb = self.calculate_aabb(*id, furniture);
             let aabb_data = AabbData::TwoAabbs {
                 outer: texture.get_aabb(),
@@ -51,9 +51,9 @@ impl<'a> FurnitureRenderer<'a> {
     }
 
     fn calculate_aabb(&self, id: usize, furniture: &Furniture) -> AABB {
-        let start_cell_xy = self.furniture_map.get_size().to_point(furniture.position);
+        let start_cell_xy = furniture.aabb.start();
         let start = start_cell_xy * self.cell_size;
-        let size = furniture.size * self.cell_size;
+        let size = furniture.aabb.size() * self.cell_size;
 
         let start_tile_xy = self.furniture_map.convert_to_tile(start_cell_xy);
         let start_tile = self
@@ -62,7 +62,7 @@ impl<'a> FurnitureRenderer<'a> {
             .to_index(&start_tile_xy)
             .unwrap_or_else(|| panic!("Start point of furniture {} is outside tilemap!", id));
 
-        let end_cell_xy = start_cell_xy + furniture.size - Size::square(1);
+        let end_cell_xy = start_cell_xy + furniture.aabb.size() - Size::square(1);
         let end_tile_xy = self.furniture_map.convert_to_tile(end_cell_xy);
         let end_tile = self
             .tilemap
@@ -129,7 +129,11 @@ mod tests {
         tilemap.set_border(1, Bottom, Border::Wall(3));
 
         let mut furniture_map = FurnitureMap2d::empty(size);
-        furniture_map.add(Furniture::without_front(0, 0, Size::new(2, 4)));
+        furniture_map.add(Furniture::without_front(
+            0,
+            Point::new(0, 0),
+            Size::new(2, 4),
+        ));
 
         let mut texture = Texture::new(Size::new(8, 16), BLACK);
 
@@ -194,7 +198,11 @@ mod tests {
         tilemap.set_border(0, Bottom, Border::Wall(0));
 
         let mut furniture_map = FurnitureMap2d::empty(size);
-        furniture_map.add(Furniture::without_front(0, 1, Size::new(1, 1)));
+        furniture_map.add(Furniture::without_front(
+            0,
+            Point::new(1, 0),
+            Size::new(1, 1),
+        ));
 
         let mut texture = Texture::new(Size::new(8, 8), BLACK);
 

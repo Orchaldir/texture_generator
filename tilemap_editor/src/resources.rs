@@ -1,39 +1,52 @@
 use std::path::PathBuf;
+use structopt::StructOpt;
 use texture_generation::definition::read;
 use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion;
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
+use texture_generation::math::point::Point;
+use texture_generation::math::size::Size;
 use texture_generation::math::vector3::Vector3;
 use texture_generation::utils::error::ResourceError;
 use tilemap::rendering::Renderer;
+use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
+use tilemap::tilemap::furniture::Furniture;
+use tilemap::tilemap::tilemap2d::Tilemap2d;
+use tilemap::tilemap::Side::*;
 use tilemap_io::rendering::resource::lookup::ResourceLookup;
+use tilemap_io::tilemap::load;
 
+#[derive(StructOpt)]
+#[structopt(name = "texture_generator")]
 pub struct ResourceInfo {
+    /// The path of the resource lookup.
+    #[structopt(parse(from_os_str), default_value = "resources/lookup.yaml")]
     lookup_path: PathBuf,
+
+    /// The path of the resource definitions.
+    #[structopt(parse(from_os_str), default_value = "resources")]
     resource_path: PathBuf,
+
+    /// The path of the resource definitions.
+    #[structopt(parse(from_os_str), default_value = "resources/tilemaps/example.tm")]
+    tilemap_path: PathBuf,
+
+    /// The size of a tile for the preview.
+    #[structopt(default_value = "128")]
     preview_tile_size: u32,
+
+    /// The size of a tile.
+    #[structopt(default_value = "512")]
     render_tile_size: u32,
+
+    /// The starting height for wall tiles.
+    #[structopt(default_value = "200")]
     wall_height: u8,
 }
 
 impl ResourceInfo {
-    pub fn new(
-        lookup_path: PathBuf,
-        resource_path: PathBuf,
-        preview_tile_size: u32,
-        render_tile_size: u32,
-        wall_height: u8,
-    ) -> Self {
-        Self {
-            lookup_path,
-            resource_path,
-            preview_tile_size,
-            render_tile_size,
-            wall_height,
-        }
-    }
-
-    pub fn load(&self) -> (Renderer, Renderer) {
+    /// Loads the needed [`Resource`]s and creates a normal & a preview [`Renderer`].
+    pub fn create_renderers(&self) -> (Renderer, Renderer) {
         info!("Load lookup from {:?}", self.lookup_path);
 
         let lookup: Result<ResourceLookup, ResourceError> = read(&self.lookup_path);
@@ -76,5 +89,22 @@ impl ResourceInfo {
         );
 
         (renderer, preview_renderer)
+    }
+
+    pub fn load_tilemap(&self) -> (Tilemap2d, FurnitureMap2d) {
+        let tilemap = load(&self.tilemap_path).unwrap();
+
+        info!(
+            "Loaded tilemap: width={} height={}",
+            tilemap.get_size().width(),
+            tilemap.get_size().height()
+        );
+
+        let mut furniture_map = FurnitureMap2d::empty(tilemap.get_size());
+        furniture_map.add(Furniture::new(2, Point::new(2, 2), Size::new(3, 2), Bottom));
+        furniture_map.add(Furniture::new(3, Point::new(5, 2), Size::new(1, 2), Right));
+        furniture_map.add(Furniture::new(1, Point::new(2, 7), Size::new(6, 1), Top));
+
+        (tilemap, furniture_map)
     }
 }
