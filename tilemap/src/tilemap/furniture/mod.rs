@@ -12,7 +12,7 @@ pub struct Furniture {
 }
 
 impl Furniture {
-    pub fn new(style_id: usize, position: usize, size: Size, front: Side) -> Self {
+    pub const fn new(style_id: usize, position: usize, size: Size, front: Side) -> Self {
         Furniture {
             style_id,
             position,

@@ -19,13 +19,25 @@ impl FurnitureMap2d {
 
         FurnitureMap2d {
             size,
-            next_id: 1,
+            next_id: 0,
             furniture: HashMap::new(),
         }
     }
 
-    pub fn get_furniture(&self) -> &HashMap<usize, Furniture> {
+    pub fn get_all_furniture(&self) -> &HashMap<usize, Furniture> {
         &self.furniture
+    }
+
+    pub fn get_furniture(&self, id: usize) -> Option<&Furniture> {
+        self.furniture.get(&id)
+    }
+
+    pub fn get_furniture_mut(&mut self, id: usize) -> Option<&mut Furniture> {
+        self.furniture.get_mut(&id)
+    }
+
+    pub fn remove_furniture(&mut self, id: usize) -> bool {
+        self.furniture.remove(&id).is_some()
     }
 
     pub fn get_size(&self) -> &Size {
@@ -65,13 +77,42 @@ mod tests {
     use super::*;
     use crate::tilemap::Side::*;
 
+    const FURNITURE0: Furniture = Furniture::new(0, 0, Size::square(1), Top);
+    const FURNITURE1: Furniture = Furniture::new(1, 1, Size::square(2), Left);
+
     #[test]
     fn test_empty() {
         let size = Size::new(2, 3);
         let map = FurnitureMap2d::empty(size);
 
-        assert_eq!(map.get_furniture(), &HashMap::new());
+        assert_eq!(map.get_all_furniture(), &HashMap::new());
         assert_eq!(map.get_size(), &Size::new(4, 6));
+    }
+
+    #[test]
+    fn test_add_and_get_furniture() {
+        let size = Size::new(2, 3);
+        let mut map = FurnitureMap2d::empty(size);
+        map.add(FURNITURE0.clone());
+        map.add(FURNITURE1.clone());
+
+        assert_eq!(map.get_all_furniture().len(), 2);
+        assert_eq!(map.get_furniture(0), Some(&FURNITURE0));
+        assert_eq!(map.get_furniture(1), Some(&FURNITURE1));
+    }
+
+    #[test]
+    fn test_remove_furniture() {
+        let size = Size::new(2, 3);
+        let mut map = FurnitureMap2d::empty(size);
+        map.add(FURNITURE0.clone());
+        map.add(FURNITURE1.clone());
+
+        assert!(map.remove_furniture(0));
+
+        assert_eq!(map.get_all_furniture().len(), 1);
+        assert_eq!(map.get_furniture(0), None);
+        assert_eq!(map.get_furniture(1), Some(&FURNITURE1));
     }
 
     #[test]

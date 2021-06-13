@@ -35,7 +35,7 @@ impl<'a> FurnitureRenderer<'a> {
 
     /// Renders a [`FurnitureMap2d`].
     pub fn render(&self, texture: &mut Texture) {
-        for (id, furniture) in self.furniture_map.get_furniture() {
+        for (id, furniture) in self.furniture_map.get_all_furniture() {
             let aabb = self.calculate_aabb(*id, furniture);
             let aabb_data = AabbData::TwoAabbs {
                 outer: texture.get_aabb(),
