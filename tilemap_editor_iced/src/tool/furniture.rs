@@ -5,6 +5,7 @@ use iced::mouse::Button;
 use iced::{
     pick_list, slider, Column, Element, HorizontalAlignment, Length, PickList, Slider, Text,
 };
+use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
 use texture_generation::math::size::Size;
 use tilemap::tilemap::furniture::Furniture;
@@ -20,8 +21,8 @@ pub struct FurnitureTool {
     height: u32,
     height_state: slider::State,
     max_size: u32,
-    side: Side,
-    side_state: pick_list::State<Side>,
+    front: Side,
+    front_state: pick_list::State<Side>,
 }
 
 impl FurnitureTool {
@@ -35,9 +36,88 @@ impl FurnitureTool {
             height,
             height_state: Default::default(),
             max_size,
-            side: Side::Bottom,
-            side_state: Default::default(),
+            front: Side::Bottom,
+            front_state: Default::default(),
         }
+    }
+
+    fn update_width(&mut self, data: &mut EditorData, width: u32) -> bool {
+        if let Some(id) = self.selected_id {
+            if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
+                info!(
+                    "FurnitureTool: Change furniture {}'s width to {}",
+                    id, width
+                );
+                let start = furniture.aabb.start();
+                let size = Size::new(width, furniture.aabb.size().height());
+                furniture.aabb = AABB::new(start, size);
+                return true;
+            }
+        }
+
+        self.width = width;
+        return false;
+    }
+
+    fn update_height(&mut self, data: &mut EditorData, height: u32) -> bool {
+        if let Some(id) = self.selected_id {
+            if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
+                info!(
+                    "FurnitureTool: Change furniture {}'s height to {}",
+                    id, height
+                );
+                let start = furniture.aabb.start();
+                let size = Size::new(furniture.aabb.size().width(), height);
+                furniture.aabb = AABB::new(start, size);
+                return true;
+            }
+        }
+
+        self.height = height;
+        return false;
+    }
+
+    fn update_front(&mut self, data: &mut EditorData, front: Side) -> bool {
+        if let Some(id) = self.selected_id {
+            if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
+                info!(
+                    "FurnitureTool: Change furniture {}'s front to {}",
+                    id, front
+                );
+                furniture.front_side = front;
+                return true;
+            }
+        }
+
+        self.front = front;
+        return false;
+    }
+
+    fn update_style(&mut self, data: &mut EditorData, style: String) -> bool {
+        if let Some(style_id) = data
+            .renderer
+            .get_resources()
+            .furniture_styles
+            .get_id(&style)
+        {
+            if let Some(id) = self.selected_id {
+                if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
+                    info!(
+                        "FurnitureTool: Change furniture {}'s style to '{}' with id {}",
+                        id, &style, style_id
+                    );
+                    furniture.style_id = style_id;
+                    return true;
+                }
+            }
+            info!(
+                "FurnitureTool: Change furniture style to '{}' with id {}",
+                &style, style_id
+            );
+            self.style_id = style_id;
+        }
+
+        return false;
     }
 }
 
@@ -48,29 +128,10 @@ impl Tool for FurnitureTool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool {
         match message {
-            EditorMessage::ChangeWidth(width) => self.width = width,
-            EditorMessage::ChangeHeight(height) => self.height = height,
-            EditorMessage::ChangeSide(side) => self.side = side,
-            EditorMessage::ChangeFurnitureStyle(name) => {
-                if let Some(style_id) = data.renderer.get_resources().furniture_styles.get_id(&name)
-                {
-                    if let Some(id) = self.selected_id {
-                        if let Some(furniture) = data.furniture_map.get_furniture_mut(id) {
-                            info!(
-                                "FurnitureTool: Change furniture {}'s style to '{}' with id {}",
-                                id, &name, style_id
-                            );
-                            furniture.style_id = style_id;
-                            return true;
-                        }
-                    }
-                    info!(
-                        "FurnitureTool: Change furniture style to '{}' with id {}",
-                        &name, style_id
-                    );
-                    self.style_id = style_id;
-                }
-            }
+            EditorMessage::ChangeWidth(width) => self.update_width(data, width),
+            EditorMessage::ChangeHeight(height) => self.update_height(data, height),
+            EditorMessage::ChangeSide(front) => self.update_front(data, front),
+            EditorMessage::ChangeFurnitureStyle(name) => self.update_style(data, name),
             EditorMessage::ClickedButton { x, y, button } => {
                 let point = Point::new(x as i32, y as i32);
 
@@ -97,79 +158,80 @@ impl Tool for FurnitureTool {
                             self.style_id,
                             start,
                             size,
-                            self.side,
+                            self.front,
                         ));
                         return true;
                     }
                 }
+                false
             }
-            _ => {}
+            _ => false,
         }
-
-        return false;
     }
 
     fn view_sidebar(&mut self, data: &EditorData) -> Element<'_, EditorMessage> {
-        if let Some(id) = self.selected_id {
-            let style_pick_list = create_pick_list(
-                &data.renderer.get_resources().furniture_styles,
-                &mut self.style_state,
-                id,
-                EditorMessage::ChangeFurnitureStyle,
-            );
-
-            return Column::new()
-                .max_width(250)
-                .spacing(20)
-                .push(
-                    Text::new("Furniture")
-                        .width(Length::Fill)
-                        .horizontal_alignment(HorizontalAlignment::Center),
+        let (style_id, width, height, front) = if let Some(furniture_id) = self.selected_id {
+            if let Some(furniture) = data.furniture_map.get_furniture(furniture_id) {
+                let size = furniture.aabb.size();
+                (
+                    furniture.style_id,
+                    size.width(),
+                    size.height(),
+                    furniture.front_side,
                 )
-                .push(Text::new(format!("Id = {}", id)))
-                .push(Text::new("Style"))
-                .push(style_pick_list)
-                .into();
-        }
+            } else {
+                return Text::new("Invalid furniture selected!").into();
+            }
+        } else {
+            (self.style_id, self.width, self.height, self.front)
+        };
 
         let style_pick_list = create_pick_list(
             &data.renderer.get_resources().furniture_styles,
             &mut self.style_state,
-            self.style_id,
+            style_id,
             EditorMessage::ChangeFurnitureStyle,
         );
 
         let width_slider = Slider::new(
             &mut self.width_state,
             1..=self.max_size,
-            self.width,
+            width,
             EditorMessage::ChangeWidth,
         );
         let height_slider = Slider::new(
             &mut self.height_state,
             1..=self.max_size,
-            self.height,
+            height,
             EditorMessage::ChangeHeight,
         );
 
         let options: Vec<Side> = Side::iterator().map(|s| s.clone()).collect();
         let side_pick_list = PickList::new(
-            &mut self.side_state,
+            &mut self.front_state,
             options,
-            Some(self.side),
+            Some(front),
             EditorMessage::ChangeSide,
         );
 
-        Column::new()
-            .max_width(250)
-            .spacing(20)
-            .push(Text::new("Furniture Style"))
+        let mut column = Column::new().max_width(250).spacing(20).push(
+            Text::new("Furniture")
+                .width(Length::Fill)
+                .horizontal_alignment(HorizontalAlignment::Center),
+        );
+
+        if let Some(id) = self.selected_id {
+            column = column.push(Text::new(format!("Id = {}", id)));
+        }
+
+        column
+            .push(Text::new("Style"))
             .push(style_pick_list)
-            .push(Text::new(format!("Width: {} cells", self.width)))
+            .push(Text::new(format!("Width: {} cells", width)))
             .push(width_slider)
-            .push(Text::new(format!("Height: {} cells", self.height)))
+            .push(Text::new(format!("Height: {} cells", height)))
             .push(height_slider)
-            .push(Text::new("Front Side"))
+            .push(Text::new("Front"))
             .push(side_pick_list)
             .into()
     }

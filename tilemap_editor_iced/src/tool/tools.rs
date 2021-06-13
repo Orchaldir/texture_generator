@@ -22,7 +22,7 @@ impl Tools {
                 Box::new(WallTool::default()),
                 Box::new(DoorTool::default()),
                 Box::new(WindowTool::default()),
-                Box::new(FurnitureTool::new(1, 1, 5)),
+                Box::new(FurnitureTool::new(1, 1, 10)),
                 Box::new(NewMapTool::new(10, 10, 20)),
             ],
             current_tool: 0,
