@@ -4,6 +4,6 @@ members = [
     "texture_generation",
     "texture_generation_cli",
     "tilemap",
-    "tilemap_editor_iced",
+    "tilemap_editor",
     "tilemap_io",
 ]
