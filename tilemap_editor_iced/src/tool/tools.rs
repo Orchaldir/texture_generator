@@ -1,5 +1,6 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
+use crate::tool::door::DoorTool;
 use crate::tool::tile::TileTool;
 use crate::tool::wall::WallTool;
 use crate::tool::Tool;
@@ -13,7 +14,11 @@ pub struct Tools {
 impl Tools {
     pub fn new() -> Self {
         Tools {
-            tools: vec![Box::new(TileTool::default()), Box::new(WallTool::default())],
+            tools: vec![
+                Box::new(TileTool::default()),
+                Box::new(WallTool::default()),
+                Box::new(DoorTool::default()),
+            ],
             current_tool: 0,
         }
     }
