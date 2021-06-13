@@ -1,3 +1,4 @@
+use crate::tilemap::furniture::map2d::FurnitureMap2d;
 use crate::tilemap::tilemap2d::Tilemap2d;
 use crate::tilemap::Side;
 use crate::tilemap::Side::*;
@@ -17,7 +18,7 @@ impl Selector {
         self.tile_size
     }
 
-    /// Returns the tile of the coordinates.
+    /// Returns the tile of the coordinates for the [`Tilemap2d`].
     pub fn get_tile_index(&self, tilemap: &Tilemap2d, point: Point) -> Option<usize> {
         if point.x < 0 || point.y < 0 {
             return None;
@@ -25,6 +26,17 @@ impl Selector {
 
         let tile = point / self.tile_size;
         tilemap.get_size().to_index(&tile)
+    }
+
+    /// Returns the tile of the coordinates for the [`FurnitureMap2d`].
+    pub fn get_furniture_tile_index(&self, map: &FurnitureMap2d, point: Point) -> Option<usize> {
+        if point.x < 0 || point.y < 0 {
+            return None;
+        }
+
+        let furniture_tile_size = map.convert_from_tile_size(self.tile_size);
+        let tile = point / furniture_tile_size;
+        map.get_size().to_index(&tile)
     }
 
     /// Returns which [`Side`] of a tile the coordinates are inside or None for its center or corners.
@@ -85,6 +97,31 @@ mod tests {
     }
 
     #[test]
+    fn test_get_furniture_tile_index() {
+        let selector = Selector::new(100);
+        let map = FurnitureMap2d::empty(Size::new(2, 3));
+        let mut index = 0;
+
+        for y in 0..4 {
+            for x in 0..4 {
+                assert_furniture(&selector, &map, 25 + 50 * x, 25 + 50 * y, index);
+                index += 1;
+            }
+        }
+    }
+
+    #[test]
+    fn test_get_furniture_tile_index_outside() {
+        let selector = Selector::new(100);
+        let map = FurnitureMap2d::empty(Size::new(2, 3));
+
+        assert_furniture_outside(&selector, &map, -50, 50);
+        assert_furniture_outside(&selector, &map, 50, -50);
+        assert_furniture_outside(&selector, &map, 250, 50);
+        assert_furniture_outside(&selector, &map, 50, 350);
+    }
+
+    #[test]
     fn test_get_side() {
         let selector = Selector::new(100);
         let tilemap = Tilemap2d::default(Size::new(2, 3), Tile::Empty);
@@ -103,8 +140,22 @@ mod tests {
         );
     }
 
+    fn assert_furniture(selector: &Selector, map: &FurnitureMap2d, x: i32, y: i32, index: usize) {
+        assert_eq!(
+            selector.get_furniture_tile_index(map, Point::new(x, y)),
+            Some(index)
+        );
+    }
+
     fn assert_outside(selector: &Selector, tilemap: &Tilemap2d, x: i32, y: i32) {
         assert_eq!(selector.get_tile_index(tilemap, Point::new(x, y)), None);
+    }
+
+    fn assert_furniture_outside(selector: &Selector, map: &FurnitureMap2d, x: i32, y: i32) {
+        assert_eq!(
+            selector.get_furniture_tile_index(map, Point::new(x, y)),
+            None
+        );
     }
 
     fn assert_side(
