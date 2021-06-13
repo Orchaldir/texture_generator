@@ -19,7 +19,7 @@ impl Tool for WallTool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool {
         match message {
-            EditorMessage::ChangeWall(name) => {
+            EditorMessage::ChangeWallStyle(name) => {
                 if let Some(id) = data.renderer.get_resources().wall_styles.get_id(&name) {
                     info!("WallTool: Change wall style to '{}' with id {}", &name, id);
                     self.wall_id = id;
@@ -54,7 +54,7 @@ impl Tool for WallTool {
             resource_manager,
             &mut self.pick_list_state,
             self.wall_id,
-            EditorMessage::ChangeWall,
+            EditorMessage::ChangeWallStyle,
         );
         Column::new()
             .max_width(800)

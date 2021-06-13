@@ -21,7 +21,7 @@ impl Tool for WindowTool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool {
         match message {
-            EditorMessage::ChangeWall(name) => {
+            EditorMessage::ChangeWallStyle(name) => {
                 if let Some(id) = data.renderer.get_resources().wall_styles.get_id(&name) {
                     info!(
                         "WindowTool: Change wall style to '{}' with id {}",
@@ -30,7 +30,7 @@ impl Tool for WindowTool {
                     self.wall_id = id;
                 }
             }
-            EditorMessage::ChangeWindow(name) => {
+            EditorMessage::ChangeWindowStyle(name) => {
                 if let Some(id) = data.renderer.get_resources().window_styles.get_id(&name) {
                     info!(
                         "WindowTool: Change window style to '{}' with id {}",
@@ -73,13 +73,13 @@ impl Tool for WindowTool {
             &data.renderer.get_resources().wall_styles,
             &mut self.wall_state,
             self.wall_id,
-            EditorMessage::ChangeWall,
+            EditorMessage::ChangeWallStyle,
         );
         let window_pick_list = create_pick_list(
             &data.renderer.get_resources().window_styles,
             &mut self.window_state,
             self.window_id,
-            EditorMessage::ChangeWindow,
+            EditorMessage::ChangeWindowStyle,
         );
         Column::new()
             .max_width(800)

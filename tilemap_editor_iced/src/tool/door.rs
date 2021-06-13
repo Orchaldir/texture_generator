@@ -21,13 +21,13 @@ impl Tool for DoorTool {
 
     fn update(&mut self, data: &mut EditorData, message: EditorMessage) -> bool {
         match message {
-            EditorMessage::ChangeWall(name) => {
+            EditorMessage::ChangeWallStyle(name) => {
                 if let Some(id) = data.renderer.get_resources().wall_styles.get_id(&name) {
                     info!("DoorTool: Change wall style to '{}' with id {}", &name, id);
                     self.wall_id = id;
                 }
             }
-            EditorMessage::ChangeDoor(name) => {
+            EditorMessage::ChangeDoorStyle(name) => {
                 if let Some(id) = data.renderer.get_resources().door_styles.get_id(&name) {
                     info!("DoorTool: Change door style to '{}' with id {}", &name, id);
                     self.door_id = id;
@@ -70,13 +70,13 @@ impl Tool for DoorTool {
             &data.renderer.get_resources().wall_styles,
             &mut self.wall_state,
             self.wall_id,
-            EditorMessage::ChangeWall,
+            EditorMessage::ChangeWallStyle,
         );
         let door_pick_list = create_pick_list(
             &data.renderer.get_resources().door_styles,
             &mut self.door_state,
             self.door_id,
-            EditorMessage::ChangeDoor,
+            EditorMessage::ChangeDoorStyle,
         );
         Column::new()
             .max_width(800)

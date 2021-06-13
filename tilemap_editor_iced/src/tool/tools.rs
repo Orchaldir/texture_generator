@@ -1,6 +1,7 @@
 use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::door::DoorTool;
+use crate::tool::furniture::FurnitureTool;
 use crate::tool::map::new::NewMapTool;
 use crate::tool::tile::TileTool;
 use crate::tool::wall::WallTool;
@@ -21,6 +22,7 @@ impl Tools {
                 Box::new(WallTool::default()),
                 Box::new(DoorTool::default()),
                 Box::new(WindowTool::default()),
+                Box::new(FurnitureTool::default()),
                 Box::new(NewMapTool::new(10, 10, 20)),
             ],
             current_tool: 0,
