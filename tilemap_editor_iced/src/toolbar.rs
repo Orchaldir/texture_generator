@@ -32,8 +32,7 @@ impl<'a> Toolbar {
         let mut toolbar = Row::new()
             .padding(10)
             .spacing(20)
-            .align_items(Align::Center)
-            .push(Text::new("Toolbar:"));
+            .align_items(Align::Center);
 
         let it = tools.iter().zip(self.button_states.iter_mut());
 
