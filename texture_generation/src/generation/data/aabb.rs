@@ -86,4 +86,41 @@ impl AabbData {
             } => AabbData::OneAabb(*texture_size, outer.limit(inner)),
         }
     }
+
+    /// Rotates the origin of the texture clockwise.
+    pub fn rotate_origin(&self) -> Self {
+        match self {
+            AabbData::OneAabb(texture_size, aabb) => {
+                AabbData::OneAabb(texture_size.flip(), aabb.rotate_origin(*texture_size))
+            }
+            AabbData::TwoAabbs {
+                texture_size,
+                outer,
+                inner,
+            } => AabbData::two(
+                texture_size.flip(),
+                outer.rotate_origin(*texture_size),
+                inner.rotate_origin(*texture_size),
+            ),
+        }
+    }
+
+    /// Rotates the origin of the texture counter clockwise.
+    pub fn rotate_origin_revers(&self) -> Self {
+        match self {
+            AabbData::OneAabb(texture_size, aabb) => AabbData::OneAabb(
+                texture_size.flip(),
+                aabb.rotate_origin_revers(*texture_size),
+            ),
+            AabbData::TwoAabbs {
+                texture_size,
+                outer,
+                inner,
+            } => AabbData::two(
+                texture_size.flip(),
+                outer.rotate_origin_revers(*texture_size),
+                inner.rotate_origin_revers(*texture_size),
+            ),
+        }
+    }
 }
