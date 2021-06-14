@@ -133,7 +133,21 @@ impl Data {
         &self.aabb_data
     }
 
-    pub fn get_aabbs_mut(&mut self) -> &mut AabbData {
-        &mut self.aabb_data
+    pub fn get_aabbs_in_texture(&self) -> AabbData {
+        if self.is_horizontal {
+            match self.orientation {
+                Side::Top => self.aabb_data.rotate_origin_revers(),
+                Side::Left => self.aabb_data.rotate_origin_revers().rotate_origin_revers(),
+                Side::Bottom => self.aabb_data.rotate_origin(),
+                Side::Right => self.aabb_data.clone(),
+            }
+        } else {
+            match self.orientation {
+                Side::Top => self.aabb_data.clone(),
+                Side::Left => self.aabb_data.rotate_origin_revers(),
+                Side::Bottom => self.aabb_data.rotate_origin_revers().rotate_origin_revers(),
+                Side::Right => self.aabb_data.rotate_origin(),
+            }
+        }
     }
 }
