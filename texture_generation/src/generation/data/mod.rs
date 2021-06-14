@@ -91,6 +91,36 @@ impl Data {
         }
     }
 
+    pub fn make_horizontal(&self) -> Self {
+        if self.is_horizontal {
+            Self {
+                aabb_data: self.aabb_data.clone(),
+                ..*self
+            }
+        } else {
+            Self {
+                aabb_data: self.aabb_data.rotate_origin_revers(),
+                is_horizontal: true,
+                ..*self
+            }
+        }
+    }
+
+    pub fn make_vertical(&self) -> Self {
+        if !self.is_horizontal {
+            Self {
+                aabb_data: self.aabb_data.clone(),
+                ..*self
+            }
+        } else {
+            Self {
+                aabb_data: self.aabb_data.rotate_origin(),
+                is_horizontal: false,
+                ..*self
+            }
+        }
+    }
+
     pub fn get_global_id(&self) -> usize {
         self.global_id
     }

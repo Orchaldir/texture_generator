@@ -2,6 +2,7 @@ use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::size::Size;
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum AabbData {
     OneAabb(Size, AABB),
     TwoAabbs {
