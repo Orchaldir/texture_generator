@@ -1,5 +1,6 @@
 ---
 tile_size: 512
+size: Fill
 depth: 50
 component:
   Layers:

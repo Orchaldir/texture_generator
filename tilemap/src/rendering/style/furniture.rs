@@ -14,9 +14,16 @@ use texture_generation::math::size::Size;
 use texture_generation::utils::resource::Resource;
 
 #[derive(Clone, Debug, PartialEq)]
+pub enum FurnitureSize {
+    Fill,
+    Fixed(Size),
+}
+
+#[derive(Clone, Debug, PartialEq)]
 /// How does the furniture look like?
 pub struct FurnitureStyle {
     name: String,
+    size: FurnitureSize,
     depth: u8,
     horizontal_component: Component,
     vertical_component: Component,
@@ -26,12 +33,14 @@ pub struct FurnitureStyle {
 impl FurnitureStyle {
     pub fn new<S: Into<String>>(
         name: S,
+        size: FurnitureSize,
         depth: u8,
         component: Component,
         front: FrontStyle,
     ) -> Self {
         FurnitureStyle {
             name: name.into(),
+            size,
             depth,
             horizontal_component: component.clone(),
             vertical_component: component.flip(),
@@ -165,6 +174,7 @@ impl Default for FurnitureStyle {
 
         Self::new(
             "default",
+            FurnitureSize::Fill,
             100,
             Component::Rendering(Box::new(component)),
             FrontStyle::None,
