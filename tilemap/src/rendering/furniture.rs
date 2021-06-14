@@ -2,12 +2,12 @@ use crate::rendering::resource::Resources;
 use crate::tilemap::furniture::map2d::FurnitureMap2d;
 use crate::tilemap::furniture::Furniture;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use crate::tilemap::Side;
-use crate::tilemap::Side::*;
 use texture_generation::generation::data::texture::Texture;
 use texture_generation::generation::data::{AabbData, Data};
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side;
+use texture_generation::math::side::Side::*;
 use texture_generation::math::size::Size;
 
 /// Renders a [`FurnitureMap2d`] in a specific style.

@@ -2,9 +2,9 @@ use crate::rendering::style::node::NodeStyle;
 use crate::rendering::style::wall::WallStyle;
 use crate::tilemap::node::get_nodes_size;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use crate::tilemap::Side;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use texture_generation::math::side::Side;
 use texture_generation::utils::resource::ResourceManager;
 
 #[derive(Debug, PartialEq)]
@@ -222,7 +222,7 @@ mod tests {
     use crate::rendering::style::edge::EdgeStyle;
     use crate::tilemap::border::Border;
     use crate::tilemap::tile::Tile;
-    use crate::tilemap::Side::{Bottom, Left, Right, Top};
+    use texture_generation::math::side::Side::{Bottom, Left, Right, Top};
     use texture_generation::math::size::Size;
 
     // wall styles

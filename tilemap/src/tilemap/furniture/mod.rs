@@ -1,6 +1,6 @@
-use crate::tilemap::Side;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side;
 use texture_generation::math::size::Size;
 
 pub mod map2d;

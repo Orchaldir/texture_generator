@@ -1,8 +1,8 @@
 use crate::tilemap::furniture::map2d::FurnitureMap2d;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use crate::tilemap::Side;
-use crate::tilemap::Side::*;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side;
+use texture_generation::math::side::Side::*;
 
 /// Transform coordinates into indices of a [`Tilemap2d`].
 pub struct Selector {

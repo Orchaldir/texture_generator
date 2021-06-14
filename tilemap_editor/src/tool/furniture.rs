@@ -7,9 +7,9 @@ use iced::{pick_list, slider, Column, PickList, Slider, Text};
 use std::fmt::Debug;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side;
 use texture_generation::math::size::Size;
 use tilemap::tilemap::furniture::Furniture;
-use tilemap::tilemap::Side;
 
 #[derive(Clone, Debug)]
 pub struct FurnitureTool {

@@ -4,7 +4,7 @@ use crate::tilemap::border::{
 };
 use crate::tilemap::node::get_nodes_size;
 use crate::tilemap::tile::Tile;
-use crate::tilemap::Side;
+use texture_generation::math::side::Side;
 use texture_generation::math::size::Size;
 use Side::*;
 

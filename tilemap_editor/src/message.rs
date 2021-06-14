@@ -1,6 +1,6 @@
 use iced_native::keyboard::KeyCode;
 use iced_native::mouse::Button;
-use tilemap::tilemap::Side;
+use texture_generation::math::side::Side;
 
 #[derive(Debug, Clone)]
 pub enum EditorMessage {

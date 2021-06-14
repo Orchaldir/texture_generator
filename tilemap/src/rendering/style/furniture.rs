@@ -1,6 +1,5 @@
 use crate::rendering::resource::Resources;
 use crate::rendering::style::front::FrontStyle;
-use crate::tilemap::Side;
 use texture_generation::generation::component::rendering::color::ColorSelector;
 use texture_generation::generation::component::rendering::depth_factory::DepthFactory;
 use texture_generation::generation::component::rendering::RenderingComponent;
@@ -10,6 +9,7 @@ use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::PINK;
 use texture_generation::math::shape_factory::ShapeFactory;
+use texture_generation::math::side::Side;
 use texture_generation::math::size::Size;
 use texture_generation::utils::resource::Resource;
 

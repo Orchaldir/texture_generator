@@ -5,6 +5,7 @@ use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side::*;
 use texture_generation::math::size::Size;
 use texture_generation::math::vector3::Vector3;
 use texture_generation::utils::error::ResourceError;
@@ -12,7 +13,6 @@ use tilemap::rendering::Renderer;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
 use tilemap::tilemap::furniture::Furniture;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
-use tilemap::tilemap::Side::*;
 use tilemap_io::rendering::resource::lookup::ResourceLookup;
 use tilemap_io::tilemap::load;
 
