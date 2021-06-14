@@ -6,7 +6,7 @@ component:
   Layers:
     - Layout:
         ComplexSplit:
-          is_horizontal: false
+          is_horizontal: true
           components:
             - Fixed:
                 size: 10
@@ -29,7 +29,7 @@ component:
                 component:
                   Layout:
                     ComplexSplit:
-                      is_horizontal: true
+                      is_horizontal: false
                       components:
                         - Proportional:
                             weight: 1
@@ -46,7 +46,7 @@ component:
                             component: Empty
     - Layout:
         ComplexSplit:
-          is_horizontal: true
+          is_horizontal: false
           components:
             - Proportional:
                 weight: 1

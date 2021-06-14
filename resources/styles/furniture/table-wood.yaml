@@ -4,7 +4,7 @@ size: Fill
 depth: 100
 component:
   Layout:
-    RepeatY:
+    RepeatX:
       size: 76
       component:
         Rendering:
