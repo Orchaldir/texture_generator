@@ -9,8 +9,9 @@ use crate::tilemap::node::{
 };
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
+use texture_generation::generation::data::aabb::AabbData;
 use texture_generation::generation::data::texture::Texture;
-use texture_generation::generation::data::{AabbData, Data};
+use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;

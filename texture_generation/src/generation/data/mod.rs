@@ -1,32 +1,10 @@
+use crate::generation::data::aabb::AabbData;
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
 use crate::math::side::Side;
 
+pub mod aabb;
 pub mod texture;
-
-pub enum AabbData {
-    OneAabb(AABB),
-    TwoAabbs { outer: AABB, inner: AABB },
-}
-
-impl AabbData {
-    pub fn next(&self, inner: AABB) -> Self {
-        AabbData::TwoAabbs {
-            outer: match self {
-                AabbData::OneAabb(aabb) => *aabb,
-                AabbData::TwoAabbs { outer, .. } => *outer,
-            },
-            inner,
-        }
-    }
-
-    pub fn combine(&self) -> Self {
-        AabbData::OneAabb(match self {
-            AabbData::OneAabb(aabb) => *aabb,
-            AabbData::TwoAabbs { outer, inner } => outer.limit(inner),
-        })
-    }
-}
 
 pub struct Data {
     /// The `global_id` is 0, if the plan is to generate a simple texture and not a tilemap.
