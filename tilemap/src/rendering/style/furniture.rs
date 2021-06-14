@@ -58,21 +58,23 @@ impl FurnitureStyle {
     ) {
         texture.set_base_depth(self.depth);
 
+        let aabb = self.calculate_aabb(data);
+        let new_data = data.transform(aabb);
         let thickness = self.front.get_thickness(resources);
 
         if thickness > 0 {
-            let aabbs = calculate_aabbs(data, front_side, thickness);
+            let aabbs = calculate_aabbs(&new_data, front_side, thickness);
 
             match front_side {
-                Side::Top => self.render_horizontal(resources, texture, data, aabbs, false),
-                Side::Left => self.render_vertical(resources, texture, data, aabbs, false),
-                Side::Bottom => self.render_horizontal(resources, texture, data, aabbs, true),
-                Side::Right => self.render_vertical(resources, texture, data, aabbs, true),
+                Side::Top => self.render_horizontal(resources, texture, &new_data, aabbs, false),
+                Side::Left => self.render_vertical(resources, texture, &new_data, aabbs, false),
+                Side::Bottom => self.render_horizontal(resources, texture, &new_data, aabbs, true),
+                Side::Right => self.render_vertical(resources, texture, &new_data, aabbs, true),
             }
         } else {
             match front_side {
-                Side::Top | Side::Bottom => self.horizontal_component.generate(texture, &data),
-                Side::Left | Side::Right => self.vertical_component.generate(texture, &data),
+                Side::Top | Side::Bottom => self.horizontal_component.generate(texture, &new_data),
+                Side::Left | Side::Right => self.vertical_component.generate(texture, &new_data),
             }
         }
     }
@@ -107,6 +109,18 @@ impl FurnitureStyle {
             .generate(texture, &data.transform(aabb_component));
         self.front
             .render_vertical(resources, &data.transform(aabb_front), is_front, texture);
+    }
+
+    fn calculate_aabb(&self, data: &Data) -> AABB {
+        match self.size {
+            FurnitureSize::Fill => data.get_inner().clone(),
+            FurnitureSize::Fixed(size) => {
+                let inner = data.get_inner();
+                let center = inner.center();
+                let start = center - size * 0.5;
+                AABB::new(start, size)
+            }
+        }
     }
 }
 
