@@ -127,10 +127,17 @@ impl AxisAlignedBoundingBox {
         point.max(&self.start).min(&self.end)
     }
 
-    /// Rotates the origin of the texture counter clockwise.
-    pub fn rotate_origin_cw(&self, texture_size: Size) -> Self {
+    /// Rotates the origin of the texture clockwise.
+    pub fn rotate_origin(&self, texture_size: Size) -> Self {
         let y = texture_size.width() as i32 - self.end.x;
         let start = Point::new(self.start.y, y);
+        AABB::new(start, self.size.flip())
+    }
+
+    /// Rotates the origin of the texture counter clockwise.
+    pub fn rotate_origin_reverse(&self, texture_size: Size) -> Self {
+        let x = texture_size.height() as i32 - self.end.y;
+        let start = Point::new(x, self.start.x);
         AABB::new(start, self.size.flip())
     }
 }
@@ -141,6 +148,7 @@ mod tests {
 
     const START: Point = Point::new(1, 2);
     const SIZE: Size = Size::new(3, 4);
+    const TEXTURE_SIZE: Size = Size::new(20, 30);
 
     #[test]
     fn test_is_inside() {
@@ -175,25 +183,50 @@ mod tests {
     }
 
     #[test]
-    fn test_rotate_origin_cw() {
-        let size = Size::new(20, 30);
-        let aabb = AABB::new(Point::new(3, 2), Size::new(5, 4));
-        let result = AABB::new(Point::new(2, 12), Size::new(4, 5));
-
-        assert_eq!(aabb.rotate_origin_cw(size), result);
+    fn test_rotate_origin() {
+        assert_eq!(aabb0().rotate_origin(TEXTURE_SIZE), aabb1());
     }
 
     #[test]
-    fn test_rotate_origin_cw_4_times() {
-        let size = Size::new(20, 30);
-        let aabb = AABB::new(Point::new(3, 2), Size::new(5, 4));
+    fn test_rotate_origin_4_times() {
+        let size = TEXTURE_SIZE;
+        let aabb = aabb0();
 
         assert_eq!(
-            aabb.rotate_origin_cw(size)
-                .rotate_origin_cw(size)
-                .rotate_origin_cw(size)
-                .rotate_origin_cw(size),
+            aabb.rotate_origin(size)
+                .rotate_origin(size)
+                .rotate_origin(size)
+                .rotate_origin(size),
             aabb
         );
+    }
+
+    #[test]
+    fn test_rotate_origin_reverse() {
+        let size = TEXTURE_SIZE.flip();
+
+        assert_eq!(aabb1().rotate_origin_reverse(size), aabb0());
+    }
+
+    #[test]
+    fn test_rotate_origin_reverse_4_times() {
+        let size = TEXTURE_SIZE;
+        let aabb = aabb0();
+
+        assert_eq!(
+            aabb.rotate_origin_reverse(size)
+                .rotate_origin_reverse(size)
+                .rotate_origin_reverse(size)
+                .rotate_origin_reverse(size),
+            aabb
+        );
+    }
+
+    fn aabb0() -> AABB {
+        AABB::new(Point::new(3, 2), Size::new(5, 4))
+    }
+
+    fn aabb1() -> AABB {
+        AABB::new(Point::new(2, 12), Size::new(4, 5))
     }
 }
