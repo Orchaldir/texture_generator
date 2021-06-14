@@ -112,10 +112,12 @@ impl FurnitureStyle {
     }
 
     fn calculate_aabb(&self, data: &Data) -> AABB {
+        let aabbs = data.get_aabbs();
+
         match self.size {
-            FurnitureSize::Fill => data.get_inner().clone(),
+            FurnitureSize::Fill => aabbs.get_inner().clone(),
             FurnitureSize::Fixed(size) => {
-                let inner = data.get_inner();
+                let inner = aabbs.get_inner();
                 let center = inner.center();
                 let start = center - size * 0.5;
                 AABB::new(start, size)
@@ -125,8 +127,8 @@ impl FurnitureStyle {
 }
 
 fn calculate_aabbs(data: &Data, front_side: Side, thickness: u32) -> (AABB, AABB) {
-    let size = data.get_inner().size();
-    let start = data.get_inner().start();
+    let size = data.get_aabbs().get_inner().size();
+    let start = data.get_aabbs().get_inner().start();
 
     match front_side {
         Side::Top => {

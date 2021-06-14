@@ -107,7 +107,7 @@ impl RepeatLayout {
     }
 
     fn generate_horizontal(&self, texture: &mut Texture, mut data: Data) {
-        let inner = data.get_inner();
+        let inner = data.get_aabbs().get_inner();
         let height = inner.size().height();
         let mut point = inner.start();
 
@@ -122,7 +122,7 @@ impl RepeatLayout {
     }
 
     fn generate_vertical(&self, texture: &mut Texture, mut data: Data) {
-        let inner = data.get_inner();
+        let inner = data.get_aabbs().get_inner();
         let width = inner.size().width();
         let mut point = inner.start();
 

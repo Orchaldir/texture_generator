@@ -73,8 +73,8 @@ impl RenderingComponent {
 
     /// Renders the texture in the area defined by the [`AABB`].
     pub fn render(&self, texture: &mut Texture, data: &Data) {
-        let start = data.get_start();
-        let end = data.get_end();
+        let start = data.get_aabbs().get_start();
+        let end = data.get_aabbs().get_end();
 
         match self {
             RenderingComponent::FillArea { color, depth, .. } => {
@@ -105,7 +105,7 @@ impl RenderingComponent {
                 let depth_calculator = depth_factory.create(data);
                 let base_depth = texture.get_base_depth();
 
-                if let Ok(shape) = shape_factory.create_shape(data.get_inner()) {
+                if let Ok(shape) = shape_factory.create_shape(data.get_aabbs().get_inner()) {
                     while point.y < end.y {
                         point.x = start.x;
 

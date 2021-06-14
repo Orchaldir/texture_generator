@@ -60,11 +60,12 @@ impl BorderComponent {
 
     /// Generates the border in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
-        let size = data.get_inner().size();
+        let aabbs = data.get_aabbs();
+        let size = aabbs.get_inner().size();
 
         match self {
             BorderComponent::MinBorder(component) => {
-                let aabb = BorderComponent::calculate_aabb(data.get_inner(), size, 1, 1);
+                let aabb = BorderComponent::calculate_aabb(aabbs.get_inner(), size, 1, 1);
                 component.generate(texture, &data.transform(aabb));
             }
             BorderComponent::UniformBorder { border, component } => {
@@ -76,7 +77,7 @@ impl BorderComponent {
                 }
 
                 let aabb =
-                    BorderComponent::calculate_aabb(data.get_inner(), size, *border, min_side);
+                    BorderComponent::calculate_aabb(aabbs.get_inner(), size, *border, min_side);
                 component.generate(texture, &data.transform(aabb));
             }
             BorderComponent::ShrinkAxis(border) => border.generate(texture, data),

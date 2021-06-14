@@ -66,7 +66,7 @@ impl HerringbonePattern {
 
     /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
-        let inner = data.get_inner();
+        let inner = data.get_aabbs().get_inner();
         let start = self.calculate_repeating_point(inner.start());
         let end = self.calculate_repeating_point(inner.end()) + 1i32;
 

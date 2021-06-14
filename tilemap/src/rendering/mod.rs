@@ -124,7 +124,7 @@ impl Renderer {
                 let data = Data::new(
                     index,
                     start_instance_id,
-                    AabbData::OneAabb(texture.get_aabb()),
+                    AabbData::from_one_aabb(texture.get_aabb()),
                 );
                 let border = borders[index];
 
@@ -200,7 +200,7 @@ impl Renderer {
                 let data = Data::new(
                     index,
                     start_instance_id,
-                    AabbData::OneAabb(texture.get_aabb()),
+                    AabbData::from_one_aabb(texture.get_aabb()),
                 );
                 let border = borders[index];
 

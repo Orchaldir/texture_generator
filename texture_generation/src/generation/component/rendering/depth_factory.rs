@@ -75,7 +75,7 @@ impl DepthFactory {
                 center_depth,
                 border_depth,
             } => {
-                let aabb = data.get_inner();
+                let aabb = data.get_aabbs().get_inner();
 
                 if *is_horizontal {
                     DepthCalculator::new_cylinder_x(
@@ -98,7 +98,7 @@ impl DepthFactory {
                 diff: *diff,
             },
             DepthFactory::Gradient { random, start, end } => {
-                let aabb = data.get_inner();
+                let aabb = data.get_aabbs().get_inner();
 
                 match random.get_random_instance_u32(data, 4, 0) {
                     0 => {

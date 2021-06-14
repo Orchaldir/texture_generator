@@ -71,8 +71,8 @@ impl FrontStyle {
         is_front: bool,
         texture: &mut Texture,
     ) {
-        let start = data.get_inner().start();
-        let size = data.get_inner().size();
+        let start = data.get_aabbs().get_inner().start();
+        let size = data.get_aabbs().get_inner().size();
         let mut point = start;
         point.y += size.height() as i32 / 2;
 
@@ -124,8 +124,8 @@ impl FrontStyle {
         is_front: bool,
         texture: &mut Texture,
     ) {
-        let start = data.get_inner().start();
-        let size = data.get_inner().size();
+        let start = data.get_aabbs().get_inner().start();
+        let size = data.get_aabbs().get_inner().size();
         let mut point = start;
         point.x += size.width() as i32 / 2;
 

@@ -88,7 +88,7 @@ struct RandomAshlarCreator {
 
 impl RandomAshlarCreator {
     pub fn new(cells_per_side: u32, min_size: u32, max_size: u32, data: Data) -> Self {
-        let inner = data.get_inner();
+        let inner = data.get_aabbs().get_inner();
         let seed = data.get_global_id() as u64;
 
         Self {

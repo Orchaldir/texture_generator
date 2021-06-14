@@ -139,7 +139,7 @@ impl SplitLayout {
     }
 
     fn generate_horizontal(&self, texture: &mut Texture, mut data: Data) {
-        let total_aabb = data.get_inner();
+        let total_aabb = data.get_aabbs().get_inner();
         let total_width = total_aabb.size().width();
         let height = total_aabb.size().height();
         let mut start = total_aabb.start();
@@ -168,7 +168,7 @@ impl SplitLayout {
     }
 
     fn generate_vertical(&self, texture: &mut Texture, mut data: Data) {
-        let total_aabb = data.get_inner();
+        let total_aabb = data.get_aabbs().get_inner();
         let width = total_aabb.size().width();
         let total_height = total_aabb.size().height();
         let mut start = total_aabb.start();
