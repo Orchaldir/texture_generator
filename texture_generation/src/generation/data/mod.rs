@@ -1,5 +1,6 @@
 use crate::math::aabb::AABB;
 use crate::math::point::Point;
+use crate::math::side::Side;
 
 pub mod texture;
 
@@ -35,6 +36,8 @@ pub struct Data {
     /// Used for variations between instances.
     instance_id: usize,
     aabb_data: AabbData,
+    orientation: Side,
+    is_horizontal: bool,
 }
 
 impl Data {
@@ -55,10 +58,22 @@ impl Data {
     }
 
     pub fn new(global_id: usize, instance_id: usize, aabb_data: AabbData) -> Self {
+        Self::full(global_id, instance_id, aabb_data, Side::Right, true)
+    }
+
+    pub fn full(
+        global_id: usize,
+        instance_id: usize,
+        aabb_data: AabbData,
+        orientation: Side,
+        is_horizontal: bool,
+    ) -> Self {
         Self {
             global_id,
             instance_id,
             aabb_data,
+            orientation,
+            is_horizontal,
         }
     }
 

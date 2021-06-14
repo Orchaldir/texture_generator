@@ -107,7 +107,7 @@ mod tests {
     use super::*;
     use crate::rendering::style::edge::EdgeStyle;
     use crate::rendering::style::front::FrontStyle;
-    use crate::rendering::style::furniture::{FurnitureStyle, FurnitureSize};
+    use crate::rendering::style::furniture::{FurnitureSize, FurnitureStyle};
     use crate::rendering::style::wall::WallStyle;
     use crate::tilemap::border::Border;
     use crate::tilemap::tile::Tile;
