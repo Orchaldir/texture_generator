@@ -100,13 +100,13 @@ impl RepeatLayout {
     /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         if self.is_horizontal {
-            self.generate_horizontal(texture, data)
+            self.inner_generate(texture, data.make_horizontal())
         } else {
-            self.generate_vertical(texture, data)
+            self.inner_generate(texture, data.make_vertical())
         }
     }
 
-    fn generate_horizontal(&self, texture: &mut Texture, mut data: Data) {
+    fn inner_generate(&self, texture: &mut Texture, mut data: Data) {
         let inner = data.get_aabbs().get_inner();
         let height = inner.size().height();
         let mut point = inner.start();
@@ -118,21 +118,6 @@ impl RepeatLayout {
             self.component.generate(texture, &data.next(aabb));
 
             point.x += step as i32;
-        }
-    }
-
-    fn generate_vertical(&self, texture: &mut Texture, mut data: Data) {
-        let inner = data.get_aabbs().get_inner();
-        let width = inner.size().width();
-        let mut point = inner.start();
-
-        for step in self.calculate_steps(&data, inner.size().height()) {
-            let size = Size::new(width, step);
-            let aabb = AABB::new(point, size);
-
-            self.component.generate(texture, &data.next(aabb));
-
-            point.y += step as i32;
         }
     }
 

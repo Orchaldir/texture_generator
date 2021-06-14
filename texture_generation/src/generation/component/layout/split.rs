@@ -132,13 +132,13 @@ impl SplitLayout {
     /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         if self.is_horizontal {
-            self.generate_horizontal(texture, data)
+            self.inner_generate(texture, data.make_horizontal())
         } else {
-            self.generate_vertical(texture, data)
+            self.inner_generate(texture, data.make_vertical())
         }
     }
 
-    fn generate_horizontal(&self, texture: &mut Texture, mut data: Data) {
+    fn inner_generate(&self, texture: &mut Texture, mut data: Data) {
         let total_aabb = data.get_aabbs().get_inner();
         let total_width = total_aabb.size().width();
         let height = total_aabb.size().height();
@@ -164,35 +164,6 @@ impl SplitLayout {
 
             component.generate(texture, &data.next(aabb));
             start.x += width as i32;
-        }
-    }
-
-    fn generate_vertical(&self, texture: &mut Texture, mut data: Data) {
-        let total_aabb = data.get_aabbs().get_inner();
-        let width = total_aabb.size().width();
-        let total_height = total_aabb.size().height();
-        let mut start = total_aabb.start();
-
-        if total_height < self.total_fixed_length {
-            return;
-        }
-
-        let remaining_height = total_height - self.total_fixed_length;
-
-        for entry in self.entries.iter() {
-            let (height, component) = match entry {
-                SplitEntry::Fixed(height, component) => (*height, component),
-                SplitEntry::Proportional(factor, component) => {
-                    let height = (remaining_height as f32 * *factor) as u32;
-                    (height, component)
-                }
-            };
-
-            let size = Size::new(width, height);
-            let aabb = AABB::new(start, size);
-
-            component.generate(texture, &data.next(aabb));
-            start.y += height as i32;
         }
     }
 }

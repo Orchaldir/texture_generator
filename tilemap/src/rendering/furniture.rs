@@ -39,7 +39,7 @@ impl<'a> FurnitureRenderer<'a> {
         for (id, furniture) in self.furniture_map.get_all_furniture() {
             let aabb = self.calculate_aabb(*id, furniture);
             let aabb_data = AabbData::from_two_aabb(texture.get_aabb(), aabb);
-            let data = Data::new(0, *id, aabb_data);
+            let data = Data::with_orientation(0, *id, aabb_data, furniture.front_side);
 
             self.resources
                 .furniture_styles

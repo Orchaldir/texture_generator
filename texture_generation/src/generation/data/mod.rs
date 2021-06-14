@@ -38,6 +38,27 @@ impl Data {
         Self::full(global_id, instance_id, aabb_data, Side::Right, true)
     }
 
+    pub fn with_orientation(
+        global_id: usize,
+        instance_id: usize,
+        aabb_data: AabbData,
+        orientation: Side,
+    ) -> Self {
+        let aabbs = match orientation {
+            Side::Top => aabb_data.rotate_origin_revers(),
+            Side::Left => aabb_data.rotate_origin().rotate_origin(),
+            Side::Bottom => aabb_data.rotate_origin(),
+            Side::Right => aabb_data,
+        };
+        Self {
+            global_id,
+            instance_id,
+            aabb_data: aabbs,
+            orientation,
+            is_horizontal: true,
+        }
+    }
+
     pub fn full(
         global_id: usize,
         instance_id: usize,
@@ -134,20 +155,17 @@ impl Data {
     }
 
     pub fn get_aabbs_in_texture(&self) -> AabbData {
+        let aabbs = match self.orientation {
+            Side::Top => self.aabb_data.rotate_origin(),
+            Side::Left => self.aabb_data.rotate_origin().rotate_origin(),
+            Side::Bottom => self.aabb_data.rotate_origin_revers(),
+            Side::Right => self.aabb_data.clone(),
+        };
+
         if self.is_horizontal {
-            match self.orientation {
-                Side::Top => self.aabb_data.rotate_origin_revers(),
-                Side::Left => self.aabb_data.rotate_origin_revers().rotate_origin_revers(),
-                Side::Bottom => self.aabb_data.rotate_origin(),
-                Side::Right => self.aabb_data.clone(),
-            }
+            aabbs
         } else {
-            match self.orientation {
-                Side::Top => self.aabb_data.clone(),
-                Side::Left => self.aabb_data.rotate_origin_revers(),
-                Side::Bottom => self.aabb_data.rotate_origin_revers().rotate_origin_revers(),
-                Side::Right => self.aabb_data.rotate_origin(),
-            }
+            aabbs.rotate_origin_revers()
         }
     }
 }
