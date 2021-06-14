@@ -5,7 +5,8 @@ use crate::math::size::Size;
 pub enum AabbData {
     OneAabb(Size, AABB),
     TwoAabbs {
-        size: Size,
+        /// The size of the whole texture needed for rotating the origin of it.
+        texture_size: Size,
         outer: AABB,
         inner: AABB,
     },
@@ -18,14 +19,18 @@ impl AabbData {
 
     pub fn from_two_aabb(outer: AABB, inner: AABB) -> Self {
         AabbData::TwoAabbs {
-            size: outer.size(),
+            texture_size: outer.size(),
             outer,
             inner,
         }
     }
 
-    pub fn two(size: Size, outer: AABB, inner: AABB) -> Self {
-        AabbData::TwoAabbs { size, outer, inner }
+    pub fn two(texture_size: Size, outer: AABB, inner: AABB) -> Self {
+        AabbData::TwoAabbs {
+            texture_size,
+            outer,
+            inner,
+        }
     }
 
     pub fn get_outer(&self) -> &AABB {
@@ -61,18 +66,24 @@ impl AabbData {
     /// Add or replaces the inner [`AABB`].
     pub fn next(&self, inner: AABB) -> Self {
         match self {
-            AabbData::OneAabb(size, aabb) => AabbData::two(*size, *aabb, inner),
-            AabbData::TwoAabbs { size, outer, .. } => AabbData::two(*size, *outer, inner),
+            AabbData::OneAabb(texture_size, aabb) => AabbData::two(*texture_size, *aabb, inner),
+            AabbData::TwoAabbs {
+                texture_size,
+                outer,
+                ..
+            } => AabbData::two(*texture_size, *outer, inner),
         }
     }
 
     /// Combines the 2 [`AABB`]s into 1 if available.
     pub fn combine(&self) -> Self {
         match self {
-            AabbData::OneAabb(size, aabb) => AabbData::OneAabb(*size, *aabb),
-            AabbData::TwoAabbs { size, outer, inner } => {
-                AabbData::OneAabb(*size, outer.limit(inner))
-            }
+            AabbData::OneAabb(texture_size, aabb) => AabbData::OneAabb(*texture_size, *aabb),
+            AabbData::TwoAabbs {
+                texture_size,
+                outer,
+                inner,
+            } => AabbData::OneAabb(*texture_size, outer.limit(inner)),
         }
     }
 }

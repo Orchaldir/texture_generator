@@ -126,6 +126,13 @@ impl AxisAlignedBoundingBox {
     pub fn limit_to(&self, point: &Point) -> Point {
         point.max(&self.start).min(&self.end)
     }
+
+    /// Rotates the origin of the texture counter clockwise.
+    pub fn rotate_origin_cw(&self, texture_size: Size) -> Self {
+        let y = texture_size.width() as i32 - self.end.x;
+        let start = Point::new(self.start.y, y);
+        AABB::new(start, self.size.flip())
+    }
 }
 
 #[cfg(test)]
@@ -159,11 +166,34 @@ mod tests {
 
     #[test]
     fn test_limit_inside() {
-        let aabb0 = AxisAlignedBoundingBox::with_size(Size::square(10));
-        let aabb1 = AxisAlignedBoundingBox::new(Point::new(1, 2), Size::new(3, 4));
+        let aabb0 = AABB::with_size(Size::square(10));
+        let aabb1 = AABB::new(Point::new(1, 2), Size::new(3, 4));
 
         assert_eq!(aabb0.limit(&aabb1), aabb1);
         assert_eq!(aabb1.limit(&aabb0), aabb1);
         assert_eq!(aabb1.limit(&aabb1), aabb1);
+    }
+
+    #[test]
+    fn test_rotate_origin_cw() {
+        let size = Size::new(20, 30);
+        let aabb = AABB::new(Point::new(3, 2), Size::new(5, 4));
+        let result = AABB::new(Point::new(2, 12), Size::new(4, 5));
+
+        assert_eq!(aabb.rotate_origin_cw(size), result);
+    }
+
+    #[test]
+    fn test_rotate_origin_cw_4_times() {
+        let size = Size::new(20, 30);
+        let aabb = AABB::new(Point::new(3, 2), Size::new(5, 4));
+
+        assert_eq!(
+            aabb.rotate_origin_cw(size)
+                .rotate_origin_cw(size)
+                .rotate_origin_cw(size)
+                .rotate_origin_cw(size),
+            aabb
+        );
     }
 }
