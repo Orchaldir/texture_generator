@@ -5,7 +5,7 @@ use crate::message::EditorMessage;
 use crate::preview::widget::Preview;
 use crate::resources::ResourceInfo;
 use crate::toolbar::Toolbar;
-use iced::{image, Column, Element, Row, Sandbox, Settings};
+use iced::{image, Column, Element, Row, Sandbox, Settings, Text};
 use structopt::StructOpt;
 use texture_generation::utils::logging::init_logging;
 use tool::tools::Tools;
@@ -69,10 +69,20 @@ impl Sandbox for Hello {
             .toolbar
             .view_toolbar(self.tools.get_tool_names(), self.tools.get_current_tool());
         let sidebar = self.tools.view_sidebar(&self.data);
+        let size = self.data.tilemap.get_size();
+        let status_bar = Row::new().push(Text::new(format!(
+            "{} x {} tiles",
+            size.width(),
+            size.height()
+        )));
 
         let main = Row::new()
             .push(Preview::new(self.image.clone()))
             .push(sidebar);
-        Column::new().push(toolbar).push(main).into()
+        Column::new()
+            .push(toolbar)
+            .push(main)
+            .push(status_bar)
+            .into()
     }
 }
