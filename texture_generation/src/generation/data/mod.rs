@@ -56,24 +56,39 @@ impl Data {
 
     /// Updates the inner [`AABB`] for a [`Component`]. Keeps `instance_id`.
     pub fn transform(&self, inner: AABB) -> Self {
-        Self::new(self.global_id, self.instance_id, self.aabb_data.next(inner))
+        Self {
+            aabb_data: self.aabb_data.next(inner),
+            ..*self
+        }
     }
 
     /// Replace the inner [`AABB`] for the next instance of the same [`Component`]. Increases `instance_id`.
     pub fn next(&mut self, inner: AABB) -> Self {
         let old_id = self.instance_id;
         self.instance_id += 1;
-        Self::new(self.global_id, old_id, self.aabb_data.next(inner))
+
+        Self {
+            instance_id: old_id,
+            aabb_data: self.aabb_data.next(inner),
+            ..*self
+        }
     }
 
     /// Replaces the inner [`AABB`] for the next instance of the same [`Component`]. Overwrites `instance_id`.
     pub fn set(&self, instance_id: usize, inner: AABB) -> Self {
-        Self::new(self.global_id, instance_id, self.aabb_data.next(inner))
+        Self {
+            instance_id,
+            aabb_data: self.aabb_data.next(inner),
+            ..*self
+        }
     }
 
     /// Combines the inner & outer [`AABB`]s into the inner one,
     pub fn combine(&self) -> Self {
-        Self::new(self.global_id, self.instance_id, self.aabb_data.combine())
+        Self {
+            aabb_data: self.aabb_data.combine(),
+            ..*self
+        }
     }
 
     pub fn get_global_id(&self) -> usize {

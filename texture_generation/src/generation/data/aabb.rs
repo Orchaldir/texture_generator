@@ -110,7 +110,7 @@ impl AabbData {
         match self {
             AabbData::OneAabb(texture_size, aabb) => AabbData::OneAabb(
                 texture_size.flip(),
-                aabb.rotate_origin_revers(*texture_size),
+                aabb.rotate_origin_reverse(*texture_size),
             ),
             AabbData::TwoAabbs {
                 texture_size,
@@ -118,8 +118,8 @@ impl AabbData {
                 inner,
             } => AabbData::two(
                 texture_size.flip(),
-                outer.rotate_origin_revers(*texture_size),
-                inner.rotate_origin_revers(*texture_size),
+                outer.rotate_origin_reverse(*texture_size),
+                inner.rotate_origin_reverse(*texture_size),
             ),
         }
     }
