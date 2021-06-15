@@ -21,17 +21,17 @@ mod toolbar;
 
 pub fn main() -> iced::Result {
     init_logging();
-    Hello::run(Settings::default())
+    TilemapEditor::run(Settings::default())
 }
 
-struct Hello {
+struct TilemapEditor {
     data: EditorData,
     image: image::Handle,
     tools: Tools,
     toolbar: Toolbar,
 }
 
-impl Hello {
+impl TilemapEditor {
     fn render_tilemap(&self) -> bool {
         info!("Render tilemap images");
         let data = self
@@ -45,14 +45,14 @@ impl Hello {
     }
 }
 
-impl Sandbox for Hello {
+impl Sandbox for TilemapEditor {
     type Message = EditorMessage;
 
-    fn new() -> Hello {
+    fn new() -> TilemapEditor {
         let data = EditorData::new(ResourceInfo::from_args());
         let image = data.render_preview();
 
-        Hello {
+        TilemapEditor {
             data,
             image,
             tools: Tools::new(),
