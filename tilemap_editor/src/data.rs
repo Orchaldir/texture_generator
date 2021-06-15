@@ -39,4 +39,10 @@ impl EditorData {
         let size = texture.get_size();
         image::Handle::from_pixels(size.width(), size.height(), rbg)
     }
+
+    pub fn reload_resources(&mut self) {
+        let (renderer, preview_renderer) = self.resource_info.create_renderers();
+        self.renderer = renderer;
+        self.preview_renderer = preview_renderer;
+    }
 }

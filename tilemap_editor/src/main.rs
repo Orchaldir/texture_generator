@@ -5,6 +5,7 @@ use crate::message::EditorMessage;
 use crate::preview::widget::Preview;
 use crate::resources::ResourceInfo;
 use crate::toolbar::Toolbar;
+use iced::keyboard::KeyCode;
 use iced::{image, Column, Element, Row, Sandbox, Settings};
 use structopt::StructOpt;
 use texture_generation::utils::logging::init_logging;
@@ -51,16 +52,18 @@ impl Sandbox for Hello {
     fn update(&mut self, message: Self::Message) {
         info!("Got message {:?}", message);
 
-        match message {
-            EditorMessage::Render => {
-                self.image = self.data.render_preview();
+        let trigger_preview = match message {
+            EditorMessage::Render => true,
+            EditorMessage::PressedKey(KeyCode::R) => {
+                self.data.reload_resources();
+                true
             }
-            _ => {
-                if self.tools.update(&mut self.data, message) {
-                    info!("Update triggered rendering");
-                    self.image = self.data.render_preview();
-                }
-            }
+            _ => self.tools.update(&mut self.data, message),
+        };
+
+        if trigger_preview {
+            info!("Update triggered rendering");
+            self.image = self.data.render_preview();
         }
     }
 
