@@ -12,7 +12,6 @@ use texture_generation::utils::error::ResourceError;
 use tilemap::rendering::Renderer;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
 use tilemap::tilemap::furniture::Furniture;
-use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap_io::rendering::resource::lookup::ResourceLookup;
 use tilemap_io::tilemap::load;
@@ -93,7 +92,7 @@ impl ResourceInfo {
     }
 
     pub fn load_tilemap(&self) -> (Tilemap2d, FurnitureMap2d) {
-        let tilemap = Tilemap2d::default(Size::new(7, 5), Tile::Empty);
+        let tilemap = load(&self.tilemap_path).unwrap();
 
         info!(
             "Loaded tilemap: width={} height={}",
@@ -103,6 +102,8 @@ impl ResourceInfo {
 
         let mut furniture_map = FurnitureMap2d::empty(tilemap.get_size());
         furniture_map.add(Furniture::new(2, Point::new(2, 2), Size::new(3, 2), Right));
+        furniture_map.add(Furniture::new(3, Point::new(5, 2), Size::new(1, 2), Right));
+        furniture_map.add(Furniture::new(1, Point::new(2, 7), Size::new(6, 1), Top));
 
         (tilemap, furniture_map)
     }

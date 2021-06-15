@@ -9,7 +9,6 @@ use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::PINK;
 use texture_generation::math::shape_factory::ShapeFactory;
-use texture_generation::math::side::Side;
 use texture_generation::math::size::Size;
 use texture_generation::utils::resource::Resource;
 
