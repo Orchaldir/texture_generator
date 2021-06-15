@@ -64,7 +64,13 @@ impl FrontStyle {
         }
     }
 
-    pub fn render_horizontal(&self, resources: &Resources, data: &Data, texture: &mut Texture) {
+    pub fn render_horizontal(
+        &self,
+        resources: &Resources,
+        data: &Data,
+        texture: &mut Texture,
+        is_front: bool,
+    ) {
         let start = data.get_aabbs().get_inner().start();
         let size = data.get_aabbs().get_inner().size();
         let mut point = start;
@@ -76,7 +82,7 @@ impl FrontStyle {
                     data,
                     point,
                     (0, size.width()),
-                    true,
+                    is_front,
                     texture,
                 );
             }
@@ -84,7 +90,7 @@ impl FrontStyle {
                 let door_style = resources.door_styles.get(*door_id);
 
                 for step in calculate_steps(size.width(), *step) {
-                    door_style.render_horizontal(data, point, (0, step), true, texture);
+                    door_style.render_horizontal(data, point, (0, step), is_front, texture);
                     point.x += step as i32;
                 }
             }
@@ -99,7 +105,7 @@ impl FrontStyle {
                             data,
                             point,
                             (0, step),
-                            true,
+                            is_front,
                             texture,
                         );
                     }

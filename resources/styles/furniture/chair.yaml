@@ -8,7 +8,7 @@ depth: 50
 component:
   Layout:
     ComplexSplit:
-      is_horizontal: false
+      is_horizontal: true
       components:
         - Fixed:
             size: 40

@@ -63,6 +63,7 @@ impl FurnitureStyle {
                 resources,
                 &data.transform(aabb_front).make_vertical(),
                 texture,
+                false,
             );
         } else {
             self.component.generate(texture, &new_data);
