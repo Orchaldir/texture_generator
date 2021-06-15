@@ -16,5 +16,4 @@ pub enum EditorMessage {
     ClickedButton { x: u32, y: u32, button: Button },
     NewMap,
     PressedKey(KeyCode),
-    Render,
 }

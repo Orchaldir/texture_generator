@@ -8,6 +8,7 @@ use crate::toolbar::Toolbar;
 use iced::keyboard::KeyCode;
 use iced::{image, Column, Element, Row, Sandbox, Settings};
 use structopt::StructOpt;
+use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::utils::logging::init_logging;
 use tool::tools::Tools;
 
@@ -28,6 +29,20 @@ struct Hello {
     image: image::Handle,
     tools: Tools,
     toolbar: Toolbar,
+}
+
+impl Hello {
+    fn render_tilemap(&self) -> bool {
+        info!("Render tilemap images");
+        let data = self
+            .data
+            .renderer
+            .render(&self.data.tilemap, Some(&self.data.furniture_map));
+        save_color_image(&data, "tilemap-color.png");
+        save_depth_image(&data, "tilemap-depth.png");
+        info!("Finished saving tilemap images");
+        false
+    }
 }
 
 impl Sandbox for Hello {
@@ -53,16 +68,16 @@ impl Sandbox for Hello {
         info!("Got message {:?}", message);
 
         let trigger_preview = match message {
-            EditorMessage::Render => true,
             EditorMessage::PressedKey(KeyCode::R) => {
                 self.data.reload_resources();
                 true
             }
+            EditorMessage::PressedKey(KeyCode::Space) => self.render_tilemap(),
             _ => self.tools.update(&mut self.data, message),
         };
 
         if trigger_preview {
-            info!("Update triggered rendering");
+            info!("Update triggered preview");
             self.image = self.data.render_preview();
         }
     }

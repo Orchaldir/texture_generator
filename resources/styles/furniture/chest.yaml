@@ -21,7 +21,7 @@ component:
                         ConstantColor: "#432711"
                       depth:
                         Cylinder:
-                          is_horizontal: false
+                          is_horizontal: true
                           center_depth: 60
                           border_depth: 1
             - Fixed:
@@ -61,7 +61,7 @@ component:
                         ConstantColor: "#646464"
                       depth:
                         Cylinder:
-                          is_horizontal: false
+                          is_horizontal: true
                           center_depth: 70
                           border_depth: 11
             - Proportional:
@@ -77,7 +77,7 @@ component:
                         ConstantColor: "#646464"
                       depth:
                         Cylinder:
-                          is_horizontal: false
+                          is_horizontal: true
                           center_depth: 70
                           border_depth: 11
             - Proportional:
