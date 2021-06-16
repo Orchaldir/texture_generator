@@ -1,9 +1,12 @@
 use crate::tilemap::furniture::FurnitureDefinition;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use texture_generation::definition::write;
+use std::path::Path;
+use texture_generation::definition::{read, write};
 use texture_generation::math::size::Size;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
+
+pub const FURNITURE_MAP_FILE_ENDING: &str = "ofm";
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct FurnitureMap2dDefinition {
@@ -36,8 +39,14 @@ impl FurnitureMap2dDefinition {
     }
 }
 
-pub fn save_furniture_map(map: &FurnitureMap2d, path: &str) {
-    info!("Save tilemap to '{}'", path);
+pub fn load_furniture_map(path: &Path) -> FurnitureMap2d {
+    info!("Load furniture map from '{:?}'", path);
+    let definition: FurnitureMap2dDefinition = read(path).unwrap();
+    definition.convert_to_map()
+}
+
+pub fn save_furniture_map(map: &FurnitureMap2d, path: &Path) {
+    info!("Save furniture map to '{:?}'", path);
     let definition = FurnitureMap2dDefinition::convert_from_map(map);
     write(&definition, path).unwrap();
 }

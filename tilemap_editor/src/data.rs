@@ -5,6 +5,8 @@ use tilemap::rendering::Renderer;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
 use tilemap::tilemap::selector::Selector;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
+use tilemap_io::tilemap::furniture::map2d::{save_furniture_map, FURNITURE_MAP_FILE_ENDING};
+use tilemap_io::tilemap::{save_tilemap, TILEMAP_FILE_ENDING};
 
 pub struct EditorData {
     pub resource_info: ResourceInfo,
@@ -18,7 +20,7 @@ pub struct EditorData {
 impl EditorData {
     pub fn new(resource_info: ResourceInfo) -> Self {
         let (renderer, preview_renderer) = resource_info.create_renderers();
-        let (tilemap, furniture_map) = resource_info.load_tilemap();
+        let (tilemap, furniture_map) = resource_info.load_maps();
         let selector = Selector::new(preview_renderer.get_tile_size());
 
         EditorData {
@@ -44,5 +46,28 @@ impl EditorData {
         let (renderer, preview_renderer) = self.resource_info.create_renderers();
         self.renderer = renderer;
         self.preview_renderer = preview_renderer;
+    }
+
+    pub fn load_maps(&mut self) {
+        info!("Load the tilemap & furniture map");
+
+        let (tilemap, furniture_map) = self.resource_info.load_maps();
+        self.tilemap = tilemap;
+        self.furniture_map = furniture_map;
+
+        info!("Finished loading");
+    }
+
+    pub fn save_maps(&self) {
+        info!("Save the tilemap & furniture map");
+
+        let map_path = self.resource_info.get_map_path();
+        let tilemap_path = map_path.with_extension(TILEMAP_FILE_ENDING);
+        let furniture_map_path = map_path.with_extension(FURNITURE_MAP_FILE_ENDING);
+
+        save_tilemap(&self.tilemap, &tilemap_path).unwrap();
+        save_furniture_map(&self.furniture_map, &furniture_map_path);
+
+        info!("Finished saving");
     }
 }

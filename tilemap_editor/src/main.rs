@@ -10,8 +10,6 @@ use iced::{image, Column, Element, Row, Sandbox, Settings};
 use structopt::StructOpt;
 use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::utils::logging::init_logging;
-use tilemap_io::tilemap::furniture::map2d::save_furniture_map;
-use tilemap_io::tilemap::save_tilemap;
 use tool::tools::Tools;
 
 mod data;
@@ -34,13 +32,6 @@ struct TilemapEditor {
 }
 
 impl TilemapEditor {
-    fn save(&self) {
-        info!("Save the tilemap & furniture map");
-        save_tilemap(&self.data.tilemap, "tilemap.tm").unwrap();
-        save_furniture_map(&self.data.furniture_map, "furniture_map.ofm");
-        info!("Finished saving");
-    }
-
     fn export_tilemap(&self) {
         info!("Export the tilemap as color & depth images");
         let data = self
@@ -80,8 +71,12 @@ impl Sandbox for TilemapEditor {
                 self.data.reload_resources();
                 true
             }
+            EditorMessage::LoadTilemap | EditorMessage::PressedKey(KeyCode::L) => {
+                self.data.load_maps();
+                true
+            }
             EditorMessage::SaveTilemap | EditorMessage::PressedKey(KeyCode::S) => {
-                self.save();
+                self.data.save_maps();
                 false
             }
             EditorMessage::ExportTilemap | EditorMessage::PressedKey(KeyCode::Space) => {

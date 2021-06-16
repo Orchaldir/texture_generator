@@ -12,7 +12,9 @@ use tilemap::tilemap::tilemap2d::Tilemap2d;
 
 pub mod furniture;
 
-pub fn load(path: &Path) -> Result<Tilemap2d> {
+pub const TILEMAP_FILE_ENDING: &str = "otm";
+
+pub fn load_tilemap(path: &Path) -> Result<Tilemap2d> {
     info!("Load tilemap from {:?}", path);
 
     let string = fs::read_to_string(path).context(format!("Unable to read {:?}", path))?;
@@ -103,8 +105,8 @@ fn load_borders(reader: &mut BufReader<&[u8]>, size: Size) -> Result<Vec<Border>
     Ok(borders)
 }
 
-pub fn save_tilemap(tilemap: &Tilemap2d, path: &str) -> Result<()> {
-    info!("Save tilemap to '{}'", path);
+pub fn save_tilemap(tilemap: &Tilemap2d, path: &Path) -> Result<()> {
+    info!("Save tilemap to '{:?}'", path);
 
     let mut file = File::create(path)?;
 

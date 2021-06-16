@@ -103,7 +103,7 @@ pub fn read<T: DeserializeOwned>(path: &Path) -> Result<T, ResourceError> {
     Ok(data)
 }
 
-pub fn write<T: Serialize>(object: &T, path: &str) -> Result<(), ResourceError> {
+pub fn write<T: Serialize>(object: &T, path: &Path) -> Result<(), ResourceError> {
     let mut file = File::create(path)?;
 
     let s = serde_yaml::to_string(object)?;
