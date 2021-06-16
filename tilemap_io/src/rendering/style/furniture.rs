@@ -25,7 +25,7 @@ impl FurnitureSizeDefinition {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct FurnitureDefinition {
+pub struct FurnitureStyleDefinition {
     tile_size: u32,
     size: FurnitureSizeDefinition,
     depth: u8,
@@ -33,7 +33,7 @@ pub struct FurnitureDefinition {
     front: FrontDefinition,
 }
 
-impl ResourceDefinition for FurnitureDefinition {
+impl ResourceDefinition for FurnitureStyleDefinition {
     type R = FurnitureStyle;
 
     fn convert(&self, name: &str, size: u32) -> Result<FurnitureStyle> {
@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn test_convert_without_handle() {
-        let definition = FurnitureDefinition {
+        let definition = FurnitureStyleDefinition {
             tile_size: 200,
             size: FurnitureSizeDefinition::Fixed(Size::new(10, 20)),
             depth: 123,

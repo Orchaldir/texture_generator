@@ -1,9 +1,10 @@
 use self::Side::*;
 use core::fmt;
+use serde::{Deserialize, Serialize};
 use std::slice::Iter;
 
-/// The 4 sides of a [`Tile`].
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+/// Used for the 4 sides of a [`Tile`] or the orientation of an object.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub enum Side {
     Top,
     Left,

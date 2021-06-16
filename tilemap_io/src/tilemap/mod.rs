@@ -10,6 +10,8 @@ use tilemap::tilemap::border::{get_horizontal_borders_size, get_vertical_borders
 use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 
+pub mod furniture;
+
 pub fn load(path: &Path) -> Result<Tilemap2d> {
     info!("Load tilemap from {:?}", path);
 

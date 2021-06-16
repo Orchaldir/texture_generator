@@ -1,5 +1,5 @@
 use crate::rendering::style::door::DoorDefinition;
-use crate::rendering::style::furniture::FurnitureDefinition;
+use crate::rendering::style::furniture::FurnitureStyleDefinition;
 use crate::rendering::style::node::NodeDefinition;
 use crate::rendering::style::wall::WallDefinition;
 use crate::rendering::style::window::WindowDefinition;
@@ -12,7 +12,7 @@ pub mod lookup;
 
 pub struct ResourceDefinitions {
     doors: Vec<Option<(String, DoorDefinition)>>,
-    furniture: Vec<Option<(String, FurnitureDefinition)>>,
+    furniture: Vec<Option<(String, FurnitureStyleDefinition)>>,
     nodes: Vec<Option<(String, NodeDefinition)>>,
     textures: Vec<Option<(String, TextureDefinition)>>,
     walls: Vec<Option<(String, WallDefinition)>>,

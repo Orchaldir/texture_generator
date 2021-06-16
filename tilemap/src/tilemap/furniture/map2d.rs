@@ -6,15 +6,24 @@ use texture_generation::math::size::Size;
 
 const RESOLUTION: u32 = 2;
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct FurnitureMap2d {
     size: Size,
-    /// The id of the next [`Furniture`]. It starts at 1.
+    /// The id of the next [`Furniture`].
     next_id: usize,
     furniture: HashMap<usize, Furniture>,
 }
 
 impl FurnitureMap2d {
-    pub fn empty(tilemap_size: Size) -> FurnitureMap2d {
+    pub fn new(size: Size, furniture: HashMap<usize, Furniture>) -> Self {
+        FurnitureMap2d {
+            size,
+            next_id: furniture.iter().map(|e| *e.0 + 1).max().unwrap_or_default(),
+            furniture,
+        }
+    }
+
+    pub fn empty(tilemap_size: Size) -> Self {
         let size = tilemap_size * RESOLUTION as f32;
 
         FurnitureMap2d {

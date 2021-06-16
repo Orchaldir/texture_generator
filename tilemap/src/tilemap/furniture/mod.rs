@@ -13,11 +13,11 @@ pub struct Furniture {
 }
 
 impl Furniture {
-    pub fn new(style_id: usize, start: Point, size: Size, front: Side) -> Self {
+    pub fn new(style_id: usize, start: Point, size: Size, front_side: Side) -> Self {
         Furniture {
             style_id,
             aabb: AABB::new(start, size),
-            front_side: front,
+            front_side,
         }
     }
 
