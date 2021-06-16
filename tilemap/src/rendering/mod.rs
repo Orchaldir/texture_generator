@@ -62,10 +62,13 @@ impl Renderer {
 
         texture.apply(&self.resources.post_processes);
 
+        info!("Finished rendering");
+
         texture
     }
 
     fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, texture: &mut Texture) {
+        info!("Render tiles");
         let tiles = tilemap.get_size();
         let mut start = Point::default();
         let mut index = 0;
@@ -93,6 +96,7 @@ impl Renderer {
     }
 
     fn render_borders(&self, tilemap: &Tilemap2d, mut texture: &mut Texture) {
+        info!("Render borders");
         texture.set_base_depth(1);
         let nodes = calculate_node_styles(
             &self.resources.node_styles,

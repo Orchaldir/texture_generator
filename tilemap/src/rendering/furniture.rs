@@ -36,10 +36,16 @@ impl<'a> FurnitureRenderer<'a> {
 
     /// Renders a [`FurnitureMap2d`].
     pub fn render(&self, texture: &mut Texture) {
-        for (id, furniture) in self.furniture_map.get_all_furniture() {
+        let furniture_list = self.furniture_map.get_all_furniture();
+        info!("Render {} furniture", furniture_list.len());
+
+        for (id, furniture) in furniture_list {
             let aabb = self.calculate_aabb(*id, furniture);
             let aabb_data = AabbData::from_two_aabb(texture.get_aabb(), aabb);
-            info!("Render furniture {} with side {}", id, furniture.front_side);
+            info!(
+                "Render furniture with id '{}' & side {}",
+                id, furniture.front_side
+            );
             let data = Data::with_orientation(0, *id, aabb_data, furniture.front_side);
 
             self.resources

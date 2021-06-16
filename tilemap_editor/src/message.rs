@@ -14,6 +14,8 @@ pub enum EditorMessage {
     ChangeWidth(u32),
     ChangeWindowStyle(String),
     ClickedButton { x: u32, y: u32, button: Button },
+    ExportTilemap,
     NewMap,
     PressedKey(KeyCode),
+    ReloadResources,
 }

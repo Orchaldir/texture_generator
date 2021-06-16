@@ -131,7 +131,6 @@ impl SplitLayout {
 
     /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
-        info!("is_horizontal={}", self.is_horizontal);
         if self.is_horizontal {
             self.inner_generate(texture, data.make_horizontal())
         } else {

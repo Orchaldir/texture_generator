@@ -2,6 +2,7 @@ use crate::data::EditorData;
 use crate::message::EditorMessage;
 use crate::tool::door::DoorTool;
 use crate::tool::furniture::FurnitureTool;
+use crate::tool::map::file::FileTool;
 use crate::tool::map::new::NewMapTool;
 use crate::tool::tile::TileTool;
 use crate::tool::wall::WallTool;
@@ -24,6 +25,7 @@ impl Tools {
                 Box::new(WindowTool::default()),
                 Box::new(FurnitureTool::new(1, 1, 10)),
                 Box::new(NewMapTool::new(10, 10, 20)),
+                Box::new(FileTool::default()),
             ],
             current_tool: 0,
         }

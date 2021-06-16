@@ -32,8 +32,8 @@ struct TilemapEditor {
 }
 
 impl TilemapEditor {
-    fn render_tilemap(&self) -> bool {
-        info!("Render tilemap images");
+    fn export_tilemap(&self) -> bool {
+        info!("Export the tilemap as color & depth images");
         let data = self
             .data
             .renderer
@@ -68,11 +68,13 @@ impl Sandbox for TilemapEditor {
         info!("Got message {:?}", message);
 
         let trigger_preview = match message {
-            EditorMessage::PressedKey(KeyCode::R) => {
+            EditorMessage::ReloadResources | EditorMessage::PressedKey(KeyCode::R) => {
                 self.data.reload_resources();
                 true
             }
-            EditorMessage::PressedKey(KeyCode::Space) => self.render_tilemap(),
+            EditorMessage::ExportTilemap | EditorMessage::PressedKey(KeyCode::Space) => {
+                self.export_tilemap()
+            }
             _ => self.tools.update(&mut self.data, message),
         };
 
