@@ -11,8 +11,7 @@ use texture_generation::math::size::Size;
 pub enum EdgeStyle {
     Layout {
         thickness: u32,
-        horizontal: LayoutComponent,
-        vertical: LayoutComponent,
+        component: LayoutComponent,
     },
     Mock(u32),
     Solid {
@@ -31,11 +30,9 @@ impl EdgeStyle {
             bail!("Argument 'thickness' needs to be greater than 0");
         }
 
-        let vertical = component.flip();
         Ok(EdgeStyle::Layout {
             thickness,
-            horizontal: component,
-            vertical,
+            component,
         })
     }
 
@@ -68,11 +65,10 @@ impl EdgeStyle {
         match self {
             EdgeStyle::Layout {
                 thickness,
-                horizontal,
-                ..
+                component,
             } => {
                 let aabb = calculate_horizontal_aabb(node, edge, *thickness);
-                horizontal.generate(texture, &data.transform(aabb))
+                component.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
@@ -95,11 +91,10 @@ impl EdgeStyle {
         match self {
             EdgeStyle::Layout {
                 thickness,
-                vertical,
-                ..
+                component,
             } => {
                 let aabb = calculate_vertical_aabb(node, edge, *thickness);
-                vertical.generate(texture, &data.transform(aabb))
+                component.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {

@@ -120,15 +120,17 @@ impl Renderer {
         let step = self.tile_size as i32;
         let mut index = 0;
         let mut start_instance_id = 222;
+        let aabb_data = AabbData::from_one_aabb(texture.get_aabb());
 
         for y in 0..size.height() {
             start.x = 0;
 
             for _x in 0..size.width() {
-                let data = Data::new(
+                let data = Data::with_orientation(
                     index,
                     start_instance_id,
-                    AabbData::from_one_aabb(texture.get_aabb()),
+                    aabb_data.clone(),
+                    Side::Right,
                 );
                 let border = borders[index];
 
@@ -192,19 +194,20 @@ impl Renderer {
     ) {
         let size = get_vertical_borders_size(tilemap.get_size());
         let borders = tilemap.get_vertical_borders();
-        let mut start = Point::default();
         let step = self.tile_size as i32;
         let mut index = 0;
         let mut start_instance_id = 111;
+        let aabb_data = AabbData::from_one_aabb(texture.get_aabb());
 
-        for _y in 0..size.height() {
-            start.x = 0;
+        for y in 0..size.height() {
+            let mut start = Point::new(y as i32 * step, texture.get_size().width() as i32);
 
             for _x in 0..size.width() {
-                let data = Data::new(
+                let data = Data::with_orientation(
                     index,
                     start_instance_id,
-                    AabbData::from_one_aabb(texture.get_aabb()),
+                    aabb_data.clone(),
+                    Side::Bottom,
                 );
                 let border = borders[index];
 
@@ -213,7 +216,7 @@ impl Renderer {
                     Border::Wall(id) => {
                         let wall_style = self.resources.wall_styles.get(id);
 
-                        wall_style.get_edge_style().render_vertical(
+                        wall_style.get_edge_style().render_horizontal(
                             &data,
                             start,
                             self.calculate_vertical_edge(nodes, size, index),
@@ -231,7 +234,7 @@ impl Renderer {
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
                         let point = Point::new(start.x + offset, start.y);
 
-                        door_style.render_vertical(
+                        door_style.render_horizontal(
                             &data,
                             point,
                             self.calculate_vertical_edge(nodes, size, index),
@@ -242,7 +245,7 @@ impl Renderer {
                     Border::Window { window_id, .. } => {
                         let window_style = self.resources.window_styles.get(window_id);
 
-                        window_style.render_vertical(
+                        window_style.render_horizontal(
                             &data,
                             start,
                             self.calculate_vertical_edge(nodes, size, index),
@@ -251,12 +254,10 @@ impl Renderer {
                     }
                 }
 
-                start.x += step;
+                start.y -= step;
                 index += 1;
                 start_instance_id += 1000;
             }
-
-            start.y += step;
         }
     }
 

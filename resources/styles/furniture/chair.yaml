@@ -33,7 +33,7 @@ component:
                   color:
                     ConstantColor: "#432711"
                   depth:
-                    Dome:
-                      center: 20
-                      border: 1
+                    InterpolateMany:
+                      - [ 0.8,20 ]
+                      - [ 1.0,1 ]
 front: None
