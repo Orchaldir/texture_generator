@@ -57,7 +57,7 @@ impl DoorStyle {
         self.edge_style.get_thickness()
     }
 
-    pub fn render_horizontal(
+    pub fn render(
         &self,
         data: &Data,
         node: Point,
@@ -66,25 +66,10 @@ impl DoorStyle {
         texture: &mut Texture,
     ) {
         if let Some(handle) = &self.handle_style {
-            handle.render_horizontal(data, node, edge, is_front, texture);
+            handle.render(data, node, edge, is_front, texture);
         }
 
-        self.edge_style.render_horizontal(data, node, edge, texture);
-    }
-
-    pub fn render_vertical(
-        &self,
-        data: &Data,
-        node: Point,
-        edge: (i32, u32),
-        is_front: bool,
-        texture: &mut Texture,
-    ) {
-        if let Some(handle) = &self.handle_style {
-            handle.render_vertical(data, node, edge, is_front, texture);
-        }
-
-        self.edge_style.render_vertical(data, node, edge, texture);
+        self.edge_style.render(data, node, edge, texture);
     }
 }
 

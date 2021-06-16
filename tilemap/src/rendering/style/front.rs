@@ -64,7 +64,7 @@ impl FrontStyle {
         }
     }
 
-    pub fn render_horizontal(
+    pub fn render(
         &self,
         resources: &Resources,
         data: &Data,
@@ -78,7 +78,7 @@ impl FrontStyle {
 
         match self {
             FrontStyle::One(door_id) => {
-                resources.door_styles.get(*door_id).render_horizontal(
+                resources.door_styles.get(*door_id).render(
                     data,
                     point,
                     (0, size.width()),
@@ -90,7 +90,7 @@ impl FrontStyle {
                 let door_style = resources.door_styles.get(*door_id);
 
                 for step in calculate_steps(size.width(), *step) {
-                    door_style.render_horizontal(data, point, (0, step), is_front, texture);
+                    door_style.render(data, point, (0, step), is_front, texture);
                     point.x += step as i32;
                 }
             }
@@ -101,7 +101,7 @@ impl FrontStyle {
                     let step = (length * *factor) as u32;
 
                     if let Some(door_id) = o {
-                        resources.door_styles.get(*door_id).render_horizontal(
+                        resources.door_styles.get(*door_id).render(
                             data,
                             point,
                             (0, step),

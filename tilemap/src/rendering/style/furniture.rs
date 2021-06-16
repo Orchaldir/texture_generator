@@ -58,7 +58,7 @@ impl FurnitureStyle {
 
             self.component
                 .generate(texture, &data.transform(aabb_component));
-            self.front.render_horizontal(
+            self.front.render(
                 resources,
                 &data.transform(aabb_front).make_vertical(),
                 texture,

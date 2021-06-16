@@ -139,7 +139,7 @@ impl Renderer {
                     Border::Wall(id) => {
                         let wall_style = self.resources.wall_styles.get(id);
 
-                        wall_style.get_edge_style().render_horizontal(
+                        wall_style.get_edge_style().render(
                             &data,
                             start,
                             self.calculate_horizontal_edge(nodes, index, y),
@@ -157,7 +157,7 @@ impl Renderer {
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
                         let point = Point::new(start.x, start.y + offset);
 
-                        door_style.render_horizontal(
+                        door_style.render(
                             &data,
                             point,
                             self.calculate_horizontal_edge(nodes, index, y),
@@ -168,7 +168,7 @@ impl Renderer {
                     Border::Window { window_id, .. } => {
                         let window_style = self.resources.window_styles.get(window_id);
 
-                        window_style.render_horizontal(
+                        window_style.render(
                             &data,
                             start,
                             self.calculate_horizontal_edge(nodes, index, y),
@@ -216,7 +216,7 @@ impl Renderer {
                     Border::Wall(id) => {
                         let wall_style = self.resources.wall_styles.get(id);
 
-                        wall_style.get_edge_style().render_horizontal(
+                        wall_style.get_edge_style().render(
                             &data,
                             start,
                             self.calculate_vertical_edge(nodes, size, index),
@@ -234,7 +234,7 @@ impl Renderer {
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
                         let point = Point::new(start.x + offset, start.y);
 
-                        door_style.render_horizontal(
+                        door_style.render(
                             &data,
                             point,
                             self.calculate_vertical_edge(nodes, size, index),
@@ -245,7 +245,7 @@ impl Renderer {
                     Border::Window { window_id, .. } => {
                         let window_style = self.resources.window_styles.get(window_id);
 
-                        window_style.render_horizontal(
+                        window_style.render(
                             &data,
                             start,
                             self.calculate_vertical_edge(nodes, size, index),

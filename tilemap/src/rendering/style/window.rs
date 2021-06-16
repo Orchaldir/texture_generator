@@ -35,27 +35,9 @@ impl WindowStyle {
         }
     }
 
-    pub fn render_horizontal(
-        &self,
-        data: &Data,
-        node: Point,
-        edge: (i32, u32),
-        texture: &mut Texture,
-    ) {
-        self.stool_style
-            .render_horizontal(data, node, edge, texture);
-        self.pane_style.render_horizontal(data, node, edge, texture);
-    }
-
-    pub fn render_vertical(
-        &self,
-        data: &Data,
-        node: Point,
-        edge: (i32, u32),
-        texture: &mut Texture,
-    ) {
-        self.stool_style.render_vertical(data, node, edge, texture);
-        self.pane_style.render_vertical(data, node, edge, texture);
+    pub fn render(&self, data: &Data, node: Point, edge: (i32, u32), texture: &mut Texture) {
+        self.stool_style.render(data, node, edge, texture);
+        self.pane_style.render(data, node, edge, texture);
     }
 }
 
