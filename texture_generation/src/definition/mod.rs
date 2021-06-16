@@ -1,10 +1,11 @@
 use crate::math::size::Size;
 use crate::utils::error::ResourceError;
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::fs;
-use std::fs::DirEntry;
-use std::io::Error;
+use std::fs::{DirEntry, File};
+use std::io::{Error, Write};
 use std::path::Path;
 
 pub mod generation;
@@ -100,4 +101,14 @@ pub fn read<T: DeserializeOwned>(path: &Path) -> Result<T, ResourceError> {
     let string = fs::read_to_string(path)?;
     let data: T = serde_yaml::from_str(&string)?;
     Ok(data)
+}
+
+pub fn write<T: Serialize>(object: &T, path: &str) -> Result<(), ResourceError> {
+    let mut file = File::create(path)?;
+
+    let s = serde_yaml::to_string(object)?;
+
+    file.write_all(s.as_bytes())?;
+
+    Ok(())
 }

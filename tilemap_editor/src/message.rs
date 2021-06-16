@@ -18,4 +18,5 @@ pub enum EditorMessage {
     NewMap,
     PressedKey(KeyCode),
     ReloadResources,
+    SaveTilemap,
 }

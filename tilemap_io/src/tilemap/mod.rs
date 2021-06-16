@@ -103,7 +103,7 @@ fn load_borders(reader: &mut BufReader<&[u8]>, size: Size) -> Result<Vec<Border>
     Ok(borders)
 }
 
-pub fn save(tilemap: &Tilemap2d, path: &str) -> Result<()> {
+pub fn save_tilemap(tilemap: &Tilemap2d, path: &str) -> Result<()> {
     info!("Save tilemap to '{}'", path);
 
     let mut file = File::create(path)?;

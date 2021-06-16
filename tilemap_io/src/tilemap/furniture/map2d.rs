@@ -1,6 +1,7 @@
 use crate::tilemap::furniture::FurnitureDefinition;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use texture_generation::definition::write;
 use texture_generation::math::size::Size;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
 
@@ -33,6 +34,12 @@ impl FurnitureMap2dDefinition {
                 }),
         )
     }
+}
+
+pub fn save_furniture_map(map: &FurnitureMap2d, path: &str) {
+    info!("Save tilemap to '{}'", path);
+    let definition = FurnitureMap2dDefinition::convert_from_map(map);
+    write(&definition, path).unwrap();
 }
 
 #[cfg(test)]

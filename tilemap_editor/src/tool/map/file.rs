@@ -5,8 +5,9 @@ use iced::{button, Button, Column, Text};
 
 #[derive(Clone, Debug, Default)]
 pub struct FileTool {
-    reload_resources_state: button::State,
-    render_state: button::State,
+    reload_state: button::State,
+    save_state: button::State,
+    export_state: button::State,
 }
 
 impl Tool for FileTool {
@@ -19,19 +20,22 @@ impl Tool for FileTool {
     }
 
     fn view_sidebar(&mut self, _data: &EditorData) -> Column<EditorMessage> {
-        let reload_resources_button = Button::new(
-            &mut self.reload_resources_state,
-            Text::new("Reload Resources"),
-        )
-        .on_press(EditorMessage::ReloadResources);
-        let render_button = Button::new(&mut self.render_state, Text::new("Export"))
+        let reload_button = Button::new(&mut self.reload_state, Text::new("Reload Resources"))
+            .on_press(EditorMessage::ReloadResources);
+
+        let save_button = Button::new(&mut self.save_state, Text::new("Save the tilemap"))
+            .on_press(EditorMessage::SaveTilemap);
+
+        let export_button = Button::new(&mut self.export_state, Text::new("Export"))
             .on_press(EditorMessage::ExportTilemap);
 
         Column::new()
-            .push(reload_resources_button)
-            .push(render_button)
+            .push(reload_button)
+            .push(save_button)
+            .push(export_button)
             .push(title("Help"))
             .push(help("Press R to reload resources"))
+            .push(help("Press S to save the tilemap"))
             .push(help("Press Space to export as images"))
     }
 }
