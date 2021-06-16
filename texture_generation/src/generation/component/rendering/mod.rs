@@ -73,7 +73,7 @@ impl RenderingComponent {
 
     /// Renders the texture in the area defined by the [`AABB`].
     pub fn render(&self, texture: &mut Texture, data: &Data) {
-        let aabbs = data.get_aabbs_in_texture();
+        let aabbs = data.get_aabbs_in_texture_space();
         let start = aabbs.get_start();
         let end = aabbs.get_end();
 

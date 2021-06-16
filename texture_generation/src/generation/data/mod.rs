@@ -5,6 +5,7 @@ use crate::math::side::Side;
 pub mod aabb;
 pub mod texture;
 
+/// [`Data`] is used to store information while traversing a tree of [`Component`]s during rendering.
 pub struct Data {
     /// The `global_id` is 0, if the plan is to generate a simple texture and not a tilemap.
     /// Otherwise it is the id of the current tile or edge.
@@ -13,7 +14,10 @@ pub struct Data {
     /// Used for variations between instances.
     instance_id: usize,
     aabb_data: AabbData,
+    /// The orientation relative to the texture. Is `Right` by default.
     orientation: Side,
+    /// Some [`Component`]s can switch between horizontal & vertical mode for their children.
+    /// `is_horizontal` keeps track of the current mode.
     is_horizontal: bool,
 }
 
@@ -155,7 +159,8 @@ impl Data {
         &self.aabb_data
     }
 
-    pub fn get_aabbs_in_texture(&self) -> AabbData {
+    /// Returns the [`AabbData`] in texture space so that they can be used to access the texture independent of the `orientation`,
+    pub fn get_aabbs_in_texture_space(&self) -> AabbData {
         let aabbs = match self.orientation {
             Side::Top => self.aabb_data.rotate_origin(),
             Side::Left => self.aabb_data.rotate_origin().rotate_origin(),

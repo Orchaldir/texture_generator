@@ -75,7 +75,7 @@ impl DepthFactory {
                 center_depth,
                 border_depth,
             } => {
-                let aabbs = data.get_aabbs_in_texture();
+                let aabbs = data.get_aabbs_in_texture_space();
                 let aabb = aabbs.get_inner();
 
                 if *is_horizontal {
@@ -99,7 +99,7 @@ impl DepthFactory {
                 diff: *diff,
             },
             DepthFactory::Gradient { random, start, end } => {
-                let aabbs = data.get_aabbs_in_texture();
+                let aabbs = data.get_aabbs_in_texture_space();
                 let aabb = aabbs.get_inner();
 
                 match random.get_random_instance_u32(data, 4, 0) {
