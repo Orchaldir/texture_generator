@@ -5,6 +5,7 @@ use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side::*;
 use texture_generation::math::size::Size;
 use texture_generation::math::vector3::Vector3;
 use texture_generation::utils::error::ResourceError;
@@ -12,7 +13,6 @@ use tilemap::rendering::Renderer;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
 use tilemap::tilemap::furniture::Furniture;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
-use tilemap::tilemap::Side::*;
 use tilemap_io::rendering::resource::lookup::ResourceLookup;
 use tilemap_io::tilemap::load;
 
@@ -101,7 +101,7 @@ impl ResourceInfo {
         );
 
         let mut furniture_map = FurnitureMap2d::empty(tilemap.get_size());
-        furniture_map.add(Furniture::new(2, Point::new(2, 2), Size::new(3, 2), Bottom));
+        furniture_map.add(Furniture::new(2, Point::new(2, 2), Size::new(3, 2), Right));
         furniture_map.add(Furniture::new(3, Point::new(5, 2), Size::new(1, 2), Right));
         furniture_map.add(Furniture::new(1, Point::new(2, 7), Size::new(6, 1), Top));
 

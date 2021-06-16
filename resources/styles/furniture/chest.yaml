@@ -1,11 +1,12 @@
 ---
 tile_size: 512
+size: Fill
 depth: 50
 component:
   Layers:
     - Layout:
         ComplexSplit:
-          is_horizontal: false
+          is_horizontal: true
           components:
             - Fixed:
                 size: 10
@@ -20,7 +21,7 @@ component:
                         ConstantColor: "#432711"
                       depth:
                         Cylinder:
-                          is_horizontal: false
+                          is_horizontal: true
                           center_depth: 60
                           border_depth: 1
             - Fixed:
@@ -28,7 +29,7 @@ component:
                 component:
                   Layout:
                     ComplexSplit:
-                      is_horizontal: true
+                      is_horizontal: false
                       components:
                         - Proportional:
                             weight: 1
@@ -45,7 +46,7 @@ component:
                             component: Empty
     - Layout:
         ComplexSplit:
-          is_horizontal: true
+          is_horizontal: false
           components:
             - Proportional:
                 weight: 1
@@ -60,7 +61,7 @@ component:
                         ConstantColor: "#646464"
                       depth:
                         Cylinder:
-                          is_horizontal: false
+                          is_horizontal: true
                           center_depth: 70
                           border_depth: 11
             - Proportional:
@@ -76,7 +77,7 @@ component:
                         ConstantColor: "#646464"
                       depth:
                         Cylinder:
-                          is_horizontal: false
+                          is_horizontal: true
                           center_depth: 70
                           border_depth: 11
             - Proportional:

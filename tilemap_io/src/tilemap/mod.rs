@@ -262,7 +262,7 @@ fn format_border(border: &Border) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tilemap::tilemap::Side::*;
+    use texture_generation::math::side::Side::*;
 
     #[test]
     fn test_save_and_load() {

@@ -1,7 +1,7 @@
 use crate::tilemap::furniture::Furniture;
-use crate::tilemap::Side;
 use std::collections::HashMap;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side;
 use texture_generation::math::size::Size;
 
 const RESOLUTION: u32 = 2;
@@ -105,7 +105,7 @@ impl FurnitureMap2d {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tilemap::Side::*;
+    use texture_generation::math::side::Side::*;
 
     #[test]
     fn test_empty() {

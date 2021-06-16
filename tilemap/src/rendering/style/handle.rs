@@ -46,7 +46,7 @@ impl HandleStyle {
         })
     }
 
-    pub fn render_horizontal(
+    pub fn render(
         &self,
         data: &Data,
         node: Point,
@@ -55,36 +55,17 @@ impl HandleStyle {
         texture: &mut Texture,
     ) {
         if is_front || self.both_sides {
-            let aabb = self.calculate_horizontal_aabb(node, edge, true);
+            let aabb = self.calculate_aabb(node, edge, true);
             self.component.render(texture, &data.transform(aabb));
         }
 
         if !is_front || self.both_sides {
-            let aabb = self.calculate_horizontal_aabb(node, edge, false);
+            let aabb = self.calculate_aabb(node, edge, false);
             self.component.render(texture, &data.transform(aabb));
         }
     }
 
-    pub fn render_vertical(
-        &self,
-        data: &Data,
-        node: Point,
-        edge: (i32, u32),
-        is_front: bool,
-        texture: &mut Texture,
-    ) {
-        if is_front || self.both_sides {
-            let aabb = self.calculate_vertical_aabb(node, edge, true);
-            self.component.render(texture, &data.transform(aabb));
-        }
-
-        if !is_front || self.both_sides {
-            let aabb = self.calculate_vertical_aabb(node, edge, false);
-            self.component.render(texture, &data.transform(aabb));
-        }
-    }
-
-    fn calculate_horizontal_aabb(&self, node: Point, edge: (i32, u32), is_front: bool) -> AABB {
+    fn calculate_aabb(&self, node: Point, edge: (i32, u32), is_front: bool) -> AABB {
         let (start, length) = edge;
         let handle_offset = if is_front {
             self.offset
@@ -102,32 +83,15 @@ impl HandleStyle {
         let start = Point::new(start_x, node.y + handle_offset);
         AABB::new(start, self.horizontal_size)
     }
-
-    fn calculate_vertical_aabb(&self, node: Point, edge: (i32, u32), is_front: bool) -> AABB {
-        let (start, length) = edge;
-        let handle_offset = if is_front {
-            self.offset
-        } else {
-            -(self.offset + self.vertical_size.width() as i32)
-        };
-        let handle_length = self.vertical_size.height() as i32;
-        let start_y = match self.position {
-            HandlePosition::Centered => node.y + start + (length as i32 - handle_length) / 2,
-            HandlePosition::DistanceToEnd(distance) => {
-                let end = node.y + start + length as i32;
-                end - distance - handle_length
-            }
-        };
-        let start = Point::new(node.x + handle_offset, start_y);
-        AABB::new(start, self.vertical_size)
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
+    use texture_generation::generation::data::aabb::AabbData;
     use texture_generation::math::color::{BLACK, GREEN};
+    use texture_generation::math::side::Side;
     use HandlePosition::*;
 
     #[test]
@@ -163,7 +127,7 @@ mod tests {
         let handle = HandleStyle::new(position, 1, true, Size::new(3, 2), component).unwrap();
         let mut texture = Texture::new(Size::new(11, 8), BLACK);
 
-        handle.render_horizontal(
+        handle.render(
             &Data::for_texture(texture.get_aabb()),
             Point::new(1, 4),
             (1, 9),
@@ -192,14 +156,10 @@ mod tests {
         let position = DistanceToEnd(2);
         let handle = HandleStyle::new(position, 1, true, Size::new(3, 2), component).unwrap();
         let mut texture = Texture::new(Size::new(8, 11), BLACK);
+        let aabb_data = AabbData::from_one_aabb(texture.get_aabb());
+        let data = Data::with_orientation(0, 0, aabb_data, Side::Bottom);
 
-        handle.render_vertical(
-            &Data::for_texture(texture.get_aabb()),
-            Point::new(4, 1),
-            (1, 9),
-            true,
-            &mut texture,
-        );
+        handle.render(&data, Point::new(1, 4), (1, 9), true, &mut texture);
 
         #[rustfmt::skip]
         let result = vec![

@@ -4,5 +4,6 @@ pub mod occupancy;
 pub mod point;
 pub mod shape;
 pub mod shape_factory;
+pub mod side;
 pub mod size;
 pub mod vector3;

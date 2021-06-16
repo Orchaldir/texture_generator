@@ -11,8 +11,7 @@ use texture_generation::math::size::Size;
 pub enum EdgeStyle {
     Layout {
         thickness: u32,
-        horizontal: LayoutComponent,
-        vertical: LayoutComponent,
+        component: LayoutComponent,
     },
     Mock(u32),
     Solid {
@@ -31,11 +30,9 @@ impl EdgeStyle {
             bail!("Argument 'thickness' needs to be greater than 0");
         }
 
-        let vertical = component.flip();
         Ok(EdgeStyle::Layout {
             thickness,
-            horizontal: component,
-            vertical,
+            component,
         })
     }
 
@@ -58,55 +55,21 @@ impl EdgeStyle {
         }
     }
 
-    pub fn render_horizontal(
-        &self,
-        data: &Data,
-        node: Point,
-        edge: (i32, u32),
-        texture: &mut Texture,
-    ) {
+    pub fn render(&self, data: &Data, node: Point, edge: (i32, u32), texture: &mut Texture) {
         match self {
             EdgeStyle::Layout {
                 thickness,
-                horizontal,
-                ..
+                component,
             } => {
-                let aabb = calculate_horizontal_aabb(node, edge, *thickness);
-                horizontal.generate(texture, &data.transform(aabb))
+                let aabb = calculate_aabb(node, edge, *thickness);
+                component.generate(texture, &data.transform(aabb))
             }
             EdgeStyle::Mock(..) => {}
             EdgeStyle::Solid {
                 thickness,
                 component,
             } => {
-                let aabb = calculate_horizontal_aabb(node, edge, *thickness);
-                component.render(texture, &data.transform(aabb))
-            }
-        }
-    }
-
-    pub fn render_vertical(
-        &self,
-        data: &Data,
-        node: Point,
-        edge: (i32, u32),
-        texture: &mut Texture,
-    ) {
-        match self {
-            EdgeStyle::Layout {
-                thickness,
-                vertical,
-                ..
-            } => {
-                let aabb = calculate_vertical_aabb(node, edge, *thickness);
-                vertical.generate(texture, &data.transform(aabb))
-            }
-            EdgeStyle::Mock(..) => {}
-            EdgeStyle::Solid {
-                thickness,
-                component,
-            } => {
-                let aabb = calculate_vertical_aabb(node, edge, *thickness);
+                let aabb = calculate_aabb(node, edge, *thickness);
                 component.render(texture, &data.transform(aabb))
             }
         }
@@ -119,7 +82,7 @@ impl Default for EdgeStyle {
     }
 }
 
-fn calculate_horizontal_aabb(node: Point, edge: (i32, u32), thickness: u32) -> AABB {
+fn calculate_aabb(node: Point, edge: (i32, u32), thickness: u32) -> AABB {
     let (start, length) = edge;
     let half_thickness = (thickness / 2) as i32;
     let start = Point::new(node.x + start, node.y - half_thickness);
@@ -127,20 +90,14 @@ fn calculate_horizontal_aabb(node: Point, edge: (i32, u32), thickness: u32) -> A
     AABB::new(start, size)
 }
 
-fn calculate_vertical_aabb(node: Point, edge: (i32, u32), thickness: u32) -> AABB {
-    let (start, length) = edge;
-    let half_thickness = (thickness / 2) as i32;
-    let start = Point::new(node.x - half_thickness, node.y + start);
-    let size = Size::new(thickness, length);
-    AABB::new(start, size)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use texture_generation::generation::component::rendering::RenderingComponent;
+    use texture_generation::generation::data::aabb::AabbData;
     use texture_generation::generation::data::texture::Texture;
     use texture_generation::math::color::{BLACK, GREEN};
+    use texture_generation::math::side::Side;
 
     #[test]
     #[should_panic]
@@ -160,7 +117,7 @@ mod tests {
         let edge_style = EdgeStyle::new_solid(2, edge_component).unwrap();
         let mut texture = Texture::new(Size::new(11, 6), BLACK);
 
-        edge_style.render_horizontal(
+        edge_style.render(
             &Data::for_texture(texture.get_aabb()),
             Point::new(3, 3),
             (2, 4),
@@ -197,13 +154,10 @@ mod tests {
         let edge_component = RenderingComponent::new_fill_area(GREEN, 4);
         let edge_style = EdgeStyle::new_solid(2, edge_component).unwrap();
         let mut texture = Texture::new(Size::new(6, 11), BLACK);
+        let aabb_data = AabbData::from_one_aabb(texture.get_aabb());
+        let data = Data::with_orientation(0, 0, aabb_data, Side::Bottom);
 
-        edge_style.render_vertical(
-            &Data::for_texture(texture.get_aabb()),
-            Point::new(3, 3),
-            (2, 4),
-            &mut texture,
-        );
+        edge_style.render(&data, Point::new(3, 3), (2, 4), &mut texture);
 
         #[rustfmt::skip]
         let result = vec![

@@ -5,8 +5,10 @@ use crate::message::EditorMessage;
 use crate::preview::widget::Preview;
 use crate::resources::ResourceInfo;
 use crate::toolbar::Toolbar;
+use iced::keyboard::KeyCode;
 use iced::{image, Column, Element, Row, Sandbox, Settings};
 use structopt::StructOpt;
+use texture_generation::generation::io::{save_color_image, save_depth_image};
 use texture_generation::utils::logging::init_logging;
 use tool::tools::Tools;
 
@@ -19,24 +21,38 @@ mod toolbar;
 
 pub fn main() -> iced::Result {
     init_logging();
-    Hello::run(Settings::default())
+    TilemapEditor::run(Settings::default())
 }
 
-struct Hello {
+struct TilemapEditor {
     data: EditorData,
     image: image::Handle,
     tools: Tools,
     toolbar: Toolbar,
 }
 
-impl Sandbox for Hello {
+impl TilemapEditor {
+    fn export_tilemap(&self) -> bool {
+        info!("Export the tilemap as color & depth images");
+        let data = self
+            .data
+            .renderer
+            .render(&self.data.tilemap, Some(&self.data.furniture_map));
+        save_color_image(&data, "tilemap-color.png");
+        save_depth_image(&data, "tilemap-depth.png");
+        info!("Finished saving tilemap images");
+        false
+    }
+}
+
+impl Sandbox for TilemapEditor {
     type Message = EditorMessage;
 
-    fn new() -> Hello {
+    fn new() -> TilemapEditor {
         let data = EditorData::new(ResourceInfo::from_args());
         let image = data.render_preview();
 
-        Hello {
+        TilemapEditor {
             data,
             image,
             tools: Tools::new(),
@@ -51,16 +67,20 @@ impl Sandbox for Hello {
     fn update(&mut self, message: Self::Message) {
         info!("Got message {:?}", message);
 
-        match message {
-            EditorMessage::Render => {
-                self.image = self.data.render_preview();
+        let trigger_preview = match message {
+            EditorMessage::ReloadResources | EditorMessage::PressedKey(KeyCode::R) => {
+                self.data.reload_resources();
+                true
             }
-            _ => {
-                if self.tools.update(&mut self.data, message) {
-                    info!("Update triggered rendering");
-                    self.image = self.data.render_preview();
-                }
+            EditorMessage::ExportTilemap | EditorMessage::PressedKey(KeyCode::Space) => {
+                self.export_tilemap()
             }
+            _ => self.tools.update(&mut self.data, message),
+        };
+
+        if trigger_preview {
+            info!("Update triggered preview");
+            self.image = self.data.render_preview();
         }
     }
 

@@ -68,7 +68,7 @@ impl BrickPattern {
 
     /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
-        let aabb = data.get_inner();
+        let aabb = data.get_aabbs().get_inner();
         let (start_column, start_row) = self.calculate_column_row(aabb.start(), 0);
         let (end_column, end_row) = self.calculate_column_row(aabb.end(), 1);
         let total_bricks = self.calculate_total_bricks(texture);

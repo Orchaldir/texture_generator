@@ -1,6 +1,6 @@
 use iced_native::keyboard::KeyCode;
 use iced_native::mouse::Button;
-use tilemap::tilemap::Side;
+use texture_generation::math::side::Side;
 
 #[derive(Debug, Clone)]
 pub enum EditorMessage {
@@ -14,7 +14,8 @@ pub enum EditorMessage {
     ChangeWidth(u32),
     ChangeWindowStyle(String),
     ClickedButton { x: u32, y: u32, button: Button },
+    ExportTilemap,
     NewMap,
     PressedKey(KeyCode),
-    Render,
+    ReloadResources,
 }

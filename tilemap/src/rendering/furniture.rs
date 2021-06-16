@@ -2,12 +2,13 @@ use crate::rendering::resource::Resources;
 use crate::tilemap::furniture::map2d::FurnitureMap2d;
 use crate::tilemap::furniture::Furniture;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use crate::tilemap::Side;
-use crate::tilemap::Side::*;
+use texture_generation::generation::data::aabb::AabbData;
 use texture_generation::generation::data::texture::Texture;
-use texture_generation::generation::data::{AabbData, Data};
+use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side;
+use texture_generation::math::side::Side::*;
 use texture_generation::math::size::Size;
 
 /// Renders a [`FurnitureMap2d`] in a specific style.
@@ -35,18 +36,22 @@ impl<'a> FurnitureRenderer<'a> {
 
     /// Renders a [`FurnitureMap2d`].
     pub fn render(&self, texture: &mut Texture) {
-        for (id, furniture) in self.furniture_map.get_all_furniture() {
+        let furniture_list = self.furniture_map.get_all_furniture();
+        info!("Render {} furniture", furniture_list.len());
+
+        for (id, furniture) in furniture_list {
             let aabb = self.calculate_aabb(*id, furniture);
-            let aabb_data = AabbData::TwoAabbs {
-                outer: texture.get_aabb(),
-                inner: aabb,
-            };
-            let data = Data::new(0, *id, aabb_data);
+            let aabb_data = AabbData::from_two_aabb(texture.get_aabb(), aabb);
+            info!(
+                "Render furniture with id '{}' & side {}",
+                id, furniture.front_side
+            );
+            let data = Data::with_orientation(0, *id, aabb_data, furniture.front_side);
 
             self.resources
                 .furniture_styles
                 .get(furniture.style_id)
-                .render(self.resources, texture, &data, furniture.front_side);
+                .render(self.resources, texture, &data);
         }
     }
 
@@ -107,7 +112,7 @@ mod tests {
     use super::*;
     use crate::rendering::style::edge::EdgeStyle;
     use crate::rendering::style::front::FrontStyle;
-    use crate::rendering::style::furniture::FurnitureStyle;
+    use crate::rendering::style::furniture::{FurnitureSize, FurnitureStyle};
     use crate::rendering::style::wall::WallStyle;
     use crate::tilemap::border::Border;
     use crate::tilemap::tile::Tile;
@@ -266,6 +271,6 @@ mod tests {
     fn create_furniture(name: &str, color: Color) -> FurnitureStyle {
         let rendering = RenderingComponent::new_fill_area(color, 1);
         let component = Component::Rendering(Box::new(rendering));
-        FurnitureStyle::new(name, 100, component, FrontStyle::None)
+        FurnitureStyle::new(name, FurnitureSize::Fill, 100, component, FrontStyle::None)
     }
 }

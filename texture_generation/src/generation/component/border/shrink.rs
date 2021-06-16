@@ -57,22 +57,11 @@ impl ShrinkAxis {
         })
     }
 
-    // Flips between horizontal & vertical mode.
-    pub fn flip(&self) -> ShrinkAxis {
-        ShrinkAxis {
-            is_horizontal: !self.is_horizontal,
-            min_border: self.min_border,
-            border_diff: self.border_diff,
-            component: self.component.flip(),
-            random: self.random.clone(),
-        }
-    }
-
     /// Generates the pattern in all the repeating areas intersected by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
         let border = self.calculate_random_border(&data);
-        let old_start = data.get_inner().start();
-        let old_size = data.get_inner().size();
+        let old_start = data.get_aabbs().get_inner().start();
+        let old_size = data.get_aabbs().get_inner().size();
 
         let (start, size) = if self.is_horizontal {
             (

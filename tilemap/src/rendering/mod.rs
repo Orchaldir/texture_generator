@@ -9,12 +9,13 @@ use crate::tilemap::node::{
 };
 use crate::tilemap::tile::Tile;
 use crate::tilemap::tilemap2d::Tilemap2d;
-use crate::tilemap::Side;
+use texture_generation::generation::data::aabb::AabbData;
 use texture_generation::generation::data::texture::Texture;
-use texture_generation::generation::data::{AabbData, Data};
+use texture_generation::generation::data::Data;
 use texture_generation::math::aabb::AABB;
 use texture_generation::math::color::BLACK;
 use texture_generation::math::point::Point;
+use texture_generation::math::side::Side;
 use texture_generation::math::size::Size;
 
 pub mod furniture;
@@ -61,10 +62,13 @@ impl Renderer {
 
         texture.apply(&self.resources.post_processes);
 
+        info!("Finished rendering");
+
         texture
     }
 
     fn render_tiles(&self, tilemap: &Tilemap2d, tile_size: Size, texture: &mut Texture) {
+        info!("Render tiles");
         let tiles = tilemap.get_size();
         let mut start = Point::default();
         let mut index = 0;
@@ -92,6 +96,7 @@ impl Renderer {
     }
 
     fn render_borders(&self, tilemap: &Tilemap2d, mut texture: &mut Texture) {
+        info!("Render borders");
         texture.set_base_depth(1);
         let nodes = calculate_node_styles(
             &self.resources.node_styles,
@@ -115,15 +120,17 @@ impl Renderer {
         let step = self.tile_size as i32;
         let mut index = 0;
         let mut start_instance_id = 222;
+        let aabb_data = AabbData::from_one_aabb(texture.get_aabb());
 
         for y in 0..size.height() {
             start.x = 0;
 
             for _x in 0..size.width() {
-                let data = Data::new(
+                let data = Data::with_orientation(
                     index,
                     start_instance_id,
-                    AabbData::OneAabb(texture.get_aabb()),
+                    aabb_data.clone(),
+                    Side::Right,
                 );
                 let border = borders[index];
 
@@ -132,7 +139,7 @@ impl Renderer {
                     Border::Wall(id) => {
                         let wall_style = self.resources.wall_styles.get(id);
 
-                        wall_style.get_edge_style().render_horizontal(
+                        wall_style.get_edge_style().render(
                             &data,
                             start,
                             self.calculate_horizontal_edge(nodes, index, y),
@@ -150,7 +157,7 @@ impl Renderer {
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
                         let point = Point::new(start.x, start.y + offset);
 
-                        door_style.render_horizontal(
+                        door_style.render(
                             &data,
                             point,
                             self.calculate_horizontal_edge(nodes, index, y),
@@ -161,7 +168,7 @@ impl Renderer {
                     Border::Window { window_id, .. } => {
                         let window_style = self.resources.window_styles.get(window_id);
 
-                        window_style.render_horizontal(
+                        window_style.render(
                             &data,
                             start,
                             self.calculate_horizontal_edge(nodes, index, y),
@@ -187,19 +194,20 @@ impl Renderer {
     ) {
         let size = get_vertical_borders_size(tilemap.get_size());
         let borders = tilemap.get_vertical_borders();
-        let mut start = Point::default();
         let step = self.tile_size as i32;
         let mut index = 0;
         let mut start_instance_id = 111;
+        let aabb_data = AabbData::from_one_aabb(texture.get_aabb());
 
-        for _y in 0..size.height() {
-            start.x = 0;
+        for y in 0..size.height() {
+            let mut start = Point::new(y as i32 * step, texture.get_size().width() as i32);
 
             for _x in 0..size.width() {
-                let data = Data::new(
+                let data = Data::with_orientation(
                     index,
                     start_instance_id,
-                    AabbData::OneAabb(texture.get_aabb()),
+                    aabb_data.clone(),
+                    Side::Bottom,
                 );
                 let border = borders[index];
 
@@ -208,7 +216,7 @@ impl Renderer {
                     Border::Wall(id) => {
                         let wall_style = self.resources.wall_styles.get(id);
 
-                        wall_style.get_edge_style().render_vertical(
+                        wall_style.get_edge_style().render(
                             &data,
                             start,
                             self.calculate_vertical_edge(nodes, size, index),
@@ -226,7 +234,7 @@ impl Renderer {
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
                         let point = Point::new(start.x + offset, start.y);
 
-                        door_style.render_vertical(
+                        door_style.render(
                             &data,
                             point,
                             self.calculate_vertical_edge(nodes, size, index),
@@ -237,7 +245,7 @@ impl Renderer {
                     Border::Window { window_id, .. } => {
                         let window_style = self.resources.window_styles.get(window_id);
 
-                        window_style.render_vertical(
+                        window_style.render(
                             &data,
                             start,
                             self.calculate_vertical_edge(nodes, size, index),
@@ -246,12 +254,10 @@ impl Renderer {
                     }
                 }
 
-                start.x += step;
+                start.y -= step;
                 index += 1;
                 start_instance_id += 1000;
             }
-
-            start.y += step;
         }
     }
 

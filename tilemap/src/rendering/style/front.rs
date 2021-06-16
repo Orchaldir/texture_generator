@@ -64,21 +64,21 @@ impl FrontStyle {
         }
     }
 
-    pub fn render_horizontal(
+    pub fn render(
         &self,
         resources: &Resources,
         data: &Data,
-        is_front: bool,
         texture: &mut Texture,
+        is_front: bool,
     ) {
-        let start = data.get_inner().start();
-        let size = data.get_inner().size();
+        let start = data.get_aabbs().get_inner().start();
+        let size = data.get_aabbs().get_inner().size();
         let mut point = start;
         point.y += size.height() as i32 / 2;
 
         match self {
             FrontStyle::One(door_id) => {
-                resources.door_styles.get(*door_id).render_horizontal(
+                resources.door_styles.get(*door_id).render(
                     data,
                     point,
                     (0, size.width()),
@@ -90,7 +90,7 @@ impl FrontStyle {
                 let door_style = resources.door_styles.get(*door_id);
 
                 for step in calculate_steps(size.width(), *step) {
-                    door_style.render_horizontal(data, point, (0, step), is_front, texture);
+                    door_style.render(data, point, (0, step), is_front, texture);
                     point.x += step as i32;
                 }
             }
@@ -101,7 +101,7 @@ impl FrontStyle {
                     let step = (length * *factor) as u32;
 
                     if let Some(door_id) = o {
-                        resources.door_styles.get(*door_id).render_horizontal(
+                        resources.door_styles.get(*door_id).render(
                             data,
                             point,
                             (0, step),
@@ -111,59 +111,6 @@ impl FrontStyle {
                     }
 
                     point.x += step as i32;
-                }
-            }
-            _ => {}
-        }
-    }
-
-    pub fn render_vertical(
-        &self,
-        resources: &Resources,
-        data: &Data,
-        is_front: bool,
-        texture: &mut Texture,
-    ) {
-        let start = data.get_inner().start();
-        let size = data.get_inner().size();
-        let mut point = start;
-        point.x += size.width() as i32 / 2;
-
-        match self {
-            FrontStyle::One(door_id) => {
-                resources.door_styles.get(*door_id).render_vertical(
-                    data,
-                    point,
-                    (0, size.height()),
-                    is_front,
-                    texture,
-                );
-            }
-            FrontStyle::Repeat { step, door_id } => {
-                let door_style = resources.door_styles.get(*door_id);
-
-                for step in calculate_steps(size.height(), *step) {
-                    door_style.render_vertical(data, point, (0, step), is_front, texture);
-                    point.y += step as i32;
-                }
-            }
-            FrontStyle::Split(entries) => {
-                let length = size.height() as f32;
-
-                for (factor, o) in entries {
-                    let step = (length * *factor) as u32;
-
-                    if let Some(door_id) = o {
-                        resources.door_styles.get(*door_id).render_vertical(
-                            data,
-                            point,
-                            (0, step),
-                            is_front,
-                            texture,
-                        );
-                    }
-
-                    point.y += step as i32;
                 }
             }
             _ => {}

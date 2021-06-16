@@ -1,32 +1,11 @@
+use crate::generation::data::aabb::AabbData;
 use crate::math::aabb::AABB;
-use crate::math::point::Point;
+use crate::math::side::Side;
 
+pub mod aabb;
 pub mod texture;
 
-pub enum AabbData {
-    OneAabb(AABB),
-    TwoAabbs { outer: AABB, inner: AABB },
-}
-
-impl AabbData {
-    pub fn next(&self, inner: AABB) -> Self {
-        AabbData::TwoAabbs {
-            outer: match self {
-                AabbData::OneAabb(aabb) => *aabb,
-                AabbData::TwoAabbs { outer, .. } => *outer,
-            },
-            inner,
-        }
-    }
-
-    pub fn combine(&self) -> Self {
-        AabbData::OneAabb(match self {
-            AabbData::OneAabb(aabb) => *aabb,
-            AabbData::TwoAabbs { outer, inner } => outer.limit(inner),
-        })
-    }
-}
-
+/// [`Data`] is used to store information while traversing a tree of [`Component`]s during rendering.
 pub struct Data {
     /// The `global_id` is 0, if the plan is to generate a simple texture and not a tilemap.
     /// Otherwise it is the id of the current tile or edge.
@@ -35,53 +14,137 @@ pub struct Data {
     /// Used for variations between instances.
     instance_id: usize,
     aabb_data: AabbData,
+    /// The orientation relative to the texture. Is `Right` by default.
+    orientation: Side,
+    /// Some [`Component`]s can switch between horizontal & vertical mode for their children.
+    /// `is_horizontal` keeps track of the current mode.
+    is_horizontal: bool,
 }
 
 impl Data {
     pub fn for_texture(aabb: AABB) -> Self {
-        Self::new(0, 0, AabbData::OneAabb(aabb))
+        Self::new(0, 0, AabbData::from_one_aabb(aabb))
     }
 
     pub fn with_global_id(global_id: usize, aabb: AABB) -> Self {
-        Self::new(global_id, 0, AabbData::OneAabb(aabb))
+        Self::new(global_id, 0, AabbData::from_one_aabb(aabb))
     }
 
     pub fn for_two_aabb(global_id: usize, outer: AABB, inner: AABB) -> Self {
-        Self::new(global_id, 0, AabbData::TwoAabbs { outer, inner })
+        Self::new(global_id, 0, AabbData::from_two_aabb(outer, inner))
     }
 
     pub fn only_instance_id(instance_id: usize) -> Self {
-        Self::new(0, instance_id, AabbData::OneAabb(AABB::default()))
+        Self::new(0, instance_id, AabbData::from_one_aabb(AABB::default()))
     }
 
     pub fn new(global_id: usize, instance_id: usize, aabb_data: AabbData) -> Self {
+        Self::full(global_id, instance_id, aabb_data, Side::Right, true)
+    }
+
+    pub fn with_orientation(
+        global_id: usize,
+        instance_id: usize,
+        aabb_data: AabbData,
+        orientation: Side,
+    ) -> Self {
+        let aabbs = match orientation {
+            Side::Top => aabb_data.rotate_origin_revers(),
+            Side::Left => aabb_data.rotate_origin().rotate_origin(),
+            Side::Bottom => aabb_data.rotate_origin(),
+            Side::Right => aabb_data,
+        };
+
+        Self {
+            global_id,
+            instance_id,
+            aabb_data: aabbs,
+            orientation,
+            is_horizontal: true,
+        }
+    }
+
+    pub fn full(
+        global_id: usize,
+        instance_id: usize,
+        aabb_data: AabbData,
+        orientation: Side,
+        is_horizontal: bool,
+    ) -> Self {
         Self {
             global_id,
             instance_id,
             aabb_data,
+            orientation,
+            is_horizontal,
         }
     }
 
     /// Updates the inner [`AABB`] for a [`Component`]. Keeps `instance_id`.
     pub fn transform(&self, inner: AABB) -> Self {
-        Self::new(self.global_id, self.instance_id, self.aabb_data.next(inner))
+        Self {
+            aabb_data: self.aabb_data.next(inner),
+            ..*self
+        }
     }
 
     /// Replace the inner [`AABB`] for the next instance of the same [`Component`]. Increases `instance_id`.
     pub fn next(&mut self, inner: AABB) -> Self {
         let old_id = self.instance_id;
         self.instance_id += 1;
-        Self::new(self.global_id, old_id, self.aabb_data.next(inner))
+
+        Self {
+            instance_id: old_id,
+            aabb_data: self.aabb_data.next(inner),
+            ..*self
+        }
     }
 
     /// Replaces the inner [`AABB`] for the next instance of the same [`Component`]. Overwrites `instance_id`.
     pub fn set(&self, instance_id: usize, inner: AABB) -> Self {
-        Self::new(self.global_id, instance_id, self.aabb_data.next(inner))
+        Self {
+            instance_id,
+            aabb_data: self.aabb_data.next(inner),
+            ..*self
+        }
     }
 
     /// Combines the inner & outer [`AABB`]s into the inner one,
     pub fn combine(&self) -> Self {
-        Self::new(self.global_id, self.instance_id, self.aabb_data.combine())
+        Self {
+            aabb_data: self.aabb_data.combine(),
+            ..*self
+        }
+    }
+
+    pub fn make_horizontal(&self) -> Self {
+        if self.is_horizontal {
+            Self {
+                aabb_data: self.aabb_data.clone(),
+                ..*self
+            }
+        } else {
+            Self {
+                aabb_data: self.aabb_data.rotate_origin_revers(),
+                is_horizontal: true,
+                ..*self
+            }
+        }
+    }
+
+    pub fn make_vertical(&self) -> Self {
+        if !self.is_horizontal {
+            Self {
+                aabb_data: self.aabb_data.clone(),
+                ..*self
+            }
+        } else {
+            Self {
+                aabb_data: self.aabb_data.rotate_origin(),
+                is_horizontal: false,
+                ..*self
+            }
+        }
     }
 
     pub fn get_global_id(&self) -> usize {
@@ -92,33 +155,23 @@ impl Data {
         self.instance_id
     }
 
-    pub fn get_outer(&self) -> &AABB {
-        match &self.aabb_data {
-            AabbData::OneAabb(aabb) => aabb,
-            AabbData::TwoAabbs { outer, .. } => outer,
-        }
+    pub fn get_aabbs(&self) -> &AabbData {
+        &self.aabb_data
     }
 
-    pub fn get_inner(&self) -> &AABB {
-        match &self.aabb_data {
-            AabbData::OneAabb(aabb) => aabb,
-            AabbData::TwoAabbs { inner, .. } => inner,
-        }
-    }
+    /// Returns the [`AabbData`] in texture space so that they can be used to access the texture independent of the `orientation`,
+    pub fn get_aabbs_in_texture_space(&self) -> AabbData {
+        let aabbs = match self.orientation {
+            Side::Top => self.aabb_data.rotate_origin(),
+            Side::Left => self.aabb_data.rotate_origin().rotate_origin(),
+            Side::Bottom => self.aabb_data.rotate_origin_revers(),
+            Side::Right => self.aabb_data.clone(),
+        };
 
-    /// Get the start point fo the combined [`AABB`]s.
-    pub fn get_start(&self) -> Point {
-        match &self.aabb_data {
-            AabbData::OneAabb(aabb) => aabb.start(),
-            AabbData::TwoAabbs { outer, inner, .. } => outer.start().max(&inner.start()),
-        }
-    }
-
-    /// Get the end point fo the combined [`AABB`]s.
-    pub fn get_end(&self) -> Point {
-        match &self.aabb_data {
-            AabbData::OneAabb(aabb) => aabb.end(),
-            AabbData::TwoAabbs { outer, inner, .. } => outer.end().min(&inner.end()),
+        if self.is_horizontal {
+            aabbs
+        } else {
+            aabbs.rotate_origin_revers()
         }
     }
 }
