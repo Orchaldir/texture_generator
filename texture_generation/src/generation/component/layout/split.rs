@@ -113,22 +113,6 @@ impl SplitLayout {
         })
     }
 
-    // Flips between horizontal & vertical mode.
-    pub fn flip(&self) -> SplitLayout {
-        SplitLayout {
-            is_horizontal: !self.is_horizontal,
-            entries: self
-                .entries
-                .iter()
-                .map(|entry| match entry {
-                    SplitEntry::Fixed(v, c) => SplitEntry::Fixed(*v, c.flip()),
-                    SplitEntry::Proportional(v, c) => SplitEntry::Proportional(*v, c.flip()),
-                })
-                .collect(),
-            total_fixed_length: self.total_fixed_length,
-        }
-    }
-
     /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         if self.is_horizontal {

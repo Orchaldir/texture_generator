@@ -20,20 +20,6 @@ pub enum Component {
 }
 
 impl Component {
-    /// Flips between horizontal & vertical mode.
-    pub fn flip(&self) -> Component {
-        match self {
-            Component::Border(component) => Component::Border(Box::new(component.flip())),
-            Component::Empty => Component::Empty,
-            Component::Layers(layers) => {
-                Component::Layers(layers.iter().map(|component| component.flip()).collect())
-            }
-            Component::Layout(component) => Component::Layout(Box::new(component.flip())),
-            Component::Mock(id) => Component::Mock(*id),
-            Component::Rendering(component) => Component::Rendering(Box::new(component.flip())),
-        }
-    }
-
     /// Generates the texture inside the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
         match self {

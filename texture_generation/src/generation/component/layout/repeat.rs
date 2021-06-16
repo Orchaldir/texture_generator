@@ -86,17 +86,6 @@ impl RepeatLayout {
         })
     }
 
-    // Flips between horizontal & vertical mode.
-    pub fn flip(&self) -> RepeatLayout {
-        RepeatLayout {
-            is_horizontal: !self.is_horizontal,
-            min_step: self.min_step,
-            max_step: self.max_step,
-            component: self.component.flip(),
-            random: self.random.clone(),
-        }
-    }
-
     /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: Data) {
         if self.is_horizontal {

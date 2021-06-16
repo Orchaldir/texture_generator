@@ -25,18 +25,6 @@ pub enum LayoutComponent {
 }
 
 impl LayoutComponent {
-    /// Flips between horizontal & vertical mode.
-    pub fn flip(&self) -> LayoutComponent {
-        match self {
-            LayoutComponent::BrickWall(..) => self.clone(),
-            LayoutComponent::Herringbone(..) => self.clone(),
-            LayoutComponent::Mock(_id) => self.clone(),
-            LayoutComponent::RandomAshlar(..) => self.clone(),
-            LayoutComponent::Repeat(repeat) => LayoutComponent::Repeat(repeat.flip()),
-            LayoutComponent::Split(split) => LayoutComponent::Split(split.flip()),
-        }
-    }
-
     /// Generates the component in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
         let combined = data.combine();

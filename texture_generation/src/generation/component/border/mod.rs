@@ -44,20 +44,6 @@ impl BorderComponent {
         BorderComponent::UniformBorder { border, component }
     }
 
-    /// Flips between horizontal & vertical mode.
-    pub fn flip(&self) -> BorderComponent {
-        match self {
-            BorderComponent::MinBorder(component) => BorderComponent::MinBorder(component.flip()),
-            BorderComponent::UniformBorder { border, component } => {
-                BorderComponent::UniformBorder {
-                    border: *border,
-                    component: component.flip(),
-                }
-            }
-            BorderComponent::ShrinkAxis(border) => BorderComponent::ShrinkAxis(border.flip()),
-        }
-    }
-
     /// Generates the border in the area defined by the [`AABB`].
     pub fn generate(&self, texture: &mut Texture, data: &Data) {
         let aabbs = data.get_aabbs();
