@@ -3,15 +3,6 @@ size:
   width: 14
   height: 10
 furniture:
-  - id: 2
-    style_id: 1
-    start:
-      x: 2
-      y: 7
-    size:
-      width: 6
-      height: 1
-    front_side: Top
   - id: 0
     style_id: 2
     start:
@@ -30,3 +21,21 @@ furniture:
       width: 1
       height: 2
     front_side: Right
+  - id: 2
+    style_id: 1
+    start:
+      x: 2
+      y: 7
+    size:
+      width: 6
+      height: 1
+    front_side: Top
+  - id: 3
+    style_id: 4
+    start:
+      x: 9
+      y: 4
+    size:
+      width: 1
+      height: 1
+    front_side: Bottom

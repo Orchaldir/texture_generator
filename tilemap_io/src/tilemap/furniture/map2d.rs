@@ -16,13 +16,15 @@ pub struct FurnitureMap2dDefinition {
 
 impl FurnitureMap2dDefinition {
     pub fn convert_from_map(map: &FurnitureMap2d) -> Self {
+        let mut furniture: Vec<FurnitureDefinition> = map
+            .get_all_furniture()
+            .iter()
+            .map(|(id, furniture)| FurnitureDefinition::convert_from(furniture, *id))
+            .collect();
+        furniture.sort_by(|a, b| a.id.cmp(&b.id));
         Self {
             size: map.get_size().clone(),
-            furniture: map
-                .get_all_furniture()
-                .iter()
-                .map(|(id, furniture)| FurnitureDefinition::convert_from(furniture, *id))
-                .collect(),
+            furniture,
         }
     }
 
@@ -40,13 +42,13 @@ impl FurnitureMap2dDefinition {
 }
 
 pub fn load_furniture_map(path: &Path) -> FurnitureMap2d {
-    info!("Load furniture map from '{:?}'", path);
+    info!("Load furniture map from {:?}", path);
     let definition: FurnitureMap2dDefinition = read(path).unwrap();
     definition.convert_to_map()
 }
 
 pub fn save_furniture_map(map: &FurnitureMap2d, path: &Path) {
-    info!("Save furniture map to '{:?}'", path);
+    info!("Save furniture map to {:?}", path);
     let definition = FurnitureMap2dDefinition::convert_from_map(map);
     write(&definition, path).unwrap();
 }
