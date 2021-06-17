@@ -24,7 +24,7 @@ And a depth image:
 ## Tilemaps
 
 A library & editor to create tilemaps and render them with the previous procedural textures.
-See [an example](resources/tilemaps/example.tm).
+See [an example](resources/tilemaps/example.otm).
 
 The rendered color image with [ambient occlusion](https://en.wikipedia.org/wiki/Ambient_occlusion) & lighting:
 

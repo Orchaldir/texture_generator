@@ -61,7 +61,7 @@ impl FurnitureTool {
             return data.furniture_map.update_furniture(id, furniture);
         }
 
-        return false;
+        false
     }
 
     fn update_width(&mut self, data: &mut EditorData, width: u32) -> bool {
@@ -74,7 +74,7 @@ impl FurnitureTool {
         }
 
         self.width = width;
-        return false;
+        false
     }
 
     fn update_height(&mut self, data: &mut EditorData, height: u32) -> bool {
@@ -87,7 +87,7 @@ impl FurnitureTool {
         }
 
         self.height = height;
-        return false;
+        false
     }
 
     fn move_furniture(&mut self, data: &mut EditorData, x: i32, y: i32) -> bool {
@@ -97,7 +97,7 @@ impl FurnitureTool {
                 AABB::new(old.start() + delta, old.size())
             });
         }
-        return false;
+        false
     }
 
     fn update_front(&mut self, data: &mut EditorData, front: Side) -> bool {
@@ -116,7 +116,7 @@ impl FurnitureTool {
         }
 
         self.front = front;
-        return false;
+        false
     }
 
     fn update_style(&mut self, data: &mut EditorData, style: String) -> bool {
@@ -146,7 +146,7 @@ impl FurnitureTool {
             self.style_id = style_id;
         }
 
-        return false;
+        false
     }
 }
 
@@ -186,7 +186,8 @@ impl Tool for FurnitureTool {
                             data.furniture_map.get_size().to_point(index),
                             Size::new(self.width, self.height),
                             self.front,
-                        );
+                        )
+                        .unwrap();
 
                         if let Some(id) = data.furniture_map.add(furniture) {
                             info!("FurnitureTool: Add furniture with id {}", id);
@@ -244,7 +245,7 @@ impl Tool for FurnitureTool {
             EditorMessage::ChangeHeight,
         );
 
-        let options: Vec<Side> = Side::iterator().map(|s| s.clone()).collect();
+        let options: Vec<Side> = Side::iterator().copied().collect();
         let side_pick_list = PickList::new(
             &mut self.front_state,
             options,

@@ -32,7 +32,7 @@ struct TilemapEditor {
 }
 
 impl TilemapEditor {
-    fn export_tilemap(&self) -> bool {
+    fn export_tilemap(&self) {
         info!("Export the tilemap as color & depth images");
         let data = self
             .data
@@ -40,8 +40,7 @@ impl TilemapEditor {
             .render(&self.data.tilemap, Some(&self.data.furniture_map));
         save_color_image(&data, "tilemap-color.png");
         save_depth_image(&data, "tilemap-depth.png");
-        info!("Finished saving tilemap images");
-        false
+        info!("Finished exporting");
     }
 }
 
@@ -72,8 +71,16 @@ impl Sandbox for TilemapEditor {
                 self.data.reload_resources();
                 true
             }
+            EditorMessage::LoadTilemap | EditorMessage::PressedKey(KeyCode::L) => {
+                self.data.load_maps()
+            }
+            EditorMessage::SaveTilemap | EditorMessage::PressedKey(KeyCode::S) => {
+                self.data.save_maps();
+                false
+            }
             EditorMessage::ExportTilemap | EditorMessage::PressedKey(KeyCode::Space) => {
-                self.export_tilemap()
+                self.export_tilemap();
+                false
             }
             _ => self.tools.update(&mut self.data, message),
         };

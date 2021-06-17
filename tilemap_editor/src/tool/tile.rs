@@ -45,7 +45,7 @@ impl Tool for TileTool {
             _ => {}
         }
 
-        return false;
+        false
     }
 
     fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage> {

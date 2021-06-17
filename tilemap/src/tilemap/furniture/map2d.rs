@@ -1,4 +1,5 @@
 use crate::tilemap::furniture::Furniture;
+use anyhow::{bail, Result};
 use std::collections::HashMap;
 use texture_generation::math::point::Point;
 use texture_generation::math::side::Side;
@@ -6,15 +7,30 @@ use texture_generation::math::size::Size;
 
 const RESOLUTION: u32 = 2;
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct FurnitureMap2d {
     size: Size,
-    /// The id of the next [`Furniture`]. It starts at 1.
+    /// The id of the next [`Furniture`].
     next_id: usize,
     furniture: HashMap<usize, Furniture>,
 }
 
 impl FurnitureMap2d {
-    pub fn empty(tilemap_size: Size) -> FurnitureMap2d {
+    pub fn new(size: Size, furniture: HashMap<usize, Furniture>) -> Result<Self> {
+        if size.width() == 0 {
+            bail!("Argument 'size.width' needs to be greater than 0");
+        } else if size.height() == 0 {
+            bail!("Argument 'size.height' needs to be greater than 0");
+        }
+
+        Ok(FurnitureMap2d {
+            size,
+            next_id: furniture.iter().map(|e| *e.0 + 1).max().unwrap_or_default(),
+            furniture,
+        })
+    }
+
+    pub fn empty(tilemap_size: Size) -> Self {
         let size = tilemap_size * RESOLUTION as f32;
 
         FurnitureMap2d {
@@ -135,7 +151,7 @@ mod tests {
         let mut map = FurnitureMap2d::empty(size);
 
         assert_eq!(
-            map.add(Furniture::new(0, Point::new(-1, 0), Size::square(1), Top)),
+            map.add(Furniture::new(0, Point::new(-1, 0), Size::square(1), Top).unwrap()),
             None
         );
 
@@ -148,7 +164,7 @@ mod tests {
         let mut map = FurnitureMap2d::empty(size);
 
         assert_eq!(
-            map.add(Furniture::new(0, Point::new(4, 2), Size::square(4), Top)),
+            map.add(Furniture::new(0, Point::new(4, 2), Size::square(4), Top).unwrap()),
             None
         );
 
@@ -204,10 +220,10 @@ mod tests {
     }
 
     fn furniture0() -> Furniture {
-        Furniture::new(0, Point::new(0, 0), Size::square(1), Top)
+        Furniture::new(0, Point::new(0, 0), Size::square(1), Top).unwrap()
     }
 
     fn furniture1() -> Furniture {
-        Furniture::new(1, Point::new(1, 0), Size::square(2), Left)
+        Furniture::new(1, Point::new(1, 0), Size::square(2), Left).unwrap()
     }
 }

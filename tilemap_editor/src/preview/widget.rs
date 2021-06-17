@@ -103,35 +103,29 @@ where
         messages: &mut Vec<EditorMessage>,
     ) -> event::Status {
         match event {
-            Event::Keyboard(event) => match event {
-                iced::keyboard::Event::KeyReleased { key_code, .. } => {
-                    let image = self.get_image_rectangle(renderer, layout.bounds());
+            Event::Keyboard(iced::keyboard::Event::KeyReleased { key_code, .. }) => {
+                let image = self.get_image_rectangle(renderer, layout.bounds());
 
-                    if image.contains(cursor_position) {
-                        info!("Released key {:?}", key_code);
-                        messages.push(EditorMessage::PressedKey(key_code))
-                    }
+                if image.contains(cursor_position) {
+                    info!("Released key {:?}", key_code);
+                    messages.push(EditorMessage::PressedKey(key_code))
                 }
-                _ => {}
-            },
-            Event::Mouse(mouse_event) => match mouse_event {
-                mouse::Event::ButtonPressed(button) => {
-                    let bounds = layout.bounds();
-                    let image = self.get_image_rectangle(renderer, bounds);
+            }
+            Event::Mouse(mouse::Event::ButtonPressed(button)) => {
+                let bounds = layout.bounds();
+                let image = self.get_image_rectangle(renderer, bounds);
 
-                    if image.contains(cursor_position) {
-                        let (width, height) = renderer.dimensions(&self.handle);
-                        let position = cursor_position - image.position();
-                        info!("Clicked at {:?} with {:?}", position, button);
-                        messages.push(EditorMessage::ClickedButton {
-                            x: (width as f32 * position.x / image.width) as u32,
-                            y: (height as f32 * position.y / image.height) as u32,
-                            button,
-                        })
-                    }
+                if image.contains(cursor_position) {
+                    let (width, height) = renderer.dimensions(&self.handle);
+                    let position = cursor_position - image.position();
+                    info!("Clicked at {:?} with {:?}", position, button);
+                    messages.push(EditorMessage::ClickedButton {
+                        x: (width as f32 * position.x / image.width) as u32,
+                        y: (height as f32 * position.y / image.height) as u32,
+                        button,
+                    })
                 }
-                _ => {}
-            },
+            }
             _ => {}
         }
         event::Status::Ignored

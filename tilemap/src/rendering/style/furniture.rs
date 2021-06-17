@@ -73,7 +73,7 @@ impl FurnitureStyle {
         let aabbs = data.get_aabbs();
 
         match self.size {
-            FurnitureSize::Fill => aabbs.get_inner().clone(),
+            FurnitureSize::Fill => *aabbs.get_inner(),
             FurnitureSize::Fixed(size) => {
                 let inner = aabbs.get_inner();
                 let center = inner.center();
