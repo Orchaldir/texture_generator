@@ -232,7 +232,7 @@ impl Renderer {
                         let door_style = self.resources.door_styles.get(door_id);
                         let offset = door_style
                             .get_offset(wall_style.get_edge_style().get_thickness(), is_front);
-                        let point = Point::new(start.x + offset, start.y);
+                        let point = Point::new(start.x, start.y - offset);
 
                         door_style.render(
                             &data,
