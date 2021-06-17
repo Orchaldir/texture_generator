@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::path::{Path, PathBuf};
 use structopt::StructOpt;
 use texture_generation::definition::read;
@@ -5,7 +6,6 @@ use texture_generation::generation::process::ambient_occlusion::AmbientOcclusion
 use texture_generation::generation::process::lighting::Lighting;
 use texture_generation::generation::process::PostProcess;
 use texture_generation::math::vector3::Vector3;
-use texture_generation::utils::error::ResourceError;
 use tilemap::rendering::Renderer;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
@@ -50,8 +50,7 @@ impl ResourceInfo {
     pub fn create_renderers(&self) -> (Renderer, Renderer) {
         info!("Load lookup from {:?}", self.lookup_path);
 
-        let lookup: Result<ResourceLookup, ResourceError> = read(&self.lookup_path);
-        let lookup = match lookup {
+        let lookup = match read(&self.lookup_path) {
             Ok(lookup) => lookup,
             Err(error) => {
                 warn!("Couldn't read the lookup, because of {:?}", error);
@@ -92,8 +91,8 @@ impl ResourceInfo {
         (renderer, preview_renderer)
     }
 
-    pub fn load_maps(&self) -> (Tilemap2d, FurnitureMap2d) {
-        let tilemap = load_tilemap(&self.map_path.with_extension(TILEMAP_FILE_ENDING)).unwrap();
+    pub fn load_maps(&self) -> Result<(Tilemap2d, FurnitureMap2d)> {
+        let tilemap = load_tilemap(&self.map_path.with_extension(TILEMAP_FILE_ENDING))?;
 
         info!(
             "Loaded tilemap: width={} height={}",
@@ -102,8 +101,8 @@ impl ResourceInfo {
         );
 
         let furniture_map =
-            load_furniture_map(&self.map_path.with_extension(FURNITURE_MAP_FILE_ENDING));
+            load_furniture_map(&self.map_path.with_extension(FURNITURE_MAP_FILE_ENDING))?;
 
-        (tilemap, furniture_map)
+        Ok((tilemap, furniture_map))
     }
 }

@@ -20,7 +20,7 @@ pub struct EditorData {
 impl EditorData {
     pub fn new(resource_info: ResourceInfo) -> Self {
         let (renderer, preview_renderer) = resource_info.create_renderers();
-        let (tilemap, furniture_map) = resource_info.load_maps();
+        let (tilemap, furniture_map) = resource_info.load_maps().unwrap();
         let selector = Selector::new(preview_renderer.get_tile_size());
 
         EditorData {
@@ -48,14 +48,21 @@ impl EditorData {
         self.preview_renderer = preview_renderer;
     }
 
-    pub fn load_maps(&mut self) {
+    pub fn load_maps(&mut self) -> bool {
         info!("Load the tilemap & furniture map");
 
-        let (tilemap, furniture_map) = self.resource_info.load_maps();
-        self.tilemap = tilemap;
-        self.furniture_map = furniture_map;
-
-        info!("Finished loading");
+        match self.resource_info.load_maps() {
+            Ok((tilemap, furniture_map)) => {
+                self.tilemap = tilemap;
+                self.furniture_map = furniture_map;
+                info!("Finished loading");
+                true
+            }
+            Err(error) => {
+                eprintln!("Error: {:?}", error);
+                false
+            }
+        }
     }
 
     pub fn save_maps(&self) {

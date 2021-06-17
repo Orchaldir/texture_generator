@@ -72,8 +72,7 @@ impl Sandbox for TilemapEditor {
                 true
             }
             EditorMessage::LoadTilemap | EditorMessage::PressedKey(KeyCode::L) => {
-                self.data.load_maps();
-                true
+                self.data.load_maps()
             }
             EditorMessage::SaveTilemap | EditorMessage::PressedKey(KeyCode::S) => {
                 self.data.save_maps();

@@ -1,5 +1,6 @@
 use crate::math::size::Size;
 use crate::utils::error::ResourceError;
+use anyhow::{Context, Result};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -97,9 +98,9 @@ pub fn read_resources<T: DeserializeOwned>(
         .collect()
 }
 
-pub fn read<T: DeserializeOwned>(path: &Path) -> Result<T, ResourceError> {
-    let string = fs::read_to_string(path)?;
-    let data: T = serde_yaml::from_str(&string)?;
+pub fn read<T: DeserializeOwned>(path: &Path) -> Result<T> {
+    let string = fs::read_to_string(path).context(format!("Failed to load {:?}", path))?;
+    let data: T = serde_yaml::from_str(&string).context(format!("Failed to parse {:?}", path))?;
     Ok(data)
 }
 

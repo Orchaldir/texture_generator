@@ -1,4 +1,5 @@
 use crate::tilemap::furniture::FurnitureDefinition;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
@@ -28,7 +29,7 @@ impl FurnitureMap2dDefinition {
         }
     }
 
-    pub fn convert_to_map(self) -> FurnitureMap2d {
+    pub fn convert_to_map(self) -> Result<FurnitureMap2d> {
         FurnitureMap2d::new(
             self.size,
             self.furniture
@@ -38,13 +39,20 @@ impl FurnitureMap2dDefinition {
                     map
                 }),
         )
+        .context("Failed to create the furniture map")
     }
 }
 
-pub fn load_furniture_map(path: &Path) -> FurnitureMap2d {
+pub fn load_furniture_map(path: &Path) -> Result<FurnitureMap2d> {
     info!("Load furniture map from {:?}", path);
-    let definition: FurnitureMap2dDefinition = read(path).unwrap();
-    definition.convert_to_map()
+    let definition: FurnitureMap2dDefinition = read(path).context(format!(
+        "Failed to load the furniture map definition from {:?}",
+        path
+    ))?;
+    definition.convert_to_map().context(format!(
+        "Failed to convert the furniture map from {:?}",
+        path
+    ))
 }
 
 pub fn save_furniture_map(map: &FurnitureMap2d, path: &Path) {
@@ -68,7 +76,9 @@ mod tests_conversion {
         furniture_map.add(Furniture::new(1, Point::new(2, 7), Size::new(6, 1), Top));
 
         assert_eq!(
-            FurnitureMap2dDefinition::convert_from_map(&furniture_map).convert_to_map(),
+            FurnitureMap2dDefinition::convert_from_map(&furniture_map)
+                .convert_to_map()
+                .unwrap(),
             furniture_map
         );
     }

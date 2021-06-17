@@ -1,4 +1,5 @@
 use crate::tilemap::furniture::Furniture;
+use anyhow::{bail, Result};
 use std::collections::HashMap;
 use texture_generation::math::point::Point;
 use texture_generation::math::side::Side;
@@ -15,12 +16,18 @@ pub struct FurnitureMap2d {
 }
 
 impl FurnitureMap2d {
-    pub fn new(size: Size, furniture: HashMap<usize, Furniture>) -> Self {
-        FurnitureMap2d {
+    pub fn new(size: Size, furniture: HashMap<usize, Furniture>) -> Result<Self> {
+        if size.width() == 0 {
+            bail!("Argument 'size.width' needs to be greater than 0");
+        } else if size.height() == 0 {
+            bail!("Argument 'size.height' needs to be greater than 0");
+        }
+
+        Ok(FurnitureMap2d {
             size,
             next_id: furniture.iter().map(|e| *e.0 + 1).max().unwrap_or_default(),
             furniture,
-        }
+        })
     }
 
     pub fn empty(tilemap_size: Size) -> Self {
