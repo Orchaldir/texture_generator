@@ -245,7 +245,7 @@ impl Tool for FurnitureTool {
             EditorMessage::ChangeHeight,
         );
 
-        let options: Vec<Side> = Side::iterator().map(|s| s.clone()).collect();
+        let options: Vec<Side> = Side::iterator().copied().collect();
         let side_pick_list = PickList::new(
             &mut self.front_state,
             options,

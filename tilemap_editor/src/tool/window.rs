@@ -65,7 +65,7 @@ impl Tool for WindowTool {
             _ => {}
         }
 
-        return false;
+        false
     }
 
     fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage> {

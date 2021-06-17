@@ -45,7 +45,7 @@ impl Tools {
             _ => return self.tools[self.current_tool].update(data, message),
         }
 
-        return false;
+        false
     }
 
     pub fn view_sidebar(&mut self, data: &EditorData) -> Element<EditorMessage> {

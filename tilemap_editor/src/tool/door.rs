@@ -62,7 +62,7 @@ impl Tool for DoorTool {
             _ => {}
         }
 
-        return false;
+        false
     }
 
     fn view_sidebar(&mut self, data: &EditorData) -> Column<EditorMessage> {

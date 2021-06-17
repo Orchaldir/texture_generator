@@ -24,7 +24,7 @@ impl FurnitureMap2dDefinition {
             .collect();
         furniture.sort_by(|a, b| a.id.cmp(&b.id));
         Self {
-            size: map.get_size().clone(),
+            size: *map.get_size(),
             furniture,
         }
     }

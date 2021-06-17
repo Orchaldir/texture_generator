@@ -42,7 +42,7 @@ impl Tool for FileTool {
             .push(title("Help"))
             .push(help("Press R to reload resources"))
             .push(help("Press S to save the maps"))
-            .push(help("Press L to save the maps"))
+            .push(help("Press L to load the maps"))
             .push(help("Press Space to export as images"))
     }
 }
