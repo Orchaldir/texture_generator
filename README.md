@@ -28,12 +28,12 @@ See [an example](resources/tilemaps/example.otm).
 
 The rendered color image with [ambient occlusion](https://en.wikipedia.org/wiki/Ambient_occlusion) & lighting:
 
-![Color image](../assets/v0.4/color.png)
+![Color image](../assets/v0.5/color.png)
 
 And the depth image:
 
-![Depth Image](../assets/v0.4/depth.png)
+![Depth Image](../assets/v0.5/depth.png)
 
-The editor uses the GUI library [Iced](https://github.com/hecrj/iced).
+The editor uses the GUI library [Iced](https://github.com/hecrj/iced):
 
 ![Editor with Iced](../assets/v0.5/editor.png)
