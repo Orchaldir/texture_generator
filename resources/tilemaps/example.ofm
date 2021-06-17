@@ -33,9 +33,27 @@ furniture:
   - id: 3
     style_id: 4
     start:
-      x: 9
+      x: 8
       y: 4
     size:
-      width: 1
-      height: 1
+      width: 2
+      height: 2
+    front_side: Bottom
+  - id: 4
+    style_id: 0
+    start:
+      x: 8
+      y: 6
+    size:
+      width: 4
+      height: 2
+    front_side: Top
+  - id: 5
+    style_id: 4
+    start:
+      x: 10
+      y: 4
+    size:
+      width: 2
+      height: 2
     front_side: Bottom
