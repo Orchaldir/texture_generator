@@ -1,6 +1,6 @@
 [package]
 name = "tilemap_editor"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Orchaldir <orchaldir@gmail.com>"]
 edition = "2018"
 
