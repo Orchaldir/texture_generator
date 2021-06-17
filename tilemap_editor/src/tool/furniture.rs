@@ -61,7 +61,7 @@ impl FurnitureTool {
             return data.furniture_map.update_furniture(id, furniture);
         }
 
-        return false;
+        false
     }
 
     fn update_width(&mut self, data: &mut EditorData, width: u32) -> bool {
@@ -74,7 +74,7 @@ impl FurnitureTool {
         }
 
         self.width = width;
-        return false;
+        false
     }
 
     fn update_height(&mut self, data: &mut EditorData, height: u32) -> bool {
@@ -87,7 +87,7 @@ impl FurnitureTool {
         }
 
         self.height = height;
-        return false;
+        false
     }
 
     fn move_furniture(&mut self, data: &mut EditorData, x: i32, y: i32) -> bool {
@@ -97,7 +97,7 @@ impl FurnitureTool {
                 AABB::new(old.start() + delta, old.size())
             });
         }
-        return false;
+        false
     }
 
     fn update_front(&mut self, data: &mut EditorData, front: Side) -> bool {
@@ -116,7 +116,7 @@ impl FurnitureTool {
         }
 
         self.front = front;
-        return false;
+        false
     }
 
     fn update_style(&mut self, data: &mut EditorData, style: String) -> bool {
@@ -146,7 +146,7 @@ impl FurnitureTool {
             self.style_id = style_id;
         }
 
-        return false;
+        false
     }
 }
 
