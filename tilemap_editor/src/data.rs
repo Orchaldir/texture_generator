@@ -1,9 +1,11 @@
 use crate::resources::ResourceInfo;
 use iced_native::image;
 use texture_generation::math::color::convert_bgra;
+use texture_generation::math::size::Size;
 use tilemap::rendering::Renderer;
 use tilemap::tilemap::furniture::map2d::FurnitureMap2d;
 use tilemap::tilemap::selector::Selector;
+use tilemap::tilemap::tile::Tile;
 use tilemap::tilemap::tilemap2d::Tilemap2d;
 use tilemap_io::tilemap::furniture::map2d::{save_furniture_map, FURNITURE_MAP_FILE_ENDING};
 use tilemap_io::tilemap::{save_tilemap, TILEMAP_FILE_ENDING};
@@ -20,7 +22,15 @@ pub struct EditorData {
 impl EditorData {
     pub fn new(resource_info: ResourceInfo) -> Self {
         let (renderer, preview_renderer) = resource_info.create_renderers();
-        let (tilemap, furniture_map) = resource_info.load_maps().unwrap();
+        let (tilemap, furniture_map) = match resource_info.load_maps() {
+            Ok(maps) => maps,
+            Err(error) => {
+                eprintln!("Error: {:?}", error);
+                let tilemap = Tilemap2d::default(Size::square(5), Tile::Floor(999));
+                let furniture_map = FurnitureMap2d::empty(tilemap.get_size());
+                (tilemap, furniture_map)
+            }
+        };
         let selector = Selector::new(preview_renderer.get_tile_size());
 
         EditorData {
