@@ -186,7 +186,8 @@ impl Tool for FurnitureTool {
                             data.furniture_map.get_size().to_point(index),
                             Size::new(self.width, self.height),
                             self.front,
-                        );
+                        )
+                        .unwrap();
 
                         if let Some(id) = data.furniture_map.add(furniture) {
                             info!("FurnitureTool: Add furniture with id {}", id);

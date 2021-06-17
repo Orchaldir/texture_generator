@@ -30,16 +30,30 @@ impl FurnitureMap2dDefinition {
     }
 
     pub fn convert_to_map(self) -> Result<FurnitureMap2d> {
-        FurnitureMap2d::new(
-            self.size,
-            self.furniture
-                .into_iter()
-                .fold(HashMap::new(), |mut map, furniture| {
-                    map.insert(furniture.id, furniture.convert_to());
-                    map
-                }),
-        )
-        .context("Failed to create the furniture map")
+        let mut hashmap = HashMap::new();
+
+        for (i, definition) in self.furniture.iter().enumerate() {
+            if !self
+                .size
+                .is_area_inside(&definition.start, &definition.size)
+            {
+                bail!("{}.furniture is (partly) outside the furniture map", i + 1)
+            }
+
+            let furniture = definition
+                .convert_to()
+                .context(format!("Failed to convert the {}.furniture", i + 1))?;
+
+            if hashmap.insert(definition.id, furniture).is_some() {
+                bail!(
+                    "{}.furniture has id '{}', which is already in use",
+                    i + 1,
+                    definition.id
+                )
+            }
+        }
+
+        FurnitureMap2d::new(self.size, hashmap).context("Failed to create the furniture map")
     }
 }
 
@@ -71,9 +85,9 @@ mod tests_conversion {
     #[test]
     fn test_empty() {
         let mut furniture_map = FurnitureMap2d::empty(Size::new(5, 10));
-        furniture_map.add(Furniture::new(2, Point::new(2, 2), Size::new(3, 2), Right));
-        furniture_map.add(Furniture::new(3, Point::new(5, 2), Size::new(1, 2), Left));
-        furniture_map.add(Furniture::new(1, Point::new(2, 7), Size::new(6, 1), Top));
+        furniture_map.add(Furniture::new(2, Point::new(2, 2), Size::new(3, 2), Right).unwrap());
+        furniture_map.add(Furniture::new(3, Point::new(5, 2), Size::new(1, 2), Left).unwrap());
+        furniture_map.add(Furniture::new(1, Point::new(2, 7), Size::new(6, 1), Top).unwrap());
 
         assert_eq!(
             FurnitureMap2dDefinition::convert_from_map(&furniture_map)

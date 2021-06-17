@@ -1,3 +1,4 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use texture_generation::math::point::Point;
 use texture_generation::math::side::Side;
@@ -26,7 +27,7 @@ impl FurnitureDefinition {
         }
     }
 
-    pub fn convert_to(self) -> Furniture {
+    pub fn convert_to(&self) -> Result<Furniture> {
         Furniture::new(self.style_id, self.start, self.size, self.front_side)
     }
 }

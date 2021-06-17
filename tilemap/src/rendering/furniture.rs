@@ -134,11 +134,7 @@ mod tests {
         tilemap.set_border(1, Bottom, Border::Wall(3));
 
         let mut furniture_map = FurnitureMap2d::empty(size);
-        furniture_map.add(Furniture::without_front(
-            0,
-            Point::new(0, 0),
-            Size::new(2, 4),
-        ));
+        furniture_map.add(Furniture::without_front(0, Point::new(0, 0), Size::new(2, 4)).unwrap());
 
         let mut texture = Texture::new(Size::new(8, 16), BLACK);
 
@@ -203,11 +199,7 @@ mod tests {
         tilemap.set_border(0, Bottom, Border::Wall(0));
 
         let mut furniture_map = FurnitureMap2d::empty(size);
-        furniture_map.add(Furniture::without_front(
-            0,
-            Point::new(1, 0),
-            Size::new(1, 1),
-        ));
+        furniture_map.add(Furniture::without_front(0, Point::new(1, 0), Size::new(1, 1)).unwrap());
 
         let mut texture = Texture::new(Size::new(8, 8), BLACK);
 
