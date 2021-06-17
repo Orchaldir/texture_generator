@@ -26,14 +26,29 @@ component:
         - Proportional:
             weight: 1
             component:
-              Rendering:
-                Shape:
-                  shape_factory:
-                    RoundedRectangle: 0.5
-                  color:
-                    ConstantColor: "#432711"
-                  depth:
-                    InterpolateMany:
-                      - [ 0.8,20 ]
-                      - [ 1.0,1 ]
+              Layers:
+                - Rendering:
+                    Shape:
+                      shape_factory:
+                        RoundedRectangle: 0.5
+                      color:
+                        ConstantColor: "#432711"
+                      depth:
+                        InterpolateMany:
+                          - [ 0.8,20 ]
+                          - [ 1.0,1 ]
+                - Border:
+                    UniformBorder:
+                      border: 30
+                      component:
+                        Rendering:
+                          Shape:
+                            shape_factory:
+                              RoundedRectangle: 0.5
+                            color:
+                              ConstantColor: "#FF0000"
+                            depth:
+                              InterpolateMany:
+                                - [ 0.8,60 ]
+                                - [ 1.0,21 ]
 front: None
