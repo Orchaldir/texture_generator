@@ -1,30 +1,30 @@
-use crate::generation::component::rendering::color::ColorSelector;
+use crate::generation::component::rendering::color_factory::ColorFactory;
 use crate::math::color::Color;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub enum ColorSelectorDefinition {
+pub enum ColorFactoryDefinition {
     ConstantColor(String),
     Sequence(Vec<String>),
     Random(Vec<String>),
     Probability(Vec<(usize, String)>),
 }
 
-impl ColorSelectorDefinition {
-    pub fn convert(&self) -> Result<ColorSelector> {
+impl ColorFactoryDefinition {
+    pub fn convert(&self) -> Result<ColorFactory> {
         match self {
-            ColorSelectorDefinition::ConstantColor(color) => {
+            ColorFactoryDefinition::ConstantColor(color) => {
                 let color = Color::convert(&color)?;
-                Ok(ColorSelector::ConstantColor(color))
+                Ok(ColorFactory::ConstantColor(color))
             }
-            ColorSelectorDefinition::Sequence(colors) => {
-                ColorSelector::new_sequence(convert_colors(colors)?)
+            ColorFactoryDefinition::Sequence(colors) => {
+                ColorFactory::new_sequence(convert_colors(colors)?)
             }
-            ColorSelectorDefinition::Random(colors) => {
-                ColorSelector::new_random(convert_colors(colors)?)
+            ColorFactoryDefinition::Random(colors) => {
+                ColorFactory::new_random(convert_colors(colors)?)
             }
-            ColorSelectorDefinition::Probability(colors) => {
+            ColorFactoryDefinition::Probability(colors) => {
                 let mut converted_colors = Vec::with_capacity(colors.len());
 
                 for (probability, color) in colors {
@@ -32,7 +32,7 @@ impl ColorSelectorDefinition {
                     converted_colors.push((*probability, color));
                 }
 
-                ColorSelector::new_probability(converted_colors)
+                ColorFactory::new_probability(converted_colors)
             }
         }
     }
@@ -57,42 +57,42 @@ mod tests {
 
     #[test]
     fn test_convert_const() {
-        let definition = ColorSelectorDefinition::ConstantColor("#FFA500".to_string());
-        let selector = ColorSelector::ConstantColor(ORANGE);
+        let definition = ColorFactoryDefinition::ConstantColor("#FFA500".to_string());
+        let factory = ColorFactory::ConstantColor(ORANGE);
 
-        assert_eq!(selector, definition.convert().unwrap())
+        assert_eq!(factory, definition.convert().unwrap())
     }
 
     #[test]
     fn test_convert_uniform() {
         let definition =
-            ColorSelectorDefinition::Sequence(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
-        let selector = ColorSelector::new_sequence(vec![ORANGE, PINK]).unwrap();
+            ColorFactoryDefinition::Sequence(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
+        let factory = ColorFactory::new_sequence(vec![ORANGE, PINK]).unwrap();
 
-        assert_eq!(selector, definition.convert().unwrap())
+        assert_eq!(factory, definition.convert().unwrap())
     }
 
     #[test]
     fn test_convert_random() {
         let definition =
-            ColorSelectorDefinition::Random(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
-        let selector = ColorSelector::new_random(vec![ORANGE, PINK]).unwrap();
+            ColorFactoryDefinition::Random(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
+        let factory = ColorFactory::new_random(vec![ORANGE, PINK]).unwrap();
 
-        assert_eq!(selector, definition.convert().unwrap())
+        assert_eq!(factory, definition.convert().unwrap())
     }
 
     #[test]
     fn test_convert_probability() {
-        let definition = ColorSelectorDefinition::Probability(vec![
+        let definition = ColorFactoryDefinition::Probability(vec![
             (10, "#FFA500".to_string()),
             (5, "#FF0080".to_string()),
         ]);
-        let selector = ColorSelector::Probability {
+        let factory = ColorFactory::Probability {
             random: Random::Hash,
             colors: vec![(10, ORANGE), (15, PINK)],
             max_number: 15,
         };
 
-        assert_eq!(selector, definition.convert().unwrap())
+        assert_eq!(factory, definition.convert().unwrap())
     }
 }
