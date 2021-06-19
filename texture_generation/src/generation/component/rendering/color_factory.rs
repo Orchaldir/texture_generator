@@ -3,6 +3,7 @@ use crate::generation::data::Data;
 use crate::generation::random::{Random, COLOR_INDEX};
 use crate::math::color::Color;
 use anyhow::{bail, Result};
+use noise::Perlin;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ColorFactory {
@@ -17,6 +18,12 @@ pub enum ColorFactory {
         random: Random,
         colors: Vec<(usize, Color)>,
         max_number: usize,
+    },
+    /// Uses a noise function to interpolate between 2 colors.
+    Noise {
+        color0: Color,
+        color1: Color,
+        scale: f64,
     },
 }
 
@@ -109,6 +116,16 @@ impl ColorFactory {
 
                 ColorSelector::ConstantColor(colors[0].1)
             }
+            ColorFactory::Noise {
+                color0,
+                color1,
+                scale,
+            } => ColorSelector::Noise {
+                color0: *color0,
+                color1: *color1,
+                noise: Perlin::new(),
+                scale: *scale,
+            },
         }
     }
 }

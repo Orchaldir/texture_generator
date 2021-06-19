@@ -1,3 +1,4 @@
+use crate::definition::convert;
 use crate::generation::component::rendering::color_factory::ColorFactory;
 use crate::math::color::Color;
 use anyhow::Result;
@@ -9,10 +10,15 @@ pub enum ColorFactoryDefinition {
     Sequence(Vec<String>),
     Random(Vec<String>),
     Probability(Vec<(usize, String)>),
+    Noise {
+        color0: String,
+        color1: String,
+        scale: u32,
+    },
 }
 
 impl ColorFactoryDefinition {
-    pub fn convert(&self) -> Result<ColorFactory> {
+    pub fn convert(&self, factor: f32) -> Result<ColorFactory> {
         match self {
             ColorFactoryDefinition::ConstantColor(color) => {
                 let color = Color::convert(&color)?;
@@ -34,6 +40,15 @@ impl ColorFactoryDefinition {
 
                 ColorFactory::new_probability(converted_colors)
             }
+            ColorFactoryDefinition::Noise {
+                color0,
+                color1,
+                scale,
+            } => Ok(ColorFactory::Noise {
+                color0: Color::convert(&color0)?,
+                color1: Color::convert(&color1)?,
+                scale: convert(*scale, factor) as f64,
+            }),
         }
     }
 }
@@ -60,7 +75,7 @@ mod tests {
         let definition = ColorFactoryDefinition::ConstantColor("#FFA500".to_string());
         let factory = ColorFactory::ConstantColor(ORANGE);
 
-        assert_eq!(factory, definition.convert().unwrap())
+        assert_eq!(factory, definition.convert(1.0).unwrap())
     }
 
     #[test]
@@ -69,7 +84,7 @@ mod tests {
             ColorFactoryDefinition::Sequence(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
         let factory = ColorFactory::new_sequence(vec![ORANGE, PINK]).unwrap();
 
-        assert_eq!(factory, definition.convert().unwrap())
+        assert_eq!(factory, definition.convert(2.0).unwrap())
     }
 
     #[test]
@@ -78,7 +93,7 @@ mod tests {
             ColorFactoryDefinition::Random(vec!["#FFA500".to_string(), "#FF0080".to_string()]);
         let factory = ColorFactory::new_random(vec![ORANGE, PINK]).unwrap();
 
-        assert_eq!(factory, definition.convert().unwrap())
+        assert_eq!(factory, definition.convert(3.0).unwrap())
     }
 
     #[test]
@@ -93,6 +108,22 @@ mod tests {
             max_number: 15,
         };
 
-        assert_eq!(factory, definition.convert().unwrap())
+        assert_eq!(factory, definition.convert(4.0).unwrap())
+    }
+
+    #[test]
+    fn test_convert_noise() {
+        let definition = ColorFactoryDefinition::Noise {
+            color0: "#FFA500".to_string(),
+            color1: "#FF0080".to_string(),
+            scale: 100,
+        };
+        let factory = ColorFactory::Noise {
+            color0: ORANGE,
+            color1: PINK,
+            scale: 500.0,
+        };
+
+        assert_eq!(factory, definition.convert(5.0).unwrap())
     }
 }

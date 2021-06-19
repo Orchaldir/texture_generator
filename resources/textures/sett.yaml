@@ -12,7 +12,7 @@ component:
             component:
               Rendering:
                 Shape:
-                  shape_factory: Rectangle
+                  shape: Rectangle
                   color:
                     ConstantColor: "#808080"
                   depth:

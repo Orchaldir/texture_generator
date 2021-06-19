@@ -3,7 +3,7 @@ tile_size: 512
 size: 80
 component:
   Shape:
-    shape_factory: Circle
+    shape: Circle
     color:
       ConstantColor: "#432711"
     depth:

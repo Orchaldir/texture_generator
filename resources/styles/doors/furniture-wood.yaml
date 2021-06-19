@@ -6,7 +6,7 @@ edge_style:
     thickness: 32
     component:
       Shape:
-        shape_factory:
+        shape:
           RoundedRectangle: 0.5
         color:
           ConstantColor: "#DEB887"
@@ -24,7 +24,7 @@ handle_style:
     height: 32
   component:
     Shape:
-      shape_factory:
+      shape:
         RoundedRectangle: 0.7
       color:
         ConstantColor: "#DEB887"

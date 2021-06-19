@@ -3,7 +3,7 @@ tile_size: 512
 size: 128
 component:
   Shape:
-    shape_factory:
+    shape:
       RoundedRectangle: 0.5
     color:
       ConstantColor: "#646464"

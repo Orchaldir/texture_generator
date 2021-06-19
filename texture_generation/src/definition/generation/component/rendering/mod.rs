@@ -18,14 +18,14 @@ pub enum RenderingDefinition {
     },
     Mock,
     Shape {
-        shape_factory: ShapeFactorDefinition,
-        color_factory: ColorFactoryDefinition,
-        depth_factory: DepthDefinition,
+        shape: ShapeFactorDefinition,
+        color: ColorFactoryDefinition,
+        depth: DepthDefinition,
     },
 }
 
 impl RenderingDefinition {
-    pub fn convert(&self, parent: &str, _factor: f32) -> Result<RenderingComponent> {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<RenderingComponent> {
         match self {
             RenderingDefinition::FillArea { color, depth } => {
                 let color = Color::convert(&color).context(format!(
@@ -36,15 +36,15 @@ impl RenderingDefinition {
             }
             RenderingDefinition::Mock => Ok(RenderingComponent::Mock),
             RenderingDefinition::Shape {
-                shape_factory,
-                color_factory,
-                depth_factory,
+                shape: shape_factory,
+                color: color_factory,
+                depth: depth_factory,
             } => {
                 let shape_factory = shape_factory
                     .convert()
                     .context(format!("Failed to convert 'shape' of '{}.Shape'", parent))?;
                 let color_factory = color_factory
-                    .convert()
+                    .convert(factor)
                     .context(format!("Failed to convert 'color' of '{}.Shape'", parent))?;
                 let depth_factory: DepthFactory = depth_factory
                     .clone()
@@ -86,9 +86,9 @@ mod tests {
         let color = ColorFactoryDefinition::ConstantColor("#FFA500".to_string());
         let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
-            shape_factory,
-            color_factory: color,
-            depth_factory: depth,
+            shape: shape_factory,
+            color: color,
+            depth: depth,
         };
         let component = RenderingComponent::new_shape_with_depth(
             ShapeFactory::Circle,
@@ -101,13 +101,13 @@ mod tests {
 
     #[test]
     fn test_convert_invalid_shape() {
-        let shape_factory = ShapeFactorDefinition::RoundedRectangle(-1.0);
+        let shape = ShapeFactorDefinition::RoundedRectangle(-1.0);
         let color = ColorFactoryDefinition::ConstantColor("#FFA500".to_string());
         let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
-            shape_factory,
-            color_factory: color,
-            depth_factory: depth,
+            shape,
+            color,
+            depth,
         };
 
         assert!(definition.convert("test", 2.0).is_err());

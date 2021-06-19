@@ -16,7 +16,7 @@ edge_style:
               component:
                 Rendering:
                   Shape:
-                    shape_factory:
+                    shape:
                       RoundedRectangle: 0.5
                     color:
                       Probability:

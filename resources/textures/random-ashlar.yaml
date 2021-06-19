@@ -14,7 +14,7 @@ component:
             component:
               Rendering:
                 Shape:
-                  shape_factory: Rectangle
+                  shape: Rectangle
                   color:
                     Sequence:
                       - "#696969"
