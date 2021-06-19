@@ -16,11 +16,13 @@ component:
                 Shape:
                   shape: Rectangle
                   color:
-                    Sequence:
-                      - "#696969"
-                      - "#808080"
-                      - "#C0C0C0"
-                      - "#A9A9A9"
+                    NoiseWithRandomColors:
+                      colors:
+                        - [1,"#696969"]
+                        - [1,"#808080"]
+                        - [1,"#C0C0C0"]
+                        - [1,"#A9A9A9"]
+                      scale: 400
                   depth:
                     InterpolateMany:
                       - [ 0.9,25 ]

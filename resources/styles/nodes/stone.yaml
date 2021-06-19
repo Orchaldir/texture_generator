@@ -6,10 +6,7 @@ component:
     shape:
       RoundedRectangle: 0.5
     color:
-      Noise:
-        color0: "#646464"
-        color1: "#A9A9A9"
-        scale: 100
+      ConstantColor: "#646464"
     depth:
       Dome:
         center: 250

@@ -21,6 +21,12 @@ pub enum ColorFactory {
     },
     /// Uses a noise function to interpolate between 2 colors.
     Noise {
+        color0: Color,
+        color1: Color,
+        scale: f64,
+    },
+    /// Uses a noise function to interpolate between 2 colors randomly selected from a list.
+    NoiseWithRandomColors {
         random: Random,
         colors: Vec<(usize, Color)>,
         max_number: usize,
@@ -69,15 +75,6 @@ impl ColorFactory {
         })
     }
 
-    pub fn new_simple_noise(color0: Color, color1: Color, scale: u32) -> Result<ColorFactory> {
-        Ok(ColorFactory::Noise {
-            random: Random::Hash,
-            colors: vec![(1, color0), (1, color1)],
-            max_number: 2,
-            scale: scale as f64,
-        })
-    }
-
     pub fn new_noise(
         random: Random,
         colors: Vec<(usize, Color)>,
@@ -85,7 +82,7 @@ impl ColorFactory {
     ) -> Result<ColorFactory> {
         let (threshold, converted_colors) = convert_probability("Noise", colors)?;
 
-        Ok(ColorFactory::Noise {
+        Ok(ColorFactory::NoiseWithRandomColors {
             random,
             colors: converted_colors,
             max_number: threshold,
@@ -121,16 +118,38 @@ impl ColorFactory {
                 ColorSelector::ConstantColor(colors[0].1)
             }
             ColorFactory::Noise {
+                color0,
+                color1,
+                scale,
+            } => ColorSelector::Noise {
+                color0: color0.clone(),
+                color1: color1.clone(),
+                noise: Perlin::new().set_seed(data.get_instance_id() as u32),
+                scale: *scale,
+            },
+            ColorFactory::NoiseWithRandomColors {
                 random,
                 colors,
                 max_number,
                 scale,
-            } => ColorSelector::Noise {
-                color0: colors[0].1.clone(),
-                color1: colors[1].1.clone(),
-                noise: Perlin::new().set_seed(data.get_instance_id() as u32),
-                scale: *scale,
-            },
+            } => {
+                let random0 = random.get_random_instance_usize(data, *max_number, 0);
+                let random1 = random.get_random_instance_usize(data, *max_number, 1);
+
+                let index0 = get_color_index(colors, random0);
+                let mut index1 = get_color_index(colors, random1);
+
+                if index0 == index1 {
+                    index1 = (index0 + 1) % colors.len();
+                }
+
+                ColorSelector::Noise {
+                    color0: colors[index0].1.clone(),
+                    color1: colors[index1].1.clone(),
+                    noise: Perlin::new().set_seed(data.get_instance_id() as u32),
+                    scale: *scale,
+                }
+            }
         }
     }
 }
@@ -156,6 +175,16 @@ fn convert_probability(
     }
 
     Ok((threshold, converted_colors))
+}
+
+fn get_color_index(colors: &Vec<(usize, Color)>, index: usize) -> usize {
+    for (i, (threshold, _color)) in colors.iter().enumerate() {
+        if index < *threshold {
+            return i;
+        }
+    }
+
+    0
 }
 
 #[cfg(test)]
@@ -227,7 +256,7 @@ mod tests {
     fn test_probability() {
         let random = Random::Mock(vec![3, 4, 5, 6, 7, 8, 9, 10, 11]);
         let colors = vec![(1, RED), (2, GREEN), (3, BLUE)];
-        let factory = ColorFactory::probability_width_random(random, colors).unwrap();
+        let factory = ColorFactory::new_probability(random, colors).unwrap();
 
         assert_cost(factory.create(&Data::only_instance_id(0)), BLUE);
         assert_cost(factory.create(&Data::only_instance_id(1)), BLUE);
