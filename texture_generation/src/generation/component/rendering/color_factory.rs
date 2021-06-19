@@ -36,6 +36,8 @@ pub enum ColorFactory {
         ring_size: f32,
         wood: Color,
         growth_ring: Color,
+        noise_amplitude: f32,
+        noise_scale: f64,
     },
 }
 
@@ -164,13 +166,20 @@ impl ColorFactory {
                 ring_size,
                 wood,
                 growth_ring,
+                noise_amplitude,
+                noise_scale,
             } => {
                 let center = data.get_aabbs_in_texture_space().get_inner().center();
+                let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
+
                 ColorSelector::WoodRings {
                     center,
                     ring_size: *ring_size,
                     wood: *wood,
                     growth_ring: *growth_ring,
+                    noise: Box::new(noise),
+                    noise_amplitude: *noise_amplitude,
+                    noise_scale: *noise_scale,
                 }
             }
         }

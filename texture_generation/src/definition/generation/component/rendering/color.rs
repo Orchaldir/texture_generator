@@ -5,7 +5,7 @@ use crate::math::color::Color;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ColorFactoryDefinition {
     ConstantColor(String),
     Sequence(Vec<String>),
@@ -24,6 +24,8 @@ pub enum ColorFactoryDefinition {
         ring_size: u32,
         wood: String,
         growth_ring: String,
+        noise_amplitude: f32,
+        noise_scale: u32,
     },
 }
 
@@ -69,6 +71,8 @@ impl ColorFactoryDefinition {
                 ring_size,
                 wood,
                 growth_ring,
+                noise_amplitude,
+                noise_scale,
             } => {
                 let wood = Color::convert(&wood)
                     .context("Failed to convert 'wood' of 'ColorFactory.WoodRings'")?;
@@ -79,6 +83,8 @@ impl ColorFactoryDefinition {
                     ring_size: convert(*ring_size, factor) as f32,
                     wood,
                     growth_ring,
+                    noise_amplitude: *noise_amplitude,
+                    noise_scale: convert(*noise_scale, factor) as f64,
                 })
             }
         }

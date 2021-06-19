@@ -19,6 +19,9 @@ pub enum ColorSelector {
         ring_size: f32,
         wood: Color,
         growth_ring: Color,
+        noise: Box<Perlin>,
+        noise_amplitude: f32,
+        noise_scale: f64,
     },
 }
 
@@ -42,10 +45,15 @@ impl ColorSelector {
                 ring_size,
                 wood,
                 growth_ring,
+                noise,
+                noise_amplitude,
+                noise_scale,
             } => {
+                let x = point.x as f64 / *noise_scale;
+                let y = point.y as f64 / *noise_scale;
+                let n = noise.get([x, y]) as f32 * *noise_amplitude;
                 let distance = center.calculate_distance(point);
-                let factor = (1.0 + (2.0 * PI * distance / *ring_size).sin()) / 2.0;
-                //info!("point={:?} center={:?} distance={} factor={}", point, center, distance, factor);
+                let factor = (1.0 + (2.0 * PI * (distance / *ring_size + n)).sin()) / 2.0;
                 wood.lerp(growth_ring, factor)
             }
         }

@@ -10,5 +10,7 @@ component:
           ring_size: 50
           wood: "#DEB887"
           growth_ring: "#432711"
+          noise_amplitude: 0.2
+          noise_scale: 50
       depth:
         Uniform: 100
