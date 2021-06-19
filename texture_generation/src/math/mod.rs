@@ -1,5 +1,6 @@
 pub mod aabb;
 pub mod color;
+pub mod interpolate;
 pub mod occupancy;
 pub mod point;
 pub mod shape;
