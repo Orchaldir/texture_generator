@@ -10,7 +10,7 @@ pub enum ColorSelector {
     Noise {
         color0: Color,
         color1: Color,
-        noise: Perlin,
+        noise: Box<Perlin>,
         scale: f64,
     },
 }

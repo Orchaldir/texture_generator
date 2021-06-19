@@ -121,12 +121,15 @@ impl ColorFactory {
                 color0,
                 color1,
                 scale,
-            } => ColorSelector::Noise {
-                color0: color0.clone(),
-                color1: color1.clone(),
-                noise: Perlin::new().set_seed(data.get_instance_id() as u32),
-                scale: *scale,
-            },
+            } => {
+                let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
+                ColorSelector::Noise {
+                    color0: *color0,
+                    color1: *color1,
+                    noise: Box::new(noise),
+                    scale: *scale,
+                }
+            }
             ColorFactory::NoiseWithRandomColors {
                 random,
                 colors,
@@ -143,10 +146,12 @@ impl ColorFactory {
                     index1 = (index0 + 1) % colors.len();
                 }
 
+                let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
+
                 ColorSelector::Noise {
-                    color0: colors[index0].1.clone(),
-                    color1: colors[index1].1.clone(),
-                    noise: Perlin::new().set_seed(data.get_instance_id() as u32),
+                    color0: colors[index0].1,
+                    color1: colors[index1].1,
+                    noise: Box::new(noise),
                     scale: *scale,
                 }
             }
@@ -177,7 +182,7 @@ fn convert_probability(
     Ok((threshold, converted_colors))
 }
 
-fn get_color_index(colors: &Vec<(usize, Color)>, index: usize) -> usize {
+fn get_color_index(colors: &[(usize, Color)], index: usize) -> usize {
     for (i, (threshold, _color)) in colors.iter().enumerate() {
         if index < *threshold {
             return i;
