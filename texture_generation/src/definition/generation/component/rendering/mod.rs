@@ -1,4 +1,4 @@
-use crate::definition::generation::component::rendering::color::ColorSelectorDefinition;
+use crate::definition::generation::component::rendering::color::ColorFactoryDefinition;
 use crate::definition::generation::component::rendering::depth::DepthDefinition;
 use crate::definition::math::shape_factor::ShapeFactorDefinition;
 use crate::generation::component::rendering::depth_factory::DepthFactory;
@@ -18,14 +18,14 @@ pub enum RenderingDefinition {
     },
     Mock,
     Shape {
-        shape_factory: ShapeFactorDefinition,
-        color: ColorSelectorDefinition,
+        shape: ShapeFactorDefinition,
+        color: ColorFactoryDefinition,
         depth: DepthDefinition,
     },
 }
 
 impl RenderingDefinition {
-    pub fn convert(&self, parent: &str, _factor: f32) -> Result<RenderingComponent> {
+    pub fn convert(&self, parent: &str, factor: f32) -> Result<RenderingComponent> {
         match self {
             RenderingDefinition::FillArea { color, depth } => {
                 let color = Color::convert(&color).context(format!(
@@ -36,25 +36,25 @@ impl RenderingDefinition {
             }
             RenderingDefinition::Mock => Ok(RenderingComponent::Mock),
             RenderingDefinition::Shape {
-                shape_factory,
-                color,
-                depth,
+                shape: shape_factory,
+                color: color_factory,
+                depth: depth_factory,
             } => {
                 let shape_factory = shape_factory
                     .convert()
                     .context(format!("Failed to convert 'shape' of '{}.Shape'", parent))?;
-                let color = color
-                    .convert()
+                let color_factory = color_factory
+                    .convert(factor)
                     .context(format!("Failed to convert 'color' of '{}.Shape'", parent))?;
-                let depth: DepthFactory = depth
+                let depth_factory: DepthFactory = depth_factory
                     .clone()
                     .convert()
                     .context(format!("Failed to convert 'depth' of '{}.Shape'", parent))?;
 
                 Ok(RenderingComponent::new_shape_with_depth(
                     shape_factory,
-                    color,
-                    depth,
+                    color_factory,
+                    depth_factory,
                 ))
             }
         }
@@ -64,7 +64,7 @@ impl RenderingDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::component::rendering::color::ColorSelector;
+    use crate::generation::component::rendering::color_factory::ColorFactory;
     use crate::generation::component::rendering::depth_factory::DepthFactory;
     use crate::math::color::ORANGE;
     use crate::math::shape_factory::ShapeFactory;
@@ -83,16 +83,16 @@ mod tests {
     #[test]
     fn test_convert_shape() {
         let shape_factory = ShapeFactorDefinition::Circle;
-        let color = ColorSelectorDefinition::ConstantColor("#FFA500".to_string());
+        let color = ColorFactoryDefinition::ConstantColor("#FFA500".to_string());
         let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
-            shape_factory,
-            color,
-            depth,
+            shape: shape_factory,
+            color: color,
+            depth: depth,
         };
         let component = RenderingComponent::new_shape_with_depth(
             ShapeFactory::Circle,
-            ColorSelector::ConstantColor(ORANGE),
+            ColorFactory::ConstantColor(ORANGE),
             DepthFactory::Uniform(111),
         );
 
@@ -101,11 +101,11 @@ mod tests {
 
     #[test]
     fn test_convert_invalid_shape() {
-        let shape_factory = ShapeFactorDefinition::RoundedRectangle(-1.0);
-        let color = ColorSelectorDefinition::ConstantColor("#FFA500".to_string());
+        let shape = ShapeFactorDefinition::RoundedRectangle(-1.0);
+        let color = ColorFactoryDefinition::ConstantColor("#FFA500".to_string());
         let depth = DepthDefinition::Uniform(111);
         let definition = RenderingDefinition::Shape {
-            shape_factory,
+            shape,
             color,
             depth,
         };

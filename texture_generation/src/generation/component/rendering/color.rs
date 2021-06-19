@@ -1,112 +1,47 @@
-use crate::generation::data::Data;
-use crate::generation::random::{Random, COLOR_INDEX};
 use crate::math::color::Color;
-use anyhow::{bail, Result};
+use crate::math::point::Point;
+use noise::{NoiseFn, Perlin};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub enum ColorSelector {
-    /// Everything has the same color.
+    /// The same color for all pixel.
     ConstantColor(Color),
-    /// A sequence of colors that repeats.
-    Sequence(Vec<Color>),
-    /// Randomly select a color from a list with equal probability.
-    Random { random: Random, colors: Vec<Color> },
-    /// Randomly select a color from a list based on probability.
-    Probability {
-        random: Random,
-        colors: Vec<(usize, Color)>,
-        max_number: usize,
+    /// Uses a noise function to interpolate between 2 colors.
+    Noise {
+        color0: Color,
+        color1: Color,
+        noise: Box<Perlin>,
+        scale: f64,
     },
 }
 
 impl ColorSelector {
-    pub fn new_sequence(colors: Vec<Color>) -> Result<ColorSelector> {
-        if colors.len() < 2 {
-            bail!("ColorSelector::Sequence requires at least 2 colors");
-        }
-
-        Ok(ColorSelector::Sequence(colors))
-    }
-
-    pub fn new_random(colors: Vec<Color>) -> Result<ColorSelector> {
-        if colors.len() < 2 {
-            bail!("ColorSelector::Random requires at least 2 colors");
-        }
-
-        Ok(ColorSelector::Random {
-            random: Random::Hash,
-            colors,
-        })
-    }
-
-    pub fn mock_random(numbers: Vec<u64>, colors: Vec<Color>) -> Result<ColorSelector> {
-        if colors.len() < 2 {
-            bail!("ColorSelector::Random requires at least 2 colors");
-        }
-
-        Ok(ColorSelector::Random {
-            random: Random::Mock(numbers),
-            colors,
-        })
-    }
-
-    pub fn new_probability(colors: Vec<(usize, Color)>) -> Result<ColorSelector> {
-        Self::probability_width_random(Random::Hash, colors)
-    }
-
-    pub fn probability_width_random(
-        random: Random,
-        colors: Vec<(usize, Color)>,
-    ) -> Result<ColorSelector> {
-        if colors.len() < 2 {
-            bail!("ColorSelector::Probability requires at least 2 colors");
-        }
-
-        let mut converted_colors = Vec::with_capacity(colors.len());
-        let mut threshold = 0;
-
-        for (i, (probability, color)) in colors.into_iter().enumerate() {
-            if probability == 0 {
-                bail!(format!("{}.probability of ColorSelector is 0", i + 1));
-            }
-
-            threshold += probability;
-            converted_colors.push((threshold, color));
-        }
-
-        Ok(ColorSelector::Probability {
-            random,
-            colors: converted_colors,
-            max_number: threshold,
-        })
-    }
-
-    pub fn select(&self, data: &Data) -> Color {
+    pub fn select(&self, point: &Point) -> Color {
         match self {
             ColorSelector::ConstantColor(color) => *color,
-            ColorSelector::Sequence(colors) => {
-                let index = data.get_instance_id() % colors.len();
-                colors[index]
-            }
-            ColorSelector::Random { random, colors } => {
-                let index = random.get_random_instance_usize(data, colors.len(), COLOR_INDEX);
-                colors[index]
-            }
-            ColorSelector::Probability {
-                random,
-                colors,
-                max_number,
+            ColorSelector::Noise {
+                color0,
+                color1,
+                noise,
+                scale,
             } => {
-                let index = random.get_random_instance_usize(data, *max_number, COLOR_INDEX);
-
-                for (threshold, color) in colors {
-                    if index < *threshold {
-                        return *color;
-                    }
-                }
-
-                colors[0].1
+                let x = point.x as f64 / scale;
+                let y = point.y as f64 / scale;
+                let factor = noise.get([x, y]);
+                color0.lerp(color1, factor as f32)
             }
+        }
+    }
+}
+
+impl PartialEq for ColorSelector {
+    fn eq(&self, other: &Self) -> bool {
+        match self {
+            ColorSelector::ConstantColor(color) => match other {
+                ColorSelector::ConstantColor(other_color) => color.eq(other_color),
+                ColorSelector::Noise { .. } => false,
+            },
+            ColorSelector::Noise { .. } => false,
         }
     }
 }
@@ -114,81 +49,13 @@ impl ColorSelector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::math::color::{BLUE, GREEN, RED};
+    use crate::math::color::RED;
 
     #[test]
-    #[should_panic]
-    fn test_new_sequence_too_few_colors() {
-        ColorSelector::new_sequence(vec![RED]).unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_new_random_too_few_colors() {
-        ColorSelector::new_random(vec![RED]).unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_new_probability_too_colors() {
-        ColorSelector::new_probability(vec![(100, RED)]).unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_new_probability_is_zero() {
-        let colors = vec![(1, RED), (0, GREEN), (3, BLUE)];
-        ColorSelector::new_probability(colors).unwrap();
-    }
-
-    #[test]
-    fn test_constant() {
-        let selector = ColorSelector::ConstantColor(RED);
-
-        assert_eq!(selector.select(&Data::only_instance_id(0)), RED);
-        assert_eq!(selector.select(&Data::only_instance_id(1)), RED);
-        assert_eq!(selector.select(&Data::only_instance_id(2)), RED);
-    }
-
-    #[test]
-    fn test_sequence() {
-        let selector = ColorSelector::new_sequence(vec![RED, GREEN, BLUE]).unwrap();
-
-        assert_eq!(selector.select(&Data::only_instance_id(0)), RED);
-        assert_eq!(selector.select(&Data::only_instance_id(1)), GREEN);
-        assert_eq!(selector.select(&Data::only_instance_id(2)), BLUE);
-        assert_eq!(selector.select(&Data::only_instance_id(3)), RED);
-        assert_eq!(selector.select(&Data::only_instance_id(4)), GREEN);
-        assert_eq!(selector.select(&Data::only_instance_id(5)), BLUE);
-    }
-
-    #[test]
-    fn test_random() {
-        let numbers = vec![2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-        let colors = vec![RED, GREEN, BLUE];
-        let selector = ColorSelector::mock_random(numbers, colors).unwrap();
-
-        assert_eq!(selector.select(&Data::only_instance_id(0)), BLUE);
-        assert_eq!(selector.select(&Data::only_instance_id(1)), RED);
-        assert_eq!(selector.select(&Data::only_instance_id(2)), GREEN);
-        assert_eq!(selector.select(&Data::only_instance_id(3)), BLUE);
-        assert_eq!(selector.select(&Data::only_instance_id(4)), RED);
-    }
-
-    #[test]
-    fn test_probability() {
-        let random = Random::Mock(vec![3, 4, 5, 6, 7, 8, 9, 10, 11]);
-        let colors = vec![(1, RED), (2, GREEN), (3, BLUE)];
-        let selector = ColorSelector::probability_width_random(random, colors).unwrap();
-
-        assert_eq!(selector.select(&Data::only_instance_id(0)), BLUE);
-        assert_eq!(selector.select(&Data::only_instance_id(1)), BLUE);
-        assert_eq!(selector.select(&Data::only_instance_id(2)), BLUE);
-        assert_eq!(selector.select(&Data::only_instance_id(3)), RED);
-        assert_eq!(selector.select(&Data::only_instance_id(4)), GREEN);
-        assert_eq!(selector.select(&Data::only_instance_id(5)), GREEN);
-        assert_eq!(selector.select(&Data::only_instance_id(6)), BLUE);
-        assert_eq!(selector.select(&Data::only_instance_id(7)), BLUE);
-        assert_eq!(selector.select(&Data::only_instance_id(8)), BLUE);
+    fn test_constant_color() {
+        assert_eq!(
+            ColorSelector::ConstantColor(RED).select(&Point::new(1, 2)),
+            RED
+        );
     }
 }

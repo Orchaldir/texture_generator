@@ -16,7 +16,7 @@ component:
                 component:
                   Rendering:
                     Shape:
-                      shape_factory: Rectangle
+                      shape: Rectangle
                       color:
                         ConstantColor: "#432711"
                       depth:
@@ -56,7 +56,7 @@ component:
                 component:
                   Rendering:
                     Shape:
-                      shape_factory: Rectangle
+                      shape: Rectangle
                       color:
                         ConstantColor: "#646464"
                       depth:
@@ -72,7 +72,7 @@ component:
                 component:
                   Rendering:
                     Shape:
-                      shape_factory: Rectangle
+                      shape: Rectangle
                       color:
                         ConstantColor: "#646464"
                       depth:

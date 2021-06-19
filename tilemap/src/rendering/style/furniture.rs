@@ -1,6 +1,6 @@
 use crate::rendering::resource::Resources;
 use crate::rendering::style::front::FrontStyle;
-use texture_generation::generation::component::rendering::color::ColorSelector;
+use texture_generation::generation::component::rendering::color_factory::ColorFactory;
 use texture_generation::generation::component::rendering::depth_factory::DepthFactory;
 use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::component::Component;
@@ -101,11 +101,11 @@ fn calculate_aabbs(data: &Data, thickness: u32) -> (AABB, AABB) {
 
 impl Default for FurnitureStyle {
     fn default() -> Self {
-        let color_selector = ColorSelector::ConstantColor(PINK);
+        let color_factory = ColorFactory::ConstantColor(PINK);
         let depth_factory = DepthFactory::Uniform(100);
         let component = RenderingComponent::new_shape_with_depth(
             ShapeFactory::RoundedRectangle(0.3),
-            color_selector,
+            color_factory,
             depth_factory,
         );
 

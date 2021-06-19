@@ -188,7 +188,7 @@ fn create_aabb(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::component::rendering::color::ColorSelector;
+    use crate::generation::component::rendering::color_factory::ColorFactory;
     use crate::generation::component::rendering::depth_factory::DepthFactory;
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::texture::Texture;
@@ -219,7 +219,7 @@ mod tests {
         let size = Size::square(8);
         let aabb = AABB::with_size(size);
         let mut texture = Texture::new(size, WHITE);
-        let color_selector = ColorSelector::Sequence(vec![
+        let color_selector = ColorFactory::Sequence(vec![
             BLACK, BLUE, CYAN, GREEN, MAGENTA, ORANGE, RED, PINK, YELLOW,
         ]);
         let rendering = RenderingComponent::new_shape_with_depth(

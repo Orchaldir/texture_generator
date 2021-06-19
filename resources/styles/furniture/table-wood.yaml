@@ -9,7 +9,7 @@ component:
       component:
         Rendering:
           Shape:
-            shape_factory:
+            shape:
               RoundedRectangle: 0.5
             color:
               ConstantColor: "#DEB887"

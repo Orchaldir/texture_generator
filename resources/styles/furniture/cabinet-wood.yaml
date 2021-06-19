@@ -5,7 +5,7 @@ depth: 200
 component:
   Rendering:
     Shape:
-      shape_factory: Rectangle
+      shape: Rectangle
       color:
         ConstantColor: "#DEB887"
       depth:

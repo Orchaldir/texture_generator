@@ -1,4 +1,4 @@
-use crate::generation::component::rendering::color::ColorSelector;
+use crate::generation::component::rendering::color_factory::ColorFactory;
 use crate::generation::component::rendering::depth_factory::DepthFactory;
 use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
@@ -6,6 +6,7 @@ use crate::math::color::{Color, PINK};
 use crate::math::shape_factory::ShapeFactory;
 
 pub mod color;
+pub mod color_factory;
 pub mod depth;
 pub mod depth_factory;
 
@@ -21,7 +22,7 @@ pub enum RenderingComponent {
     /// Renders a [`Shape`].
     Shape {
         shape_factory: ShapeFactory,
-        color_selector: ColorSelector,
+        color_selector: ColorFactory,
         depth_factory: DepthFactory,
     },
 }
@@ -38,36 +39,20 @@ impl RenderingComponent {
     pub fn new_shape(shape_factory: ShapeFactory, color: Color, depth: u8) -> RenderingComponent {
         RenderingComponent::new_shape_with_depth(
             shape_factory,
-            ColorSelector::ConstantColor(color),
+            ColorFactory::ConstantColor(color),
             DepthFactory::Uniform(depth),
         )
     }
 
     pub fn new_shape_with_depth(
         shape_factory: ShapeFactory,
-        color_selector: ColorSelector,
+        color_factory: ColorFactory,
         depth_factory: DepthFactory,
     ) -> RenderingComponent {
         RenderingComponent::Shape {
             shape_factory,
-            color_selector,
+            color_selector: color_factory,
             depth_factory,
-        }
-    }
-
-    /// Flips between horizontal & vertical mode.
-    pub fn flip(&self) -> RenderingComponent {
-        match self {
-            RenderingComponent::Shape {
-                shape_factory,
-                color_selector,
-                depth_factory,
-            } => RenderingComponent::Shape {
-                shape_factory: *shape_factory,
-                color_selector: color_selector.clone(),
-                depth_factory: depth_factory.flip(),
-            },
-            _ => self.clone(),
         }
     }
 
@@ -97,12 +82,12 @@ impl RenderingComponent {
             RenderingComponent::Mock => {}
             RenderingComponent::Shape {
                 shape_factory,
-                color_selector,
+                color_selector: color_factory,
                 depth_factory,
                 ..
             } => {
                 let mut point = start;
-                let color = color_selector.select(data);
+                let color_selector = color_factory.create(data);
                 let depth_calculator = depth_factory.create(data);
                 let base_depth = texture.get_base_depth();
 
@@ -114,6 +99,7 @@ impl RenderingComponent {
                             let distance = shape.distance(&point);
 
                             if distance <= 1.0 {
+                                let color = color_selector.select(&point);
                                 let depth = depth_calculator.calculate(&point, distance);
                                 let depth = base_depth.saturating_add(depth);
                                 texture.set(&point, &color, depth);

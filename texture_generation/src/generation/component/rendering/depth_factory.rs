@@ -20,7 +20,7 @@ pub enum DepthFactory {
     },
     /// Creates a dome.
     Dome { center: f32, diff: f32 },
-    /// Creates a gradient along the x- or y-axis.
+    /// Creates a gradient along the x- or y-axis based on `random`.
     Gradient { random: Random, start: u8, end: u8 },
 }
 
@@ -42,22 +42,6 @@ impl DepthFactory {
         DepthFactory::Dome {
             center: center as f32,
             diff,
-        }
-    }
-
-    /// Flips between horizontal & vertical mode.
-    pub fn flip(&self) -> DepthFactory {
-        match self {
-            DepthFactory::Cylinder {
-                is_horizontal,
-                center_depth,
-                border_depth,
-            } => DepthFactory::Cylinder {
-                is_horizontal: !*is_horizontal,
-                center_depth: *center_depth,
-                border_depth: *border_depth,
-            },
-            _ => self.clone(),
         }
     }
 
@@ -173,20 +157,5 @@ mod tests {
     #[should_panic]
     fn test_new_interpolate_many_with_pos_above_one() {
         DepthFactory::new_interpolate_many(vec![(0.3, 100), (1.7, 200)]).unwrap();
-    }
-
-    #[test]
-    fn test_flip_cylinder() {
-        let factory = DepthFactory::Cylinder {
-            is_horizontal: true,
-            center_depth: 10,
-            border_depth: 20,
-        };
-        let result = DepthFactory::Cylinder {
-            is_horizontal: false,
-            center_depth: 10,
-            border_depth: 20,
-        };
-        assert_eq!(factory.flip(), result,);
     }
 }

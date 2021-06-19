@@ -1,3 +1,4 @@
+use crate::math::interpolate::lerp;
 use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul, MulAssign};
@@ -84,6 +85,24 @@ impl Color {
     /// ```
     pub fn b(&self) -> u8 {
         self.b
+    }
+
+    /// Interpolates linearly with another color.
+    ///
+    /// ```
+    /// use texture_generation::math::color::Color;
+    /// let color0 = Color::from_rgb(  0, 25, 120);
+    /// let color1 = Color::from_rgb(200, 75, 220);
+    /// let result = Color::from_rgb(100, 50, 170);
+    ///
+    /// assert_eq!(color0.lerp(&color1, 0.5), result);
+    /// ```
+    pub fn lerp(&self, other: &Color, factor: f32) -> Color {
+        Color {
+            r: lerp(self.r, other.r, factor),
+            g: lerp(self.g, other.g, factor),
+            b: lerp(self.b, other.b, factor),
+        }
     }
 }
 
