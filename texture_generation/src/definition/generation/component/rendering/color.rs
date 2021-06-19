@@ -1,7 +1,7 @@
 use crate::definition::convert;
 use crate::generation::component::rendering::color_factory::ColorFactory;
 use crate::math::color::Color;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -25,16 +25,19 @@ impl ColorFactoryDefinition {
                 Ok(ColorFactory::ConstantColor(color))
             }
             ColorFactoryDefinition::Sequence(colors) => {
-                ColorFactory::new_sequence(convert_colors(colors)?)
+                ColorFactory::new_sequence(convert_colors(colors, "Sequence")?)
             }
             ColorFactoryDefinition::Random(colors) => {
-                ColorFactory::new_random(convert_colors(colors)?)
+                ColorFactory::new_random(convert_colors(colors, "Random")?)
             }
             ColorFactoryDefinition::Probability(colors) => {
                 let mut converted_colors = Vec::with_capacity(colors.len());
 
-                for (probability, color) in colors {
-                    let color = Color::convert(&color)?;
+                for (i, (probability, color)) in colors.iter().enumerate() {
+                    let color = Color::convert(&color).context(format!(
+                        "Failed to convert the {}.color of 'ColorFactory.Probability'",
+                        i + 1
+                    ))?;
                     converted_colors.push((*probability, color));
                 }
 
@@ -44,20 +47,31 @@ impl ColorFactoryDefinition {
                 color0,
                 color1,
                 scale,
-            } => Ok(ColorFactory::Noise {
-                color0: Color::convert(&color0)?,
-                color1: Color::convert(&color1)?,
-                scale: convert(*scale, factor) as f64,
-            }),
+            } => {
+                let color0 = Color::convert(&color0)
+                    .context("Failed to convert 'color0' of 'ColorFactory.Noise'")?;
+                let color1 = Color::convert(&color1)
+                    .context("Failed to convert 'color1' of 'ColorFactory.Noise'")?;
+
+                Ok(ColorFactory::Noise {
+                    color0,
+                    color1,
+                    scale: convert(*scale, factor) as f64,
+                })
+            }
         }
     }
 }
 
-fn convert_colors(colors: &[String]) -> Result<Vec<Color>> {
+fn convert_colors(colors: &[String], parent: &str) -> Result<Vec<Color>> {
     let mut converted_colors = Vec::with_capacity(colors.len());
 
-    for color in colors {
-        let color = Color::convert(&color)?;
+    for (i, color) in colors.iter().enumerate() {
+        let color = Color::convert(&color).context(format!(
+            "Failed to convert the {}.color of 'ColorFactory.{}'",
+            i + 1,
+            parent
+        ))?;
         converted_colors.push(color);
     }
 

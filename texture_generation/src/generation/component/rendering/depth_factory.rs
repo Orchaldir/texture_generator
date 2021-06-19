@@ -20,7 +20,7 @@ pub enum DepthFactory {
     },
     /// Creates a dome.
     Dome { center: f32, diff: f32 },
-    /// Creates a gradient along the x- or y-axis.
+    /// Creates a gradient along the x- or y-axis based on `random`.
     Gradient { random: Random, start: u8, end: u8 },
 }
 
