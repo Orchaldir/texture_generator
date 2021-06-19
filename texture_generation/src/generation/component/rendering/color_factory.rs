@@ -3,7 +3,7 @@ use crate::generation::data::Data;
 use crate::generation::random::{Random, COLOR_INDEX};
 use crate::math::color::Color;
 use anyhow::{bail, Result};
-use noise::Perlin;
+use noise::{Perlin, Seedable};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ColorFactory {
@@ -123,7 +123,7 @@ impl ColorFactory {
             } => ColorSelector::Noise {
                 color0: *color0,
                 color1: *color1,
-                noise: Perlin::new(),
+                noise: Perlin::new().set_seed(data.get_instance_id() as u32),
                 scale: *scale,
             },
         }
