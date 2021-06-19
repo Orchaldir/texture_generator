@@ -21,8 +21,9 @@ pub enum ColorFactory {
     },
     /// Uses a noise function to interpolate between 2 colors.
     Noise {
-        color0: Color,
-        color1: Color,
+        random: Random,
+        colors: Vec<(usize, Color)>,
+        max_number: usize,
         scale: f64,
     },
 }
@@ -58,34 +59,37 @@ impl ColorFactory {
         })
     }
 
-    pub fn new_probability(colors: Vec<(usize, Color)>) -> Result<ColorFactory> {
-        Self::probability_width_random(Random::Hash, colors)
-    }
-
-    pub fn probability_width_random(
-        random: Random,
-        colors: Vec<(usize, Color)>,
-    ) -> Result<ColorFactory> {
-        if colors.len() < 2 {
-            bail!("ColorFactory::Probability requires at least 2 colors");
-        }
-
-        let mut converted_colors = Vec::with_capacity(colors.len());
-        let mut threshold = 0;
-
-        for (i, (probability, color)) in colors.into_iter().enumerate() {
-            if probability == 0 {
-                bail!(format!("{}.probability of ColorFactory is 0", i + 1));
-            }
-
-            threshold += probability;
-            converted_colors.push((threshold, color));
-        }
+    pub fn new_probability(random: Random, colors: Vec<(usize, Color)>) -> Result<ColorFactory> {
+        let (threshold, converted_colors) = convert_probability("Probability", colors)?;
 
         Ok(ColorFactory::Probability {
             random,
             colors: converted_colors,
             max_number: threshold,
+        })
+    }
+
+    pub fn new_simple_noise(color0: Color, color1: Color, scale: u32) -> Result<ColorFactory> {
+        Ok(ColorFactory::Noise {
+            random: Random::Hash,
+            colors: vec![(1, color0), (1, color1)],
+            max_number: 2,
+            scale: scale as f64,
+        })
+    }
+
+    pub fn new_noise(
+        random: Random,
+        colors: Vec<(usize, Color)>,
+        scale: u32,
+    ) -> Result<ColorFactory> {
+        let (threshold, converted_colors) = convert_probability("Noise", colors)?;
+
+        Ok(ColorFactory::Noise {
+            random,
+            colors: converted_colors,
+            max_number: threshold,
+            scale: scale as f64,
         })
     }
 
@@ -117,12 +121,13 @@ impl ColorFactory {
                 ColorSelector::ConstantColor(colors[0].1)
             }
             ColorFactory::Noise {
-                color0,
-                color1,
+                random,
+                colors,
+                max_number,
                 scale,
             } => ColorSelector::Noise {
-                color0: *color0,
-                color1: *color1,
+                color0: colors[0].1.clone(),
+                color1: colors[1].1.clone(),
                 noise: Perlin::new().set_seed(data.get_instance_id() as u32),
                 scale: *scale,
             },
@@ -130,10 +135,34 @@ impl ColorFactory {
     }
 }
 
+fn convert_probability(
+    parent: &str,
+    colors: Vec<(usize, Color)>,
+) -> Result<(usize, Vec<(usize, Color)>)> {
+    if colors.len() < 2 {
+        bail!("ColorFactory::{} requires at least 2 colors", parent);
+    }
+
+    let mut converted_colors = Vec::with_capacity(colors.len());
+    let mut threshold = 0;
+
+    for (i, (probability, color)) in colors.into_iter().enumerate() {
+        if probability == 0 {
+            bail!("{}.probability of ColorFactory::{} is 0", i + 1, parent);
+        }
+
+        threshold += probability;
+        converted_colors.push((threshold, color));
+    }
+
+    Ok((threshold, converted_colors))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::math::color::{BLUE, GREEN, RED};
+    use Random::Hash;
 
     #[test]
     #[should_panic]
@@ -150,14 +179,14 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_new_probability_too_colors() {
-        ColorFactory::new_probability(vec![(100, RED)]).unwrap();
+        ColorFactory::new_probability(Hash, vec![(100, RED)]).unwrap();
     }
 
     #[test]
     #[should_panic]
     fn test_new_probability_is_zero() {
         let colors = vec![(1, RED), (0, GREEN), (3, BLUE)];
-        ColorFactory::new_probability(colors).unwrap();
+        ColorFactory::new_probability(Hash, colors).unwrap();
     }
 
     #[test]

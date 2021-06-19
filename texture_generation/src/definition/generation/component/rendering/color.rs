@@ -1,5 +1,6 @@
 use crate::definition::convert;
 use crate::generation::component::rendering::color_factory::ColorFactory;
+use crate::generation::random::Random;
 use crate::math::color::Color;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
@@ -41,7 +42,7 @@ impl ColorFactoryDefinition {
                     converted_colors.push((*probability, color));
                 }
 
-                ColorFactory::new_probability(converted_colors)
+                ColorFactory::new_probability(Random::Hash, converted_colors)
             }
             ColorFactoryDefinition::Noise {
                 color0,
@@ -53,11 +54,7 @@ impl ColorFactoryDefinition {
                 let color1 = Color::convert(&color1)
                     .context("Failed to convert 'color1' of 'ColorFactory.Noise'")?;
 
-                Ok(ColorFactory::Noise {
-                    color0,
-                    color1,
-                    scale: convert(*scale, factor) as f64,
-                })
+                ColorFactory::new_simple_noise(color0, color1, convert(*scale, factor))
             }
         }
     }
@@ -132,11 +129,7 @@ mod tests {
             color1: "#FF0080".to_string(),
             scale: 100,
         };
-        let factory = ColorFactory::Noise {
-            color0: ORANGE,
-            color1: PINK,
-            scale: 500.0,
-        };
+        let factory = ColorFactory::new_simple_noise(ORANGE, PINK, 500);
 
         assert_eq!(factory, definition.convert(5.0).unwrap())
     }
