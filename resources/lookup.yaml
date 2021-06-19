@@ -16,6 +16,7 @@ textures:
   - herringbone.yaml
   - random-ashlar.yaml
   - sett.yaml
+  - wood-rings.yaml
 walls:
   - stone.yaml
   - stone-random.yaml

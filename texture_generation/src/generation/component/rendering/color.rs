@@ -1,6 +1,7 @@
 use crate::math::color::Color;
 use crate::math::point::Point;
 use noise::{NoiseFn, Perlin};
+use std::f32::consts::PI;
 
 #[derive(Clone, Debug)]
 pub enum ColorSelector {
@@ -12,6 +13,12 @@ pub enum ColorSelector {
         color1: Color,
         noise: Box<Perlin>,
         scale: f64,
+    },
+    WoodRings {
+        center: Point,
+        ring_size: f32,
+        wood: Color,
+        growth_ring: Color,
     },
 }
 
@@ -30,6 +37,17 @@ impl ColorSelector {
                 let factor = noise.get([x, y]);
                 color0.lerp(color1, factor as f32)
             }
+            ColorSelector::WoodRings {
+                center,
+                ring_size,
+                wood,
+                growth_ring,
+            } => {
+                let distance = center.calculate_distance(point);
+                let factor = (1.0 + (2.0 * PI * distance / *ring_size).sin()) / 2.0;
+                //info!("point={:?} center={:?} distance={} factor={}", point, center, distance, factor);
+                wood.lerp(growth_ring, factor)
+            }
         }
     }
 }
@@ -39,9 +57,9 @@ impl PartialEq for ColorSelector {
         match self {
             ColorSelector::ConstantColor(color) => match other {
                 ColorSelector::ConstantColor(other_color) => color.eq(other_color),
-                ColorSelector::Noise { .. } => false,
+                _ => false,
             },
-            ColorSelector::Noise { .. } => false,
+            _ => false,
         }
     }
 }

@@ -1,0 +1,14 @@
+---
+size: 1024
+background: "#432711"
+component:
+  Rendering:
+    Shape:
+      shape: Rectangle
+      color:
+        WoodRings:
+          ring_size: 50
+          wood: "#DEB887"
+          growth_ring: "#432711"
+      depth:
+        Uniform: 100

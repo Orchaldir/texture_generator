@@ -20,6 +20,11 @@ pub enum ColorFactoryDefinition {
         colors: Vec<(usize, String)>,
         scale: u32,
     },
+    WoodRings {
+        ring_size: u32,
+        wood: String,
+        growth_ring: String,
+    },
 }
 
 impl ColorFactoryDefinition {
@@ -59,6 +64,22 @@ impl ColorFactoryDefinition {
             ColorFactoryDefinition::NoiseWithRandomColors { colors, scale } => {
                 let converted_colors = convert_probability(colors, "NoiseWithRandomColors")?;
                 ColorFactory::new_noise(Random::Hash, converted_colors, convert(*scale, factor))
+            }
+            ColorFactoryDefinition::WoodRings {
+                ring_size,
+                wood,
+                growth_ring,
+            } => {
+                let wood = Color::convert(&wood)
+                    .context("Failed to convert 'wood' of 'ColorFactory.WoodRings'")?;
+                let growth_ring = Color::convert(&growth_ring)
+                    .context("Failed to convert 'growth_ring' of 'ColorFactory.WoodRings'")?;
+
+                Ok(ColorFactory::WoodRings {
+                    ring_size: convert(*ring_size, factor) as f32,
+                    wood,
+                    growth_ring,
+                })
             }
         }
     }

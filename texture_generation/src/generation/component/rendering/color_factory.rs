@@ -32,6 +32,11 @@ pub enum ColorFactory {
         max_number: usize,
         scale: f64,
     },
+    WoodRings {
+        ring_size: f32,
+        wood: Color,
+        growth_ring: Color,
+    },
 }
 
 impl ColorFactory {
@@ -153,6 +158,19 @@ impl ColorFactory {
                     color1: colors[index1].1,
                     noise: Box::new(noise),
                     scale: *scale,
+                }
+            }
+            ColorFactory::WoodRings {
+                ring_size,
+                wood,
+                growth_ring,
+            } => {
+                let center = data.get_aabbs_in_texture_space().get_inner().center();
+                ColorSelector::WoodRings {
+                    center,
+                    ring_size: *ring_size,
+                    wood: *wood,
+                    growth_ring: *growth_ring,
                 }
             }
         }
