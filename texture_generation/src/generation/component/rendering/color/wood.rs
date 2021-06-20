@@ -59,11 +59,7 @@ impl WoodFactory {
     }
 
     pub fn create(&self, data: &Data, max_distance: u32) -> WoodSelector {
-        let aabbs = data.get_aabbs_in_texture_space();
-        let aabb = aabbs.get_inner();
-        let center = aabb.center();
         let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
-        let diff = aabb.end() - center;
         let ring_sizes = self.calculate_ring_sizes(data, max_distance);
 
         WoodSelector {

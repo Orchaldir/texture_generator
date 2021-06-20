@@ -38,6 +38,7 @@ pub enum ColorFactory {
     },
     WoodRings(WoodFactory),
     WoodX(WoodFactory),
+    WoodY(WoodFactory),
 }
 
 impl ColorFactory {
@@ -180,6 +181,15 @@ impl ColorFactory {
                 ColorSelector::WoodX {
                     start_y: aabb.start().y as f32,
                     selector: factory.create(data, aabb.size().height()),
+                }
+            }
+            ColorFactory::WoodY(factory) => {
+                let data1 = data.get_aabbs_in_texture_space();
+                let aabb = data1.get_inner();
+
+                ColorSelector::WoodY {
+                    start_x: aabb.start().x as f32,
+                    selector: factory.create(data, aabb.size().width()),
                 }
             }
         }

@@ -22,6 +22,10 @@ pub enum ColorSelector {
         start_y: f32,
         selector: WoodSelector,
     },
+    WoodY {
+        start_x: f32,
+        selector: WoodSelector,
+    },
 }
 
 impl ColorSelector {
@@ -45,6 +49,9 @@ impl ColorSelector {
             }
             ColorSelector::WoodX { start_y, selector } => {
                 selector.select(point, point.y as f32 - *start_y)
+            }
+            ColorSelector::WoodY { start_x, selector } => {
+                selector.select(point, point.x as f32 - *start_x)
             }
         }
     }

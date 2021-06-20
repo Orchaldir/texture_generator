@@ -106,17 +106,26 @@ impl ColorFactoryDefinition {
             } => {
                 let early_wood = early_wood
                     .convert(factor)
-                    .context("Failed to convert 'early_wood' of 'ColorFactory.WoodRings'")?;
+                    .context("Failed to convert 'early_wood' of 'ColorFactory.Wood'")?;
                 let late_wood = late_wood
                     .convert(factor)
-                    .context("Failed to convert 'late_wood' of 'ColorFactory.WoodRings'")?;
+                    .context("Failed to convert 'late_wood' of 'ColorFactory.Wood'")?;
 
-                Ok(ColorFactory::WoodX(WoodFactory::new(
-                    early_wood,
-                    late_wood,
-                    *noise_amplitude,
-                    convert(*noise_scale, factor) as f64,
-                )))
+                if *is_horizontal {
+                    Ok(ColorFactory::WoodX(WoodFactory::new(
+                        early_wood,
+                        late_wood,
+                        *noise_amplitude,
+                        convert(*noise_scale, factor) as f64,
+                    )))
+                } else {
+                    Ok(ColorFactory::WoodY(WoodFactory::new(
+                        early_wood,
+                        late_wood,
+                        *noise_amplitude,
+                        convert(*noise_scale, factor) as f64,
+                    )))
+                }
             }
         }
     }

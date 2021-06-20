@@ -6,7 +6,8 @@ component:
     Shape:
       shape: Rectangle
       color:
-        WoodRings:
+        Wood:
+          is_horizontal: false
           early_wood:
             color: "#DEB887"
             color_variation: 0.1
