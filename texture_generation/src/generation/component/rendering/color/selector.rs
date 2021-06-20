@@ -18,6 +18,10 @@ pub enum ColorSelector {
         center: Point,
         selector: WoodSelector,
     },
+    WoodX {
+        start_y: f32,
+        selector: WoodSelector,
+    },
 }
 
 impl ColorSelector {
@@ -38,6 +42,9 @@ impl ColorSelector {
             ColorSelector::WoodRings { center, selector } => {
                 let distance = center.calculate_distance(point);
                 selector.select(point, distance)
+            }
+            ColorSelector::WoodX { start_y, selector } => {
+                selector.select(point, point.y as f32 - *start_y)
             }
         }
     }

@@ -30,6 +30,13 @@ pub enum ColorFactoryDefinition {
         noise_amplitude: f32,
         noise_scale: u32,
     },
+    Wood {
+        is_horizontal: bool,
+        early_wood: WoodRingDefinition,
+        late_wood: WoodRingDefinition,
+        noise_amplitude: f32,
+        noise_scale: u32,
+    },
 }
 
 impl ColorFactoryDefinition {
@@ -84,6 +91,27 @@ impl ColorFactoryDefinition {
                     .context("Failed to convert 'late_wood' of 'ColorFactory.WoodRings'")?;
 
                 Ok(ColorFactory::WoodRings(WoodFactory::new(
+                    early_wood,
+                    late_wood,
+                    *noise_amplitude,
+                    convert(*noise_scale, factor) as f64,
+                )))
+            }
+            ColorFactoryDefinition::Wood {
+                is_horizontal,
+                early_wood,
+                late_wood,
+                noise_amplitude,
+                noise_scale,
+            } => {
+                let early_wood = early_wood
+                    .convert(factor)
+                    .context("Failed to convert 'early_wood' of 'ColorFactory.WoodRings'")?;
+                let late_wood = late_wood
+                    .convert(factor)
+                    .context("Failed to convert 'late_wood' of 'ColorFactory.WoodRings'")?;
+
+                Ok(ColorFactory::WoodX(WoodFactory::new(
                     early_wood,
                     late_wood,
                     *noise_amplitude,
