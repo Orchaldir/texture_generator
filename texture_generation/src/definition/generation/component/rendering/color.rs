@@ -1,9 +1,27 @@
 use crate::definition::convert;
-use crate::generation::component::rendering::color_factory::ColorFactory;
+use crate::generation::component::rendering::color_factory::{ColorFactory, WoodRing};
 use crate::generation::random::Random;
 use crate::math::color::Color;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct WoodRingDefinition {
+    color: String,
+    ring_size: u32,
+    ring_size_variation: u32,
+}
+
+impl WoodRingDefinition {
+    pub fn convert(&self, factor: f32) -> Result<WoodRing> {
+        let color = Color::convert(&self.color)?;
+        Ok(WoodRing {
+            color,
+            ring_size: convert(self.ring_size, factor),
+            ring_size_variation: convert(self.ring_size_variation, factor),
+        })
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ColorFactoryDefinition {
@@ -21,11 +39,8 @@ pub enum ColorFactoryDefinition {
         scale: u32,
     },
     WoodRings {
-        early_wood_color: String,
-        early_wood_ring: u32,
-        late_wood_color: String,
-        late_wood_ring: u32,
-        ring_size_variation: u32,
+        early_wood: WoodRingDefinition,
+        late_wood: WoodRingDefinition,
         noise_amplitude: f32,
         noise_scale: u32,
     },
@@ -70,25 +85,21 @@ impl ColorFactoryDefinition {
                 ColorFactory::new_noise(Random::Hash, converted_colors, convert(*scale, factor))
             }
             ColorFactoryDefinition::WoodRings {
-                early_wood_color,
-                early_wood_ring,
-                late_wood_color,
-                late_wood_ring,
-                ring_size_variation,
+                early_wood,
+                late_wood,
                 noise_amplitude,
                 noise_scale,
             } => {
-                let wood = Color::convert(early_wood_color)
-                    .context("Failed to convert 'early_wood_color' of 'ColorFactory.WoodRings'")?;
-                let growth_ring = Color::convert(late_wood_color)
-                    .context("Failed to convert 'late_wood_color' of 'ColorFactory.WoodRings'")?;
+                let early_wood = early_wood
+                    .convert(factor)
+                    .context("Failed to convert 'early_wood' of 'ColorFactory.WoodRings'")?;
+                let late_wood = late_wood
+                    .convert(factor)
+                    .context("Failed to convert 'late_wood' of 'ColorFactory.WoodRings'")?;
 
                 Ok(ColorFactory::WoodRings {
-                    early_wood_color: wood,
-                    early_wood_ring: *early_wood_ring,
-                    late_wood_color: growth_ring,
-                    late_wood_ring: *late_wood_ring,
-                    ring_size_variation: *ring_size_variation,
+                    early_wood,
+                    late_wood,
                     noise_amplitude: *noise_amplitude,
                     noise_scale: convert(*noise_scale, factor) as f64,
                 })

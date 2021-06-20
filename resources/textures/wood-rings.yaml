@@ -7,11 +7,14 @@ component:
       shape: Rectangle
       color:
         WoodRings:
-          early_wood_color: "#DAA520"
-          early_wood_ring: 30
-          late_wood_color: "#432711"
-          late_wood_ring: 5
-          ring_size_variation: 5
+          early_wood:
+            color: "#DAA520"
+            ring_size: 30
+            ring_size_variation: 20
+          late_wood:
+            color: "#432711"
+            ring_size: 5
+            ring_size_variation: 2
           noise_amplitude: 2
           noise_scale: 100
       depth:

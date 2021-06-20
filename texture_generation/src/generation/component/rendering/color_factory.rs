@@ -6,6 +6,13 @@ use anyhow::{bail, Result};
 use noise::{Perlin, Seedable};
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct WoodRing {
+    pub color: Color,
+    pub ring_size: u32,
+    pub ring_size_variation: u32,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum ColorFactory {
     /// Everything has the same color.
     ConstantColor(Color),
@@ -33,11 +40,8 @@ pub enum ColorFactory {
         scale: f64,
     },
     WoodRings {
-        early_wood_color: Color,
-        early_wood_ring: u32,
-        late_wood_color: Color,
-        late_wood_ring: u32,
-        ring_size_variation: u32,
+        early_wood: WoodRing,
+        late_wood: WoodRing,
         noise_amplitude: f32,
         noise_scale: f64,
     },
@@ -165,11 +169,8 @@ impl ColorFactory {
                 }
             }
             ColorFactory::WoodRings {
-                early_wood_color,
-                early_wood_ring,
-                late_wood_color,
-                late_wood_ring,
-                ring_size_variation,
+                early_wood,
+                late_wood,
                 noise_amplitude,
                 noise_scale,
             } => {
@@ -178,19 +179,14 @@ impl ColorFactory {
                 let center = aabb.center();
                 let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
                 let diff = aabb.end() - center;
-                let ring_sizes = calculate_ring_sizes(
-                    data,
-                    (diff.x + diff.y) as u32,
-                    *early_wood_ring,
-                    *late_wood_ring,
-                    *ring_size_variation,
-                );
+                let ring_sizes =
+                    calculate_ring_sizes(data, (diff.x + diff.y) as u32, early_wood, late_wood);
 
                 ColorSelector::WoodRings {
                     center,
                     ring_sizes,
-                    early_wood_color: *early_wood_color,
-                    late_wood_color: *late_wood_color,
+                    early_wood_color: early_wood.color,
+                    late_wood_color: late_wood.color,
                     noise: Box::new(noise),
                     noise_amplitude: *noise_amplitude,
                     noise_scale: *noise_scale,
@@ -203,9 +199,8 @@ impl ColorFactory {
 fn calculate_ring_sizes(
     data: &Data,
     max_distance: u32,
-    early_wood_ring: u32,
-    late_wood_ring: u32,
-    ring_size_variation: u32,
+    early_wood: &WoodRing,
+    late_wood: &WoodRing,
 ) -> Vec<f32> {
     let random = Random::Hash;
     let mut ring_sizes = Vec::new();
@@ -215,14 +210,11 @@ fn calculate_ring_sizes(
     let mut is_early = true;
 
     while distance < max_distance {
-        let mut ring_size = if is_early {
-            early_wood_ring
-        } else {
-            late_wood_ring
-        };
+        let definition = if is_early { early_wood } else { late_wood };
+        let mut ring_size = definition.ring_size;
 
-        if ring_size_variation > 0 {
-            ring_size += random.get_random_instance_u32(data, ring_size_variation, i);
+        if definition.ring_size_variation > 0 {
+            ring_size += random.get_random_instance_u32(data, definition.ring_size_variation, i);
         }
 
         distance += ring_size;
