@@ -22,7 +22,8 @@ component:
                         - [1,"#808080"]
                         - [1,"#C0C0C0"]
                         - [1,"#A9A9A9"]
-                      scale: 400
+                      scale_x: 400
+                      scale_y: 400
                   depth:
                     InterpolateMany:
                       - [ 0.9,25 ]

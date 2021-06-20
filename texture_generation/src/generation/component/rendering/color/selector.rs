@@ -12,7 +12,8 @@ pub enum ColorSelector {
         color0: Color,
         color1: Color,
         noise: Box<Perlin>,
-        scale: f64,
+        scale_x: f64,
+        scale_y: f64,
     },
     WoodRings {
         center: Point,
@@ -36,10 +37,11 @@ impl ColorSelector {
                 color0,
                 color1,
                 noise,
-                scale,
+                scale_x,
+                scale_y,
             } => {
-                let x = point.x as f64 / scale;
-                let y = point.y as f64 / scale;
+                let x = point.x as f64 / scale_x;
+                let y = point.y as f64 / scale_y;
                 let factor = noise.get([x, y]);
                 color0.lerp(color1, factor as f32)
             }

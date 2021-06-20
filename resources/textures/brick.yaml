@@ -25,7 +25,8 @@ component:
                         - [1,"#A91B0D" ]
                         - [1,"#E3242B" ]
                         - [1,"#990F02" ]
-                      scale: 100
+                      scale_x: 100
+                      scale_y: 100
                   depth:
                     Dome:
                       center: 25
