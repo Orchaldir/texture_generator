@@ -3,6 +3,7 @@ use crate::math::color::Color;
 use crate::math::point::Point;
 use noise::{NoiseFn, SuperSimplex};
 
+#[derive(Clone, Debug)]
 pub enum ColorSelector {
     /// The same color for all pixel.
     ConstantColor(Color),
