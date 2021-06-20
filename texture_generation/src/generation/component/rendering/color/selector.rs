@@ -1,3 +1,4 @@
+use crate::generation::component::rendering::color::wood::WoodSelector;
 use crate::math::color::Color;
 use crate::math::point::Point;
 use noise::{NoiseFn, Perlin};
@@ -15,12 +16,7 @@ pub enum ColorSelector {
     },
     WoodRings {
         center: Point,
-        ring_sizes: Vec<(f32, f32)>,
-        early_wood_color: Color,
-        late_wood_color: Color,
-        noise: Box<Perlin>,
-        noise_amplitude: f32,
-        noise_scale: f64,
+        selector: WoodSelector,
     },
 }
 
@@ -39,47 +35,12 @@ impl ColorSelector {
                 let factor = noise.get([x, y]);
                 color0.lerp(color1, factor as f32)
             }
-            ColorSelector::WoodRings {
-                center,
-                ring_sizes,
-                early_wood_color,
-                late_wood_color,
-                noise,
-                noise_amplitude,
-                noise_scale,
-            } => {
-                let n = get_noise(noise, point, *noise_scale, *noise_amplitude);
-                let distance = center.calculate_distance(point) + n;
-                let mut ring_start = 0.0;
-                let mut is_early = true;
-                let mut factor = 0.0;
-
-                for (color_variation, ring_size) in ring_sizes {
-                    let ring_end = ring_start + *ring_size;
-
-                    if distance < ring_end {
-                        if is_early {
-                            factor = *color_variation;
-                        } else {
-                            factor = 1.0 - *color_variation;
-                        }
-                        break;
-                    }
-
-                    ring_start = ring_end;
-                    is_early = !is_early;
-                }
-
-                early_wood_color.lerp(late_wood_color, factor)
+            ColorSelector::WoodRings { center, selector } => {
+                let distance = center.calculate_distance(point);
+                selector.select(point, distance)
             }
         }
     }
-}
-
-fn get_noise(noise: &Box<Perlin>, point: &Point, scale: f64, amplitude: f32) -> f32 {
-    let x = point.x as f64 / scale;
-    let y = point.y as f64 / scale;
-    noise.get([x, y]) as f32 * amplitude
 }
 
 impl PartialEq for ColorSelector {

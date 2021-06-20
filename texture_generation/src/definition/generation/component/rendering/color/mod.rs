@@ -1,6 +1,7 @@
 use crate::definition::convert;
 use crate::definition::generation::component::rendering::color::wood::WoodRingDefinition;
 use crate::generation::component::rendering::color::factory::ColorFactory;
+use crate::generation::component::rendering::color::wood::WoodFactory;
 use crate::generation::random::Random;
 use crate::math::color::Color;
 use anyhow::{Context, Result};
@@ -82,12 +83,12 @@ impl ColorFactoryDefinition {
                     .convert(factor)
                     .context("Failed to convert 'late_wood' of 'ColorFactory.WoodRings'")?;
 
-                Ok(ColorFactory::WoodRings {
+                Ok(ColorFactory::WoodRings(WoodFactory::new(
                     early_wood,
                     late_wood,
-                    noise_amplitude: *noise_amplitude,
-                    noise_scale: convert(*noise_scale, factor) as f64,
-                })
+                    *noise_amplitude,
+                    convert(*noise_scale, factor) as f64,
+                )))
             }
         }
     }

@@ -1,5 +1,5 @@
 use crate::generation::component::rendering::color::selector::ColorSelector;
-use crate::generation::component::rendering::color::wood::WoodRing;
+use crate::generation::component::rendering::color::wood::WoodFactory;
 use crate::generation::data::Data;
 use crate::generation::random::{Random, COLOR_INDEX};
 use crate::math::color::Color;
@@ -13,7 +13,10 @@ pub enum ColorFactory {
     /// A sequence of colors that repeats.
     Sequence(Vec<Color>),
     /// Randomly select a color from a list with equal probability.
-    Random { random: Random, colors: Vec<Color> },
+    Random {
+        random: Random,
+        colors: Vec<Color>,
+    },
     /// Randomly select a color from a list based on probability.
     Probability {
         random: Random,
@@ -33,12 +36,7 @@ pub enum ColorFactory {
         max_number: usize,
         scale: f64,
     },
-    WoodRings {
-        early_wood: WoodRing,
-        late_wood: WoodRing,
-        noise_amplitude: f32,
-        noise_scale: f64,
-    },
+    WoodRings(WoodFactory),
 }
 
 impl ColorFactory {
@@ -162,63 +160,18 @@ impl ColorFactory {
                     scale: *scale,
                 }
             }
-            ColorFactory::WoodRings {
-                early_wood,
-                late_wood,
-                noise_amplitude,
-                noise_scale,
-            } => {
+            ColorFactory::WoodRings(factory) => {
                 let data1 = data.get_aabbs_in_texture_space();
                 let aabb = data1.get_inner();
                 let center = aabb.center();
-                let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
-                let diff = aabb.end() - center;
-                let ring_sizes =
-                    calculate_ring_sizes(data, (diff.x + diff.y) as u32, early_wood, late_wood);
 
                 ColorSelector::WoodRings {
                     center,
-                    ring_sizes,
-                    early_wood_color: early_wood.color,
-                    late_wood_color: late_wood.color,
-                    noise: Box::new(noise),
-                    noise_amplitude: *noise_amplitude,
-                    noise_scale: *noise_scale,
+                    selector: factory.create(data),
                 }
             }
         }
     }
-}
-
-fn calculate_ring_sizes(
-    data: &Data,
-    max_distance: u32,
-    early_wood: &WoodRing,
-    late_wood: &WoodRing,
-) -> Vec<(f32, f32)> {
-    let random = Random::Hash;
-    let mut ring_sizes = Vec::new();
-
-    let mut i = 0;
-    let mut distance = 0;
-    let mut is_early = true;
-
-    while distance < max_distance {
-        let definition = if is_early { early_wood } else { late_wood };
-        let color_variation = random.get_random_instance_f32(data, definition.color_variation, i);
-        let mut ring_size = definition.ring_size;
-
-        if definition.ring_size_variation > 0 {
-            ring_size += random.get_random_instance_u32(data, definition.ring_size_variation, i);
-        }
-
-        distance += ring_size;
-        ring_sizes.push((color_variation, ring_size as f32));
-        is_early = !is_early;
-        i += 1;
-    }
-
-    ring_sizes
 }
 
 fn convert_probability(
