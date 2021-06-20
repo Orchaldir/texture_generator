@@ -7,10 +7,10 @@ component:
       shape: Rectangle
       color:
         WoodRings:
-          ring_size: 50
-          wood: "#DEB887"
+          ring_size: 30
+          wood: "#DAA520"
           growth_ring: "#432711"
-          noise_amplitude: 0.2
-          noise_scale: 50
+          noise_amplitude: 2
+          noise_scale: 100
       depth:
         Uniform: 100
