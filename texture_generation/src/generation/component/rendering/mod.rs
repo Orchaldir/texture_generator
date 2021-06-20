@@ -1,4 +1,5 @@
-use crate::generation::component::rendering::color_factory::ColorFactory;
+use color::factory::ColorFactory;
+
 use crate::generation::component::rendering::depth_factory::DepthFactory;
 use crate::generation::data::texture::Texture;
 use crate::generation::data::Data;
@@ -6,7 +7,6 @@ use crate::math::color::{Color, PINK};
 use crate::math::shape_factory::ShapeFactory;
 
 pub mod color;
-pub mod color_factory;
 pub mod depth;
 pub mod depth_factory;
 
@@ -118,13 +118,15 @@ impl RenderingComponent {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use ShapeFactory::Rectangle;
+
     use crate::generation::data::texture::Texture;
     use crate::math::aabb::AABB;
     use crate::math::color::{RED, WHITE};
     use crate::math::point::Point;
     use crate::math::size::Size;
-    use ShapeFactory::Rectangle;
+
+    use super::*;
 
     #[test]
     fn test_render_fill_area() {

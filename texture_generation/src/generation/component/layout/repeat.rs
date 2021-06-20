@@ -168,7 +168,7 @@ pub fn calculate_steps(distance: u32, desired_step: u32) -> Vec<u32> {
 mod tests {
     use super::*;
     use crate::generation::component::layout::tests::create_component;
-    use crate::generation::component::rendering::color_factory::ColorFactory;
+    use crate::generation::component::rendering::color::factory::ColorFactory;
     use crate::generation::component::rendering::depth_factory::DepthFactory;
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::texture::Texture;

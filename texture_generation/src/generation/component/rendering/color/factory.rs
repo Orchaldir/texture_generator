@@ -1,4 +1,4 @@
-use crate::generation::component::rendering::color::ColorSelector;
+use crate::generation::component::rendering::color::selector::ColorSelector;
 use crate::generation::data::Data;
 use crate::generation::random::{Random, COLOR_INDEX};
 use crate::math::color::Color;

@@ -1,5 +1,5 @@
 use crate::definition::convert;
-use crate::generation::component::rendering::color_factory::{ColorFactory, WoodRing};
+use crate::generation::component::rendering::color::factory::{ColorFactory, WoodRing};
 use crate::generation::random::Random;
 use crate::math::color::Color;
 use anyhow::{Context, Result};
