@@ -7,9 +7,32 @@ use noise::{Perlin, Seedable};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct WoodRing {
-    pub color: Color,
-    pub ring_size: u32,
-    pub ring_size_variation: u32,
+    color: Color,
+    color_variation: f32,
+    ring_size: u32,
+    ring_size_variation: u32,
+}
+
+impl WoodRing {
+    pub fn new(
+        color: Color,
+        color_variation: f32,
+        ring_size: u32,
+        ring_size_variation: u32,
+    ) -> Result<WoodRing> {
+        if color_variation <= 0.0 {
+            bail!("Argument 'color_variation' needs to be greater than 0");
+        } else if color_variation > 0.5 {
+            bail!("Argument 'color_variation' needs to be less than 0.5");
+        }
+
+        Ok(WoodRing {
+            color,
+            color_variation,
+            ring_size,
+            ring_size_variation,
+        })
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -201,7 +224,7 @@ fn calculate_ring_sizes(
     max_distance: u32,
     early_wood: &WoodRing,
     late_wood: &WoodRing,
-) -> Vec<f32> {
+) -> Vec<(f32, f32)> {
     let random = Random::Hash;
     let mut ring_sizes = Vec::new();
 
@@ -211,6 +234,7 @@ fn calculate_ring_sizes(
 
     while distance < max_distance {
         let definition = if is_early { early_wood } else { late_wood };
+        let color_variation = random.get_random_instance_f32(data, definition.color_variation, i);
         let mut ring_size = definition.ring_size;
 
         if definition.ring_size_variation > 0 {
@@ -218,7 +242,7 @@ fn calculate_ring_sizes(
         }
 
         distance += ring_size;
-        ring_sizes.push(ring_size as f32);
+        ring_sizes.push((color_variation, ring_size as f32));
         is_early = !is_early;
         i += 1;
     }

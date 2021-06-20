@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WoodRingDefinition {
     color: String,
+    color_variation: f32,
     ring_size: u32,
     ring_size_variation: u32,
 }
@@ -15,11 +16,12 @@ pub struct WoodRingDefinition {
 impl WoodRingDefinition {
     pub fn convert(&self, factor: f32) -> Result<WoodRing> {
         let color = Color::convert(&self.color)?;
-        Ok(WoodRing {
+        WoodRing::new(
             color,
-            ring_size: convert(self.ring_size, factor),
-            ring_size_variation: convert(self.ring_size_variation, factor),
-        })
+            self.color_variation,
+            convert(self.ring_size, factor),
+            convert(self.ring_size_variation, factor),
+        )
     }
 }
 

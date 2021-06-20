@@ -15,7 +15,7 @@ pub enum ColorSelector {
     },
     WoodRings {
         center: Point,
-        ring_sizes: Vec<f32>,
+        ring_sizes: Vec<(f32, f32)>,
         early_wood_color: Color,
         late_wood_color: Color,
         noise: Box<Perlin>,
@@ -52,23 +52,25 @@ impl ColorSelector {
                 let distance = center.calculate_distance(point) + n;
                 let mut ring_start = 0.0;
                 let mut is_early = true;
+                let mut factor = 0.0;
 
-                for ring_size in ring_sizes {
+                for (color_variation, ring_size) in ring_sizes {
                     let ring_end = ring_start + *ring_size;
 
                     if distance < ring_end {
-                        return if is_early {
-                            *early_wood_color
+                        if is_early {
+                            factor = *color_variation;
                         } else {
-                            *late_wood_color
-                        };
+                            factor = 1.0 - *color_variation;
+                        }
+                        break;
                     }
 
                     ring_start = ring_end;
                     is_early = !is_early;
                 }
 
-                *early_wood_color
+                early_wood_color.lerp(late_wood_color, factor)
             }
         }
     }

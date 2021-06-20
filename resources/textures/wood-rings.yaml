@@ -9,11 +9,13 @@ component:
         WoodRings:
           early_wood:
             color: "#DEB887"
-            ring_size: 20
-            ring_size_variation: 20
+            color_variation: 0.1
+            ring_size: 10
+            ring_size_variation: 10
           late_wood:
             color: "#432711"
-            ring_size: 5
+            color_variation: 0.2
+            ring_size: 2
             ring_size_variation: 2
           noise_amplitude: 5
           noise_scale: 100
