@@ -1,6 +1,6 @@
 use crate::rendering::resource::Resources;
 use crate::rendering::style::front::FrontStyle;
-use texture_generation::generation::component::rendering::color_factory::ColorFactory;
+use texture_generation::generation::component::rendering::color::factory::ColorFactory;
 use texture_generation::generation::component::rendering::depth_factory::DepthFactory;
 use texture_generation::generation::component::rendering::RenderingComponent;
 use texture_generation::generation::component::Component;

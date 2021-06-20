@@ -1,11 +1,15 @@
 use crate::definition::convert;
-use crate::generation::component::rendering::color_factory::ColorFactory;
+use crate::definition::generation::component::rendering::color::wood::WoodRingDefinition;
+use crate::generation::component::rendering::color::factory::ColorFactory;
+use crate::generation::component::rendering::color::wood::WoodFactory;
 use crate::generation::random::Random;
 use crate::math::color::Color;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub mod wood;
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ColorFactoryDefinition {
     ConstantColor(String),
     Sequence(Vec<String>),
@@ -14,11 +18,26 @@ pub enum ColorFactoryDefinition {
     Noise {
         color0: String,
         color1: String,
-        scale: u32,
+        scale_x: u32,
+        scale_y: u32,
     },
     NoiseWithRandomColors {
         colors: Vec<(usize, String)>,
-        scale: u32,
+        scale_x: u32,
+        scale_y: u32,
+    },
+    WoodRings {
+        early_wood: WoodRingDefinition,
+        late_wood: WoodRingDefinition,
+        noise_amplitude: f32,
+        noise_scale: u32,
+    },
+    Wood {
+        is_horizontal: bool,
+        early_wood: WoodRingDefinition,
+        late_wood: WoodRingDefinition,
+        noise_amplitude: f32,
+        noise_scale: u32,
     },
 }
 
@@ -43,7 +62,8 @@ impl ColorFactoryDefinition {
             ColorFactoryDefinition::Noise {
                 color0,
                 color1,
-                scale,
+                scale_x,
+                scale_y,
             } => {
                 let color0 = Color::convert(&color0)
                     .context("Failed to convert 'color0' of 'ColorFactory.Noise'")?;
@@ -53,12 +73,72 @@ impl ColorFactoryDefinition {
                 Ok(ColorFactory::Noise {
                     color0,
                     color1,
-                    scale: convert(*scale, factor) as f64,
+                    scale_x: convert(*scale_x, factor) as f64,
+                    scale_y: convert(*scale_y, factor) as f64,
                 })
             }
-            ColorFactoryDefinition::NoiseWithRandomColors { colors, scale } => {
+            ColorFactoryDefinition::NoiseWithRandomColors {
+                colors,
+                scale_x,
+                scale_y,
+            } => {
                 let converted_colors = convert_probability(colors, "NoiseWithRandomColors")?;
-                ColorFactory::new_noise(Random::Hash, converted_colors, convert(*scale, factor))
+                ColorFactory::new_noise(
+                    Random::Hash,
+                    converted_colors,
+                    convert(*scale_x, factor),
+                    convert(*scale_y, factor),
+                )
+            }
+            ColorFactoryDefinition::WoodRings {
+                early_wood,
+                late_wood,
+                noise_amplitude,
+                noise_scale,
+            } => {
+                let early_wood = early_wood
+                    .convert(factor)
+                    .context("Failed to convert 'early_wood' of 'ColorFactory.WoodRings'")?;
+                let late_wood = late_wood
+                    .convert(factor)
+                    .context("Failed to convert 'late_wood' of 'ColorFactory.WoodRings'")?;
+
+                Ok(ColorFactory::WoodRings(WoodFactory::new(
+                    early_wood,
+                    late_wood,
+                    *noise_amplitude,
+                    convert(*noise_scale, factor),
+                )))
+            }
+            ColorFactoryDefinition::Wood {
+                is_horizontal,
+                early_wood,
+                late_wood,
+                noise_amplitude,
+                noise_scale,
+            } => {
+                let early_wood = early_wood
+                    .convert(factor)
+                    .context("Failed to convert 'early_wood' of 'ColorFactory.Wood'")?;
+                let late_wood = late_wood
+                    .convert(factor)
+                    .context("Failed to convert 'late_wood' of 'ColorFactory.Wood'")?;
+
+                if *is_horizontal {
+                    Ok(ColorFactory::WoodX(WoodFactory::new(
+                        early_wood,
+                        late_wood,
+                        *noise_amplitude,
+                        convert(*noise_scale, factor),
+                    )))
+                } else {
+                    Ok(ColorFactory::WoodY(WoodFactory::new(
+                        early_wood,
+                        late_wood,
+                        *noise_amplitude,
+                        convert(*noise_scale, factor),
+                    )))
+                }
             }
         }
     }
@@ -146,12 +226,14 @@ mod tests {
         let definition = ColorFactoryDefinition::Noise {
             color0: "#FFA500".to_string(),
             color1: "#FF0080".to_string(),
-            scale: 100,
+            scale_x: 100,
+            scale_y: 120,
         };
         let factory = ColorFactory::Noise {
             color0: ORANGE,
             color1: PINK,
-            scale: 500.0,
+            scale_x: 500.0,
+            scale_y: 600.0,
         };
 
         assert_eq!(factory, definition.convert(5.0).unwrap())
@@ -161,13 +243,15 @@ mod tests {
     fn test_convert_noise_with_random_colors() {
         let definition = ColorFactoryDefinition::NoiseWithRandomColors {
             colors: vec![(10, "#FFA500".to_string()), (5, "#FF0080".to_string())],
-            scale: 100,
+            scale_x: 100,
+            scale_y: 120,
         };
         let factory = ColorFactory::NoiseWithRandomColors {
             random: Random::Hash,
             colors: vec![(10, ORANGE), (15, PINK)],
             max_number: 15,
-            scale: 600.0,
+            scale_x: 600.0,
+            scale_y: 720.0,
         };
 
         assert_eq!(factory, definition.convert(6.0).unwrap())

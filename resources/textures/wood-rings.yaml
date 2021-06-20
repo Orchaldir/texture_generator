@@ -1,0 +1,24 @@
+---
+size: 1024
+background: "#432711"
+component:
+  Rendering:
+    Shape:
+      shape: Rectangle
+      color:
+        Wood:
+          is_horizontal: false
+          early_wood:
+            color: "#DEB887"
+            color_variation: 0.1
+            ring_size: 10
+            ring_size_variation: 10
+          late_wood:
+            color: "#432711"
+            color_variation: 0.2
+            ring_size: 2
+            ring_size_variation: 2
+          noise_amplitude: 5
+          noise_scale: 100
+      depth:
+        Uniform: 100

@@ -1,6 +1,7 @@
+use crate::generation::component::rendering::color::wood::WoodSelector;
 use crate::math::color::Color;
 use crate::math::point::Point;
-use noise::{NoiseFn, Perlin};
+use noise::{NoiseFn, SuperSimplex};
 
 #[derive(Clone, Debug)]
 pub enum ColorSelector {
@@ -10,8 +11,21 @@ pub enum ColorSelector {
     Noise {
         color0: Color,
         color1: Color,
-        noise: Box<Perlin>,
-        scale: f64,
+        noise: Box<SuperSimplex>,
+        scale_x: f64,
+        scale_y: f64,
+    },
+    WoodRings {
+        center: Point,
+        selector: WoodSelector,
+    },
+    WoodX {
+        start_y: f32,
+        selector: WoodSelector,
+    },
+    WoodY {
+        start_x: f32,
+        selector: WoodSelector,
     },
 }
 
@@ -23,12 +37,23 @@ impl ColorSelector {
                 color0,
                 color1,
                 noise,
-                scale,
+                scale_x,
+                scale_y,
             } => {
-                let x = point.x as f64 / scale;
-                let y = point.y as f64 / scale;
+                let x = point.x as f64 / scale_x;
+                let y = point.y as f64 / scale_y;
                 let factor = noise.get([x, y]);
                 color0.lerp(color1, factor as f32)
+            }
+            ColorSelector::WoodRings { center, selector } => {
+                let distance = center.calculate_distance(point);
+                selector.select(point, distance)
+            }
+            ColorSelector::WoodX { start_y, selector } => {
+                selector.select(point, point.y as f32 - *start_y)
+            }
+            ColorSelector::WoodY { start_x, selector } => {
+                selector.select(point, point.x as f32 - *start_x)
             }
         }
     }
@@ -39,9 +64,9 @@ impl PartialEq for ColorSelector {
         match self {
             ColorSelector::ConstantColor(color) => match other {
                 ColorSelector::ConstantColor(other_color) => color.eq(other_color),
-                ColorSelector::Noise { .. } => false,
+                _ => false,
             },
-            ColorSelector::Noise { .. } => false,
+            _ => false,
         }
     }
 }

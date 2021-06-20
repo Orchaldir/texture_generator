@@ -188,7 +188,7 @@ fn create_aabb(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::generation::component::rendering::color_factory::ColorFactory;
+    use crate::generation::component::rendering::color::factory::ColorFactory;
     use crate::generation::component::rendering::depth_factory::DepthFactory;
     use crate::generation::component::rendering::RenderingComponent;
     use crate::generation::data::texture::Texture;

@@ -12,7 +12,11 @@ component:
             shape:
               RoundedRectangle: 0.5
             color:
-              ConstantColor: "#DEB887"
+              Noise:
+                color0: "#DEB887"
+                color1: "#B8860B"
+                scale_x: 800
+                scale_y: 4
             depth:
               InterpolateMany:
                 - [ 0.8,30 ]

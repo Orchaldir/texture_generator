@@ -1,9 +1,10 @@
-use crate::generation::component::rendering::color::ColorSelector;
+use crate::generation::component::rendering::color::selector::ColorSelector;
+use crate::generation::component::rendering::color::wood::WoodFactory;
 use crate::generation::data::Data;
 use crate::generation::random::{Random, COLOR_INDEX};
 use crate::math::color::Color;
 use anyhow::{bail, Result};
-use noise::{Perlin, Seedable};
+use noise::{Seedable, SuperSimplex};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ColorFactory {
@@ -12,7 +13,10 @@ pub enum ColorFactory {
     /// A sequence of colors that repeats.
     Sequence(Vec<Color>),
     /// Randomly select a color from a list with equal probability.
-    Random { random: Random, colors: Vec<Color> },
+    Random {
+        random: Random,
+        colors: Vec<Color>,
+    },
     /// Randomly select a color from a list based on probability.
     Probability {
         random: Random,
@@ -23,15 +27,20 @@ pub enum ColorFactory {
     Noise {
         color0: Color,
         color1: Color,
-        scale: f64,
+        scale_x: f64,
+        scale_y: f64,
     },
     /// Uses a noise function to interpolate between 2 colors randomly selected from a list.
     NoiseWithRandomColors {
         random: Random,
         colors: Vec<(usize, Color)>,
         max_number: usize,
-        scale: f64,
+        scale_x: f64,
+        scale_y: f64,
     },
+    WoodRings(WoodFactory),
+    WoodX(WoodFactory),
+    WoodY(WoodFactory),
 }
 
 impl ColorFactory {
@@ -78,7 +87,8 @@ impl ColorFactory {
     pub fn new_noise(
         random: Random,
         colors: Vec<(usize, Color)>,
-        scale: u32,
+        scale_x: u32,
+        scale_y: u32,
     ) -> Result<ColorFactory> {
         let (threshold, converted_colors) = convert_probability("Noise", colors)?;
 
@@ -86,7 +96,8 @@ impl ColorFactory {
             random,
             colors: converted_colors,
             max_number: threshold,
-            scale: scale as f64,
+            scale_x: scale_x as f64,
+            scale_y: scale_y as f64,
         })
     }
 
@@ -120,21 +131,24 @@ impl ColorFactory {
             ColorFactory::Noise {
                 color0,
                 color1,
-                scale,
+                scale_x,
+                scale_y,
             } => {
-                let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
+                let noise = SuperSimplex::new().set_seed(data.get_instance_id() as u32);
                 ColorSelector::Noise {
                     color0: *color0,
                     color1: *color1,
                     noise: Box::new(noise),
-                    scale: *scale,
+                    scale_x: *scale_x,
+                    scale_y: *scale_y,
                 }
             }
             ColorFactory::NoiseWithRandomColors {
                 random,
                 colors,
                 max_number,
-                scale,
+                scale_x,
+                scale_y,
             } => {
                 let random0 = random.get_random_instance_usize(data, *max_number, 0);
                 let random1 = random.get_random_instance_usize(data, *max_number, 1);
@@ -146,13 +160,44 @@ impl ColorFactory {
                     index1 = (index0 + 1) % colors.len();
                 }
 
-                let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
+                let noise = SuperSimplex::new().set_seed(data.get_instance_id() as u32);
 
                 ColorSelector::Noise {
                     color0: colors[index0].1,
                     color1: colors[index1].1,
                     noise: Box::new(noise),
-                    scale: *scale,
+                    scale_x: *scale_x,
+                    scale_y: *scale_y,
+                }
+            }
+            ColorFactory::WoodRings(factory) => {
+                let data1 = data.get_aabbs_in_texture_space();
+                let aabb = data1.get_inner();
+                let center = aabb.center();
+                let diff = aabb.end() - center;
+                let max_distance = (diff.x + diff.y) as u32;
+
+                ColorSelector::WoodRings {
+                    center,
+                    selector: factory.create(data, max_distance),
+                }
+            }
+            ColorFactory::WoodX(factory) => {
+                let data1 = data.get_aabbs_in_texture_space();
+                let aabb = data1.get_inner();
+
+                ColorSelector::WoodX {
+                    start_y: aabb.start().y as f32,
+                    selector: factory.create(data, aabb.size().height()),
+                }
+            }
+            ColorFactory::WoodY(factory) => {
+                let data1 = data.get_aabbs_in_texture_space();
+                let aabb = data1.get_inner();
+
+                ColorSelector::WoodY {
+                    start_x: aabb.start().x as f32,
+                    selector: factory.create(data, aabb.size().width()),
                 }
             }
         }
