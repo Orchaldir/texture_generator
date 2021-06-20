@@ -1,9 +1,8 @@
 use crate::generation::component::rendering::color::wood::WoodSelector;
 use crate::math::color::Color;
 use crate::math::point::Point;
-use noise::{NoiseFn, Perlin};
+use noise::{NoiseFn, SuperSimplex};
 
-#[derive(Clone, Debug)]
 pub enum ColorSelector {
     /// The same color for all pixel.
     ConstantColor(Color),
@@ -11,7 +10,7 @@ pub enum ColorSelector {
     Noise {
         color0: Color,
         color1: Color,
-        noise: Box<Perlin>,
+        noise: Box<SuperSimplex>,
         scale_x: f64,
         scale_y: f64,
     },

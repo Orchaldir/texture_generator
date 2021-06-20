@@ -24,14 +24,12 @@ impl WoodRing {
             bail!("Argument 'color_variation' needs to be 0 or greater");
         } else if color_variation > 0.5 {
             bail!("Argument 'color_variation' needs to be less than 0.5");
-        } else if ring_size == 0 {
-            bail!("Argument 'ring_size' needs to be greater than 0");
         }
 
         Ok(WoodRing {
             color,
             color_variation,
-            ring_size,
+            ring_size: ring_size.max(1),
             ring_size_variation,
         })
     }

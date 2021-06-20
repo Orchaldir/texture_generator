@@ -4,7 +4,7 @@ use crate::generation::data::Data;
 use crate::generation::random::{Random, COLOR_INDEX};
 use crate::math::color::Color;
 use anyhow::{bail, Result};
-use noise::{Perlin, Seedable};
+use noise::{Seedable, SuperSimplex};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ColorFactory {
@@ -134,7 +134,7 @@ impl ColorFactory {
                 scale_x,
                 scale_y,
             } => {
-                let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
+                let noise = SuperSimplex::new().set_seed(data.get_instance_id() as u32);
                 ColorSelector::Noise {
                     color0: *color0,
                     color1: *color1,
@@ -160,7 +160,7 @@ impl ColorFactory {
                     index1 = (index0 + 1) % colors.len();
                 }
 
-                let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
+                let noise = SuperSimplex::new().set_seed(data.get_instance_id() as u32);
 
                 ColorSelector::Noise {
                     color0: colors[index0].1,

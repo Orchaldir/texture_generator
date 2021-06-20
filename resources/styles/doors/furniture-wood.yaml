@@ -9,7 +9,11 @@ edge_style:
         shape:
           RoundedRectangle: 0.5
         color:
-          ConstantColor: "#DEB887"
+          Noise:
+            color0: "#DEB887"
+            color1: "#B8860B"
+            scale_x: 800
+            scale_y: 4
         depth:
           Dome:
             center: 30
@@ -27,7 +31,11 @@ handle_style:
       shape:
         RoundedRectangle: 0.7
       color:
-        ConstantColor: "#DEB887"
+        Noise:
+          color0: "#DEB887"
+          color1: "#B8860B"
+          scale_x: 800
+          scale_y: 4
       depth:
         Dome:
           center: 20
