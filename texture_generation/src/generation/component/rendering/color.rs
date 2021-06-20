@@ -48,7 +48,8 @@ impl ColorSelector {
                 noise_amplitude,
                 noise_scale,
             } => {
-                let distance = center.calculate_distance(point);
+                let n = get_noise(noise, point, *noise_scale, *noise_amplitude);
+                let distance = center.calculate_distance(point) + n;
                 let mut ring_start = 0.0;
                 let mut is_early = true;
 

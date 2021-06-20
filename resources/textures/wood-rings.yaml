@@ -8,14 +8,14 @@ component:
       color:
         WoodRings:
           early_wood:
-            color: "#DAA520"
-            ring_size: 30
+            color: "#DEB887"
+            ring_size: 20
             ring_size_variation: 20
           late_wood:
             color: "#432711"
             ring_size: 5
             ring_size_variation: 2
-          noise_amplitude: 2
+          noise_amplitude: 5
           noise_scale: 100
       depth:
         Uniform: 100
