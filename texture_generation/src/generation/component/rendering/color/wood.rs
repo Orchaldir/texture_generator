@@ -20,10 +20,12 @@ impl WoodRing {
         ring_size: u32,
         ring_size_variation: u32,
     ) -> Result<WoodRing> {
-        if color_variation <= 0.0 {
-            bail!("Argument 'color_variation' needs to be greater than 0");
+        if color_variation < 0.0 {
+            bail!("Argument 'color_variation' needs to be 0 or greater");
         } else if color_variation > 0.5 {
             bail!("Argument 'color_variation' needs to be less than 0.5");
+        } else if ring_size == 0 {
+            bail!("Argument 'ring_size' needs to be greater than 0");
         }
 
         Ok(WoodRing {
@@ -48,13 +50,13 @@ impl WoodFactory {
         early_wood: WoodRing,
         late_wood: WoodRing,
         noise_amplitude: f32,
-        noise_scale: f64,
+        noise_scale: u32,
     ) -> WoodFactory {
         WoodFactory {
             early_wood,
             late_wood,
             noise_amplitude,
-            noise_scale,
+            noise_scale: noise_scale as f64,
         }
     }
 
@@ -74,6 +76,7 @@ impl WoodFactory {
 
     pub fn calculate_ring_sizes(&self, data: &Data, max_distance: u32) -> Vec<(f32, f32)> {
         let random = Random::Hash;
+        let max_distance = (max_distance as f32 * 1.2) as u32;
         let mut ring_sizes = Vec::new();
 
         let mut i = 0;
@@ -143,7 +146,7 @@ impl WoodSelector {
     }
 }
 
-fn get_noise(noise: &Box<Perlin>, point: &Point, scale: f64, amplitude: f32) -> f32 {
+fn get_noise(noise: &Perlin, point: &Point, scale: f64, amplitude: f32) -> f32 {
     let x = point.x as f64 / scale;
     let y = point.y as f64 / scale;
     noise.get([x, y]) as f32 * amplitude

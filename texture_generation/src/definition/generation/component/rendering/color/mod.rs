@@ -94,7 +94,7 @@ impl ColorFactoryDefinition {
                     early_wood,
                     late_wood,
                     *noise_amplitude,
-                    convert(*noise_scale, factor) as f64,
+                    convert(*noise_scale, factor),
                 )))
             }
             ColorFactoryDefinition::Wood {
@@ -116,14 +116,14 @@ impl ColorFactoryDefinition {
                         early_wood,
                         late_wood,
                         *noise_amplitude,
-                        convert(*noise_scale, factor) as f64,
+                        convert(*noise_scale, factor),
                     )))
                 } else {
                     Ok(ColorFactory::WoodY(WoodFactory::new(
                         early_wood,
                         late_wood,
                         *noise_amplitude,
-                        convert(*noise_scale, factor) as f64,
+                        convert(*noise_scale, factor),
                     )))
                 }
             }
