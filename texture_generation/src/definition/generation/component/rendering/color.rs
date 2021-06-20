@@ -21,9 +21,11 @@ pub enum ColorFactoryDefinition {
         scale: u32,
     },
     WoodRings {
-        ring_size: u32,
-        wood: String,
-        growth_ring: String,
+        early_wood_color: String,
+        early_wood_ring: u32,
+        late_wood_color: String,
+        late_wood_ring: u32,
+        ring_size_variation: u32,
         noise_amplitude: f32,
         noise_scale: u32,
     },
@@ -68,21 +70,25 @@ impl ColorFactoryDefinition {
                 ColorFactory::new_noise(Random::Hash, converted_colors, convert(*scale, factor))
             }
             ColorFactoryDefinition::WoodRings {
-                ring_size,
-                wood,
-                growth_ring,
+                early_wood_color,
+                early_wood_ring,
+                late_wood_color,
+                late_wood_ring,
+                ring_size_variation,
                 noise_amplitude,
                 noise_scale,
             } => {
-                let wood = Color::convert(&wood)
-                    .context("Failed to convert 'wood' of 'ColorFactory.WoodRings'")?;
-                let growth_ring = Color::convert(&growth_ring)
-                    .context("Failed to convert 'growth_ring' of 'ColorFactory.WoodRings'")?;
+                let wood = Color::convert(early_wood_color)
+                    .context("Failed to convert 'early_wood_color' of 'ColorFactory.WoodRings'")?;
+                let growth_ring = Color::convert(late_wood_color)
+                    .context("Failed to convert 'late_wood_color' of 'ColorFactory.WoodRings'")?;
 
                 Ok(ColorFactory::WoodRings {
-                    ring_size: convert(*ring_size, factor) as f32,
-                    wood,
-                    growth_ring,
+                    early_wood_color: wood,
+                    early_wood_ring: *early_wood_ring,
+                    late_wood_color: growth_ring,
+                    late_wood_ring: *late_wood_ring,
+                    ring_size_variation: *ring_size_variation,
                     noise_amplitude: *noise_amplitude,
                     noise_scale: convert(*noise_scale, factor) as f64,
                 })

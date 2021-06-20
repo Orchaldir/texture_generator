@@ -33,9 +33,11 @@ pub enum ColorFactory {
         scale: f64,
     },
     WoodRings {
-        ring_size: f32,
-        wood: Color,
-        growth_ring: Color,
+        early_wood_color: Color,
+        early_wood_ring: u32,
+        late_wood_color: Color,
+        late_wood_ring: u32,
+        ring_size_variation: u32,
         noise_amplitude: f32,
         noise_scale: f64,
     },
@@ -163,20 +165,32 @@ impl ColorFactory {
                 }
             }
             ColorFactory::WoodRings {
-                ring_size,
-                wood,
-                growth_ring,
+                early_wood_color,
+                early_wood_ring,
+                late_wood_color,
+                late_wood_ring,
+                ring_size_variation,
                 noise_amplitude,
                 noise_scale,
             } => {
-                let center = data.get_aabbs_in_texture_space().get_inner().center();
+                let data1 = data.get_aabbs_in_texture_space();
+                let aabb = data1.get_inner();
+                let center = aabb.center();
                 let noise = Perlin::new().set_seed(data.get_instance_id() as u32);
+                let diff = aabb.end() - center;
+                let ring_sizes = calculate_ring_sizes(
+                    data,
+                    (diff.x + diff.y) as u32,
+                    *early_wood_ring,
+                    *late_wood_ring,
+                    *ring_size_variation,
+                );
 
                 ColorSelector::WoodRings {
                     center,
-                    ring_size: *ring_size,
-                    wood: *wood,
-                    growth_ring: *growth_ring,
+                    ring_sizes,
+                    early_wood_color: *early_wood_color,
+                    late_wood_color: *late_wood_color,
                     noise: Box::new(noise),
                     noise_amplitude: *noise_amplitude,
                     noise_scale: *noise_scale,
@@ -184,6 +198,40 @@ impl ColorFactory {
             }
         }
     }
+}
+
+fn calculate_ring_sizes(
+    data: &Data,
+    max_distance: u32,
+    early_wood_ring: u32,
+    late_wood_ring: u32,
+    ring_size_variation: u32,
+) -> Vec<f32> {
+    let random = Random::Hash;
+    let mut ring_sizes = Vec::new();
+
+    let mut i = 0;
+    let mut distance = 0;
+    let mut is_early = true;
+
+    while distance < max_distance {
+        let mut ring_size = if is_early {
+            early_wood_ring
+        } else {
+            late_wood_ring
+        };
+
+        if ring_size_variation > 0 {
+            ring_size += random.get_random_instance_u32(data, ring_size_variation, i);
+        }
+
+        distance += ring_size;
+        ring_sizes.push(ring_size as f32);
+        is_early = !is_early;
+        i += 1;
+    }
+
+    ring_sizes
 }
 
 fn convert_probability(
