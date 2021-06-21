@@ -27,6 +27,7 @@ pub enum ColorFactory {
     Noise {
         color0: Color,
         color1: Color,
+        base_factor: f32,
         scale_x: f64,
         scale_y: f64,
     },
@@ -35,6 +36,7 @@ pub enum ColorFactory {
         random: Random,
         colors: Vec<(usize, Color)>,
         max_number: usize,
+        base_factor: f32,
         scale_x: f64,
         scale_y: f64,
     },
@@ -87,15 +89,23 @@ impl ColorFactory {
     pub fn new_noise(
         random: Random,
         colors: Vec<(usize, Color)>,
+        base_factor: f32,
         scale_x: u32,
         scale_y: u32,
     ) -> Result<ColorFactory> {
+        if base_factor < 0.0 {
+            bail!("Argument 'base_factor' needs to be 0 or greater");
+        } else if base_factor >= 1.0 {
+            bail!("Argument 'base_factor' needs to be less than 1");
+        }
+
         let (threshold, converted_colors) = convert_probability("Noise", colors)?;
 
         Ok(ColorFactory::NoiseWithRandomColors {
             random,
             colors: converted_colors,
             max_number: threshold,
+            base_factor,
             scale_x: scale_x as f64,
             scale_y: scale_y as f64,
         })
@@ -131,6 +141,7 @@ impl ColorFactory {
             ColorFactory::Noise {
                 color0,
                 color1,
+                base_factor,
                 scale_x,
                 scale_y,
             } => {
@@ -139,6 +150,7 @@ impl ColorFactory {
                     color0: *color0,
                     color1: *color1,
                     noise: Box::new(noise),
+                    base_factor: *base_factor,
                     scale_x: *scale_x,
                     scale_y: *scale_y,
                 }
@@ -147,6 +159,7 @@ impl ColorFactory {
                 random,
                 colors,
                 max_number,
+                base_factor,
                 scale_x,
                 scale_y,
             } => {
@@ -166,6 +179,7 @@ impl ColorFactory {
                     color0: colors[index0].1,
                     color1: colors[index1].1,
                     noise: Box::new(noise),
+                    base_factor: *base_factor,
                     scale_x: *scale_x,
                     scale_y: *scale_y,
                 }
