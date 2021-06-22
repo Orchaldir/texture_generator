@@ -44,7 +44,7 @@ impl BrickPattern {
         } else if brick.height() == 0 {
             bail!("Argument 'brick.height' needs to be greater than 0");
         } else if offset >= brick.width() {
-            bail!("Argument 'offset' needs to be greater than or equal to 'brick.width'");
+            bail!("Argument 'offset' needs to be smaller than or equal to 'brick.width'");
         }
 
         Ok(BrickPattern {

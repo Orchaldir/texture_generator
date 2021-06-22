@@ -1,0 +1,26 @@
+---
+size: 1024
+background: "#000000"
+component:
+  Layout:
+    BrickWall:
+      brick:
+        width: 1024
+        height: 128
+      offset: 512
+      component:
+        Border:
+          UniformBorder:
+            border: 1
+            component:
+              Rendering:
+                Shape:
+                  shape: Rectangle
+                  color:
+                    Noise:
+                      color0: "#CD853F"
+                      color1: "#8B4513"
+                      scale_x: 800
+                      scale_y: 4
+                  depth:
+                    Uniform: 25
