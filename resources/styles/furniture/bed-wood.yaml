@@ -23,58 +23,83 @@ component:
         - Proportional:
             weight: 1
             component:
-              Border:
-                ShrinkAxis:
-                  is_horizontal: false
-                  border: 20
-                  component:
-                    Layers:
-                      - Rendering:
-                          Shape:
-                            shape:
-                              RoundedRectangle: 0.1
-                            color:
-                              ConstantColor: "#FFFFFF"
-                            depth:
-                              Dome:
-                                center: 20
-                                border: 1
-                      - Layout:
+              Layers:
+                - Border:
+                    ShrinkAxis:
+                      is_horizontal: false
+                      border: 20
+                      component:
+                        Layers:
+                          - Rendering:
+                              Shape:
+                                shape:
+                                  RoundedRectangle: 0.1
+                                color:
+                                  ConstantColor: "#FFFFFF"
+                                depth:
+                                  Dome:
+                                    center: 20
+                                    border: 1
+                          - Layout:
+                              ComplexSplit:
+                                is_horizontal: true
+                                components:
+                                  - Fixed:
+                                      size: 20
+                                      component: Empty
+                                  - Fixed:
+                                      size: 200
+                                      component:
+                                        Layout:
+                                          ComplexSplit:
+                                            is_horizontal: false
+                                            components:
+                                              - Fixed:
+                                                  size: 20
+                                                  component: Empty
+                                              - Proportional:
+                                                  weight: 1
+                                                  component:
+                                                    Rendering:
+                                                      Shape:
+                                                        shape:
+                                                          RoundedRectangle: 0.5
+                                                        color:
+                                                          ConstantColor: "#0000FF"
+                                                        depth:
+                                                          InterpolateMany:
+                                                            - [ 0.8,60 ]
+                                                            - [ 1.0,21 ]
+                                              - Fixed:
+                                                  size: 20
+                                                  component: Empty
+                                  - Proportional:
+                                      weight: 1
+                                      component: Empty
+                - Border:
+                    ShrinkAxis:
+                      is_horizontal: false
+                      border: 10
+                      component:
+                        Layout:
                           ComplexSplit:
                             is_horizontal: true
                             components:
                               - Fixed:
-                                  size: 20
+                                  size: 240
                                   component: Empty
-                              - Fixed:
-                                  size: 200
-                                  component:
-                                    Layout:
-                                      ComplexSplit:
-                                        is_horizontal: false
-                                        components:
-                                          - Fixed:
-                                              size: 20
-                                              component: Empty
-                                          - Proportional:
-                                              weight: 1
-                                              component:
-                                                Rendering:
-                                                  Shape:
-                                                    shape:
-                                                      RoundedRectangle: 0.5
-                                                    color:
-                                                      ConstantColor: "#0000FF"
-                                                    depth:
-                                                      InterpolateMany:
-                                                        - [ 0.8,60 ]
-                                                        - [ 1.0,21 ]
-                                          - Fixed:
-                                              size: 20
-                                              component: Empty
                               - Proportional:
                                   weight: 1
-                                  component: Empty
+                                  component:
+                                    Rendering:
+                                      Shape:
+                                        shape: Rectangle
+                                        color:
+                                          ConstantColor: "#0000FF"
+                                        depth:
+                                          Dome:
+                                            center: 30
+                                            border: 20
         - Fixed:
             size: 40
             component:
